@@ -19,6 +19,7 @@ Craft.ElementThumbLoader = Garnish.Base.extend(
     load: function ($elements) {
       // Only immediately load the visible images
       let $thumbs = $elements.find('.thumb[data-sizes]');
+      console.log($thumbs);
       for (let i = 0; i < $thumbs.length; i++) {
         let $thumb = $thumbs.eq(i);
         if ($thumb.is(':visible')) {
@@ -157,10 +158,10 @@ Craft.ElementThumbLoader.Worker = Garnish.Base.extend({
     picturefill({
       elements: [$img[0]],
     });
-    //
-    // if (Craft.cp.globalAnimationController) {
-    //   Craft.cp.globalAnimationController.addImagesInContainer($img.parent());
-    // }
+
+    if (Craft.cp.globalAnimationController) {
+      Craft.cp.globalAnimationController.addImagesInContainer($img.parent());
+    }
   },
 
   loadNextIfRemoved() {
