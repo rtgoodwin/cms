@@ -19,7 +19,7 @@ services:
       target: craft
       dockerfile: ./node_modules/@craftcms/playwright/Dockerfile
     ports:
-      - ${PLAYWRIGHT_SITE_PORT:-52370}:8080
+      - ${PLAYWRIGHT_SITE_PORT:-8089}:8080
     environment:
       CRAFT_APP_ID: ${PLAYWRIGHT_CRAFT_APP_ID:-CraftCMS}
       CRAFT_ENVIRONMENT: ${PLAYWRIGHT_CRAFT_ENVIRONMENT:-dev}
