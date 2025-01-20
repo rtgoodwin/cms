@@ -35,7 +35,8 @@ Craft.EditableTable = Garnish.Base.extend(
       this.$tbody = this.$table.children('tbody');
       this.$tableParent = this.$table.parent();
       this.$statusMessage = this.$tableParent.find('[data-status-message]');
-      this.rowCount = this.$tbody.find('tr').length;
+      const $rows = this.$tbody.children();
+      this.rowCount = $rows.length;
 
       // Is this already an editable table?
       if (this.$table.data('editable-table')) {
@@ -52,6 +53,16 @@ Craft.EditableTable = Garnish.Base.extend(
           this.updateAllRows();
         },
       });
+
+      for (let i = 0; i < $rows.length; i++) {
+        const $row = $rows.eq(i);
+        const id = parseInt(
+          $row.attr('data-id').substring(this.settings.rowIdPrefix.length)
+        );
+        if (id > this.biggestId) {
+          this.biggestId = id;
+        }
+      }
 
       if (this.isVisible()) {
         this.initialize();
@@ -79,12 +90,6 @@ Craft.EditableTable = Garnish.Base.extend(
       this.initialized = true;
       this.removeListener(Garnish.$win, 'resize');
 
-      var $rows = this.$tbody.children();
-
-      for (var i = 0; i < $rows.length; i++) {
-        this.createRowObj($rows[i]);
-      }
-
       const $container = this.$table.parent('.input');
       if ($container.length && this.$table.width() > $container.width()) {
         $container.css('overflow-x', 'auto');
@@ -92,7 +97,50 @@ Craft.EditableTable = Garnish.Base.extend(
 
       this.$addRowBtn = this.$table.next('.add');
       this.updateAddRowButton();
+
+      // If there's only one row, disable the action button
+      const $actionButtons = this.$tbody.find('.action-btn');
+      if (this.rowCount === 1) {
+        $actionButtons.attr('disabled', 'disabled').addClass('disabled');
+      }
+
       this.addListener(this.$addRowBtn, 'activate', 'addRow');
+
+      // don't allow lazyInitRows if any of the columns are radio checkboxes
+      this.settings.lazyInitRows =
+        this.settings.lazyInitRows &&
+        !Object.entries(this.columns).some(
+          ([colId, col]) => col.type === 'checkbox' && col.radioMode
+        );
+
+      if (this.settings.lazyInitRows) {
+        // Lazily create the row objects
+        this.addListener(
+          this.$tbody.add($actionButtons),
+          'keypress,keyup,change,focus,blur,click,mousedown,mouseup',
+          (ev) => {
+            const $target = $(ev.target);
+            const $tr = $target.closest('tr');
+            if ($tr.length && !$tr.data('editable-table-row')) {
+              const $textarea = $target.hasClass('editable-table-preview')
+                ? $target.next()
+                : null;
+              this.createRowObj($tr);
+              setTimeout(() => {
+                if ($textarea && !$textarea.is(':focus')) {
+                  $textarea.focus();
+                }
+              }, 100);
+            }
+          }
+        );
+      } else {
+        const $rows = this.$tbody.children();
+        for (let i = 0; i < $rows.length; i++) {
+          this.createRowObj($rows.eq(i));
+        }
+      }
+
       return true;
     },
     initializeIfVisible: function () {
@@ -130,6 +178,7 @@ Craft.EditableTable = Garnish.Base.extend(
       }
 
       const $deleteBtn = $row.find('button.delete');
+      const $actionsBtn = $row.find('button.action-btn');
 
       if ($deleteBtn.length) {
         $deleteBtn.attr(
@@ -142,6 +191,20 @@ Craft.EditableTable = Garnish.Base.extend(
           $deleteBtn.removeAttr('disabled').removeClass('disabled');
         } else {
           $deleteBtn.attr('disabled', 'disabled').addClass('disabled');
+        }
+      }
+
+      if ($actionsBtn.length) {
+        const name = `${Craft.t('app', 'Row {index}', {
+          index: $row.index() + 1,
+        })} ${Craft.t('app', 'Actions')}`;
+        $actionsBtn.attr('aria-label', name);
+
+        if (this.rowCount === 1) {
+          $actionsBtn.attr('disabled', 'disabled').addClass('disabled');
+          $actionsBtn.attr('disabled', 'disabled').addClass('disabled');
+        } else {
+          $actionsBtn.removeAttr('disabled').removeClass('disabled');
         }
       }
     },
@@ -194,6 +257,10 @@ Craft.EditableTable = Garnish.Base.extend(
 
       if (this.rowCount === 0) {
         this.$table.addClass('hidden');
+        this.$addRowBtn.focus();
+      } else {
+        // Focus element in previous row
+        this.$tbody.find(':focusable').last().focus();
       }
 
       // onDeleteRow callback
@@ -240,7 +307,7 @@ Craft.EditableTable = Garnish.Base.extend(
         $tr
           .find('input:visible,textarea:visible,select:visible')
           .first()
-          .trigger('focus');
+          .focus();
       }
 
       this.rowCount++;
@@ -265,6 +332,10 @@ Craft.EditableTable = Garnish.Base.extend(
       );
     },
 
+    getRowObj: function ($tr) {
+      return $tr.data('editable-table-row') || this.createRowObj($tr);
+    },
+
     createRowObj: function ($tr) {
       return new Craft.EditableTable.Row(this, $tr);
     },
@@ -274,7 +345,7 @@ Craft.EditableTable = Garnish.Base.extend(
       var prevRow;
 
       if ($prevTr.length) {
-        prevRow = $prevTr.data('editable-table-row');
+        prevRow = this.getRowObj($prevTr);
       } else {
         prevRow = this.addRow(false, true);
       }
@@ -298,7 +369,7 @@ Craft.EditableTable = Garnish.Base.extend(
       var $input = $('textarea,input.text', prevRow.$tds[tdIndex]);
       if ($input.length) {
         $(blurTd).trigger('blur');
-        $input.trigger('focus');
+        $input.focus();
       }
     },
 
@@ -307,7 +378,7 @@ Craft.EditableTable = Garnish.Base.extend(
       var nextRow;
 
       if ($nextTr.length) {
-        nextRow = $nextTr.data('editable-table-row');
+        nextRow = this.getRowObj($nextTr);
       } else {
         nextRow = this.addRow(false);
       }
@@ -331,7 +402,7 @@ Craft.EditableTable = Garnish.Base.extend(
       var $input = $('textarea,input.text', nextRow.$tds[tdIndex]);
       if ($input.length) {
         $(blurTd).trigger('blur');
-        $input.trigger('focus');
+        $input.focus();
       }
     },
 
@@ -351,7 +422,7 @@ Craft.EditableTable = Garnish.Base.extend(
         // move onto the next row
         let $nextTr = row.$tr.next('tr');
         if ($nextTr.length) {
-          row = $nextTr.data('editable-table-row');
+          row = this.getRowObj($nextTr);
         } else {
           row = this.addRow(false);
         }
@@ -384,6 +455,7 @@ Craft.EditableTable = Garnish.Base.extend(
       allowDelete: false,
       minRows: null,
       maxRows: null,
+      lazyInitRows: true,
       onAddRow: $.noop,
       onDeleteRow: $.noop,
     },
@@ -419,7 +491,7 @@ Craft.EditableTable = Garnish.Base.extend(
           var name = baseName + '[' + rowId + '][' + colId + ']';
 
           $cell = $('<td/>', {
-            class: `${col.class} ${col.type}-cell`,
+            class: `${col.class ?? ''} ${col.type}-cell`,
             width: col.width,
           });
 
@@ -448,7 +520,7 @@ Craft.EditableTable = Garnish.Base.extend(
               Craft.ui
                 .createColorInput({
                   name: name,
-                  value: value,
+                  value: typeof value !== 'object' ? value : null,
                   small: true,
                 })
                 .appendTo($cell);
@@ -513,7 +585,7 @@ Craft.EditableTable = Garnish.Base.extend(
               Craft.ui
                 .createTextInput({
                   name: name,
-                  value: value,
+                  value: typeof value !== 'object' ? value : null,
                   type: col.type,
                   placeholder: col.placeholder || null,
                 })
@@ -524,7 +596,7 @@ Craft.EditableTable = Garnish.Base.extend(
               $('<textarea/>', {
                 name: name,
                 rows: col.rows || 1,
-                val: value,
+                val: typeof value !== 'object' ? value : null,
                 placeholder: col.placeholder,
               }).appendTo($cell);
           }
@@ -534,16 +606,52 @@ Craft.EditableTable = Garnish.Base.extend(
       }
 
       if (allowReorder) {
-        $('<td/>', {
+        const containerId = `menu-${Math.floor(Math.random() * 1000000)}`;
+        const $actionsBtn = $('<button/>', {
+          class: 'btn menu-btn action-btn',
+          type: 'button',
+          title: Craft.t('app', 'Actions'),
+          'aria-controls': containerId,
+          'data-disclosure-trigger': 'true',
+        });
+        const $menuContainer = $('<div/>', {
+          id: containerId,
+          class: 'menu menu--disclosure',
+        });
+
+        const $td = $('<td/>', {
           class: 'thin action',
+        }).appendTo($tr);
+
+        $('<div/>', {
+          class: 'flex flex-nowrap',
         })
           .append(
             $('<a/>', {
               class: 'move icon',
               title: Craft.t('app', 'Reorder'),
+              role: 'button',
+              type: 'button',
             })
           )
-          .appendTo($tr);
+          .append($actionsBtn)
+          .append($menuContainer)
+          .appendTo($td);
+
+        const menu = $actionsBtn.disclosureMenu().data('disclosureMenu');
+
+        menu.addItems([
+          {
+            icon: 'arrow-up',
+            label: Craft.t('app', 'Move up'),
+            attributes: {'data-action': 'moveUp'},
+          },
+          {
+            icon: 'arrow-down',
+            label: Craft.t('app', 'Move down'),
+            attributes: {'data-action': 'moveDown'},
+          },
+        ]);
       }
 
       if (allowDelete) {
@@ -580,6 +688,14 @@ Craft.EditableTable.Row = Garnish.Base.extend(
     $textareas: null,
     $deleteBtn: null,
 
+    get prevRow() {
+      return this.$tr.prev('tr');
+    },
+
+    get nextRow() {
+      return this.$tr.next('tr');
+    },
+
     init: function (table, tr) {
       this.table = table;
       this.$tr = $(tr);
@@ -600,10 +716,10 @@ Craft.EditableTable.Row = Garnish.Base.extend(
 
       this.$textareas = $();
       this.niceTexts = [];
-      var textareasByColId = {};
+      var textInputsByColId = {};
 
       var i = 0;
-      var colId, col, td, $textarea, $checkbox;
+      var colId, col, td, $checkbox;
 
       for (colId in this.table.columns) {
         if (!this.table.columns.hasOwnProperty(colId)) {
@@ -614,42 +730,42 @@ Craft.EditableTable.Row = Garnish.Base.extend(
         td = this.tds[colId] = this.$tds[i];
 
         if (Craft.inArray(col.type, Craft.EditableTable.textualColTypes)) {
-          $textarea = $('textarea', td);
-          this.$textareas = this.$textareas.add($textarea);
+          $('.editable-table-preview', td).remove();
+          let $input;
+          if (col.type === 'color') {
+            $input = $('input.color-input', td);
+          } else {
+            $input = $('textarea', td);
+            this.$textareas = this.$textareas.add($input);
+            this.niceTexts.push(
+              new Garnish.NiceText($input, {
+                onHeightChange: this.onTextareaHeightChange.bind(this),
+              })
+            );
+          }
 
-          this.addListener($textarea, 'focus', 'onTextareaFocus');
-          this.addListener($textarea, 'mousedown', 'ignoreNextTextareaFocus');
-
-          this.niceTexts.push(
-            new Garnish.NiceText($textarea, {
-              onHeightChange: this.onTextareaHeightChange.bind(this),
-            })
-          );
+          this.addListener($input, 'focus', 'onTextareaFocus');
+          this.addListener($input, 'mousedown', 'ignoreNextTextareaFocus');
 
           this.addListener(
-            $textarea,
+            $input,
             'keypress',
             {tdIndex: i, type: col.type},
             'handleKeypress'
           );
-          this.addListener(
-            $textarea,
-            'input',
-            {type: col.type},
-            'validateValue'
-          );
-          $textarea.trigger('input');
+          this.addListener($input, 'input', {type: col.type}, 'validateValue');
+          $input.trigger('input');
 
           if (col.type !== 'multiline') {
             this.addListener(
-              $textarea,
+              $input,
               'paste',
               {tdIndex: i, type: col.type},
               'handlePaste'
             );
           }
 
-          textareasByColId[colId] = $textarea;
+          textInputsByColId[colId] = $input;
         } else if (col.type === 'checkbox') {
           $checkbox = $('input[type="checkbox"]', td);
 
@@ -708,12 +824,13 @@ Craft.EditableTable.Row = Garnish.Base.extend(
 
         if (
           col.autopopulate &&
-          typeof textareasByColId[col.autopopulate] !== 'undefined' &&
-          !textareasByColId[colId].val()
+          typeof textInputsByColId[col.autopopulate] !== 'undefined' &&
+          !textInputsByColId[colId].val() &&
+          !textInputsByColId[col.autopopulate].val()
         ) {
           new Craft.HandleGenerator(
-            textareasByColId[colId],
-            textareasByColId[col.autopopulate],
+            textInputsByColId[colId],
+            textInputsByColId[col.autopopulate],
             {
               allowNonAlphaStart: true,
             }
@@ -731,6 +848,95 @@ Craft.EditableTable.Row = Garnish.Base.extend(
       this.addListener($inputs, 'blur', function (ev) {
         $(ev.currentTarget).closest('td').removeClass('focus');
       });
+
+      // Action menu modification
+      const $actionMenuBtn = this.$tr.find('> .action .action-btn');
+
+      if ($actionMenuBtn.length) {
+        this.actionDisclosure =
+          $actionMenuBtn.data('trigger') ||
+          new Garnish.DisclosureMenu($actionMenuBtn);
+        this.$actionMenu = this.actionDisclosure.$container;
+
+        this.actionDisclosure.on('show', () => {
+          this.updateDisclosureMenu();
+
+          // Fixes issue focusing caused by hiding button
+          const $focusableBtn = Garnish.firstFocusableElement(this.$actionMenu);
+          $focusableBtn.focus();
+        });
+
+        this.$actionMenuOptions = this.$actionMenu.find('button[data-action]');
+
+        this.addListener(
+          this.$actionMenuOptions,
+          'activate',
+          this.handleActionClick
+        );
+      }
+    },
+
+    updateDisclosureMenu: function () {
+      if (this.prevRow.length) {
+        this.$actionMenu
+          .find('button[data-action=moveUp]:first')
+          .parent()
+          .removeClass('hidden');
+      } else {
+        this.$actionMenu
+          .find('button[data-action=moveUp]:first')
+          .parent()
+          .addClass('hidden');
+      }
+      if (this.nextRow.length) {
+        this.$actionMenu
+          .find('button[data-action=moveDown]:first')
+          .parent()
+          .removeClass('hidden');
+      } else {
+        this.$actionMenu
+          .find('button[data-action=moveDown]:first')
+          .parent()
+          .addClass('hidden');
+      }
+    },
+
+    handleActionClick: function (event) {
+      event.preventDefault();
+      this.onActionSelect(event.target);
+    },
+
+    onActionSelect: function (option) {
+      $option = $(option);
+      switch ($option.data('action')) {
+        case 'moveUp': {
+          this.moveUp();
+          break;
+        }
+
+        case 'moveDown': {
+          this.moveDown();
+          break;
+        }
+      }
+
+      this.actionDisclosure.hide();
+    },
+
+    moveUp: function () {
+      let $prev = this.prevRow;
+      if ($prev.length) {
+        this.$tr.insertBefore($prev);
+        this.table.updateAllRows();
+      }
+    },
+
+    moveDown: function () {
+      let $next = this.nextRow;
+      if ($next.length) {
+        this.$tr.insertAfter($next);
+        this.table.updateAllRows();
+      }
     },
 
     onTextareaFocus: function (ev) {
@@ -817,15 +1023,6 @@ Craft.EditableTable.Row = Garnish.Base.extend(
         }
         return;
       }
-
-      // Was this an invalid number character?
-      if (
-        ev.data.type === 'number' &&
-        !ctrl &&
-        !Craft.inArray(keyCode, Craft.EditableTable.Row.numericKeyCodes)
-      ) {
-        ev.preventDefault();
-      }
     },
 
     handlePaste: function (ev) {
@@ -845,22 +1042,13 @@ Craft.EditableTable.Row = Garnish.Base.extend(
         return;
       }
 
-      var safeValue;
-
       if (ev.data.type === 'number') {
-        // Only grab the number at the beginning of the value (if any)
-        var match = ev.currentTarget.value.match(/^\s*(-?[\d\\.]*)/);
-
-        if (match !== null) {
-          safeValue = match[1];
-        } else {
-          safeValue = '';
-        }
-      } else {
-        // Just strip any newlines
-        safeValue = ev.currentTarget.value.replace(/[\r\n]/g, '');
+        Craft.filterNumberInputVal(ev.currentTarget);
+        return;
       }
 
+      // Strip any newlines
+      const safeValue = ev.currentTarget.value.replace(/[\r\n]/g, '');
       if (safeValue !== ev.currentTarget.value) {
         ev.currentTarget.value = safeValue;
       }
@@ -895,6 +1083,7 @@ Craft.EditableTable.Row = Garnish.Base.extend(
     },
   },
   {
+    /** @deprecated */
     numericKeyCodes: [
       9 /* (tab) */, 8 /* (delete) */, 37, 38, 39, 40 /* (arrows) */, 45,
       91 /* (minus) */, 46, 190 /* period */, 48, 49, 50, 51, 52, 53, 54, 55,

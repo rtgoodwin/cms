@@ -74,14 +74,14 @@
                       complete: () => {
                         $allDone.velocity({opacity: 1}, {duration: 'fast'});
                         $trigger.removeClass('disabled');
-                        $trigger.trigger('focus');
+                        $trigger.focus();
                       },
                     }
                   );
                 }, 300);
               })
               .catch(({response}) => {
-                alert(response.data.message);
+                Craft.cp.displayError(response.data.message);
               });
           },
         }

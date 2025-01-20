@@ -8,6 +8,7 @@
 namespace craft\services;
 
 use Craft;
+use craft\helpers\App;
 use craft\helpers\FileHelper;
 use yii\base\Component;
 use yii\base\Exception;
@@ -215,7 +216,9 @@ class Path extends Component
      */
     public function getRebrandPath(bool $create = true): string
     {
-        $path = $this->getStoragePath($create) . DIRECTORY_SEPARATOR . 'rebrand';
+        $path = App::env('CRAFT_REBRAND_PATH')
+            ? App::parseEnv('$CRAFT_REBRAND_PATH')
+            : $this->getStoragePath($create) . DIRECTORY_SEPARATOR . 'rebrand';
 
         if ($create) {
             FileHelper::createDirectory($path);
@@ -376,6 +379,24 @@ class Path extends Component
     public function getAssetsIconsPath(bool $create = true): string
     {
         $path = $this->getAssetsPath($create) . DIRECTORY_SEPARATOR . 'icons';
+
+        if ($create) {
+            FileHelper::createDirectory($path);
+        }
+
+        return $path;
+    }
+
+    /**
+     * Returns the path to the `storage/runtime/assets/imagetransforms/` directory.
+     *
+     * @param bool $create Whether the directory should be created if it doesn't exist
+     * @return string
+     * @since 4.4.0
+     */
+    public function getImageTransformsPath(bool $create = true): string
+    {
+        $path = $this->getAssetsPath($create) . DIRECTORY_SEPARATOR . 'imagetransforms';
 
         if ($create) {
             FileHelper::createDirectory($path);

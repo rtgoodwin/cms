@@ -7,6 +7,15 @@
     { label: "Settings"|t('app'), url: url('settings') }
 ] %}
 
+{% set formActions = [
+    {
+        label: 'Save and continue editing'|t('app'),
+        redirect: 'settings/general'|hash,
+        shortcut: true,
+        retainScroll: true,
+    },
+] %}
+
 {# set defaults #}
 {% set system = {
     name: null,
@@ -18,7 +27,7 @@
 
 {% macro configWarning(setting, file) -%}
     {{ "This is being overridden by the {setting} config setting."|t('app', {
-        setting: '<a href="https://craftcms.com/docs/4.x/config/config-settings.html#-'~setting|lower~'" rel="noopener" target="_blank">'~setting~'</a>'
+        setting: '<a href="https://craftcms.com/docs/5.x/reference/config/general.html#'~setting|lower~'" rel="noopener" target="_blank">'~setting~'</a>'
     })|raw }}
 {%- endmacro %}
 
@@ -68,7 +77,7 @@
         includeEnvVars: true,
     }) }}
 
-    {% if CraftEdition == CraftPro %}
+    {% if CraftEdition >= CraftPro %}
         <hr>
 
         {% do view.registerTranslations('app', [
@@ -80,12 +89,12 @@
         {{ forms.field({
             label: "Login Page Logo"|t('app'),
             instructions: "SVG file recommended. The logo will be displayed at {size} wide."|t('app', { size: '300px' })
-        }, include('settings/general/_images/logo')) }}
+        }, include('settings/general/_images/logo.twig')) }}
 
         {{ forms.field({
             label: "Site Icon"|t('app'),
             instructions: "Square SVG file recommended. The logo will be displayed at {size} by {size}."|t('app', { size: '32px' })
-        }, include('settings/general/_images/icon')) }}
+        }, include('settings/general/_images/icon.twig')) }}
 
         <div class="clear"></div>
     {% endif %}

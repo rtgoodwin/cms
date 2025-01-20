@@ -42,7 +42,7 @@
                   setTimeout(this.onComplete.bind(this), 300);
                 })
                 .catch(({response}) => {
-                  alert(response.data.message);
+                  Craft.cp.displayError(response.data.message);
                 });
             },
           }
@@ -77,7 +77,7 @@
           complete: () => {
             this.$allDone.velocity({opacity: 1}, {duration: 'fast'});
             this.$trigger.removeClass('disabled');
-            this.$trigger.trigger('focus');
+            this.$trigger.focus();
           },
         }
       );

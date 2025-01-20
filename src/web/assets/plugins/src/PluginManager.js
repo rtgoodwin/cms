@@ -47,7 +47,7 @@ import './plugins.scss';
       },
 
       addUninstalledPluginRow: function (handle, info) {
-        const $table = $('#plugins');
+        let $table = $('#plugins');
         if (!$table.length) {
           $table = $('<table/>', {
             id: 'plugins',
@@ -72,7 +72,7 @@ import './plugins.scss';
                   )
                 )
                 .append(
-                  $('<div/>', {class: 'details'})
+                  $('<div/>', {class: 'plugin-details'})
                     .append($('<h2/>', {text: info.name}))
                     .append(
                       info.description
@@ -114,7 +114,7 @@ import './plugins.scss';
               class: 'nowrap',
               'data-title': Craft.t('app', 'Status'),
             })
-              .append($('<span/>', {class: 'status'}))
+              .append($('<span/>', {class: 'status disabled'}))
               .append(
                 $('<span/>', {class: 'light', text: Craft.t('app', 'Missing')})
               )
@@ -180,29 +180,25 @@ import './plugins.scss';
                     )
                     .append(Craft.getCsrfInput())
                     .append(
-                      $('<div/>', {class: 'btngroup'})
-                        .append(
-                          $('<button/>', {
-                            type: 'button',
-                            class: 'btn menubtn',
-                            'data-icon': 'settings',
-                          })
-                        )
-                        .append(
-                          $('<div/>', {
-                            class: 'menu',
-                            'data-align': 'right',
-                          }).append(
-                            $('<ul/>').append(
-                              $('<li/>').append(
-                                $('<a/>', {
-                                  class: 'formsubmit',
-                                  text: Craft.t('app', 'Install'),
-                                })
-                              )
-                            )
+                      $('<button/>', {
+                        type: 'button',
+                        class: 'btn menubtn action-btn hairline',
+                      })
+                    )
+                    .append(
+                      $('<div/>', {
+                        class: 'menu',
+                        'data-align': 'right',
+                      }).append(
+                        $('<ul/>').append(
+                          $('<li/>').append(
+                            $('<a/>', {
+                              class: 'formsubmit',
+                              text: Craft.t('app', 'Install'),
+                            })
                           )
                         )
+                      )
                     )
                 )
               : $()
@@ -237,7 +233,7 @@ import './plugins.scss';
     init: function (manager, $row) {
       this.manager = manager;
       this.$row = $row;
-      this.$details = this.$row.find('.details');
+      this.$details = this.$row.find('.plugin-details');
       this.$keyContainer = $row.find('.license-key');
       this.$keyInput = this.$keyContainer
         .find('input.text')
@@ -389,7 +385,7 @@ import './plugins.scss';
                 'This license is tied to another Craft install. Visit {accountLink} to detach it, or <a href="{buyUrl}">buy a new license</a>',
                 {
                   accountLink:
-                    '<a href="https://id.craftcms.com" rel="noopener" target="_blank">id.craftcms.com</a>',
+                    '<a href="https://console.craftcms.com" rel="noopener" target="_blank">console.craftcms.com</a>',
                   buyUrl: Craft.getCpUrl(
                     `plugin-store/buy/${this.handle}/${info.edition}`
                   ),

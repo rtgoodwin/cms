@@ -5,7 +5,13 @@
 import Vue from 'vue';
 import axios from 'axios';
 import {currency} from './js/filters/currency';
-import {escapeHtml, formatDate, formatNumber, t} from './js/filters/craft';
+import {
+  escapeHtml,
+  uppercaseFirst,
+  formatDate,
+  formatNumber,
+  t,
+} from './js/filters/craft';
 import router from './js/router';
 import store from './js/store';
 import {mapState} from 'vuex';
@@ -19,9 +25,11 @@ import CDropdown from './js/components/ui/CDropdown';
 import CIcon from './js/components/ui/CIcon';
 import CSpinner from './js/components/ui/CSpinner';
 import CTextbox from './js/components/ui/CTextbox';
+import CLightswitch from './js/components/ui/CLightswitch';
 
 Vue.filter('currency', currency);
 Vue.filter('escapeHtml', escapeHtml);
+Vue.filter('uppercaseFirst', uppercaseFirst);
 Vue.filter('formatDate', formatDate);
 Vue.filter('formatNumber', formatNumber);
 Vue.filter('t', t);
@@ -31,6 +39,7 @@ Vue.component('c-dropdown', CDropdown);
 Vue.component('c-icon', CIcon);
 Vue.component('c-spinner', CSpinner);
 Vue.component('c-textbox', CTextbox);
+Vue.component('c-lightswitch', CLightswitch);
 
 Garnish.$doc.ready(function () {
   Craft.initUiElements();
@@ -94,19 +103,43 @@ Garnish.$doc.ready(function () {
       /**
        * Displays a notice.
        *
-       * @param message
+       * @param {string} message
+       * @param {Object} [settings]
+       * @param {string} [settings.icon] The icon to show on the notification
+       * @param {string} [settings.iconLabel] The icon’s ARIA label
+       * @param {string} [settings.details] Any additional HTML that should be included below the message
+       * @return {Object} The notification
        */
-      displayNotice(message) {
-        Craft.cp.displayNotice(message);
+      displayNotice(message, settings) {
+        Craft.cp.displayNotice(message, settings);
+      },
+
+      /**
+       * Displays a success message.
+       *
+       * @param {string} message
+       * @param {Object} [settings]
+       * @param {string} [settings.icon] The icon to show on the notification
+       * @param {string} [settings.iconLabel] The icon’s ARIA label
+       * @param {string} [settings.details] Any additional HTML that should be included below the message
+       * @return {Object} The notification
+       */
+      displaySuccess(message, settings) {
+        Craft.cp.displaySuccess(message, settings);
       },
 
       /**
        * Displays an error.
        *
-       * @param message
+       * @param {string} message
+       * @param {Object} [settings]
+       * @param {string} [settings.icon] The icon to show on the notification
+       * @param {string} [settings.iconLabel] The icon’s ARIA label
+       * @param {string} [settings.details] Any additional HTML that should be included below the message
+       * @return {Object} The notification
        */
-      displayError(message) {
-        Craft.cp.displayError(message);
+      displayError(message, settings) {
+        Craft.cp.displayError(message, settings);
       },
 
       /**
@@ -128,7 +161,7 @@ Garnish.$doc.ready(function () {
       },
 
       /**
-       * Updates Craft ID.
+       * Updates Craft Console.
        *
        * @param craftIdJson
        */
@@ -136,7 +169,7 @@ Garnish.$doc.ready(function () {
         this.$store.commit('craft/updateCraftId', craftId);
 
         if (this.craftId && this.craftId.email !== this.cart.email) {
-          // Update the cart’s email with the one from the Craft ID account
+          // Update the cart’s email with the one from the Craft Console account
           let data = {
             email: this.craftId.email,
           };
@@ -151,7 +184,9 @@ Garnish.$doc.ready(function () {
               }
             })
             .catch((error) => {
-              this.$root.displayError('Couldn’t update cart’s email.');
+              this.$root.displayError(
+                Craft.t('app', 'Couldn’t update cart’s email.')
+              );
 
               if (callback) {
                 callback();
@@ -231,7 +266,7 @@ Garnish.$doc.ready(function () {
           $pluginStoreActionsSpinner.addClass('hidden');
         });
 
-        // Craft ID
+        // Craft Console
         const $craftId = $('#craftid-account');
         const $craftIdConnectForm = $('#craftid-connect-form');
         const $craftIdDisconnectForm = $('#craftid-disconnect-form');

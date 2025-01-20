@@ -10,11 +10,11 @@ namespace crafttests\functional;
 use Codeception\Example;
 use Craft;
 use craft\elements\User;
+use craft\enums\CmsEdition;
 use FunctionalTester;
 
 /**
- * Test that most pages within Craft are rendered successfully and that we can - some a minor degree -
- * establish that the correct content is loaded on those pages.
+ * Test that most pages within Craft are rendered successfully and the correct content is loaded on those pages.
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @author Global Network Group | Giel Tettelaar <giel@yellowflash.net>
@@ -44,7 +44,7 @@ class PageRenderChecksCest
         $I->amLoggedInAs($this->currentUser);
         $this->cpTrigger = Craft::$app->getConfig()->getGeneral()->cpTrigger;
 
-        Craft::$app->setEdition(Craft::Pro);
+        Craft::$app->edition = CmsEdition::Pro;
     }
 
     /**
@@ -119,7 +119,7 @@ class PageRenderChecksCest
             [
                 'url' => '/settings/email', 'title' => 'Email Settings', 'extraContent' => [
                 ['rendered' => 'System Email Address'],
-                ['rendered' => 'This can be set to an environment variable. Learn more'],
+                ['rendered' => 'This can begin with an environment variable. Learn more'],
                 ['rendered' => 'Sender Name'],
                 ['rendered' => 'HTML Email Template'],
                 ['rendered' => 'Transport Type'],
@@ -141,28 +141,16 @@ class PageRenderChecksCest
                 ['rendered' => 'New field'],
             ],
             ],
-            [
-                'url' => '/settings/fields/1', 'title' => 'Fields', 'extraContent' => [
-                ['rendered' => 'New field'],
-            ],
-            ],
 
             [
                 'url' => '/settings/assets', 'title' => 'Volumes - Asset Settings', 'extraContent' => [
                 ['rendered' => 'New volume'],
                 ['rendered' => 'Image Transforms'],
-                ['rendered' => 'Settings'],
             ],
             ],
             [
                 'url' => '/settings/assets/transforms', 'title' => 'Image Transforms - Asset Settings', 'extraContent' => [
                 ['rendered' => 'New image transform'],
-            ],
-            ],
-            [
-                'url' => '/settings/assets/settings', 'title' => 'Settings - Asset Settings', 'extraContent' => [
-                ['rendered' => 'Temp Uploads Location'],
-                ['rendered' => 'Where do you want to store temporary asset uploads?'],
             ],
             ],
 
@@ -203,7 +191,7 @@ class PageRenderChecksCest
             ],
             [
                 'url' => '/utilities/deprecation-errors', 'title' => 'Deprecation Warnings', 'extraContent' => [
-                ['rendered' => 'No deprecation errors to report!'],
+                ['rendered' => 'No deprecation warnings to report!'],
             ],
             ],
             [
@@ -214,7 +202,7 @@ class PageRenderChecksCest
             ],
             [
                 'url' => '/utilities/migrations', 'title' => 'Migrations', 'extraContent' => [
-                ['rendered' => 'No content migrations.'],
+                ['rendered' => 'No pending content migrations.'],
             ],
             ],
             [

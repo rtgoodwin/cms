@@ -38,9 +38,9 @@ class FindAndReplace extends Utility
     /**
      * @inheritdoc
      */
-    public static function iconPath(): ?string
+    public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/wand.svg');
+        return 'wand-magic-sparkles';
     }
 
     /**
@@ -53,6 +53,6 @@ class FindAndReplace extends Utility
         $view->registerAssetBundle(FindReplaceAsset::class);
         $view->registerJs('new Craft.FindAndReplaceUtility(\'find-replace\');');
 
-        return $view->renderTemplate('_components/utilities/FindAndReplace');
+        return $view->renderTemplate('_components/utilities/FindAndReplace.twig');
     }
 }

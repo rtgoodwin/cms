@@ -3,18 +3,12 @@
 namespace craft\elements\conditions\entries;
 
 use Craft;
-use craft\base\conditions\BaseConditionRule;
+use craft\base\conditions\BaseMultiSelectConditionRule;
 use craft\base\ElementInterface;
-use craft\db\Table;
 use craft\elements\conditions\ElementConditionRuleInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\db\EntryQuery;
 use craft\elements\Entry;
-use craft\helpers\ArrayHelper;
-use craft\helpers\Cp;
-use craft\helpers\Db;
-use craft\helpers\UrlHelper;
-use craft\models\Section;
 
 /**
  * Entry type condition rule.
@@ -22,7 +16,7 @@ use craft\models\Section;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 4.0.0
  */
-class TypeConditionRule extends BaseConditionRule implements ElementConditionRuleInterface
+class TypeConditionRule extends BaseMultiSelectConditionRule implements ElementConditionRuleInterface
 {
     /**
      * @inheritdoc
@@ -41,112 +35,28 @@ class TypeConditionRule extends BaseConditionRule implements ElementConditionRul
     }
 
     /**
-     * @var Section[]
-     */
-    private array $_sections = [];
-
-    public ?string $sectionUid = null;
-    public ?string $entryTypeUid = null;
-
-    /**
      * @inheritdoc
      */
-    public function init(): void
+    public function setAttributes($values, $safeOnly = true): void
     {
-        $this->_sections = Craft::$app->getSections()->getAllSections();
-
-        // Set a default section
-        if (!$this->sectionUid) {
-            $this->sectionUid = ArrayHelper::firstValue($this->_sections)?->uid;
+        if (array_key_exists('entryTypeUid', $values)) {
+            $values['values'] = array_filter([$values['entryTypeUid']]);
+            unset($values['entryTypeUid'], $values['sectionUid']);
         }
 
-        // Once we have a section, set a default entry type
-        $this->_ensureEntryType();
-
-        parent::init();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getConfig(): array
-    {
-        return array_merge(parent::getConfig(), [
-            'sectionUid' => $this->sectionUid,
-            'entryTypeUid' => $this->entryTypeUid,
-        ]);
+        parent::setAttributes($values, $safeOnly);
     }
 
     /**
      * @return array
      */
-    private function _sectionOptions(): array
-    {
-        return ArrayHelper::map($this->_sections, 'uid', 'name');
-    }
-
-    /**
-     * @return array
-     */
-    private function _entryTypeOptions(): array
+    protected function options(): array
     {
         $options = [];
-        foreach ($this->_sections as $section) {
-            if ($section->uid == $this->sectionUid) {
-                foreach ($section->getEntryTypes() as $entryType) {
-                    $options[$entryType->uid] = $entryType->name;
-                }
-            }
+        foreach (Craft::$app->getEntries()->getAllEntryTypes() as $entryType) {
+            $options[$entryType->uid] = $entryType->getUiLabel();
         }
-
         return $options;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function inputHtml(): string
-    {
-        $html = Cp::selectHtml([
-            'name' => 'sectionUid',
-            'value' => $this->sectionUid,
-            'options' => $this->_sectionOptions(),
-            'inputAttributes' => [
-                'hx' => [
-                    'post' => UrlHelper::actionUrl('conditions/render'), // Only the section re-renders the body
-                    'target' => 'closest .rule-body',
-                    'select' => '#' . Craft::$app->getView()->namespaceInputId('rule-body'),
-                    'swap' => 'outerHTML',
-                ],
-            ],
-        ]);
-
-        $this->_ensureEntryType();
-
-        $html .= Cp::selectHtml([
-            'name' => 'entryTypeUid',
-            'value' => $this->entryTypeUid,
-            'options' => $this->_entryTypeOptions(),
-        ]);
-
-        return $html;
-    }
-
-    /**
-     * Ensures an entry type is set correctly based on the section selected.
-     */
-    private function _ensureEntryType(): void
-    {
-        if (!$this->sectionUid) {
-            $this->entryTypeUid = null;
-            return;
-        }
-
-        $entryTypeOptions = $this->_entryTypeOptions();
-
-        if (!$this->entryTypeUid || !ArrayHelper::keyExists($this->entryTypeUid, $entryTypeOptions)) {
-            $this->entryTypeUid = ArrayHelper::firstKey($entryTypeOptions);
-        }
     }
 
     /**
@@ -154,21 +64,9 @@ class TypeConditionRule extends BaseConditionRule implements ElementConditionRul
      */
     public function modifyQuery(ElementQueryInterface $query): void
     {
-        $typeId = Db::idByUid(Table::ENTRYTYPES, $this->entryTypeUid);
-        $type = Craft::$app->getSections()->getEntryTypeById($typeId);
-
         /** @var EntryQuery $query */
-        $query->type($type);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function defineRules(): array
-    {
-        return array_merge(parent::defineRules(), [
-            [['sectionUid', 'entryTypeUid'], 'safe'],
-        ]);
+        $entriesService = Craft::$app->getEntries();
+        $query->typeId($this->paramValue(fn($uid) => $entriesService->getEntryTypeByUid($uid)->id ?? null));
     }
 
     /**
@@ -177,7 +75,6 @@ class TypeConditionRule extends BaseConditionRule implements ElementConditionRul
     public function matchElement(ElementInterface $element): bool
     {
         /** @var Entry $element */
-        $typeId = Db::idByUid(Table::ENTRYTYPES, $this->entryTypeUid);
-        return $element->getType()->id === (int)$typeId;
+        return $this->matchValue((string)$element->getType()->uid);
     }
 }

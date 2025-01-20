@@ -39,11 +39,6 @@ class Gmail extends BaseTransportAdapter
     public ?string $password = null;
 
     /**
-     * @var int The timeout duration (in seconds)
-     */
-    public int $timeout = 10;
-
-    /**
      * @inheritdoc
      */
     protected function defineBehaviors(): array
@@ -67,7 +62,6 @@ class Gmail extends BaseTransportAdapter
         return [
             'username' => Craft::t('app', 'Username'),
             'password' => Craft::t('app', 'Password'),
-            'timeout' => Craft::t('app', 'Timeout'),
         ];
     }
 
@@ -78,8 +72,7 @@ class Gmail extends BaseTransportAdapter
     {
         $rules = parent::defineRules();
         $rules[] = [['username', 'password'], 'trim'];
-        $rules[] = [['username', 'password', 'timeout'], 'required'];
-        $rules[] = [['timeout'], 'number', 'integerOnly' => true];
+        $rules[] = [['username', 'password'], 'required'];
         return $rules;
     }
 
@@ -88,7 +81,7 @@ class Gmail extends BaseTransportAdapter
      */
     public function getSettingsHtml(): ?string
     {
-        return Craft::$app->getView()->renderTemplate('_components/mailertransportadapters/Gmail/settings', [
+        return Craft::$app->getView()->renderTemplate('_components/mailertransportadapters/Gmail/settings.twig', [
             'adapter' => $this,
         ]);
     }
@@ -101,11 +94,9 @@ class Gmail extends BaseTransportAdapter
         return [
             'scheme' => 'smtp',
             'host' => 'smtp.gmail.com',
-            'port' => 465,
-            'encryption' => 'ssl',
+            'port' => 0,
             'username' => App::parseEnv($this->username),
             'password' => App::parseEnv($this->password),
-            'timeout' => $this->timeout,
         ];
     }
 }

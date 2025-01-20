@@ -6,11 +6,22 @@
 Craft.Preview = Garnish.Base.extend(
   {
     elementEditor: null,
+    tabManager: null,
+    hasTabs: false,
 
     $shade: null,
+
+    editorId: null,
     $editorContainer: null,
-    $editor: null,
+    $editorHeader: null,
+    $editorToolbar: null,
+    $tabContainer: null,
+    $content: null,
     $spinner: null,
+
+    $editorFooter: null,
+    $saveBtn: null,
+
     $statusIcon: null,
     $dragHandle: null,
     $previewWrapper: null,
@@ -29,8 +40,6 @@ Craft.Preview = Garnish.Base.extend(
     $devicePreviewContainer: null,
     $iframe: null,
     iframeLoaded: false,
-    $tempInput: null,
-    $fieldPlaceholder: null,
 
     isActive: false,
     isVisible: false,
@@ -55,37 +64,28 @@ Craft.Preview = Garnish.Base.extend(
 
     draftId: null,
     url: null,
-    fields: null,
 
     iframeHeight: null,
     scrollTop: null,
+    scrollLeft: null,
 
     dragger: null,
     dragStartEditorWidth: null,
 
-    _updateIframeProxy: null,
-
     _editorWidth: null,
     _editorWidthInPx: null,
 
-    init: function (elementEditor) {
-      this.elementEditor = elementEditor;
-
-      this._updateIframeProxy = this.updateIframe.bind(this);
-
-      this.$tempInput = $('<input/>', {
-        type: 'hidden',
-        name: '__PREVIEW_FIELDS__',
-        value: '1',
-      });
-      this.$fieldPlaceholder = $('<div/>');
+    /**
+     * @param {Object} [settings]
+     */
+    init: function (settings) {
+      this.setSettings(settings, Craft.Preview.defaults);
 
       // Set the initial editor width
       this.editorWidth = Craft.getLocalStorage(
         'LivePreview.editorWidth',
         Craft.Preview.defaultEditorWidth
       );
-      this.setAnimationDuration();
 
       Craft.Preview.instances.push(this);
     },
@@ -99,7 +99,7 @@ Craft.Preview = Garnish.Base.extend(
     },
 
     set editorWidth(width) {
-      var inPx;
+      let inPx;
 
       // Is this getting set in pixels?
       if (width >= 1) {
@@ -119,195 +119,23 @@ Craft.Preview = Garnish.Base.extend(
       this._editorWidthInPx = inPx;
     },
 
-    setAnimationDuration: function () {
-      this.animationDuration = Garnish.prefersReducedMotion() ? 0 : 'slow';
-    },
-
-    open: function () {
+    open: async function () {
       if (this.isActive) {
         return;
       }
 
-      this.setAnimationDuration();
+      if (this.cancelToken) {
+        this.ignoreFailedRequest = true;
+        this.cancelToken.cancel();
+      }
+
       this.isActive = true;
       this.trigger('beforeOpen');
 
       $(document.activeElement).trigger('blur');
 
-      if (!this.$editor) {
-        const previewSkipLinkText = Craft.t('app', 'Skip to {title}', {
-          title: Craft.t('app', 'Top of preview'),
-        });
-
-        this.$shade = $('<div/>', {class: 'modal-shade dark'}).appendTo(
-          Garnish.$bod
-        );
-        this.$previewWrapper = $('<div/>', {
-          role: 'dialog',
-          'aria-modal': 'true',
-          'aria-labelledby': 'lp-preview-heading',
-        }).appendTo(Garnish.$bod);
-        this.$modalLabel = $('<h2/>', {
-          id: 'lp-preview-heading',
-          class: 'visually-hidden',
-          html: Craft.t('app', 'Preview'),
-        }).appendTo(this.$previewWrapper);
-        this.$editorContainer = $('<div/>', {
-          class: 'lp-editor-container',
-        }).appendTo(this.$previewWrapper);
-        this.$previewContainer = $('<div/>', {
-          class: 'lp-preview-container',
-          id: 'lp-preview-container',
-        }).appendTo(this.$previewWrapper);
-        this.$notifier = $('<span/>', {
-          class: 'visually-hidden',
-          'aria-live': 'assertive',
-        }).appendTo(this.$previewContainer);
-
-        var $editorHeader = $('<header/>', {class: 'flex'}).appendTo(
-          this.$editorContainer
-        );
-        this.$editor = $('<form/>', {class: 'lp-editor'}).appendTo(
-          this.$editorContainer
-        );
-        this.$dragHandle = $('<div/>', {class: 'lp-draghandle'}).appendTo(
-          this.$editorContainer
-        );
-        var $closeBtn = $('<button/>', {
-          type: 'button',
-          class: 'btn',
-          text: Craft.t('app', 'Close Preview'),
-        }).appendTo($editorHeader);
-        $('<div/>', {class: 'flex-grow'}).appendTo($editorHeader);
-        this.$spinner = $('<div/>', {
-          class: 'spinner hidden',
-          title: Craft.t('app', 'Saving'),
-        }).appendTo($editorHeader);
-        this.$statusIcon = $('<div/>', {class: 'invisible'}).appendTo(
-          $editorHeader
-        );
-        this.$statusMessage = $('<span/>', {
-          class: 'visually-hidden',
-          'aria-live': 'polite',
-        }).appendTo($editorHeader);
-        this.$previewSkipLink = $('<a/>', {
-          class: 'skip-link btn',
-          href: '#lp-preview-container',
-          html: previewSkipLinkText,
-        }).appendTo($editorHeader);
-
-        if (Craft.Pro) {
-          this.$previewHeader = $('<header/>', {
-            class: 'lp-preview-header',
-          }).appendTo(this.$previewContainer);
-
-          // Preview targets
-          if (this.elementEditor.settings.previewTargets.length > 1) {
-            this.$targetBtn = $('<button/>', {
-              type: 'button',
-              class: 'btn menubtn',
-              text: this.elementEditor.settings.previewTargets[0].label,
-            }).appendTo(this.$previewHeader);
-            this.$targetMenu = $('<div/>', {
-              class: 'menu lp-target-menu',
-            }).insertAfter(this.$targetBtn);
-            const $ul = $('<ul/>', {class: 'padded'}).appendTo(
-              this.$targetMenu
-            );
-            let $li, $a;
-            for (
-              let i = 0;
-              i < this.elementEditor.settings.previewTargets.length;
-              i++
-            ) {
-              $li = $('<li/>').appendTo($ul);
-              $a = $('<a/>', {
-                data: {target: i},
-                text: this.elementEditor.settings.previewTargets[i].label,
-                class: i === 0 ? 'sel' : null,
-              }).appendTo($li);
-            }
-            new Garnish.MenuBtn(this.$targetBtn, {
-              onOptionSelect: (option) => {
-                this.switchTarget($(option).data('target'));
-              },
-            });
-
-            $('<div class="flex-grow"/>').appendTo(this.$previewHeader);
-          }
-
-          this._buildDeviceTypeFieldset();
-
-          $('<div class="flex-grow"/>').appendTo(this.$previewHeader);
-          const $buttonContainer = $('<div class="buttons"/>').appendTo(
-            this.$previewHeader
-          );
-
-          // Orientation toggle
-          this.$orientationBtn = $('<button/>', {
-            type: 'button',
-            class: 'btn disabled',
-            'data-icon': 'rotate',
-            'aria-disabled': 'false',
-            text: Craft.t('app', 'Rotate'),
-            'aria-label': Craft.t('app', 'Rotate'),
-          }).appendTo($buttonContainer);
-          this.addListener(this.$orientationBtn, 'click', 'switchOrientation');
-
-          // Refresh button
-          this.$refreshBtn = $('<button/>', {
-            type: 'button',
-            class: 'btn hidden',
-            text: Craft.t('app', 'Refresh'),
-            'data-icon': 'refresh',
-          }).appendTo($buttonContainer);
-          this._updateRefreshBtn();
-          this.addListener(this.$refreshBtn, 'click', () => {
-            this.updateIframe(false, true);
-          });
-
-          // Get the last stored orientation
-          this.deviceOrientation = Craft.getLocalStorage(
-            'LivePreview.orientation'
-          );
-
-          // Device type input change handler
-          this.addListener(
-            $('input', this.$deviceTypeContainer),
-            'change',
-            'switchDeviceType'
-          );
-        }
-
-        this.$iframeContainer = $('<div/>', {
-          class: 'lp-iframe-container',
-        }).appendTo(this.$previewContainer);
-        this.$devicePreviewContainer = $('<div/>', {
-          class: 'lp-device-preview-container',
-        }).appendTo(this.$iframeContainer);
-        this.$deviceMask = $('<div/>', {
-          class: 'lp-device-mask',
-        }).appendTo(this.$iframeContainer);
-
-        /* Prevents focus trap bug caused by iframe as last element */
-        this.$bumperLink = $('<a/>', {
-          class: 'skip-link btn lp-preview-container__bumper-link',
-          html: previewSkipLinkText,
-          href: '#lp-preview-container',
-        });
-        this.$bumperLink.appendTo(this.$previewContainer);
-
-        this.dragger = new Garnish.BaseDrag(this.$dragHandle, {
-          axis: Garnish.X_AXIS,
-          onDragStart: this._onDragStart.bind(this),
-          onDrag: this._onDrag.bind(this),
-          onDragStop: this._onDragStop.bind(this),
-        });
-
-        this.addListener($closeBtn, 'click', 'close');
-        this.addListener(this.$statusIcon, 'click', () => {
-          this.elementEditor.showStatusHud(this.$statusIcon);
-        });
+      if (!this.$editorContainer) {
+        this._buildUi();
       }
 
       // Set the sizes
@@ -317,41 +145,313 @@ Craft.Preview = Garnish.Base.extend(
       this.$editorContainer.css(Craft.left, -this.editorWidthInPx + 'px');
       this.$previewContainer.css(Craft.right, -this.getIframeWidth());
 
-      // Find the fields, excluding nested fields
-      this.fields = [];
-      var $fields = $('#content .field').not($('#content .field .field'));
+      this.slideIn();
 
-      if ($fields.length) {
-        // Insert our temporary input before the first field so we know where to swap in the serialized form values
-        this.$tempInput.insertBefore($fields.get(0));
+      if (!this.elementEditor) {
+        await this._loadElementEditor();
+      }
 
-        // Move all the fields into the editor rather than copying them
-        // so any JS that's referencing the elements won't break.
-        for (let i = 0; i < $fields.length; i++) {
-          let $field = $($fields[i]),
-            $clone = this._getClone($field);
+      this.trigger('open');
+    },
 
-          // It's important that the actual field is added to the DOM *after* the clone,
-          // so any radio buttons in the field get deselected from the clone rather than the actual field.
-          this.$fieldPlaceholder.insertAfter($field);
-          $field.detach();
-          this.$fieldPlaceholder.replaceWith($clone);
-          $field.appendTo(this.$editor);
+    _buildUi: function () {
+      this.editorId = `lp-editor-${Math.floor(Math.random() * 100000000)}`;
 
-          this.fields.push({
-            $field: $field,
-            $clone: $clone,
-          });
+      const previewSkipLinkText = Craft.t('app', 'Skip to {title}', {
+        title: Craft.t('app', 'Top of preview'),
+      });
+
+      this.$shade = $('<div/>', {class: 'modal-shade dark'}).appendTo(
+        Garnish.$bod
+      );
+      this.$previewWrapper = $('<div/>', {
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': 'lp-preview-heading',
+      }).appendTo(Garnish.$bod);
+      this.$modalLabel = $('<h2/>', {
+        id: 'lp-preview-heading',
+        class: 'visually-hidden',
+        html: Craft.t('app', 'Preview'),
+      }).appendTo(this.$previewWrapper);
+      this.$editorContainer = $('<form/>', {
+        id: this.editorId,
+        class: 'lp-editor-container',
+      }).appendTo(this.$previewWrapper);
+      this.$previewContainer = $('<div/>', {
+        class: 'lp-preview-container',
+        id: 'lp-preview-container',
+      }).appendTo(this.$previewWrapper);
+      this.$notifier = $('<span/>', {
+        class: 'visually-hidden',
+        role: 'status',
+      }).appendTo(this.$previewContainer);
+
+      this.$editorHeader = $('<header/>', {
+        class: 'flex flex-nowrap',
+      }).appendTo(this.$editorContainer);
+      const $closeBtn = $('<button/>', {
+        type: 'button',
+        class: 'btn',
+        'data-icon': 'xmark',
+        title: Craft.t('app', 'Close Preview'),
+        'aria-label': Craft.t('app', 'Close Preview'),
+      }).appendTo(this.$editorHeader);
+      this.$editorToolbar = $('<div/>', {class: 'lp-toolbar'}).appendTo(
+        this.$editorHeader
+      );
+      this.$tabContainer = $('<div/>', {class: 'pane-tabs'}).appendTo(
+        this.$editorToolbar
+      );
+      this.$content = $('<div/>', {
+        class: 'lp-content loading',
+      })
+        .appendTo(this.$editorContainer)
+        .append($('<div/>', {class: 'spinner'}));
+
+      this.$editorFooter = $('<footer/>', {class: 'flex flex-nowrap'}).appendTo(
+        this.$editorContainer
+      );
+
+      this.$dragHandle = $('<div/>', {class: 'lp-draghandle'}).appendTo(
+        this.$editorContainer
+      );
+      $('<div/>', {class: 'flex-grow'}).appendTo(this.$editorHeader);
+      this.$spinner = $('<div/>', {
+        class: 'spinner hidden',
+        title: Craft.t('app', 'Saving'),
+      }).appendTo(this.$editorHeader);
+      this.$statusIcon = $('<div/>', {class: 'invisible'}).appendTo(
+        this.$editorHeader
+      );
+      this.$statusMessage = $('<span/>', {
+        class: 'visually-hidden',
+        'aria-live': 'polite',
+      }).appendTo(this.$editorHeader);
+      this.$previewSkipLink = $('<a/>', {
+        class: 'skip-link btn',
+        href: '#lp-preview-container',
+        html: previewSkipLinkText,
+      }).appendTo(this.$editorHeader);
+
+      this.$previewHeader = $('<header/>', {
+        class: 'lp-preview-header',
+      }).appendTo(this.$previewContainer);
+
+      this._buildDeviceTypeFieldset();
+
+      $('<div class="flex-grow"/>').appendTo(this.$previewHeader);
+      const $buttonContainer = $('<div class="buttons"/>').appendTo(
+        this.$previewHeader
+      );
+
+      // Orientation toggle
+      this.$orientationBtn = $('<button/>', {
+        type: 'button',
+        class: 'btn disabled',
+        'data-icon': 'rotate',
+        'aria-disabled': 'true',
+        text: Craft.t('app', 'Rotate'),
+        'aria-label': Craft.t('app', 'Rotate'),
+      }).appendTo($buttonContainer);
+      this.addListener(this.$orientationBtn, 'click', 'switchOrientation');
+
+      // Refresh button
+      this.$refreshBtn = $('<button/>', {
+        type: 'button',
+        class: 'btn',
+        text: Craft.t('app', 'Refresh'),
+        'data-icon': 'refresh',
+      }).appendTo($buttonContainer);
+      this.addListener(this.$refreshBtn, 'click', () => {
+        this.updateIframe(false, true);
+      });
+
+      // Get the last stored orientation
+      this.deviceOrientation = Craft.getLocalStorage('LivePreview.orientation');
+
+      this.$iframeContainer = $('<div/>', {
+        class: 'lp-iframe-container',
+      }).appendTo(this.$previewContainer);
+      this.$devicePreviewContainer = $('<div/>', {
+        class: 'lp-device-preview-container',
+      }).appendTo(this.$iframeContainer);
+      this.$deviceMask = $('<div/>', {
+        class: 'lp-device-mask',
+      }).appendTo(this.$iframeContainer);
+
+      /* Prevents focus trap bug caused by iframe as last element */
+      this.$bumperLink = $('<a/>', {
+        class: 'skip-link btn lp-preview-container__bumper-link',
+        html: previewSkipLinkText,
+        href: '#lp-preview-container',
+      });
+      this.$bumperLink.appendTo(this.$previewContainer);
+
+      this.dragger = new Garnish.BaseDrag(this.$dragHandle, {
+        axis: Garnish.X_AXIS,
+        onDragStart: this._onDragStart.bind(this),
+        onDrag: this._onDrag.bind(this),
+        onDragStop: this._onDragStop.bind(this),
+      });
+
+      this.addListener($closeBtn, 'click', 'close');
+      this.addListener(this.$statusIcon, 'click', () => {
+        this.elementEditor.showStatusHud(this.$statusIcon);
+      });
+    },
+
+    _loadElementEditor: async function () {
+      await this.settings.onBeforeLoad();
+
+      this.cancelToken = axios.CancelToken.source();
+      let response;
+      try {
+        response = await Craft.sendActionRequest('GET', 'elements/edit', {
+          params: {
+            elementType: this.settings.elementType,
+            elementId: this.settings.elementId,
+            draftId: this.settings.draftId,
+            revisionId: this.settings.revisionId,
+            siteId: this.settings.siteId,
+          },
+          cancelToken: this.cancelToken.token,
+          headers: {
+            'X-Craft-Container-Id': this.editorId,
+            'X-Craft-Namespace': this.namespace,
+          },
+        });
+      } catch (e) {
+        if (!this.ignoreFailedRequest) {
+          Craft.cp.displayError();
+          reject(e);
         }
+        this.ignoreFailedRequest = false;
+        return;
+      } finally {
+        this.$content.removeClass('loading');
+        this.cancelToken = null;
+      }
+
+      const {data} = response;
+      this.namespace = data.namespace;
+      this.$content.html(data.content);
+
+      this.$saveBtn = Craft.ui
+        .createSubmitButton({
+          label: Craft.t('app', 'Save'),
+          spinner: true,
+        })
+        .appendTo(this.$editorFooter);
+
+      this.updateTabs(data.tabs);
+
+      if (data.formAttributes) {
+        Craft.setElementAttributes(this.$editorContainer, data.formAttributes);
+      }
+
+      this.$editorContainer.data('delta-names', response.data.deltaNames);
+      this.$editorContainer.data(
+        'initial-delta-values',
+        response.data.initialDeltaValues
+      );
+      this.$editorContainer.data(
+        'initialSerializedValue',
+        this.$editorContainer.serialize()
+      );
+
+      Craft.initUiElements(this.$editorContainer);
+      await Craft.appendHeadHtml(data.headHtml);
+      await Craft.appendBodyHtml(data.bodyHtml);
+
+      this.elementEditor = new Craft.ElementEditor(
+        this.$editorContainer,
+        Object.assign(
+          {
+            namespace: this.namespace,
+            $contentContainer: this.$content,
+            $actionBtn: this.$saveBtn,
+            $spinnerContainer: this.$editorHeader,
+            updateTabs: (tabs) => this.updateTabs(tabs),
+            getTabManager: () => this.tabManager,
+            handleSubmitResponse: () => {
+              window.location.reload();
+            },
+            handleSubmitError: async (error) => {
+              // We can get away with just refreshing the content since there's
+              // no sidebar to worry about
+              this.$saveBtn.addClass('loading');
+              // Wait a sec so the `finally` block has a chance to run
+              await (async () => {})();
+              await this.elementEditor.refreshContent({
+                [this.elementEditor.namespaceInputName('prevalidate')]: 1,
+              });
+              this.$saveBtn.removeClass('loading');
+            },
+            autosaveDrafts: true,
+            saveParams: {
+              setEnabled: 0,
+            },
+          },
+          this.$editorContainer.data('elementEditorSettings')
+        )
+      );
+
+      this.elementEditor.on('afterSaveDraft', ({response}) => {
+        this.trigger('afterSaveDraft', {response});
+      });
+
+      this.elementEditor.on('update', () => {
+        this.updateIframe();
+      });
+
+      this.elementEditor.on('beforeSubmit', () => {
+        this.$saveBtn.addClass('loading');
+      });
+
+      this.elementEditor.on('afterSubmit', () => {
+        this.$saveBtn.removeClass('loading');
+      });
+
+      Craft.cp.elementThumbLoader.load(this.$content);
+      Craft.setFocusWithin(this.$content);
+
+      // Preview targets
+      if (this.elementEditor.settings.previewTargets.length > 1) {
+        const $spacer = $('<div class="flex-grow"/>').insertAfter(
+          this.$deviceTypeContainer
+        );
+        this.$targetBtn = $('<button/>', {
+          type: 'button',
+          class: 'btn menubtn',
+          text: this.elementEditor.settings.previewTargets[0].label,
+        }).insertAfter($spacer);
+        this.$targetMenu = $('<div/>', {
+          class: 'menu lp-target-menu',
+        }).insertAfter(this.$targetBtn);
+        const $ul = $('<ul/>', {class: 'padded'}).appendTo(this.$targetMenu);
+        let $li, $a;
+        for (
+          let i = 0;
+          i < this.elementEditor.settings.previewTargets.length;
+          i++
+        ) {
+          $li = $('<li/>').appendTo($ul);
+          $a = $('<a/>', {
+            data: {target: i},
+            text: this.elementEditor.settings.previewTargets[i].label,
+            class: i === 0 ? 'sel' : null,
+          }).appendTo($li);
+        }
+        new Garnish.MenuBtn(this.$targetBtn, {
+          onOptionSelect: (option) => {
+            this.switchTarget($(option).data('target'));
+          },
+        });
       }
 
       this.updateIframe();
-
-      this.elementEditor.on('update', this._updateIframeProxy);
-
       Craft.ElementThumbLoader.retryAll();
-
-      this.trigger('open');
     },
 
     _getDeviceTypeTranslation: function (type) {
@@ -377,104 +477,54 @@ Craft.Preview = Garnish.Base.extend(
     },
 
     _buildDeviceTypeFieldset: function () {
-      this.$deviceTypeContainer = $('<fieldset/>', {
-        class: 'lp-device-type',
+      // Device type buttons
+      this.$deviceTypeContainer = $('<section/>', {
+        class: 'btngroup lp-device-type',
+        'aria-label': Craft.t('app', 'Device type'),
       }).appendTo(this.$previewHeader);
-
-      $('<legend/>', {
-        text: Craft.t('app', 'Device type'),
-        class: 'visually-hidden',
-      }).appendTo(this.$deviceTypeContainer);
-
-      const $radioGroup = $('<div/>', {
-        class: 'lp-device-type__radio-group',
-      }).appendTo(this.$deviceTypeContainer);
-
-      // Desktop
-      const $desktopWrapper = $('<div/>', {
-        class: 'lp-device-type__item',
-      }).appendTo($radioGroup);
-
-      $('<input/>', {
-        class: 'lp-device-type__input visually-hidden',
-        type: 'radio',
-        name: 'device',
-        value: 'desktop',
-        id: 'device-desktop',
-        checked: true,
+      $('<button/>', {
+        type: 'button',
+        class: 'btn lp-device-type-btn--desktop active',
+        title: Craft.t('app', 'Desktop'),
+        'aria-label': Craft.t('app', 'Desktop'),
+        'aria-pressed': 'true',
         data: {
           width: '',
           height: '',
+          deviceType: 'desktop',
         },
-      }).appendTo($desktopWrapper);
-
-      const $desktopLabel = $('<label/>', {
-        for: 'device-desktop',
-        class:
-          'btn lp-device-type__label lp-device-type__label--desktop active',
-        title: this._getDeviceTypeTranslation('desktop'),
-      }).appendTo($desktopWrapper);
-
-      $('<span/>', {
-        class: 'visually-hidden',
-        text: this._getDeviceTypeTranslation('desktop'),
-      }).appendTo($desktopLabel);
-
-      // Tablet
-      const $tabletWrapper = $('<div/>', {
-        class: 'lp-device-type__item',
-      }).appendTo($radioGroup);
-
-      $('<input/>', {
-        class: 'lp-device-type__input visually-hidden',
-        type: 'radio',
-        name: 'device',
-        value: 'tablet',
-        id: 'device-tablet',
+      }).appendTo(this.$deviceTypeContainer);
+      $('<button/>', {
+        type: 'button',
+        class: 'btn lp-device-type-btn--tablet',
+        title: Craft.t('app', 'Tablet'),
+        'aria-label': Craft.t('app', 'Tablet'),
+        'aria-pressed': 'false',
         data: {
           width: 768,
           height: 1024,
+          deviceType: 'tablet',
         },
-      }).appendTo($tabletWrapper);
-
-      const $tabletLabel = $('<label/>', {
-        for: 'device-tablet',
-        class: 'btn lp-device-type__label lp-device-type__label--tablet',
-        title: this._getDeviceTypeTranslation('tablet'),
-      }).appendTo($tabletWrapper);
-
-      $('<span/>', {
-        class: 'visually-hidden',
-        text: this._getDeviceTypeTranslation('tablet'),
-      }).appendTo($tabletLabel);
-
-      // Mobile
-      const $mobileWrapper = $('<div/>', {
-        class: 'lp-device-type__item',
-      }).appendTo($radioGroup);
-
-      $('<input/>', {
-        class: 'lp-device-type__input visually-hidden',
-        type: 'radio',
-        name: 'device',
-        value: 'phone',
-        id: 'device-phone',
+      }).appendTo(this.$deviceTypeContainer);
+      $('<button/>', {
+        type: 'button',
+        class: 'btn lp-device-type-btn--phone',
+        title: Craft.t('app', 'Mobile'),
+        'aria-label': Craft.t('app', 'Mobile'),
+        'aria-pressed': 'false',
         data: {
           width: 375,
           height: 667,
+          deviceType: 'phone',
         },
-      }).appendTo($mobileWrapper);
+      }).appendTo(this.$deviceTypeContainer);
 
-      const $mobileLabel = $('<label/>', {
-        for: 'device-phone',
-        class: 'btn lp-device-type__label lp-device-type__label--phone',
-        title: this._getDeviceTypeTranslation('phone'),
-      }).appendTo($mobileWrapper);
-
-      $('<span/>', {
-        class: 'visually-hidden',
-        text: this._getDeviceTypeTranslation('phone'),
-      }).appendTo($mobileLabel);
+      // Add functionality
+      this.deviceBtnGroup = new Craft.Listbox(this.$deviceTypeContainer, {
+        onChange: ($selectedOption) => {
+          this.switchDeviceType($selectedOption);
+        },
+      });
     },
 
     _activeTarget: function () {
@@ -490,21 +540,12 @@ Craft.Preview = Garnish.Base.extend(
       return typeof typeof target.refresh === 'undefined' || !!target.refresh;
     },
 
-    _updateRefreshBtn: function () {
-      if (!this._autoRefresh()) {
-        this.$refreshBtn.removeClass('hidden');
-      } else {
-        this.$refreshBtn.addClass('hidden');
-      }
-    },
-
     switchTarget: function (i) {
       this.activeTarget = i;
       this.$targetBtn.text(this.elementEditor.settings.previewTargets[i].label);
       this.$targetMenu.find('a.sel').removeClass('sel');
       this.$targetMenu.find('a').eq(i).addClass('sel');
       this.updateIframe(true);
-      this._updateRefreshBtn();
       this.trigger('switchTarget', {
         previewTarget: this.elementEditor.settings.previewTargets[i],
       });
@@ -529,15 +570,22 @@ Craft.Preview = Garnish.Base.extend(
       this.$editorContainer
         .show()
         .velocity('stop')
-        .animateLeft(0, this.animationDuration, () => {
-          this.trigger('slideIn');
-          Garnish.$win.trigger('resize');
-        });
+        .animateLeft(
+          0,
+          Garnish.getUserPreferredAnimationDuration(this.animationDuration),
+          () => {
+            this.trigger('slideIn');
+            Garnish.$win.trigger('resize');
+          }
+        );
 
       this.$previewContainer
         .show()
         .velocity('stop')
-        .animateRight(0, this.animationDuration);
+        .animateRight(
+          0,
+          Garnish.getUserPreferredAnimationDuration(this.animationDuration)
+        );
 
       this.isVisible = true;
 
@@ -545,17 +593,29 @@ Craft.Preview = Garnish.Base.extend(
       Garnish.hideModalBackgroundLayers();
       Craft.setFocusWithin(this.$previewWrapper);
       Craft.trapFocusWithin(this.$previewWrapper);
+      Garnish.uiLayerManager.registerShortcut(
+        {
+          keyCode: Garnish.S_KEY,
+          ctrl: true,
+        },
+        async (ev) => {
+          await this.elementEditor.checkForm();
+          this.elementEditor.handleSubmit(ev);
+        }
+      );
       Garnish.uiLayerManager.registerShortcut(Garnish.ESC_KEY, () => {
         this.close();
       });
     },
 
-    close: function () {
+    close: async function () {
       if (!this.isActive || !this.isVisible) {
         return;
       }
 
-      this.setAnimationDuration();
+      // Check the form one last time
+      await this.elementEditor.checkForm();
+
       this.trigger('beforeClose');
 
       $('html').removeClass('noscroll');
@@ -563,10 +623,6 @@ Craft.Preview = Garnish.Base.extend(
       this.removeListener(Garnish.$win, 'resize');
       Garnish.uiLayerManager.removeLayer();
       Garnish.resetModalBackgroundLayerVisibility();
-
-      // Remove our temporary input and move the preview fields back into place
-      this.$tempInput.detach();
-      this.moveFieldsBack();
 
       // Delay shade fade-out when animation is present
       if (Garnish.prefersReducedMotion()) {
@@ -577,49 +633,56 @@ Craft.Preview = Garnish.Base.extend(
 
       this.$editorContainer
         .velocity('stop')
-        .animateLeft(-this.editorWidthInPx, this.animationDuration, () => {
-          for (var i = 0; i < this.fields.length; i++) {
-            this.fields[i].$newClone.remove();
+        .animateLeft(
+          -this.editorWidthInPx,
+          Garnish.getUserPreferredAnimationDuration(this.animationDuration),
+          () => {
+            this.$editorContainer.hide();
+            this.trigger('slideOut');
           }
-          this.$editorContainer.hide();
-          this.trigger('slideOut');
-        });
+        );
 
       this.$previewContainer
         .velocity('stop')
-        .animateRight(-this.getIframeWidth(), this.animationDuration, () => {
-          this.$iframeContainer.removeClass('lp-iframe-container--rotating');
-          this.$previewContainer.hide();
-        });
-
-      this.elementEditor.off('update', this._updateIframeProxy);
+        .animateRight(
+          -this.getIframeWidth(),
+          Garnish.getUserPreferredAnimationDuration(this.animationDuration),
+          () => {
+            this.$iframeContainer.removeClass('lp-iframe-container--rotating');
+            this.$previewContainer.hide();
+          }
+        );
 
       Craft.ElementThumbLoader.retryAll();
-
-      if (this.elementEditor.$previewBtn) {
-        this.elementEditor.$previewBtn.focus();
-      }
 
       this.isActive = false;
       this.isVisible = false;
       this.trigger('close');
     },
 
-    moveFieldsBack: function () {
-      for (var i = 0; i < this.fields.length; i++) {
-        var field = this.fields[i];
-        field.$newClone = this._getClone(field.$field);
-
-        // It's important that the actual field is added to the DOM *after* the clone,
-        // so any radio buttons in the field get deselected from the clone rather than the actual field.
-        this.$fieldPlaceholder.insertAfter(field.$field);
-        field.$field.detach();
-        this.$fieldPlaceholder.replaceWith(field.$newClone);
-        field.$clone.replaceWith(field.$field);
+    updateTabs: function (tabs) {
+      if (this.tabManager) {
+        this.tabManager.destroy();
+        this.tabManager = null;
+        this.$tabContainer.html('');
       }
 
-      Garnish.$win.trigger('resize');
-      Garnish.$doc.trigger('scroll');
+      this.hasTabs = !!tabs;
+
+      if (this.hasTabs) {
+        const $tabContainer = $(tabs);
+        this.$tabContainer.replaceWith($tabContainer);
+        this.$tabContainer = $tabContainer;
+        this.tabManager = new Craft.Tabs(this.$tabContainer);
+        this.tabManager.on('deselectTab', (ev) => {
+          $(ev.$tab.attr('href')).addClass('hidden');
+        });
+        this.tabManager.on('selectTab', (ev) => {
+          $(ev.$tab.attr('href')).removeClass('hidden');
+          Garnish.$win.trigger('resize');
+          this.$content.trigger('scroll');
+        });
+      }
     },
 
     getIframeWidth: function () {
@@ -682,23 +745,29 @@ Craft.Preview = Garnish.Base.extend(
           let sameHost;
           if (resetScroll) {
             this.scrollTop = null;
+            this.scrollLeft = null;
           } else if (this.iframeLoaded && this.$iframe) {
             if (this._useIframeResizer()) {
               this.iframeHeight = this.$iframe.height();
               this.scrollTop = this.$iframeContainer.scrollTop();
+              this.scrollLeft = this.$iframeContainer.scrollLeft();
             } else {
               sameHost = Craft.isSameHost(url);
               if (sameHost && this.$iframe[0].contentWindow) {
                 this.scrollTop = $(
                   this.$iframe[0].contentWindow.document
                 ).scrollTop();
+
+                this.scrollLeft = $(
+                  this.$iframe[0].contentWindow.document
+                ).scrollLeft();
               }
             }
           }
 
           this.iframeLoaded = false;
 
-          var $iframe = $('<iframe/>', {
+          const $iframe = $('<iframe/>', {
             class: 'lp-preview',
             frameborder: 0,
             src: url,
@@ -716,6 +785,7 @@ Craft.Preview = Garnish.Base.extend(
             if (!resetScroll && this.iframeHeight !== null) {
               $iframe.height(this.iframeHeight);
               this.$iframeContainer.scrollTop(this.scrollTop);
+              this.$iframeContainer.scrollLeft(this.scrollLeft);
             }
 
             iFrameResize(
@@ -728,6 +798,7 @@ Craft.Preview = Garnish.Base.extend(
                     this.iframeLoaded = true;
                     this.iframeHeight = null;
                     this.scrollTop = null;
+                    this.scrollLeft = null;
                     iframe.scrolling = 'no';
                   },
                 },
@@ -738,8 +809,11 @@ Craft.Preview = Garnish.Base.extend(
           } else {
             $iframe.on('load', () => {
               this.iframeLoaded = true;
-              if (!resetScroll && sameHost && this.scrollTop !== null) {
-                $($iframe[0].contentWindow.document).scrollTop(this.scrollTop);
+              if (!resetScroll && sameHost) {
+                $iframe[0].contentWindow.scrollTo(
+                  this.scrollLeft || 0,
+                  this.scrollTop || 0
+                );
               }
             });
           }
@@ -794,13 +868,10 @@ Craft.Preview = Garnish.Base.extend(
       }, 200);
     },
 
-    switchDeviceType: function (ev) {
+    switchDeviceType: function ($option) {
       this.$iframeContainer.removeClass('lp-iframe-container--rotating');
 
-      const $input = $(ev.target);
-      const $inputWrapper = $input.closest('.lp-device-type__item');
-      const newDeviceType = $input.val();
-
+      const newDeviceType = $option.data('deviceType');
       // Bail if we’re just smashing the same button
       if (newDeviceType === this.currentDeviceType) {
         return false;
@@ -808,13 +879,8 @@ Craft.Preview = Garnish.Base.extend(
 
       // Store new device type data
       this.currentDeviceType = newDeviceType;
-      this.deviceWidth = $input.data('width');
-      this.deviceHeight = $input.data('height');
-
-      // Set the active state on the label
-      this.$deviceTypeContainer.find('.btn').removeClass('active');
-
-      $inputWrapper.find('.btn').addClass('active');
+      this.deviceWidth = $option.data('width');
+      this.deviceHeight = $option.data('height');
 
       if (this.currentDeviceType === 'desktop') {
         // Disable the orientation button
@@ -960,22 +1026,6 @@ Craft.Preview = Garnish.Base.extend(
       }
     },
 
-    _getClone: function ($field) {
-      var $clone = $field.clone();
-
-      // clone() won't account for input values that have changed since the original HTML set them
-      Garnish.copyInputValues($field, $clone);
-
-      // Remove any id= attributes
-      $clone.attr('id', '');
-      $clone.find('[id]').attr('id', '');
-
-      // Disable anything with a name attribute
-      $clone.find('[name]').prop('disabled', true);
-
-      return $clone;
-    },
-
     _onDragStart: function () {
       this.dragStartEditorWidth = this.editorWidthInPx;
       this.$previewContainer.addClass('dragging');
@@ -988,7 +1038,12 @@ Craft.Preview = Garnish.Base.extend(
         this.editorWidth = this.dragStartEditorWidth - this.dragger.mouseDistX;
       }
 
+      if (this.tabManager) {
+        this.tabManager.updateMenuBtn();
+      }
+
       this.updateWidths();
+      this.trigger('drag');
     },
 
     _onDragStop: function () {
@@ -1000,6 +1055,8 @@ Craft.Preview = Garnish.Base.extend(
       Craft.Preview.instances = Craft.Preview.instances.filter(
         (o) => o !== this
       );
+      this.elementEditor.destroy();
+      delete this.elementEditor;
       this.base();
     },
   },
@@ -1008,12 +1065,29 @@ Craft.Preview = Garnish.Base.extend(
     minEditorWidthInPx: 320,
     instances: [],
 
+    defaults: {
+      elementType: null,
+      elementId: null,
+      draftId: null,
+      revisionId: null,
+      siteId: null,
+      onBeforeLoad: async () => {},
+    },
+
     refresh: function () {
-      for (preview of Craft.Preview.instances) {
+      for (let preview of Craft.Preview.instances) {
         preview.updateIframe();
       }
-      for (preview of Craft.LivePreview.instances) {
+      for (let preview of Craft.LivePreview.instances) {
         preview.forceUpdateIframe();
+      }
+    },
+
+    getActive: function () {
+      for (let preview of Craft.Preview.instances) {
+        if (preview.isActive) {
+          return preview;
+        }
       }
     },
   }

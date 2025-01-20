@@ -36,10 +36,14 @@ class SitesController extends Controller
      */
     public function beforeAction($action): bool
     {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
         // All actions require an admin account
         $this->requireAdmin();
 
-        return parent::beforeAction($action);
+        return true;
     }
 
     /**
@@ -52,7 +56,6 @@ class SitesController extends Controller
     public function actionSettingsIndex(?int $groupId = null): Response
     {
         $sitesService = Craft::$app->getSites();
-        $allGroups = $sitesService->getAllGroups();
 
         if ($groupId) {
             if (($group = $sitesService->getGroupById($groupId)) === null) {
@@ -82,11 +85,10 @@ class SitesController extends Controller
             'Delete {site}',
         ]);
 
-        return $this->renderTemplate('settings/sites/index', compact(
+        return $this->renderTemplate('settings/sites/index.twig', compact(
             'crumbs',
-            'allGroups',
             'group',
-            'sites'
+            'sites',
         ));
     }
 
@@ -262,29 +264,13 @@ class SitesController extends Controller
             ],
         ];
 
-        $languageOptions = [];
-        $languageId = Craft::$app->getLocale()->getLanguageID();
-
-        foreach (Craft::$app->getI18n()->getAllLocales() as $locale) {
-            $languageOptions[] = [
-                'label' => $locale->getDisplayName(Craft::$app->language),
-                'value' => $locale->id,
-                'data' => [
-                    'data' => [
-                        'hint' => $locale->getLanguageID() !== $languageId ? $locale->getDisplayName() : false,
-                    ],
-                ],
-            ];
-        }
-
-        return $this->renderTemplate('settings/sites/_edit', [
+        return $this->renderTemplate('settings/sites/_edit.twig', [
             'brandNewSite' => $brandNewSite,
             'title' => $title,
             'crumbs' => $crumbs,
             'site' => $siteModel,
             'groupId' => $groupId,
             'groupOptions' => $groupOptions,
-            'languageOptions' => $languageOptions,
         ]);
     }
 

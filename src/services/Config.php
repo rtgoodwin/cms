@@ -8,6 +8,7 @@
 namespace craft\services;
 
 use Craft;
+use craft\config\BaseConfig;
 use craft\config\DbConfig;
 use craft\config\GeneralConfig;
 use craft\helpers\App;
@@ -17,10 +18,8 @@ use craft\helpers\StringHelper;
 use craft\helpers\Typecast;
 use yii\base\BaseObject;
 use yii\base\Component;
-use yii\base\ErrorException;
 use yii\base\Exception;
 use yii\base\InvalidArgumentException;
-use yii\base\InvalidConfigException;
 
 /**
  * The Config service provides APIs for retrieving the values of Craft’s [config settings](http://craftcms.com/docs/config-settings),
@@ -42,6 +41,11 @@ class Config extends Component
     public const CATEGORY_CUSTOM = 'custom';
     public const CATEGORY_DB = 'db';
     public const CATEGORY_GENERAL = 'general';
+
+    /**
+     * @var string The application type (`web` or `console`).
+     */
+    public string $appType;
 
     /**
      * @var string|null The environment ID Craft is currently running in.
@@ -79,49 +83,43 @@ class Config extends Component
     private ?string $_dotEnvPath = null;
 
     /**
+     * @var string|null
+     * @see getConfigFromFile()
+     * @see getLoadingConfigFile()
+     */
+    private ?string $_loadingConfigFile = null;
+
+    /**
      * Returns all of the config settings for a given category.
      *
      * @param string $category The config category
      * @return object The config settings
      * @throws InvalidArgumentException if $category is invalid
-     * @throws InvalidConfigException if the securityKey general config setting is not set, and a auto-generated one could not be saved
      */
     public function getConfigSettings(string $category): object
     {
         if (!isset($this->_configSettings[$category])) {
-            $this->_configSettings[$category] = $this->_createConfigObj($category);
+            $config = $this->_createConfigObj($category, $category, null);
 
-            // This needs to happen here – after `$this->_configSettings[$category]` has been set – to avoid
-            // an infinite recursion bug
-            if ($category === self::CATEGORY_GENERAL && !isset($this->_configSettings[$category]->securityKey)) {
-                $keyPath = Craft::$app->getPath()->getRuntimePath() . DIRECTORY_SEPARATOR . 'validation.key';
-                if (file_exists($keyPath)) {
-                    $this->_configSettings[$category]->securityKey = trim(file_get_contents($keyPath));
-                } else {
-                    $key = Craft::$app->getSecurity()->generateRandomString();
-                    try {
-                        FileHelper::writeToFile($keyPath, $key);
-                    } catch (ErrorException $e) {
-                        throw new InvalidConfigException('The securityKey config setting is required, and an auto-generated value could not be generated: ' . $e->getMessage());
-                    }
-                    $this->_configSettings[$category]->securityKey = $key;
-                }
-                Craft::$app->getDeprecator()->log('validation.key', "The auto-generated validation key stored at `$keyPath` has been deprecated. Copy its value to the `securityKey` config setting in `config/general.php`.");
+            if ($category !== self::CATEGORY_CUSTOM && isset($this->appType)) {
+                // See if an application type-specific config exists (general.web.php / general.console.php)
+                /** @var GeneralConfig|DbConfig $config */
+                $config = $this->_createConfigObj($category, "$category.$this->appType", $config);
             }
+
+            $this->_configSettings[$category] = $config;
         }
 
         return $this->_configSettings[$category];
     }
 
-    /**
-     * Creates a new config object.
-     *
-     * @param string $category The config category
-     * @return object
-     */
-    private function _createConfigObj(string $category): object
+    private function _createConfigObj(string $category, string $filename, ?BaseConfig $existingConfig): object
     {
-        $config = $this->getConfigFromFile($category);
+        $config = $this->getConfigFromFile($filename);
+
+        if ($existingConfig && empty($config)) {
+            return $existingConfig;
+        }
 
         switch ($category) {
             case self::CATEGORY_CUSTOM:
@@ -138,13 +136,48 @@ class Config extends Component
                 throw new InvalidArgumentException("Invalid config category: $category");
         }
 
-        // Merge in any environment value overrides, and typecast everything
+        if (is_callable($config)) {
+            $config = $config($existingConfig ?? $configClass::create());
+        }
+
+        // Get any environment value overrides
         $envConfig = App::envConfig($configClass, $envPrefix);
+
+        // If $config is already a BaseConfig object, assign the env overrides to it and return
+        if ($config instanceof BaseConfig) {
+            Typecast::properties($configClass, $envConfig);
+
+            foreach ($envConfig as $name => $value) {
+                // Use the fluent methods when possible, in case it has any value normalization logic
+                if (method_exists($config, $name)) {
+                    try {
+                        $config->$name($value);
+                        continue;
+                    } catch (\Throwable) {
+                    }
+                    $config->$name = $value;
+                }
+            }
+
+            return $config;
+        }
+
+        $loadingConfig = $this->_loadingConfigFile;
+        $this->_loadingConfigFile = $filename;
+
         $config = array_merge($config, $envConfig);
         Typecast::properties($configClass, $config);
 
-        /** @var BaseObject */
-        return new $configClass($config);
+        if ($existingConfig !== null) {
+            Craft::configure($existingConfig, $config);
+            $config = $existingConfig;
+        } else {
+            /** @var BaseObject $config */
+            $config = new $configClass($config);
+        }
+
+        $this->_loadingConfigFile = $loadingConfig;
+        return $config;
     }
 
     /**
@@ -232,9 +265,9 @@ class Config extends Component
      * ```
      *
      * @param string $filename
-     * @return array
+     * @return array|callable|BaseConfig
      */
-    public function getConfigFromFile(string $filename): array
+    public function getConfigFromFile(string $filename): array|callable|BaseConfig
     {
         $path = $this->getConfigFilePath($filename);
 
@@ -242,7 +275,24 @@ class Config extends Component
             return [];
         }
 
-        if (!is_array($config = @include $path)) {
+        $loadingConfig = $this->_loadingConfigFile;
+        $this->_loadingConfigFile = $filename;
+
+        $config = $this->_configFromFileInternal($path);
+
+        $this->_loadingConfigFile = $loadingConfig;
+        return $config;
+    }
+
+    private function _configFromFileInternal(string $path): array|callable|BaseConfig
+    {
+        $config = @include $path;
+
+        if ($config instanceof BaseConfig || is_callable($config)) {
+            return $config;
+        }
+
+        if (!is_array($config)) {
             return [];
         }
 
@@ -267,23 +317,34 @@ class Config extends Component
     }
 
     /**
+     * Returns the config filename currently being loaded.
+     *
+     * @return string|null
+     * @since 4.2.0
+     */
+    public function getLoadingConfigFile(): ?string
+    {
+        return $this->_loadingConfigFile;
+    }
+
+    /**
      * Returns the path to the .env file (regardless of whether it exists).
      *
      * @return string
      */
     public function getDotEnvPath(): string
     {
-        return $this->_dotEnvPath ?? ($this->_dotEnvPath = Craft::getAlias('@root/.env'));
+        return $this->_dotEnvPath ?? ($this->_dotEnvPath = Craft::getAlias('@dotenv'));
     }
 
     /**
-     * Sets an environment variable value in the project's .env file.
+     * Sets an environment variable value in the project's `.env` file.
      *
      * @param string $name The environment variable name
-     * @param string $value The environment variable value
+     * @param string|false $value The environment variable value, or `false` if it should be removed.
      * @throws Exception if the .env file doesn't exist
      */
-    public function setDotEnvVar(string $name, string $value): void
+    public function setDotEnvVar(string $name, string|false $value): void
     {
         $path = $this->getDotEnvPath();
 
@@ -293,28 +354,36 @@ class Config extends Component
 
         $contents = file_get_contents($path);
         $qName = preg_quote($name, '/');
-        $slashedValue = addslashes($value);
 
-        // Only surround with quotes if the value contains a space
-        if (str_contains($slashedValue, ' ') || str_contains($slashedValue, '#')) {
-            $slashedValue = "\"$slashedValue\"";
-        }
-
-        $def = "$name=$slashedValue";
-        $token = StringHelper::randomString();
-        $contents = preg_replace("/^(\s*)$qName=.*/m", $token, $contents, -1, $count);
-
-        if ($count !== 0) {
-            $contents = str_replace($token, $def, $contents);
+        if ($value === false) {
+            $contents = preg_replace("/\s*^\s*$qName=.*/m", '', $contents);
         } else {
-            $contents = rtrim($contents);
-            $contents = ($contents ? $contents . PHP_EOL . PHP_EOL : '') . $def . PHP_EOL;
+            $slashedValue = addslashes($value);
+            // Only surround with quotes if the value contains a space
+            if (str_contains($slashedValue, ' ') || str_contains($slashedValue, '#')) {
+                $slashedValue = "\"$slashedValue\"";
+            }
+            $def = "$name=$slashedValue";
+
+            $token = StringHelper::randomString();
+            $contents = preg_replace("/^\s*$qName=.*/m", $token, $contents, -1, $count);
+
+            if ($count !== 0) {
+                $contents = str_replace($token, $def, $contents);
+            } else {
+                $contents = rtrim($contents);
+                $contents = ($contents ? $contents . PHP_EOL . PHP_EOL : '') . $def . PHP_EOL;
+            }
         }
 
         FileHelper::writeToFile($path, $contents);
 
         // Now actually set the environment variable
-        $_SERVER[$name] = $value;
+        if ($value === false) {
+            unset($_SERVER[$name]);
+        } else {
+            $_SERVER[$name] = $value;
+        }
     }
 
     /**

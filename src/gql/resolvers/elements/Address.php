@@ -11,7 +11,7 @@ use craft\elements\Address as AddressElement;
 use craft\elements\db\AddressQuery;
 use craft\elements\db\ElementQuery;
 use craft\gql\base\ElementResolver;
-use craft\helpers\Gql as GqlHelper;
+use yii\base\UnknownMethodException;
 
 /**
  * Class Address
@@ -41,11 +41,13 @@ class Address extends ElementResolver
         }
 
         foreach ($arguments as $key => $value) {
-            $query->$key($value);
-        }
-
-        if (!GqlHelper::canQueryUsers()) {
-            return [];
+            try {
+                $query->$key($value);
+            } catch (UnknownMethodException $e) {
+                if ($value !== null) {
+                    throw $e;
+                }
+            }
         }
 
         return $query;

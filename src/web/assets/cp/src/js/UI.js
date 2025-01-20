@@ -7,10 +7,16 @@ Craft.ui = {
       class: 'btn',
     });
     if (config.id) {
-      $btn.attr('id', id);
+      $btn.attr('id', config.id);
     }
     if (config.class) {
       $btn.addClass(config.class);
+    }
+    if (config.ariaLabel) {
+      $btn.attr('aria-label', config.ariaLabel);
+    }
+    if (config.role) {
+      $btn.attr('role', config.role);
     }
     if (config.html) {
       $btn.html(config.html);
@@ -18,6 +24,17 @@ Craft.ui = {
       $btn.append($('<div class="label"/>').text(config.label));
     } else {
       $btn.addClass('btn-empty');
+    }
+    if (config.toggle) {
+      $btn.attr('aria-expanded', 'false');
+    }
+    if (config.controls) {
+      $btn.attr('aria-controls', config.controls);
+    }
+    if (config.data) {
+      Object.entries(config.data).forEach((item) => {
+        $btn.attr('data-' + item[0], item[1]);
+      });
     }
     if (config.spinner) {
       $btn.append($('<div class="spinner spinner-absolute"/>'));
@@ -61,6 +78,7 @@ Craft.ui = {
               : 'off'
             : config.autocomplete,
         disabled: this.getDisabledValue(config.disabled),
+        'aria-describedby': this.getDescribedByValue(config),
         readonly: config.readonly,
         title: config.title,
         placeholder: config.placeholder,
@@ -84,6 +102,12 @@ Craft.ui = {
     }
     if (!config.size) {
       $input.addClass('fullwidth');
+    }
+    if (config.describedBy) {
+      $input.attr('aria-describedby', config.describedBy);
+    }
+    if (config.inputAttributes) {
+      this.addAttributes($input, config.inputAttributes);
     }
 
     if (config.showCharsLeft && config.maxlength) {
@@ -111,6 +135,22 @@ Craft.ui = {
       config.id = 'text' + Math.floor(Math.random() * 1000000000);
     }
     return this.createField(this.createTextInput(config), config);
+  },
+
+  createPasswordInput(config) {
+    return this.createTextInput(
+      Object.assign({}, config, {
+        type: 'password',
+      })
+    );
+  },
+
+  createPasswordField(config) {
+    return this.createTextField(
+      Object.assign({}, config, {
+        type: 'password',
+      })
+    );
   },
 
   createCopyTextInput: function (config) {
@@ -151,14 +191,17 @@ Craft.ui = {
     let id = config.id || 'copytext' + Math.floor(Math.random() * 1000000000);
     let value = config.value;
 
+    const $wrapper = $('<div/>', {
+      class: 'copytextbtn-wrapper',
+    });
+
     let $btn = $('<div/>', {
       id,
       class: 'copytextbtn',
       role: 'button',
       title: Craft.t('app', 'Copy to clipboard'),
-      'aria-label': Craft.t('app', 'Copy to clipboard'),
       tabindex: '0',
-    });
+    }).appendTo($wrapper);
 
     if (config.class) {
       $btn.addClass(config.class);
@@ -169,9 +212,22 @@ Craft.ui = {
       readonly: true,
       size: value.length,
       tabindex: '-1',
+      'aria-hidden': 'true',
+      class: 'visually-hidden',
+    }).insertBefore($btn);
+
+    const $value = $('<span/>', {
+      text: value,
+      class: 'copytextbtn__value',
+    }).appendTo($btn);
+
+    $('<span/>', {
+      class: 'visually-hidden',
+      text: Craft.t('app', 'Copy to clipboard'),
     }).appendTo($btn);
 
     let $icon = $('<span/>', {
+      class: 'copytextbtn__icon',
       'data-icon': 'clipboard',
       'aria-hidden': 'true',
     }).appendTo($btn);
@@ -185,7 +241,7 @@ Craft.ui = {
       $btn.focus();
     };
 
-    $btn.on('click', () => {
+    $btn.on('activate', () => {
       copyValue();
     });
 
@@ -196,7 +252,7 @@ Craft.ui = {
       }
     });
 
-    return $btn;
+    return $wrapper;
   },
 
   createCopyTextField: function (config) {
@@ -221,6 +277,14 @@ Craft.ui = {
         config
       )
     ).appendTo($body);
+
+    const $label = $body.find('label');
+
+    // Provide accessible name for modal dialog
+    if ($label.length > 0 && $label.attr('id')) {
+      $container.attr('aria-labelledby', $label.attr('id'));
+    }
+
     let modal = new Garnish.Modal($container, {
       closeOtherModals: false,
     });
@@ -281,6 +345,7 @@ Craft.ui = {
       autofocus: config.autofocus && Garnish.isMobileBrowser(true),
       disabled: config.disabled,
       'data-target-prefix': config.targetPrefix,
+      'aria-labelledby': config.labelledBy,
     }).appendTo($container);
 
     // Normalize the options into an array
@@ -322,7 +387,7 @@ Craft.ui = {
       // Starting a new <optgroup>?
       if (typeof option.optgroup !== 'undefined') {
         $optgroup = $('<optgroup/>', {
-          label: option.label,
+          label: option.optgroup,
         }).appendTo($select);
       } else {
         $('<option/>', {
@@ -370,6 +435,18 @@ Craft.ui = {
       $input.addClass(config.class);
     }
 
+    if (config.data) {
+      Object.entries(config.data).forEach((item) => {
+        $input.attr('data-' + item[0], item[1]);
+      });
+    }
+
+    if (config.aria) {
+      Object.entries(config.aria).forEach((item) => {
+        $input.attr('aria-' + item[0], item[1]);
+      });
+    }
+
     if (config.toggle || config.reverseToggle) {
       $input.addClass('fieldtoggle');
       new Craft.FieldToggle($input);
@@ -404,7 +481,11 @@ Craft.ui = {
       config.id = 'checkbox' + Math.floor(Math.random() * 1000000000);
     }
 
-    var $field = $('<div class="field checkboxfield"/>', {
+    var fieldClass = ['field', 'checkboxfield'];
+    if (config.fieldClass.length > 0) {
+      fieldClass = fieldClass.concat(config.fieldClass);
+    }
+    var $field = $('<div class="' + fieldClass.join(' ') + '"/>', {
       id: `${config.id}-field`,
     });
 
@@ -427,17 +508,22 @@ Craft.ui = {
   },
 
   createCheckboxSelect: function (config) {
-    var $container = $('<fieldset class="checkbox-select"/>');
+    const $container = $('<div class="checkbox-select"/>');
 
     if (config.class) {
       $container.addClass(config.class);
     }
 
-    var allValue, allChecked;
+    let values = config.values || [];
+    let allChecked = false;
 
     if (config.showAllOption) {
-      allValue = config.allValue || '*';
-      allChecked = config.values == allValue;
+      const allValue = config.allValue || '*';
+
+      if (values === allValue) {
+        values = config.options.map((o) => o.value);
+        allChecked = true;
+      }
 
       // Create the "All" checkbox
       $('<div/>')
@@ -453,32 +539,62 @@ Craft.ui = {
             autofocus: config.autofocus,
           })
         );
+
+      // omit the “all” value from the options
+      config.options = config.options.filter((o) => o.value !== allValue);
     } else {
       allChecked = false;
     }
 
-    // Create the actual options
-    for (var i = 0; i < config.options.length; i++) {
-      var option = config.options[i];
+    if (!Array.isArray(values)) {
+      values = [];
+    }
 
-      if (option.value == allValue) {
-        continue;
+    if (config.sortable) {
+      // Make sure the selected options are listed first
+      config.options.sort((a, b) => {
+        let aPos = values.indexOf(a.value);
+        let bPos = values.indexOf(b.value);
+        if (aPos === -1) {
+          aPos = values.length;
+        }
+        if (bPos === -1) {
+          bPos = values.length;
+        }
+        return aPos - bPos;
+      });
+    }
+
+    // Create the actual options
+    for (let i = 0; i < config.options.length; i++) {
+      const option = config.options[i];
+
+      const $option = $('<div/>', {
+        class: 'checkbox-select-item',
+      }).appendTo($container);
+
+      if (config.sortable) {
+        $('<div/>', {class: 'icon move'}).appendTo($option);
       }
 
-      $('<div/>')
-        .appendTo($container)
-        .append(
-          this.createCheckbox({
-            label: option.label,
-            name: config.name ? config.name + '[]' : null,
-            value: option.value,
-            checked: allChecked || (config.values || []).includes(option.value),
-            disabled: allChecked,
-          })
-        );
+      this.createCheckbox({
+        label: Craft.escapeHtml(option.label),
+        name: config.name ? Craft.ensureEndsWith(config.name, '[]') : null,
+        value: option.value,
+        checked: allChecked || values.includes(option.value),
+        disabled: allChecked,
+      }).appendTo($option);
     }
 
     new Garnish.CheckboxSelect($container);
+
+    if (config.sortable) {
+      const dragSort = new Garnish.DragSort($container.children(':not(.all)'), {
+        handle: '.move',
+        axis: 'y',
+      });
+      $container.data('dragSort', dragSort);
+    }
 
     return $container;
   },
@@ -501,12 +617,12 @@ Craft.ui = {
       'data-value': value,
       'data-indeterminate-value': indeterminateValue,
       id: config.id,
-      role: 'checkbox',
+      role: 'switch',
       'aria-checked': config.on
         ? 'true'
         : config.indeterminate
-        ? 'mixed'
-        : 'false',
+          ? 'mixed'
+          : 'false',
       'aria-labelledby': config.labelId,
       'data-target': config.toggle,
       'data-reverse-target': config.reverseToggle,
@@ -539,8 +655,8 @@ Craft.ui = {
         value: config.on
           ? value
           : config.indeterminate
-          ? indeterminateValue
-          : '',
+            ? indeterminateValue
+            : '',
         disabled: config.disabled,
       }).appendTo($container);
     }
@@ -560,6 +676,9 @@ Craft.ui = {
   createLightswitchField: function (config) {
     if (!config.id) {
       config.id = 'lightswitch' + Math.floor(Math.random() * 1000000000);
+    }
+    if (!config.labelId) {
+      config.labelId = `${config.id}-label`;
     }
     return this.createField(this.createLightswitch(config), config).addClass(
       'lightswitch-field'
@@ -846,6 +965,7 @@ Craft.ui = {
     $dateInputs.on('keyup', function (ev) {
       if (
         ev.keyCode === Garnish.ESC_KEY &&
+        $(this).data('datepicker') &&
         $(this).data('datepicker').dpDiv.is(':visible')
       ) {
         ev.stopPropagation();
@@ -853,12 +973,16 @@ Craft.ui = {
     });
 
     // prevent clicks in the datepicker divs from closing the menu
-    $startDate.data('datepicker').dpDiv.on('mousedown', function (ev) {
-      ev.stopPropagation();
-    });
-    $endDate.data('datepicker').dpDiv.on('mousedown', function (ev) {
-      ev.stopPropagation();
-    });
+    if ($startDate.data('datepicker')) {
+      $startDate.data('datepicker').dpDiv.on('mousedown', function (ev) {
+        ev.stopPropagation();
+      });
+    }
+    if ($endDate.data('datepicker')) {
+      $endDate.data('datepicker').dpDiv.on('mousedown', function (ev) {
+        ev.stopPropagation();
+      });
+    }
 
     var menu = new Garnish.Menu($menu, {
       onOptionSelect: function (option) {
@@ -869,8 +993,13 @@ Craft.ui = {
         $option.addClass('sel');
 
         // Update the start/end dates
-        $startDate.datepicker('setDate', $option.data('startDate'));
-        $endDate.datepicker('setDate', $option.data('endDate'));
+        if (!$startDate.hasClass('hasDatepicker')) {
+          $startDate.val($option.data('startDate'));
+          $endDate.val($option.data('endDate'));
+        } else {
+          $startDate.datepicker('setDate', $option.data('startDate'));
+          $endDate.datepicker('setDate', $option.data('endDate'));
+        }
 
         config.onChange(
           $option.data('startDate') || null,
@@ -881,9 +1010,24 @@ Craft.ui = {
     });
 
     $dateInputs.on('change', function () {
+      let startDate = null;
+      let endDate = null;
       // Do the start & end dates match one of our options?
-      let startDate = $startDate.datepicker('getDate');
-      let endDate = $endDate.datepicker('getDate');
+      if (!$startDate.hasClass('hasDatepicker')) {
+        let startDateVal = $startDate.val();
+        if (startDateVal !== '') {
+          startDate = new Date(Date.parse(startDateVal));
+        }
+
+        let endDateVal = $endDate.val();
+        if (endDateVal !== '') {
+          endDate = new Date(Date.parse(endDateVal));
+        }
+      } else {
+        startDate = $startDate.datepicker('getDate');
+        endDate = $endDate.datepicker('getDate');
+      }
+
       let startTime = startDate ? startDate.getTime() : null;
       let endTime = endDate ? endDate.getTime() : null;
 
@@ -947,11 +1091,27 @@ Craft.ui = {
     }
 
     if (config.startDate) {
-      $startDate.datepicker('setDate', config.startDate);
+      if (!$startDate.hasClass('hasDatepicker')) {
+        // we need the date to be in yyyy-mm-dd format
+        let offset = config.startDate.getTimezoneOffset();
+        let startDate = new Date(
+          config.startDate.getTime() - offset * 60 * 1000
+        );
+        $startDate.val(startDate.toISOString().split('T')[0]);
+      } else {
+        $startDate.datepicker('setDate', config.startDate);
+      }
     }
 
     if (config.endDate) {
-      $endDate.datepicker('setDate', config.endDate);
+      if (!$endDate.hasClass('hasDatepicker')) {
+        // we need the date to be in yyyy-mm-dd format
+        let offset = config.endDate.getTimezoneOffset();
+        let endDate = new Date(config.endDate.getTime() - offset * 60 * 1000);
+        $endDate.val(endDate.toISOString().split('T')[0]);
+      } else {
+        $endDate.datepicker('setDate', config.endDate);
+      }
     }
 
     if (config.startDate || config.endDate) {
@@ -1029,13 +1189,15 @@ Craft.ui = {
   },
 
   createField: function (input, config) {
-    var label =
-        config.label && config.label !== '__blank__' ? config.label : null,
-      siteId = Craft.isMultiSite && config.siteId ? config.siteId : null;
+    const label =
+      config.label && config.label !== '__blank__' ? config.label : null;
 
-    var $field = $(config.fieldset ? '<fieldset/>' : '<div/>', {
+    const $field = $(config.fieldset ? '<fieldset/>' : '<div/>', {
       class: 'field',
       id: config.fieldId || (config.id ? config.id + '-field' : null),
+      'aria-describedby': config.fieldset
+        ? this.getDescribedByValue(config)
+        : null,
     });
 
     if (config.first) {
@@ -1046,17 +1208,25 @@ Craft.ui = {
       $field.addClass(config.fieldClass);
     }
 
-    if (label) {
-      var $heading = $('<div class="heading"/>').appendTo($field);
+    if (label && config.fieldset) {
+      $('<legend/>', {
+        text: label,
+        class: 'visually-hidden',
+        'data-label': label,
+      }).appendTo($field);
+    }
 
-      var $label = $(config.fieldset ? '<legend/>' : '<label/>', {
+    if (label) {
+      const $heading = $('<div class="heading"/>').appendTo($field);
+
+      $(config.fieldset ? '<legend/>' : '<label/>', {
         id:
           config.labelId ||
           (config.id
             ? `${config.id}-${config.fieldset ? 'legend' : 'label'}`
             : null),
         class: config.required ? 'required' : null,
-        for: !config.fieldset && config.id,
+        for: (!config.fieldset && config.id) || null,
         text: label,
       }).appendTo($heading);
     }
@@ -1064,6 +1234,7 @@ Craft.ui = {
     if (config.instructions) {
       $('<div class="instructions"/>')
         .text(config.instructions)
+        .attr('id', this.getInstructionsId(config))
         .appendTo($field);
     }
 
@@ -1096,8 +1267,43 @@ Craft.ui = {
     return $field;
   },
 
-  createErrorList: function (errors) {
-    var $list = $('<ul class="errors"/>');
+  addAttributes: function ($element, attributes) {
+    for (const name in attributes) {
+      const value = attributes[name];
+      if (typeof value === 'boolean') {
+        if (value) {
+          $element.attr(name, '');
+        }
+      } else if ($.isPlainObject(value)) {
+        if (['aria', 'data', 'data-ng', 'ng'].includes(name)) {
+          for (const n in value) {
+            let v = value[n];
+            if (typeof v === 'object') {
+              $element.attr(`${name}-${n}`, JSON.stringify(v));
+            } else if (typeof v === 'boolean') {
+              if (v) {
+                $element.attr(`${name}-${n}`, '');
+              }
+            } else if (v !== null) {
+              $element.attr(`${name}-${n}`, v);
+            }
+          }
+        } else if (name === 'class') {
+          $element.addClass(value);
+        } else if (name === 'style') {
+          $element.css(value);
+        } else {
+          $element.attr(name, value);
+        }
+      }
+    }
+  },
+
+  createErrorList: function (errors, fieldErrorsId) {
+    const $list = $('<ul class="errors" tabindex="-1"/>');
+    if (fieldErrorsId) {
+      $list.attr('id', fieldErrorsId);
+    }
 
     if (errors) {
       this.addErrorsToList($list, errors);
@@ -1108,7 +1314,7 @@ Craft.ui = {
 
   addErrorsToList: function ($list, errors) {
     for (var i = 0; i < errors.length; i++) {
-      $('<li/>').text(errors[i]).appendTo($list);
+      $('<li/>').text(errors[i].replaceAll('*', '')).appendTo($list);
     }
   },
 
@@ -1117,13 +1323,21 @@ Craft.ui = {
       return;
     }
 
-    $field.addClass('has-errors');
-    $field.children('.input').addClass('errors');
+    this.clearErrorsFromField($field);
 
-    var $errors = $field.children('ul.errors');
+    $field.addClass('has-errors');
+    $field.children('.input').addClass('errors prevalidate');
+
+    const fieldId = $field.attr('id');
+    let fieldErrorsId = '';
+    if (fieldId) {
+      fieldErrorsId = fieldId.replace(new RegExp(`(-field)$`), '-errors');
+    }
+
+    let $errors = $field.children('ul.errors');
 
     if (!$errors.length) {
-      $errors = this.createErrorList().appendTo($field);
+      $errors = this.createErrorList(null, fieldErrorsId).appendTo($field);
     }
 
     this.addErrorsToList($errors, errors);
@@ -1131,8 +1345,114 @@ Craft.ui = {
 
   clearErrorsFromField: function ($field) {
     $field.removeClass('has-errors');
-    $field.children('.input').removeClass('errors');
+    $field.children('.input').removeClass('errors prevalidate');
     $field.children('ul.errors').remove();
+  },
+
+  clearErrorSummary: function ($body) {
+    $body.find('.error-summary').remove();
+  },
+
+  setFocusOnErrorSummary: function ($body) {
+    const errorSummaryContainer = $body.find('.error-summary');
+    if (errorSummaryContainer.length > 0) {
+      errorSummaryContainer.focus();
+
+      // start listening for clicks on summary errors
+      errorSummaryContainer.find('a').on('click', (ev) => {
+        if ($(ev.currentTarget).hasClass('cross-site-validate') == false) {
+          ev.preventDefault();
+          this.anchorSummaryErrorToField(ev.currentTarget, $body);
+        }
+      });
+    }
+  },
+
+  findErrorsContainerByErrorKey: function ($body, fieldErrorKey) {
+    let errorsElement = $body
+      .find(`[data-error-key="${fieldErrorKey}"]`)
+      .find('ul.errors');
+
+    return $(errorsElement);
+  },
+
+  anchorSummaryErrorToField: function (error, $body) {
+    const fieldErrorKey = $(error).attr('data-field-error-key');
+
+    if (!fieldErrorKey) {
+      return;
+    }
+
+    const $fieldErrorsContainer = this.findErrorsContainerByErrorKey(
+      $body,
+      fieldErrorKey
+    );
+
+    if ($fieldErrorsContainer) {
+      // check if we need to switch tabs first
+      const fieldTabAnchors = this.findTabAnchorForField(
+        $fieldErrorsContainer,
+        $body
+      );
+
+      if (fieldTabAnchors.length > 0) {
+        for (let i = 0; i < fieldTabAnchors.length; i++) {
+          let $tabAnchor = $(fieldTabAnchors[i]);
+          if ($tabAnchor.attr('aria-selected') == 'false') {
+            $tabAnchor.click();
+          }
+        }
+      }
+
+      // check if the parents are collapsed - if yes, expand
+      let $collapsedParents = $fieldErrorsContainer.parents(
+        '.collapsed, .is-collapsed'
+      );
+      if ($collapsedParents.length > 0) {
+        // expand in the reverse order - from outside in!
+        for (let i = $collapsedParents.length; i > 0; i--) {
+          let $item = $($collapsedParents[i - 1]);
+          if ($item.data('block') != undefined) {
+            $item.data('block').expand();
+          } else {
+            $item.find('.titlebar').trigger('doubletap');
+          }
+        }
+      }
+
+      // focus on the field container that contains the error
+      let $field = $fieldErrorsContainer.parents('.field:first');
+      if ($field.is(':visible')) {
+        $field.attr('tabindex', '-1').focus();
+      } else {
+        // wait in case the field isn't yet visible; (MatrixInput.expand() has a timeout of 200)
+        setTimeout(() => {
+          $field.attr('tabindex', '-1').focus();
+        }, 201);
+      }
+    }
+  },
+
+  findTabAnchorForField: function ($container, $body) {
+    const fieldTabDivs = $container.parents(
+      `div[data-id^=tab][role="tabpanel"]`
+    );
+
+    let fieldTabAnchors = [];
+    fieldTabDivs.each((i, tabDiv) => {
+      let tabAnchor = $body
+        .find('[role="tablist"]')
+        .find('a[href="#' + $(tabDiv).attr('id') + '"]');
+      fieldTabAnchors.push(tabAnchor);
+    });
+
+    return fieldTabAnchors;
+  },
+
+  getInstructionsId: function (config) {
+    return config.id
+      ? `${config.id}-instructions`
+      : `${Math.floor(Math.random() * 1000000000)}-instructions`;
   },
 
   getAutofocusValue: function (autofocus) {
@@ -1141,5 +1461,19 @@ Craft.ui = {
 
   getDisabledValue: function (disabled) {
     return disabled ? 'disabled' : null;
+  },
+
+  getDescribedByValue: function (config) {
+    let value = '';
+
+    if (config.instructions) {
+      value += this.getInstructionsId(config);
+    }
+
+    if (value.length) {
+      return value;
+    }
+
+    return null;
   },
 };

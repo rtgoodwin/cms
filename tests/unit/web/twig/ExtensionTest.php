@@ -8,11 +8,12 @@
 namespace crafttests\unit\web\twig;
 
 use ArrayObject;
-use Codeception\Test\Unit;
 use Craft;
 use craft\elements\Address;
+use craft\elements\ElementCollection;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\enums\CmsEdition;
 use craft\fields\MissingField;
 use craft\fields\PlainText;
 use craft\test\TestCase;
@@ -21,9 +22,10 @@ use craft\web\View;
 use crafttests\fixtures\GlobalSetFixture;
 use DateInterval;
 use DateTime;
+use Illuminate\Support\Collection;
 use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
-use TypeError;
 use yii\base\ErrorException;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
@@ -94,11 +96,11 @@ class ExtensionTest extends TestCase
      */
     public function testCraftSystemGlobals(): void
     {
-        Craft::$app->setEdition(Craft::Pro);
-        Craft::$app->getView()->setTemplateMode(View::TEMPLATE_MODE_CP);
+        Craft::$app->edition = CmsEdition::Pro;
         $this->testRenderResult(
-            '' . Craft::$app->getEdition() . ' | ' . Craft::Solo . ' | ' . Craft::Pro,
-            Craft::$app->getEdition() . ' | 0 | 1'
+            implode(',', [CmsEdition::Solo->value, CmsEdition::Team->value, CmsEdition::Pro->value]),
+            '{{ [CraftSolo, CraftTeam, CraftPro]|join(",") }}',
+            templateMode: View::TEMPLATE_MODE_CP,
         );
     }
 
@@ -139,8 +141,6 @@ class ExtensionTest extends TestCase
      */
     public function testElementGlobals(): void
     {
-        Craft::$app->getView()->setTemplateMode(View::TEMPLATE_MODE_SITE);
-
         $this->testRenderResult(
             'A global set | A different global set',
             '{{ aGlobalSet }} | {{ aDifferentGlobalSet }}'
@@ -390,6 +390,29 @@ class ExtensionTest extends TestCase
     /**
      *
      */
+    public function testBase64DecodeFilter(): void
+    {
+        $encoded = base64_encode('foo');
+        $this->testRenderResult(
+            'foo',
+            "{{ '$encoded'|base64_decode }}",
+        );
+    }
+
+    /**
+     *
+     */
+    public function testBase64EncodeFilter(): void
+    {
+        $this->testRenderResult(
+            base64_encode('foo'),
+            '{{ "foo"|base64_encode }}',
+        );
+    }
+
+    /**
+     *
+     */
     public function testParseAttrFilter(): void
     {
         $this->testRenderResult(
@@ -507,6 +530,27 @@ class ExtensionTest extends TestCase
         $this->testRenderResult(
             'foo qux baz',
             '{{ "foo bar baz"|replace("bar", "qux") }}'
+        );
+
+        $this->testRenderResult(
+            'foo zar zazzy',
+            '{{ "foo bar baz"|replace({"/b(\\\w+)/": "z$1", zaz: "zazzy"}) }}',
+        );
+
+        // https://github.com/craftcms/cms/issues/13618
+        $this->testRenderResult(
+            'qux',
+            '{{ "https://foo.com/bar/baz/"|replace("/(http(s?):)?\\\/\\\/foo\\\.com\\\/bar\\\/baz\\\//", "qux") }}',
+        );
+
+        $this->testRenderResult(
+            '/baz/bar/',
+            '{{ "/foo/bar/"|replace({"/foo/": "baz"}, regex=true) }}',
+        );
+
+        $this->testRenderResult(
+            'bazbar/',
+            '{{ "/foo/bar/"|replace({"/foo/": "baz"}, regex=false) }}',
         );
     }
 
@@ -680,7 +724,7 @@ class ExtensionTest extends TestCase
         );
 
         // invalid value
-        self::expectException(TypeError::class);
+        self::expectException(RuntimeError::class);
         $this->view->renderString('{% do "foo"|group("bar") %}');
     }
 
@@ -761,7 +805,7 @@ class ExtensionTest extends TestCase
         $this->testRenderResult($expected, $renderString, $variables);
     }
 
-    public function addressFilterDataProvider(): array
+    public static function addressFilterDataProvider(): array
     {
         return [
             ['{{ myAddress|address }}', ['myAddress' => Craft::createObject(Address::class, ['config' => ['attributes' => ['addressLine1' => '1 Main Stree', 'postalCode' => '12345', 'countryCode' => 'US', 'administrativeArea' => 'OR']]])], '<p translate="no">
@@ -935,9 +979,17 @@ class ExtensionTest extends TestCase
      */
     public function testDataUrlFunction(): void
     {
-        $path = dirname(__DIR__, 3) . '/_data/assets/files/craft-logo.svg';
+        $path = '@root/.github/workflows/ci.yml';
         $dataUrl = $this->view->renderString('{{ dataUrl(path) }}', compact('path'));
-        self::assertStringStartsWith('data:image/svg+xml;base64,', $dataUrl);
+        self::assertStringStartsWith('data:application/x-yaml;base64,', $dataUrl);
+    }
+
+    public function testEncodeUrlFunction(): void
+    {
+        $this->testRenderResult(
+            'https://domain/fr/offices/gen%C3%AAve',
+            '{{ encodeUrl("https://domain/fr/offices/genêve") }}',
+        );
     }
 
     public function testExpressionFunction(): void
@@ -945,6 +997,17 @@ class ExtensionTest extends TestCase
         $this->testRenderResult(
             'Im an expression | var | Im an expression',
             '{% set expression =  expression("Im an expression", ["var"]) %}{{ expression }} | {{ expression.params[0] }} | {{ expression.expression }}'
+        );
+    }
+
+    public function testFieldValueSqlFunction(): void
+    {
+        $entryType = Craft::$app->getEntries()->getEntryTypeByHandle('test1');
+        $field = $entryType->getFieldLayout()->getFieldByHandle('plainTextField');
+        $valueSql = $field->getValueSql();
+        $this->testRenderResult(
+            $valueSql,
+            '{{ fieldValueSql(entryType(\'test1\'), \'plainTextField\') }}'
         );
     }
 
@@ -1141,15 +1204,46 @@ class ExtensionTest extends TestCase
     }
 
     /**
+     * @dataProvider collectFunctionDataProvider
+     *
+     * @param string $expectedClass
+     * @param array $items
+     */
+    public function testCollectFunction(string $expectedClass, array $items): void
+    {
+        $this->testRenderResult(
+            Collection::class,
+            "{{ className(collect(items)) }}",
+            ['items' => $items],
+        );
+    }
+
+    public static function collectFunctionDataProvider(): array
+    {
+        $users = User::find()->all();
+        return [
+            [Collection::class, []],
+            [Collection::class, ['foo']],
+            [Collection::class, array_merge($users, ['foo'])],
+            [ElementCollection::class, $users],
+        ];
+    }
+
+    /**
      * @param string $expectedString
      * @param string $renderString
      * @param array $variables
+     * @param string $templateMode
      * @throws LoaderError
      * @throws SyntaxError
      */
-    protected function testRenderResult(string $expectedString, string $renderString, array $variables = [])
-    {
-        $result = $this->view->renderString($renderString, $variables);
+    protected function testRenderResult(
+        string $expectedString,
+        string $renderString,
+        array $variables = [],
+        string $templateMode = View::TEMPLATE_MODE_SITE,
+    ) {
+        $result = $this->view->renderString($renderString, $variables, $templateMode);
         self::assertSame(
             $expectedString,
             $result

@@ -22,6 +22,7 @@ use FilesystemIterator;
 use Generator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use yii\validators\InlineValidator;
 
 /**
  * Local represents a local filesystem.
@@ -102,11 +103,36 @@ class Local extends Fs implements LocalFsInterface
     /**
      * @inheritdoc
      */
+    public function attributeLabels(): array
+    {
+        return array_merge(parent::attributeLabels(), [
+            'path' => Craft::t('app', 'Base Path'),
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
         $rules[] = [['path'], 'required'];
+        $rules[] = [['path'], 'validatePath'];
         return $rules;
+    }
+
+    /**
+     * @param string $attribute
+     * @param array|null $params
+     * @param InlineValidator $validator
+     * @return void
+     * @since 4.4.6
+     */
+    public function validatePath(string $attribute, ?array $params, InlineValidator $validator): void
+    {
+        if (Craft::$app->getSecurity()->isSystemDir($this->getRootPath())) {
+            $validator->addError($this, $attribute, Craft::t('app', 'Local filesystems cannot be located within or above system directories.'));
+        }
     }
 
     /**
@@ -114,7 +140,7 @@ class Local extends Fs implements LocalFsInterface
      */
     public function getSettingsHtml(): ?string
     {
-        return Craft::$app->getView()->renderTemplate('_components/fs/Local/settings',
+        return Craft::$app->getView()->renderTemplate('_components/fs/Local/settings.twig',
             [
                 'volume' => $this,
             ]);
@@ -141,7 +167,9 @@ class Local extends Fs implements LocalFsInterface
      */
     public function getRootPath(): string
     {
-        return FileHelper::normalizePath(App::parseEnv($this->path));
+        $path = FileHelper::normalizePath(App::parseEnv($this->path) ?? '');
+        // Pass it through realpath() in case the path is symlinked
+        return realpath($path) ?: $path;
     }
 
     /**
@@ -219,7 +247,7 @@ class Local extends Fs implements LocalFsInterface
 
         $targetStream = @fopen($fullPath, 'w+b');
 
-        if (!@stream_copy_to_stream($stream, $targetStream)) {
+        if (!$targetStream || !@stream_copy_to_stream($stream, $targetStream)) {
             throw new FsException("Unable to copy stream to `$fullPath`");
         }
 
@@ -287,7 +315,7 @@ class Local extends Fs implements LocalFsInterface
     /**
      * @inheritdoc
      */
-    public function renameFile(string $path, string $newPath): void
+    public function renameFile(string $path, string $newPath, array $config = []): void
     {
         $this->createDirectory(pathinfo($newPath, PATHINFO_DIRNAME));
         @rename($this->prefixPath($path), $this->prefixPath($newPath));
@@ -296,7 +324,7 @@ class Local extends Fs implements LocalFsInterface
     /**
      * @inheritdoc
      */
-    public function copyFile(string $path, string $newPath): void
+    public function copyFile(string $path, string $newPath, array $config = []): void
     {
         $this->createDirectory(pathinfo($newPath, PATHINFO_DIRNAME));
         @copy($this->prefixPath($path), $this->prefixPath($newPath));
@@ -345,16 +373,18 @@ class Local extends Fs implements LocalFsInterface
      */
     public function renameDirectory(string $path, string $newName): void
     {
-        if (!is_dir($this->prefixPath($path))) {
+        $fullPath = $this->prefixPath($path);
+
+        if (!is_dir($fullPath)) {
             throw new FsObjectNotFoundException('No folder exists at path: ' . $path);
         }
 
-        $components = explode("/", $this->prefixPath($path));
+        $components = explode(DIRECTORY_SEPARATOR, $fullPath);
         array_pop($components);
         $components[] = $newName;
-        $newPath = implode("/", $components);
+        $newPath = implode(DIRECTORY_SEPARATOR, $components);
 
-        @rename($this->prefixPath($path), $newPath);
+        @rename($fullPath, $newPath);
     }
 
     /**
@@ -385,7 +415,7 @@ class Local extends Fs implements LocalFsInterface
             throw new FsException("The path `$path` is not contained.");
         }
 
-        return $this->getRootPath() . DIRECTORY_SEPARATOR . $path;
+        return $this->getRootPath() . DIRECTORY_SEPARATOR . FileHelper::normalizePath($path);
     }
 
     /**

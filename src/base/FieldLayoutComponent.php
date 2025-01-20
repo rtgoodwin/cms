@@ -12,6 +12,7 @@ use craft\base\conditions\ConditionInterface;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\conditions\users\UserCondition;
 use craft\elements\User;
+use craft\events\DefineShowFieldLayoutComponentInFormEvent;
 use craft\helpers\Cp;
 use craft\models\FieldLayout;
 
@@ -26,6 +27,13 @@ use craft\models\FieldLayout;
  */
 abstract class FieldLayoutComponent extends Model
 {
+    /**
+     * @event DefineShowFieldLayoutComponentInFormEvent The event that is triggered when determining whether the component should be shown in a field layout.
+     * @see showInForm()
+     * @since 5.3.0
+     */
+    public const EVENT_DEFINE_SHOW_IN_FORM = 'defineShowInForm';
+
     /**
      * @var UserCondition
      */
@@ -48,14 +56,12 @@ abstract class FieldLayoutComponent extends Model
     }
 
     /**
-     * @param string $elementType
-     * @phpstan-param class-string<ElementInterface> $elementType
+     * @param class-string<ElementInterface> $elementType
      * @return ElementConditionInterface
      */
     private static function defaultElementCondition(string $elementType): ElementConditionInterface
     {
         if (!isset(self::$defaultElementConditions[$elementType])) {
-            /** @var string|ElementInterface $elementType */
             self::$defaultElementConditions[$elementType] = $elementType::createCondition();
         }
         return self::$defaultElementConditions[$elementType];
@@ -67,6 +73,12 @@ abstract class FieldLayoutComponent extends Model
     public ?string $uid = null;
 
     /**
+     * @var string|null The element type the field layout is for
+     * @since 5.0.0
+     */
+    public ?string $elementType = null;
+
+    /**
      * @var FieldLayout The field layout tab this element belongs to
      * @see getLayout()
      * @see setLayout()
@@ -74,18 +86,20 @@ abstract class FieldLayoutComponent extends Model
     private FieldLayout $_layout;
 
     /**
-     * @var UserCondition|null
+     * @var UserCondition|class-string<UserCondition>|array|null
+     * @phpstan-var UserCondition|class-string<UserCondition>|array{class:class-string<UserCondition>}|null
      * @see getUserCondition()
      * @see setUserCondition()
      */
-    private ?UserCondition $_userCondition = null;
+    private mixed $_userCondition = null;
 
     /**
-     * @var ElementConditionInterface|null
+     * @var ElementConditionInterface|class-string<ElementConditionInterface>|array|null
+     * @phpstan-var ElementConditionInterface|class-string<ElementConditionInterface>|array{class:class-string<ElementConditionInterface>}|null
      * @see getElementCondition()
      * @see setElementCondition()
      */
-    private ?ElementConditionInterface $_elementCondition = null;
+    private mixed $_elementCondition = null;
 
     /**
      * Returns the layout this element belongs to.
@@ -124,7 +138,7 @@ abstract class FieldLayoutComponent extends Model
      */
     public function hasConditions(): bool
     {
-        return isset($this->_userCondition) || isset($this->_elementCondition);
+        return $this->getUserCondition() || $this->getElementCondition();
     }
 
     /**
@@ -134,18 +148,22 @@ abstract class FieldLayoutComponent extends Model
      */
     public function getUserCondition(): ?UserCondition
     {
+        if (isset($this->_userCondition) && !$this->_userCondition instanceof UserCondition) {
+            $this->_userCondition = $this->_normalizeCondition($this->_userCondition);
+        }
+
         return $this->_userCondition;
     }
 
     /**
      * Sets the user condition for this layout element.
      *
-     * @param UserCondition|string|array|null $userCondition
+     * @param UserCondition|class-string<UserCondition>|array|null $userCondition
      * @phpstan-param UserCondition|class-string<UserCondition>|array{class:class-string<UserCondition>}|null $userCondition
      */
     public function setUserCondition(mixed $userCondition): void
     {
-        $this->_userCondition = $this->_normalizeCondition($userCondition);
+        $this->_userCondition = $userCondition;
     }
 
     /**
@@ -155,25 +173,36 @@ abstract class FieldLayoutComponent extends Model
      */
     public function getElementCondition(): ?ElementConditionInterface
     {
+        if (isset($this->_elementCondition) && !$this->_elementCondition instanceof ElementConditionInterface) {
+            if (is_string($this->_elementCondition)) {
+                $this->_elementCondition = ['class' => $this->_elementCondition];
+            }
+            $this->_elementCondition = array_merge(
+                ['fieldLayouts' => [$this->getLayout()]],
+                $this->_elementCondition,
+            );
+            $this->_elementCondition = $this->_normalizeCondition($this->_elementCondition);
+        }
+
         return $this->_elementCondition;
     }
 
     /**
      * Sets the element condition for this layout element.
      *
-     * @param ElementConditionInterface|string|array|null $elementCondition
+     * @param ElementConditionInterface|class-string<ElementConditionInterface>|array|null $elementCondition
      * @phpstan-param ElementConditionInterface|class-string<ElementConditionInterface>|array{class:class-string<ElementConditionInterface>}|null $elementCondition
      */
     public function setElementCondition(mixed $elementCondition): void
     {
-        $this->_elementCondition = $this->_normalizeCondition($elementCondition);
+        $this->_elementCondition = $elementCondition;
     }
 
     /**
      * Normalizes a condition.
      *
      * @template T of ConditionInterface
-     * @param T|string|array|null $condition
+     * @param T|class-string<T>|array|null $condition
      * @phpstan-param T|class-string<T>|array{class:class-string<T>}|null $condition
      * @return T|null
      */
@@ -198,15 +227,21 @@ abstract class FieldLayoutComponent extends Model
     public function fields(): array
     {
         $fields = parent::fields();
-
-        if ($this->_userCondition) {
-            $fields['userCondition'] = fn() => $this->_userCondition->getConfig();
-        }
-        if ($this->_elementCondition) {
-            $fields['elementCondition'] = fn() => $this->_elementCondition->getConfig();
-        }
-
+        unset($fields['elementType']);
+        $fields['userCondition'] = fn() => $this->getUserCondition()?->getConfig();
+        $fields['elementCondition'] = fn() => $this->getElementCondition()?->getConfig();
         return $fields;
+    }
+
+    /**
+     * Returns whether the layout element has settings.
+     *
+     * @return bool
+     * @since 5.0.0
+     */
+    public function hasSettings()
+    {
+        return $this->conditional();
     }
 
     /**
@@ -228,7 +263,7 @@ abstract class FieldLayoutComponent extends Model
                 $html .= '<hr>';
             }
 
-            $userCondition = $this->_userCondition ?? self::defaultUserCondition();
+            $userCondition = $this->getUserCondition() ?? self::defaultUserCondition();
             $userCondition->mainTag = 'div';
             $userCondition->id = 'user-condition';
             $userCondition->name = 'userCondition';
@@ -241,10 +276,14 @@ abstract class FieldLayoutComponent extends Model
 
             // Do we know the element type?
             /** @var ElementInterface|string|null $elementType */
-            $elementType = $this->getLayout()->type;
+            $elementType = $this->elementType ?? $this->getLayout()->type;
 
             if ($elementType && is_subclass_of($elementType, ElementInterface::class)) {
-                $elementCondition = $this->_elementCondition ?? self::defaultElementCondition($elementType);
+                $elementCondition = $this->getElementCondition();
+                if (!$elementCondition) {
+                    $elementCondition = clone self::defaultElementCondition($elementType);
+                    $elementCondition->setFieldLayouts([$this->getLayout()]);
+                }
                 $elementCondition->mainTag = 'div';
                 $elementCondition->id = 'element-condition';
                 $elementCondition->name = 'elementCondition';
@@ -285,15 +324,30 @@ abstract class FieldLayoutComponent extends Model
      */
     public function showInForm(?ElementInterface $element = null): bool
     {
+        // Fire a 'defineShowInForm' event
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_SHOW_IN_FORM)) {
+            $event = new DefineShowFieldLayoutComponentInFormEvent([
+                'fieldLayout' => $this->getLayout(),
+                'element' => $element,
+            ]);
+            $this->trigger(self::EVENT_DEFINE_SHOW_IN_FORM, $event);
+            if (!$event->showInForm || $event->handled) {
+                return $event->showInForm;
+            }
+        }
+
         if ($this->conditional()) {
-            if ($this->_userCondition) {
+            $userCondition = $this->getUserCondition();
+            $elementCondition = $this->getElementCondition();
+
+            if ($userCondition) {
                 $currentUser = Craft::$app->getUser()->getIdentity();
-                if ($currentUser && !$this->_userCondition->matchElement($currentUser)) {
+                if ($currentUser && !$userCondition->matchElement($currentUser)) {
                     return false;
                 }
             }
 
-            if ($this->_elementCondition && $element && !$this->_elementCondition->matchElement($element)) {
+            if ($elementCondition && $element && !$elementCondition->matchElement($element)) {
                 return false;
             }
         }

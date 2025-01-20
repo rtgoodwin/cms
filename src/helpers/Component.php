@@ -24,13 +24,11 @@ class Component
      * Returns whether a component class exists, is an instance of a given interface,
      * and doesn't belong to a disabled plugin.
      *
-     * @param string $class The component’s class name.
-     * @phpstan-param class-string<ComponentInterface> $class
-     * @param string|null $instanceOf The class or interface that the component must be an instance of.
-     * @phpstan-param class-string<ComponentInterface>|null $instanceOf
+     * @param class-string<ComponentInterface> $class The component’s class name.
+     * @param class-string<ComponentInterface>|null $instanceOf The class or interface that the component must be an instance of.
      * @param bool $throwException Whether an exception should be thrown if an issue is encountered
      * @return bool
-     * @throws InvalidConfigException if $config doesn’t contain a `type` value, or the type isn’s compatible with|null $instanceOf.
+     * @throws InvalidConfigException if $config doesn’t contain a `type` value, or the type isn’t compatible with|null $instanceOf.
      * @throws MissingComponentException if the class specified by $config doesn’t exist, or belongs to an uninstalled plugin
      * @since 3.2.0
      */
@@ -51,8 +49,6 @@ class Component
             throw new InvalidConfigException("Component class '$class' does not implement ComponentInterface.");
         }
 
-        /** @var string $class */
-        /** @phpstan-var class-string $class */
         if ($instanceOf !== null && !is_subclass_of($class, $instanceOf)) {
             if (!$throwException) {
                 return false;
@@ -81,15 +77,35 @@ class Component
     }
 
     /**
+     * Cleanses a component config of any `on X` or `as X` keys.
+     *
+     * @param array $config
+     * @return array
+     * @since 4.4.15
+     */
+    public static function cleanseConfig(array $config): array
+    {
+        foreach ($config as $key => $value) {
+            if (is_string($key) && (str_starts_with($key, 'on ') || str_starts_with($key, 'as '))) {
+                unset($config[$key]);
+                continue;
+            }
+            if (is_array($value)) {
+                $config[$key] = static::cleanseConfig($value);
+            }
+        }
+        return $config;
+    }
+
+    /**
      * Instantiates and populates a component, and ensures that it is an instance of a given interface.
      *
      * @template T of ComponentInterface
-     * @param string|array $config The component’s class name, or its config, with a `type` value and optionally a `settings` value.
+     * @param class-string<T>|array $config The component’s class name, or its config, with a `type` value and optionally a `settings` value.
      * @phpstan-param class-string<T>|array{type:class-string<T>,__class?:string} $config
-     * @param string|null $instanceOf The class or interface that the component must be an instance of.
-     * @phpstan-param class-string<T>|null $instanceOf
+     * @param class-string<T>|null $instanceOf The class or interface that the component must be an instance of.
      * @return T The component
-     * @throws InvalidConfigException if $config doesn’t contain a `type` value, or the type isn’s compatible with|null $instanceOf.
+     * @throws InvalidConfigException if $config doesn’t contain a `type` value, or the type isn’t compatible with|null $instanceOf.
      * @throws MissingComponentException if the class specified by $config doesn’t exist, or belongs to an uninstalled plugin
      */
     public static function createComponent(string|array $config, ?string $instanceOf = null): ComponentInterface
@@ -118,7 +134,7 @@ class Component
 
         // Instantiate and return
         $config['class'] = $class;
-        return Craft::createObject($config);
+        return Craft::createObject(static::cleanseConfig($config));
     }
 
     /**
@@ -144,48 +160,20 @@ class Component
     }
 
     /**
-     * Returns an SVG icon’s contents.
+     * Returns an SVG icon’s contents, namespaced and with `aria-hidden="true"` added to it.
      *
      * @param string|null $icon The path to the SVG icon, or the actual SVG contents
      * @param string $label The label of the component
      * @return string
      * @since 3.5.0
+     * @deprecated in 5.0.0. [[Cp::iconSvg()]] or [[Cp::fallbackIconSvg()]] should be used instead.
      */
     public static function iconSvg(?string $icon, string $label): string
     {
         if ($icon === null) {
-            return self::_defaultIconSvg($label);
+            return Cp::fallbackIconSvg($label);
         }
 
-        if (stripos($icon, '<svg') !== false) {
-            return $icon;
-        }
-
-        $icon = Craft::getAlias($icon);
-
-        if (!is_file($icon)) {
-            Craft::warning("Icon file doesn't exist: $icon", __METHOD__);
-            return self::_defaultIconSvg($label);
-        }
-
-        if (!FileHelper::isSvg($icon)) {
-            Craft::warning("Icon file is not an SVG: $icon", __METHOD__);
-            return self::_defaultIconSvg($label);
-        }
-
-        return file_get_contents($icon);
-    }
-
-    /**
-     * Returns the default icon SVG for a given widget type.
-     *
-     * @param string $label
-     * @return string
-     */
-    private static function _defaultIconSvg(string $label): string
-    {
-        return Craft::$app->getView()->renderTemplate('_includes/defaulticon.svg.twig', [
-            'label' => $label,
-        ]);
+        return Cp::iconSvg($icon, $label);
     }
 }

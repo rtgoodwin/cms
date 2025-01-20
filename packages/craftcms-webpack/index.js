@@ -17,6 +17,7 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const {WebpackManifestPlugin} = _require('webpack-manifest-plugin');
 const JsonMinimizerPlugin = require('json-minimizer-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const requestedConfig = argv['config-name'] ?? null;
 
 /**
@@ -310,7 +311,7 @@ const getConfig = ({context, type, watchPaths, postcssConfig, config = {}}) => {
             ],
           },
           {
-            test: /fonts\/[a-zA-Z0-9\-\_]*\.(ttf|woff|woff2|svg)$/,
+            test: /fonts\/[a-zA-Z0-9\-\_]*\.(ttf|woff|woff2|svg|eot)$/,
             type: 'asset/resource',
             generator: {
               filename: 'fonts/[name][ext][query]',
@@ -334,7 +335,6 @@ const getConfig = ({context, type, watchPaths, postcssConfig, config = {}}) => {
       ],
       externals: {
         jquery: 'jQuery',
-        d3: 'd3',
         axios: 'axios',
         fabric: 'fabric',
         'element-resize-detector': 'elementResizeDetectorMaker',
@@ -349,10 +349,20 @@ const getConfig = ({context, type, watchPaths, postcssConfig, config = {}}) => {
       config.plugins.push(new Dotenv({path: dotenvResult}));
     }
 
-    if (!process.env.NODE_ENV === 'production') {
+    if (!isDevServerRunning) {
       config.plugins.push(new CleanWebpackPlugin());
+    }
+
+    if (process.env.NODE_ENV === 'production') {
       config.optimization.minimize = true;
-      config.optimization.minimizer = [`...`, new JsonMinimizerPlugin()];
+      config.optimization.minimizer = [
+        `...`,
+        new JsonMinimizerPlugin(),
+
+        // `MiniCssExtractPlugin` does this for us for modules,
+        // but this covers any assets, e.g. `CopyWebpackPlugin`.
+        new CssMinimizerPlugin(),
+      ];
     }
 
     return config;

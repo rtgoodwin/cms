@@ -40,9 +40,9 @@ class Upgrade extends Utility
     /**
      * @inheritdoc
      */
-    public static function iconPath(): ?string
+    public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/upgrade.svg');
+        return 'square-arrow-up';
     }
 
     /**
@@ -75,6 +75,6 @@ JS;
             [$version, $allPlugins],
         ]);
 
-        return $view->renderTemplate('_components/utilities/Upgrade');
+        return $view->renderTemplate('_components/utilities/Upgrade.twig');
     }
 }

@@ -13,6 +13,23 @@
 {%- set allowReorder = (allowReorder ?? false) and not staticRows %}
 {%- set allowDelete = (allowDelete ?? false) and not staticRows %}
 
+{% set actionMenuItems = [
+  {
+    icon: 'arrow-up',
+    label: 'Move up'|t('app'),
+    attributes: {
+      data: {action: 'moveUp'},
+    },
+  },
+  {
+    icon: 'arrow-down',
+    label: 'Move down'|t('app'),
+    attributes: {
+      data: {action: 'moveDown'},
+    },
+  },
+] %}
+
 {% if not static %}
     {{ hiddenInput(name, '') }}
 {% endif %}
@@ -51,39 +68,55 @@
   {%- set tableAttributes = tableAttributes|merge(('<div ' ~ block('attr') ~ '>')|parseAttr, recursive=true) %}
 {% endif %}
 
-<span aria-live="assertive" class="visually-hidden" data-status-message></span>
+{% for col in cols %}
+    {%- switch col.type %}
+        {%- case 'time' %}
+            {%- do view.registerAssetBundle('craft\\web\\assets\\timepicker\\TimepickerAsset') %}
+        {%- case 'template' %}
+            {%- do view.registerAssetBundle("craft\\web\\assets\\vue\\VueAsset") %}
+    {%- endswitch %}
+{% endfor %}
+
+<span role="status" class="visually-hidden" data-status-message></span>
 {% tag 'table' with tableAttributes %}
-    <thead>
-        <tr>
-            {% for col in cols %}
-                {%- switch col.type %}
-                    {%- case 'time' %}
-                        {%- do view.registerAssetBundle('craft\\web\\assets\\timepicker\\TimepickerAsset') %}
-                    {%- case 'template' %}
-                        {%- do view.registerAssetBundle("craft\\web\\assets\\vue\\VueAsset") %}
-                {%- endswitch %}
-                {% set columnHeadingId = "#{id}-heading-#{loop.index}" %}
-                <th id="{{ columnHeadingId }}" scope="col" class="{{ _self.cellClass(fullWidth, col, col.class ?? []) }}">
-                    {%- if col.headingHtml is defined %}
-                        {{- col.headingHtml|raw }}
-                    {%- elseif col.heading ?? false %}
-                        {{- col.heading }}
-                    {%- else %}
-                        &nbsp;
-                    {%- endif %}
-                    {%- if col.info is defined -%}
-                        <span class="info">{{ col.info|md|raw }}</span>
-                    {%- endif -%}
-                </th>
-            {% endfor %}
-            {% if (allowDelete or allowReorder) %}
-                <th colspan="{{ not allowDelete or not allowReorder ? 1 : 2 }}"><span class="visually-hidden">{{ 'Row actions'|t('app') }}</span></th>
-            {% endif %}
-        </tr>
-    </thead>
+    {% for col in cols %}
+        <col>
+    {% endfor %}
+    {% if (allowDelete and allowReorder) %}
+        <colgroup span="2"></colgroup>
+    {% else %}
+        {% if allowDelete %}<col>{% endif %}
+        {% if allowReorder %}<col>{% endif %}
+    {% endif %}
+    {% if cols|filter(c => (c.headingHtml ?? c.heading ?? c.info ?? '') is not same as(''))|length %}
+        <thead>
+            <tr>
+                {% for col in cols %}
+                    {% set columnHeadingId = "#{id}-heading-#{loop.index}" %}
+                    <th id="{{ columnHeadingId }}" scope="col" class="{{ _self.cellClass(fullWidth, col, col.class ?? []) }}">
+                        {%- if col.headingHtml is defined %}
+                            {{- col.headingHtml|raw }}
+                        {%- elseif col.heading ?? false %}
+                            {{- col.heading }}
+                        {%- else %}
+                            &nbsp;
+                        {%- endif %}
+                        {%- if col.info is defined -%}
+                            <span class="info">{{ col.info|md|raw }}</span>
+                        {%- endif -%}
+                    </th>
+                {% endfor %}
+                {% if (allowDelete or allowReorder) %}
+                    <th colspan="{{ not allowDelete or not allowReorder ? 1 : 2 }}" scope="colgroup"><span class="visually-hidden">{{ 'Row actions'|t('app') }}</span></th>
+                {% endif %}
+            </tr>
+        </thead>
+    {% endif %}
     <tbody>
         {% for rowId, row in rows %}
             {% set rowNumber = loop.index %}
+            {% set rowName = 'Row {index}'|t('app', {index: rowNumber}) %}
+            {% set actionBtnLabel = "#{rowName} #{'Actions'|t('app')}" %}
             <tr data-id="{{ rowId }}">
                 {% for colId, col in cols %}
                     {% set cell = row[colId] is defined ? row[colId] : (defaultValues[colId] ?? null) %}
@@ -179,9 +212,21 @@
                                         } only %}
                                     {%- default -%}
                                         {% if static %}
-                                            <pre class="disabled">{{ value }}</pre>
+                                            <pre class="noteditable">{{ value }}</pre>
                                         {% else %}
-                                            <textarea aria-labelledby="{{ headingId }}" aria-describedby="{{ describedBy }}" name="{{ cellName }}" rows="{{ col.rows ?? 1 }}"{% if col.placeholder is defined %} placeholder="{{ col.placeholder }}"{% endif %}>{{ value }}</textarea>
+                                            {% if value %}
+                                                <div class="editable-table-preview" aria-hidden="true">{{ value }}</div>
+                                            {% endif %}
+                                            {{ tag('textarea', {
+                                                name: cellName,
+                                                rows: col.rows ?? 1,
+                                                placeholder: col.placeholder ?? false,
+                                                aria: {
+                                                    labelledby: headingId,
+                                                    describedby: describedBy,
+                                                },
+                                                html: value,
+                                            }) }}
                                         {% endif %}
                                 {%- endswitch -%}
                             {% endblock %}
@@ -189,7 +234,21 @@
                     {% endif %}
                 {% endfor %}
                 {% if allowReorder -%}
-                    <td class="thin action"><a class="move icon" title="{{ 'Reorder'|t('app') }}" aria-label="{{ 'Reorder'|t('app') }}"></a></td>
+                    <td class="thin action">
+                      <div class="flex flex-nowrap">
+                        <a class="move icon" title="{{ 'Reorder'|t('app') }}" aria-label="{{ 'Reorder'|t('app') }}" type="button" role="button"></a>
+                        {{~ disclosureMenu(actionMenuItems, {
+                          buttonAttributes: {
+                            'aria-label': actionBtnLabel,
+                            class: ['action-btn'],
+                            title: 'Actions'|t('app'),
+                            data: {
+                              'disclosure-trigger': true,
+                            },
+                          },
+                        }) }}
+                      </div>
+                    </td>
                 {%- endif -%}
                 {%- if allowDelete -%}
                     <td class="thin action">

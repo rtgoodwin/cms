@@ -72,9 +72,9 @@ class ClearCaches extends Utility
     /**
      * @inheritdoc
      */
-    public static function iconPath(): ?string
+    public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/trash.svg');
+        return 'trash';
     }
 
     /**
@@ -106,7 +106,7 @@ class ClearCaches extends Utility
         $view->registerAssetBundle(ClearCachesAsset::class);
         $view->registerJs('new Craft.ClearCachesUtility(\'clear-caches\');');
 
-        return $view->renderTemplate('_components/utilities/ClearCaches', [
+        return $view->renderTemplate('_components/utilities/ClearCaches.twig', [
             'cacheOptions' => $cacheOptions,
             'tagOptions' => $tagOptions,
         ]);
@@ -136,6 +136,7 @@ class ClearCaches extends Utility
                     $dirs = [
                         $pathService->getAssetSourcesPath(false),
                         $pathService->getAssetsIconsPath(false),
+                        $pathService->getImageTransformsPath(false),
                     ];
                     foreach ($dirs as $dir) {
                         try {
@@ -178,7 +179,7 @@ class ClearCaches extends Utility
                     ) {
                         throw new Exception("Unable to clear control panel resources because the location isn't known for console commands.\n" .
                             "Explicitly set the @webroot alias in config/general.php to avoid this error.\n" .
-                            'See https://craftcms.com/docs/4.x/config/#aliases for more info.');
+                            'See https://craftcms.com/docs/5.x/configure.html#aliases for more info.');
                     }
 
                     $basePath = Craft::getAlias($basePath);
@@ -218,14 +219,16 @@ class ClearCaches extends Utility
             ],
         ];
 
-        $event = new RegisterCacheOptionsEvent([
-            'options' => $options,
-        ]);
-        Event::trigger(self::class, self::EVENT_REGISTER_CACHE_OPTIONS, $event);
+        // Fire a 'registerCacheOptions' event
+        if (Event::hasHandlers(self::class, self::EVENT_REGISTER_CACHE_OPTIONS)) {
+            $event = new RegisterCacheOptionsEvent(['options' => $options]);
+            Event::trigger(self::class, self::EVENT_REGISTER_CACHE_OPTIONS, $event);
+            $options = $event->options;
+        }
 
-        ArrayHelper::multisort($event->options, 'label');
+        ArrayHelper::multisort($options, 'label');
 
-        return $event->options;
+        return $options;
     }
 
     /**
@@ -250,13 +253,15 @@ class ClearCaches extends Utility
             ];
         }
 
-        $event = new RegisterCacheOptionsEvent([
-            'options' => $options,
-        ]);
-        Event::trigger(self::class, self::EVENT_REGISTER_TAG_OPTIONS, $event);
+        // Fire a 'registerTagOptions' event
+        if (Event::hasHandlers(self::class, self::EVENT_REGISTER_TAG_OPTIONS)) {
+            $event = new RegisterCacheOptionsEvent(['options' => $options]);
+            Event::trigger(self::class, self::EVENT_REGISTER_TAG_OPTIONS, $event);
+            $options = $event->options;
+        }
 
-        ArrayHelper::multisort($event->options, 'label');
+        ArrayHelper::multisort($options, 'label');
 
-        return $event->options;
+        return $options;
     }
 }

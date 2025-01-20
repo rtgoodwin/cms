@@ -42,13 +42,12 @@ class Message extends \yii\symfonymailer\Message
     /**
      * Sets the message sender.
      *
-     * @param string|array|User|User[] $from The sender’s email address, or their
+     * @param string|array<User|string>|User $from The sender’s email address, or their
      * user model(s). You may pass an array of addresses if this message is from
      * multiple people. You may also specify sender name in addition to email
      * address using format: `[email => name]`.
-     * @return self self reference
      */
-    public function setFrom($from): self
+    public function setFrom($from): static
     {
         parent::setFrom(MailerHelper::normalizeEmails($from));
         return $this;
@@ -57,7 +56,7 @@ class Message extends \yii\symfonymailer\Message
     /**
      * Sets the Reply-To email.
      *
-     * @param string|array|User|User[] $replyTo The Reply-To email address, or their
+     * @param string|array<User|string>|User $replyTo The Reply-To email address, or their
      * user model(s). You may pass an array of addresses if this message is from
      * multiple people. You may also specify Reply-To name in addition to email
      * address using format: `[email => name]`.
@@ -73,7 +72,7 @@ class Message extends \yii\symfonymailer\Message
     /**
      * Sets the message recipient(s).
      *
-     * @param string|array|User|User[] $to The receiver’s email address, or their
+     * @param string|array<User|string>|User $to The receiver’s email address, or their
      * user model(s). You may pass an array of addresses if multiple recipients
      * should receive this message. You may also specify receiver name in addition
      * to email address using format: `[email => name]`.
@@ -96,7 +95,7 @@ class Message extends \yii\symfonymailer\Message
     /**
      * Sets the CC (additional copy receiver) addresses of this message.
      *
-     * @param string|array|User|User[] $cc The copied receiver’s email address, or their user model(s).
+     * @param string|array<User|string>|User $cc The copied receiver’s email address, or their user model(s).
      * You may pass an array of addresses if multiple recipients should receive this message.
      * You may also specify receiver name in addition to email address using format:
      * `[email => name]`.
@@ -111,7 +110,7 @@ class Message extends \yii\symfonymailer\Message
     /**
      * Sets the BCC (hidden copy receiver) addresses of this message.
      *
-     * @param string|array|User|User[]|null $bcc The hidden copied receiver’s email address, or their user model(s).
+     * @param string|array<User|string>|User|null $bcc The hidden copied receiver’s email address, or their user model(s).
      * You may pass an array of addresses if multiple recipients should receive this message.
      * You may also specify receiver name in addition to email address using format:
      * `[email => name]`.

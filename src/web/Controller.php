@@ -8,7 +8,12 @@
 namespace craft\web;
 
 use Craft;
+use craft\base\Chippable;
+use craft\base\Identifiable;
 use craft\base\ModelInterface;
+use craft\elements\User;
+use craft\events\DefineBehaviorsEvent;
+use craft\helpers\Cp;
 use yii\base\Action;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
@@ -16,6 +21,7 @@ use yii\base\Model;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\JsonResponseFormatter;
+use yii\web\MethodNotAllowedHttpException;
 use yii\web\Response as YiiResponse;
 use yii\web\UnauthorizedHttpException;
 
@@ -32,6 +38,13 @@ use yii\web\UnauthorizedHttpException;
  */
 abstract class Controller extends \yii\web\Controller
 {
+    /**
+     * @event DefineBehaviorsEvent The event that is triggered when defining the class behaviors
+     * @see behaviors()
+     * @since 4.5.0
+     */
+    public const EVENT_DEFINE_BEHAVIORS = 'defineBehaviors';
+
     public const ALLOW_ANONYMOUS_NEVER = 0;
     public const ALLOW_ANONYMOUS_LIVE = 1;
     public const ALLOW_ANONYMOUS_OFFLINE = 2;
@@ -55,6 +68,39 @@ abstract class Controller extends \yii\web\Controller
      *   that the listed action IDs can be accessed anonymously per the bitwise int assigned to it.
      */
     protected array|bool|int $allowAnonymous = self::ALLOW_ANONYMOUS_NEVER;
+
+    /**
+     * Returns the behaviors to attach to this class.
+     *
+     * See [[behaviors()]] for details about what should be returned.
+     *
+     * Controllers should override this method instead of [[behaviors()]] so [[EVENT_DEFINE_BEHAVIORS]] handlers can
+     * modify the class-defined behaviors.
+     *
+     * @return array
+     * @since 4.5.0
+     */
+    protected function defineBehaviors(): array
+    {
+        return [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function behaviors(): array
+    {
+        $behaviors = $this->defineBehaviors();
+
+        // Fire a 'defineBehaviors' event
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_BEHAVIORS)) {
+            $event = new DefineBehaviorsEvent(['behaviors' => $behaviors]);
+            $this->trigger(self::EVENT_DEFINE_BEHAVIORS, $event);
+            return $event->behaviors;
+        }
+
+        return $behaviors;
+    }
 
     /**
      * @inheritdoc
@@ -81,8 +127,6 @@ abstract class Controller extends \yii\web\Controller
                 }
             }
             $this->allowAnonymous = $normalized;
-        } elseif (!is_int($this->allowAnonymous)) {
-            throw new InvalidConfigException('Invalid $allowAnonymous value');
         }
 
         parent::init();
@@ -133,7 +177,20 @@ abstract class Controller extends \yii\web\Controller
             return false;
         }
 
-        // Enforce $allowAnonymous
+        $this->_enforceAllowAnonymous($action);
+
+        return true;
+    }
+
+    private function _enforceAllowAnonymous(Action $action): void
+    {
+        $isCpRequest = $this->request->getIsCpRequest();
+
+        // If a valid site token was passed, grant them access
+        if (!$isCpRequest && $this->request->hasValidSiteToken()) {
+            return;
+        }
+
         $isLive = Craft::$app->getIsLive();
         $test = $isLive ? self::ALLOW_ANONYMOUS_LIVE : self::ALLOW_ANONYMOUS_OFFLINE;
 
@@ -145,7 +202,7 @@ abstract class Controller extends \yii\web\Controller
 
         if (!($test & $allowAnonymous)) {
             // If this is a control panel request, make sure they have access to the control panel
-            if ($this->request->getIsCpRequest()) {
+            if ($isCpRequest) {
                 $this->requireLogin();
                 $this->requirePermission('accessCp');
             } elseif (Craft::$app->getUser()->getIsGuest()) {
@@ -171,8 +228,19 @@ abstract class Controller extends \yii\web\Controller
                 }
             }
         }
+    }
 
-        return true;
+    /**
+     * Returns the currently logged-in user.
+     *
+     * @param bool $autoRenew
+     * @return User|null
+     * @see \yii\web\User::getIdentity()
+     * @since 4.3.0
+     */
+    public static function currentUser(bool $autoRenew = true): ?User
+    {
+        return Craft::$app->getUser()->getIdentity($autoRenew);
     }
 
     /**
@@ -205,9 +273,31 @@ abstract class Controller extends \yii\web\Controller
      */
     public function asCpScreen(): Response
     {
+        if ($this->response->getBehavior(CpScreenResponseBehavior::NAME)) {
+            return $this->response;
+        }
+
         $this->response->attachBehavior(CpScreenResponseBehavior::NAME, CpScreenResponseBehavior::class);
         $this->response->formatters[CpScreenResponseFormatter::FORMAT] = CpScreenResponseFormatter::class;
         $this->response->format = CpScreenResponseFormatter::FORMAT;
+        return $this->response;
+    }
+
+    /**
+     * Sends a control panel modal response.
+     *
+     * @return Response
+     * @since 5.0.0
+     */
+    public function asCpModal(): Response
+    {
+        if ($this->response->getBehavior(CpModalResponseBehavior::NAME)) {
+            return $this->response;
+        }
+
+        $this->response->attachBehavior(CpModalResponseBehavior::NAME, CpModalResponseBehavior::class);
+        $this->response->formatters[CpModalResponseFormatter::FORMAT] = CpModalResponseFormatter::class;
+        $this->response->format = CpModalResponseFormatter::FORMAT;
         return $this->response;
     }
 
@@ -247,6 +337,7 @@ abstract class Controller extends \yii\web\Controller
      * @param string|null $message
      * @param array $data Additional data to include in the JSON response
      * @param string|null $redirect The URL to redirect the request
+     * @param array $notificationSettings Control panel notification settings
      * @return YiiResponse|null
      * @since 4.0.0
      */
@@ -254,15 +345,26 @@ abstract class Controller extends \yii\web\Controller
         ?string $message = null,
         array $data = [],
         ?string $redirect = null,
+        array $notificationSettings = [],
     ): ?YiiResponse {
         if ($this->request->getAcceptsJson()) {
-            return $this->asJson($data + array_filter([
-                    'message' => $message,
-                    'redirect' => $redirect,
-                ]));
+            $data += array_filter([
+                'message' => $message,
+                'redirect' => $redirect,
+            ]);
+            if ($notificationSettings && $this->request->getIsCpRequest()) {
+                $data += [
+                    'notificationSettings' => $notificationSettings,
+                ];
+            }
+            $response = $this->asJson($data);
+            if ($this->request->isCpRequest && Craft::$app->getConfig()->getGeneral()->enableCsrfProtection) {
+                $response->getHeaders()->setDefault('X-CSRF-Token', $this->request->getCsrfToken());
+            }
+            return $response;
         }
 
-        $this->setSuccessFlash($message);
+        $this->setSuccessFlash($message, $notificationSettings);
 
         if ($redirect !== null) {
             return $this->redirect($redirect);
@@ -324,13 +426,24 @@ abstract class Controller extends \yii\web\Controller
     ): YiiResponse {
         $data += array_filter([
             'modelName' => $modelName,
+            'modelClass' => get_class($model),
             ($modelName ?? 'model') => $model->toArray(),
         ]);
+
+        if ($model instanceof Identifiable) {
+            $data['modelId'] = $model->getId();
+        }
+
+        $notificationSettings = [];
+        if ($model instanceof Chippable) {
+            $notificationSettings['details'] = Cp::chipHtml($model);
+        }
 
         return $this->asSuccess(
             $message,
             $data,
             $redirect ?? $this->getPostedRedirectUrl($model),
+            $notificationSettings,
         );
     }
 
@@ -365,7 +478,7 @@ abstract class Controller extends \yii\web\Controller
     /**
      * Throws a 403 error if the current user is not an admin.
      *
-     * @param bool $requireAdminChanges Whether the <config4:allowAdminChanges>
+     * @param bool $requireAdminChanges Whether the <config5:allowAdminChanges>
      * config setting must also be enabled.
      * @throws ForbiddenHttpException if the current user is not an admin
      */
@@ -426,12 +539,12 @@ abstract class Controller extends \yii\web\Controller
     /**
      * Throws a 400 error if this isn’t a POST request
      *
-     * @throws BadRequestHttpException if the request is not a post request
+     * @throws MethodNotAllowedHttpException if the request is not a POST request
      */
     public function requirePostRequest(): void
     {
         if (!$this->request->getIsPost()) {
-            throw new BadRequestHttpException('Post request required');
+            throw new MethodNotAllowedHttpException('Post request required');
         }
     }
 
@@ -491,14 +604,15 @@ abstract class Controller extends \yii\web\Controller
      *
      * If a hashed `successMessage` param was sent with the request, that will be used instead of the provided default.
      *
-     * @param string|null $default
+     * @param string|null $default The default message, if no `successMessage` param was sent
+     * @param array $settings Control panel notification settings
      * @since 3.5.0
      */
-    public function setSuccessFlash(?string $default = null): void
+    public function setSuccessFlash(?string $default = null, array $settings = []): void
     {
         $message = $this->request->getValidatedBodyParam('successMessage') ?? $default;
         if ($message !== null) {
-            Craft::$app->getSession()->setNotice($message);
+            Craft::$app->getSession()->setSuccess($message, $settings);
         }
     }
 
@@ -507,14 +621,15 @@ abstract class Controller extends \yii\web\Controller
      *
      * If a hashed `failMessage` param was sent with the request, that will be used instead of the provided default.
      *
-     * @param string|null $default
+     * @param string|null $default The default message, if no `successMessage` param was sent
+     * @param array $settings Control panel notification settings
      * @since 3.5.0
      */
-    public function setFailFlash(?string $default = null): void
+    public function setFailFlash(?string $default = null, array $settings = []): void
     {
         $message = $this->request->getValidatedBodyParam('failMessage') ?? $default;
         if ($message !== null) {
-            Craft::$app->getSession()->setError($message);
+            Craft::$app->getSession()->setError($message, $settings);
         }
     }
 

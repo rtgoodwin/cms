@@ -47,7 +47,7 @@ class MyDrafts extends Widget
      */
     public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/draft.svg');
+        return 'scribble';
     }
 
     /**
@@ -85,6 +85,7 @@ class MyDrafts extends Widget
             ->drafts()
             ->status(null)
             ->draftCreator(Craft::$app->getUser()->getId())
+            ->section('*')
             ->site('*')
             ->unique()
             ->orderBy(['dateUpdated' => SORT_DESC])
@@ -97,11 +98,18 @@ class MyDrafts extends Widget
             ]);
         }
 
-        $html = '';
+        $html = Html::beginTag('ul', [
+            'class' => 'widget__list chips',
+            'role' => 'list',
+        ]);
 
         foreach ($drafts as $draft) {
-            $html .= Html::tag('div', Cp::elementHtml($draft));
+            $html .= Html::tag('li', Cp::elementChipHtml($draft), [
+                'class' => 'widget__list-item',
+            ]);
         }
+
+        $html .= Html::endTag('ul');
 
         return $html;
     }

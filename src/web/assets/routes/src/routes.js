@@ -48,7 +48,7 @@ import './routes.scss';
 
       Craft.sendActionRequest('POST', 'routes/update-route-order', {data})
         .then(() => {
-          Craft.cp.displayNotice(Craft.t('app', 'New route order saved.'));
+          Craft.cp.displaySuccess(Craft.t('app', 'New route order saved.'));
         })
         .catch(() => {
           Craft.cp.displayError(
@@ -277,7 +277,7 @@ import './routes.scss';
           var node = uriNodes[i];
 
           if (Garnish.isTextNode(node)) {
-            var text = this.uriInput.addTextElement();
+            var text = this.uriInput.addTextElement(undefined, false);
             text.setVal(node.nodeValue);
           } else {
             this.addUriVar(node);
@@ -292,7 +292,7 @@ import './routes.scss';
       this.base($container);
 
       // We must add vars on mousedown, so that text elements don't have a chance
-      // to lose focus, thus losing the carot position.
+      // to lose focus, thus losing the caret position.
       var $uriVars = this.$container.find('.uri-tokens').children('div');
 
       this.addListener($uriVars, 'mousedown', function (event) {
@@ -312,21 +312,32 @@ import './routes.scss';
       this.addListener($uriVar, 'keydown', function (event) {
         switch (event.keyCode) {
           case Garnish.LEFT_KEY: {
-            // Select the previous element
+            event.preventDefault();
+            // Select the first/previous element
             setTimeout(() => {
-              this.uriInput.focusPreviousElement($uriVar);
+              if (Garnish.isCtrlKeyPressed(event)) {
+                this.uriInput.focusStart();
+              } else {
+                this.uriInput.focusPreviousElement($uriVar);
+              }
             }, 1);
 
             break;
           }
           case Garnish.RIGHT_KEY: {
-            // Select the next element
+            event.preventDefault();
+            // Select the last/next element
             setTimeout(() => {
-              this.uriInput.focusNextElement($uriVar);
+              if (Garnish.isCtrlKeyPressed(event)) {
+                this.uriInput.focusEnd();
+              } else {
+                this.uriInput.focusNextElement($uriVar);
+              }
             }, 1);
 
             break;
           }
+          case Garnish.BACKSPACE_KEY:
           case Garnish.DELETE_KEY: {
             // Delete this element
             setTimeout(() => {
@@ -344,17 +355,6 @@ import './routes.scss';
         this.$heading.html(Craft.t('app', 'Edit Route'));
         this.$deleteBtn.show();
       }
-
-      // Focus on the first element
-      setTimeout(() => {
-        if (this.uriInput.elements.length) {
-          var $firstElem = this.uriInput.elements[0];
-          this.uriInput.setFocus($firstElem);
-          this.uriInput.setCarotPos($firstElem, 0);
-        } else {
-          this.$uriInput.trigger('focus');
-        }
-      }, 100);
 
       this.base();
     },
@@ -392,7 +392,7 @@ import './routes.scss';
             val = Craft.ltrim(val, '/');
 
             // Make sure the first element isn’t using the action/control panel trigger
-            if (Craft.startsWith(val, Craft.actionTrigger + '/')) {
+            if (val.startsWith(`${Craft.actionTrigger}/`)) {
               this.addUriError(
                 Craft.t(
                   'app',
@@ -405,7 +405,7 @@ import './routes.scss';
               return;
             } else if (
               Craft.cpTrigger &&
-              Craft.startsWith(val, Craft.cpTrigger + '/')
+              val.startsWith(`${Craft.cpTrigger}/`)
             ) {
               this.addUriError(
                 Craft.t(
@@ -478,7 +478,7 @@ import './routes.scss';
           this.route.updateHtmlFromModal();
           this.hide();
 
-          Craft.cp.displayNotice(Craft.t('app', 'Route saved.'));
+          Craft.cp.displaySuccess(Craft.t('app', 'Route saved.'));
         })
         .catch(() => {
           Craft.cp.displayError(Craft.t('app', 'Couldn’t save route.'));
@@ -515,7 +515,7 @@ import './routes.scss';
         Craft.sendActionRequest('POST', 'routes/delete-route', {
           data: {routeUid: this.route.uid},
         }).then((response) => {
-          Craft.cp.displayNotice(Craft.t('app', 'Route deleted.'));
+          Craft.cp.displaySuccess(Craft.t('app', 'Route deleted.'));
         });
 
         Craft.routes.sorter.removeItems(this.route.$container);

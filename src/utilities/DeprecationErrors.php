@@ -38,9 +38,9 @@ class DeprecationErrors extends Utility
     /**
      * @inheritdoc
      */
-    public static function iconPath(): ?string
+    public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/bug.svg');
+        return 'bug';
     }
 
     /**
@@ -60,7 +60,7 @@ class DeprecationErrors extends Utility
 
         $view->registerAssetBundle(DeprecationErrorsAsset::class);
 
-        return $view->renderTemplate('_components/utilities/DeprecationErrors', [
+        return $view->renderTemplate('_components/utilities/DeprecationErrors/index.twig', [
             'logs' => Craft::$app->getDeprecator()->getLogs(),
         ]);
     }

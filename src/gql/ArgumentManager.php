@@ -12,6 +12,7 @@ use craft\base\Component;
 use craft\errors\GqlException;
 use craft\events\RegisterGqlArgumentHandlersEvent;
 use craft\gql\base\ArgumentHandlerInterface;
+use craft\gql\base\RelationArgumentHandler;
 use craft\gql\handlers\RelatedAssets;
 use craft\gql\handlers\RelatedCategories;
 use craft\gql\handlers\RelatedEntries;
@@ -57,7 +58,7 @@ class ArgumentManager extends Component
 
     public function init(): void
     {
-        $handlers = [
+        $this->_argumentHandlers = [
             'relatedToEntries' => RelatedEntries::class,
             'relatedToAssets' => RelatedAssets::class,
             'relatedToCategories' => RelatedCategories::class,
@@ -67,13 +68,12 @@ class ArgumentManager extends Component
             'siteId' => SiteId::class,
         ];
 
-        $event = new RegisterGqlArgumentHandlersEvent([
-            'handlers' => $handlers,
-        ]);
-
-        $this->trigger(self::EVENT_DEFINE_GQL_ARGUMENT_HANDLERS, $event);
-
-        $this->_argumentHandlers = $event->handlers;
+        // Fire a 'defineGqlArgumentHandlers' event
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_GQL_ARGUMENT_HANDLERS)) {
+            $event = new RegisterGqlArgumentHandlersEvent(['handlers' => $this->_argumentHandlers]);
+            $this->trigger(self::EVENT_DEFINE_GQL_ARGUMENT_HANDLERS, $event);
+            $this->_argumentHandlers = $event->handlers;
+        }
     }
 
     /**
@@ -153,6 +153,15 @@ class ArgumentManager extends Component
         foreach ($this->_argumentHandlers as $argumentName => $handler) {
             if (!empty($arguments[$argumentName]) && $handler instanceof ArgumentHandlerInterface) {
                 $arguments = $handler->handleArgumentCollection($arguments);
+            }
+            // if it's one of the relatedToXYZ arguments,
+            // if the value is empty/null unset that arg so that it doesn't go into the criteria
+            if (
+                array_key_exists($argumentName, $arguments) &&
+                empty($arguments[$argumentName]) &&
+                $handler instanceof RelationArgumentHandler
+            ) {
+                unset($arguments[$argumentName]);
             }
         }
 

@@ -27,16 +27,20 @@ abstract class BaseElementsController extends Controller
      */
     public function beforeAction($action): bool
     {
+        if (!parent::beforeAction($action)) {
+            return false;
+        }
+
         // All actions require control panel requests
         $this->requireCpRequest();
 
-        return parent::beforeAction($action);
+        return true;
     }
 
     /**
      * Returns the posted element type class.
      *
-     * @return string
+     * @return class-string<ElementInterface>
      * @throws BadRequestHttpException if the requested element type is invalid
      */
     protected function elementType(): string

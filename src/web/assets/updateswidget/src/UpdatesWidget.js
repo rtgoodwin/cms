@@ -44,7 +44,16 @@
       Craft.cp.checkForUpdates(
         forceRefresh,
         false,
-        this.showUpdateInfo.bind(this)
+        this.showUpdateInfo.bind(this),
+        () => {
+          this.dontLookLikeWereChecking();
+          this.$body.empty().append(
+            $('<p/>', {
+              class: 'centeralign error',
+              text: Craft.t('app', 'Unable to fetch updates at this time.'),
+            })
+          );
+        }
       );
     },
 
@@ -77,7 +86,9 @@
           '<p class="centeralign">' +
             Craft.t('app', 'Congrats! You’re up to date.') +
             '</p>' +
-            '<p class="centeralign"><button type="button" class="btn" data-icon="refresh">' +
+            '<p class="centeralign"><button type="button" class="btn" data-icon="refresh" aria-label="' +
+            Craft.t('app', 'Check again') +
+            '">' +
             Craft.t('app', 'Check again') +
             '</button></p>'
         );

@@ -7,23 +7,26 @@
 
 namespace craft\db\mysql;
 
-use Composer\Util\Platform;
 use Craft;
 use craft\db\Connection;
+use craft\db\ExpressionBuilder;
+use craft\db\ExpressionInterface;
 use craft\db\TableSchema;
 use craft\helpers\App;
 use craft\helpers\Db;
 use craft\helpers\FileHelper;
 use craft\helpers\StringHelper;
 use mikehaertl\shellcommand\Command as ShellCommand;
+use PDO;
 use PDOException;
 use yii\base\ErrorException;
+use yii\base\InvalidArgumentException;
 use yii\base\NotSupportedException;
 use yii\db\Exception;
 
 /**
  * @inheritdoc
- * @method TableSchema getTableSchema($name, $refresh = false) Obtains the schema information for the named table.
+ * @method TableSchema|null getTableSchema($name, $refresh = false) Obtains the schema information for the named table.
  * @property Connection $db
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
@@ -64,6 +67,44 @@ class Schema extends \yii\db\mysql\Schema
     }
 
     /**
+     * Returns whether a table supports 4-byte characters.
+     *
+     * @param string $table The table to check
+     * @return bool
+     * @throws InvalidArgumentException if $table is invalid
+     * @since 5.0.0
+     */
+    public function supportsMb4(string $table): bool
+    {
+        $tableSchema = $this->getTableSchema($table);
+        if (!$tableSchema) {
+            throw new InvalidArgumentException("Invalid table: $table");
+        }
+        foreach ($tableSchema->columns as $column) {
+            // collation names always start with the charset name,
+            // so if a collation includes "mb4" we can safely assume the table has an mb4 charset
+            /** @var ColumnSchema $column */
+            if (isset($column->collation) && str_contains($column->collation, 'mb4')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function findTableNames($schema = ''): array
+    {
+        $sql = 'SHOW FULL TABLES';
+        if ($schema !== '') {
+            $sql .= ' FROM ' . $this->quoteSimpleTableName($schema);
+        }
+        $sql .= " WHERE `Table_Type` = 'BASE TABLE'";
+        return $this->db->createCommand($sql)->queryColumn();
+    }
+
+    /**
      * Creates a query builder for the database.
      *
      * This method may be overridden by child classes to create a DBMS-specific query builder.
@@ -73,6 +114,9 @@ class Schema extends \yii\db\mysql\Schema
     public function createQueryBuilder(): QueryBuilder
     {
         return new QueryBuilder($this->db, [
+            'expressionBuilders' => [
+                ExpressionInterface::class => ExpressionBuilder::class,
+            ],
             'separator' => "\n",
         ]);
     }
@@ -82,6 +126,7 @@ class Schema extends \yii\db\mysql\Schema
      *
      * @param string $name
      * @return string
+     * @deprecated in 5.4.0
      */
     public function quoteDatabaseName(string $name): string
     {
@@ -151,67 +196,61 @@ class Schema extends \yii\db\mysql\Schema
      */
     public function getDefaultBackupCommand(?array $ignoreTables = null): string
     {
-        $defaultArgs =
-            ' --defaults-extra-file="' . $this->_createDumpConfigFile() . '"' .
-            ' --add-drop-table' .
-            ' --comments' .
-            ' --create-options' .
-            ' --dump-date' .
-            ' --no-autocommit' .
-            ' --routines' .
-            ' --default-character-set=' . Craft::$app->getConfig()->getDb()->charset .
-            ' --set-charset' .
-            ' --triggers' .
-            ' --no-tablespaces';
+        $baseCommand = (new ShellCommand('mysqldump'))
+            ->addArg('--defaults-file=', $this->_createDumpConfigFile())
+            ->addArg('--add-drop-table')
+            ->addArg('--comments')
+            ->addArg('--create-options')
+            ->addArg('--dump-date')
+            ->addArg('--no-autocommit')
+            ->addArg('--routines')
+            ->addArg('--default-character-set=', Craft::$app->getConfig()->getDb()->charset)
+            ->addArg('--set-charset')
+            ->addArg('--triggers')
+            ->addArg('--no-tablespaces');
 
-        // If the server is MySQL 5.x, we need to see what version of mysqldump is installed (5.x or 8.x)
-        if (version_compare(App::normalizeVersion(Craft::$app->getDb()->getSchema()->getServerVersion()), "8", "<")) {
-            // Find out if the db supports column-statistics
-            $shellCommand = new ShellCommand();
+        $serverVersion = App::normalizeVersion(Craft::$app->getDb()->getServerVersion());
+        $isMySQL8 = version_compare($serverVersion, '8', '>=');
+        $ignoreTables = $ignoreTables ?? Craft::$app->getDb()->getIgnoredBackupTables();
+        $commandFromConfig = Craft::$app->getConfig()->getGeneral()->backupCommand;
 
-            if (Platform::isWindows()) {
-                $shellCommand->setCommand('mysqldump --help | findstr "column-statistics"');
-            } else {
-                $shellCommand->setCommand('mysqldump --help | grep "column-statistics"');
-            }
+        // https://bugs.mysql.com/bug.php?id=109685
+        $useSingleTransaction = $isMySQL8 && version_compare($serverVersion, '8.0.32', '<');
 
-            // If we don't have proc_open, maybe we've got exec
-            if (!function_exists('proc_open') && function_exists('exec')) {
-                $shellCommand->useExec = true;
-            }
-
-            $success = $shellCommand->execute();
-
-            // if there was output, then they're running mysqldump 8.x against a 5.x database.
-            if ($success && $shellCommand->getOutput()) {
-                $defaultArgs .= ' --skip-column-statistics';
-            }
+        if ($useSingleTransaction) {
+            $baseCommand->addArg('--single-transaction');
         }
 
-        if ($ignoreTables === null) {
-            $ignoreTables = $this->db->getIgnoredBackupTables();
+        if ($this->supportsColumnStatistics()) {
+            $baseCommand->addArg('--column-statistics=', '0');
         }
-        $ignoreTableArgs = [];
+
+        $schemaDump = (clone $baseCommand)
+            ->addArg('--no-data')
+            ->addArg('--skip-triggers')
+            ->addArg('--result-file=', '{file}')
+            ->addArg('{database}');
+
+        $dataDump = (clone $baseCommand)
+            ->addArg('--no-create-info');
+
         foreach ($ignoreTables as $table) {
             $table = $this->getRawTableName($table);
-            $ignoreTableArgs[] = "--ignore-table={database}.$table";
+            $dataDump->addArg('--ignore-table=', "{database}.$table");
         }
 
-        $schemaDump = 'mysqldump' .
-            $defaultArgs .
-            ' --single-transaction' .
-            ' --no-data' .
-            ' --result-file="{file}"' .
-            ' {database}';
+        $dataDump->addArg('{database}');
 
-        $dataDump = 'mysqldump' .
-            $defaultArgs .
-            ' --no-create-info' .
-            ' ' . implode(' ', $ignoreTableArgs) .
-            ' {database}' .
-            ' >> "{file}"';
+        if ($commandFromConfig instanceof \Closure) {
+            $schemaDump = $commandFromConfig($schemaDump);
+            $dataDump = $commandFromConfig($dataDump);
+        }
 
-        return $schemaDump . ' && ' . $dataDump;
+        return sprintf(
+            '%s && %s >> "{file}"',
+            $schemaDump->getExecCommand(),
+            $dataDump->getExecCommand(),
+        );
     }
 
     /**
@@ -222,10 +261,16 @@ class Schema extends \yii\db\mysql\Schema
      */
     public function getDefaultRestoreCommand(): string
     {
-        return 'mysql' .
-            ' --defaults-extra-file="' . $this->_createDumpConfigFile() . '"' .
-            ' {database}' .
-            ' < "{file}"';
+        $commandFromConfig = Craft::$app->getConfig()->getGeneral()->restoreCommand;
+        $command = (new ShellCommand('mysql'))
+            ->addArg('--defaults-file=', $this->_createDumpConfigFile())
+            ->addArg('{database}');
+
+        if ($commandFromConfig instanceof \Closure) {
+            $command = $commandFromConfig($command);
+        }
+
+        return $command->getExecCommand() . ' < "{file}"';
     }
 
     /**
@@ -285,6 +330,18 @@ class Schema extends \yii\db\mysql\Schema
         }
 
         return null;
+    }
+
+    /**
+     * @param array $info
+     * @return ColumnSchema
+     */
+    protected function loadColumnSchema($info): ColumnSchema
+    {
+        /** @var ColumnSchema $column */
+        $column = parent::loadColumnSchema($info);
+        $column->collation = $info['collation'] ?? null;
+        return $column;
     }
 
     /**
@@ -370,6 +427,28 @@ SQL;
         }
     }
 
+    protected function supportsColumnStatistics(): bool
+    {
+        // Find out if the db/dump client supports column-statistics
+        $shellCommand = new ShellCommand();
+
+        if (App::isWindows()) {
+            $shellCommand->setCommand('mysqldump --help | findstr "column-statistics"');
+        } else {
+            $shellCommand->setCommand('mysqldump --help | grep "column-statistics"');
+        }
+
+        // If we don't have proc_open, maybe we've got exec
+        if (!function_exists('proc_open') && function_exists('exec')) {
+            $shellCommand->useExec = true;
+        }
+
+        $success = $shellCommand->execute();
+
+        // if there was output, then column-statistics is supported
+        return $success && $shellCommand->getOutput();
+    }
+
     /**
      * Creates a temporary my.cnf file based on the DB config settings.
      *
@@ -392,6 +471,17 @@ SQL;
         } else {
             $contents .= PHP_EOL . 'host=' . ($parsed['host'] ?? '') .
                 PHP_EOL . 'port=' . ($parsed['port'] ?? '');
+        }
+
+        // Certificates
+        if (isset($this->db->attributes[PDO::MYSQL_ATTR_SSL_CA])) {
+            $contents .= PHP_EOL . 'ssl_ca=' . $this->db->attributes[PDO::MYSQL_ATTR_SSL_CA];
+        }
+        if (isset($this->db->attributes[PDO::MYSQL_ATTR_SSL_CERT])) {
+            $contents .= PHP_EOL . 'ssl_cert=' . $this->db->attributes[PDO::MYSQL_ATTR_SSL_CERT];
+        }
+        if (isset($this->db->attributes[PDO::MYSQL_ATTR_SSL_KEY])) {
+            $contents .= PHP_EOL . 'ssl_key=' . $this->db->attributes[PDO::MYSQL_ATTR_SSL_KEY];
         }
 
         FileHelper::writeToFile($this->tempMyCnfPath, '');

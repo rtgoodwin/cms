@@ -3,6 +3,7 @@
 namespace craft\base\conditions;
 
 use craft\base\ComponentInterface;
+use yii\base\InvalidConfigException;
 
 /**
  * ConditionRuleInterface defines the common interface to be implemented by condition rule classes.
@@ -12,9 +13,10 @@ use craft\base\ComponentInterface;
  * @property ConditionInterface $condition The condition associated with this rule
  * @property-read array $config The rule’s portable config
  * @property-read string $label The rule’s option label
+ * @mixin BaseConditionRule
+ * @phpstan-require-extends BaseConditionRule
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 4.0.0
- * @mixin BaseConditionRule
  */
 interface ConditionRuleInterface extends ComponentInterface
 {
@@ -33,6 +35,14 @@ interface ConditionRuleInterface extends ComponentInterface
     public function getLabel(): string;
 
     /**
+     * Returns the rule’s option label hint.
+     *
+     * @return string|null
+     * @since 4.6.0
+     */
+    public function getLabelHint(): ?string;
+
+    /**
      * Returns the optgroup label the condition rule should be grouped under.
      *
      * @return string|null
@@ -43,6 +53,7 @@ interface ConditionRuleInterface extends ComponentInterface
      * Returns the rule’s portable config.
      *
      * @return array
+     * @throws InvalidConfigException if the rule is misconfigured
      */
     public function getConfig(): array;
 

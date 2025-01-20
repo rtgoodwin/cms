@@ -148,10 +148,12 @@ export class FocalPoint {
     this.saving = true;
 
     this.renderButton();
+    Craft.cp.announce(Craft.t('app', 'Saving...'));
 
     let data = {
       assetUid: this.assetUid,
       focal: (this.visible ? this.focalPos : [0.5, 0.5]).join(';'),
+      focalEnabled: this.visible,
     };
 
     this.$button.parents('.buttons').css({opacity: 1});
@@ -163,6 +165,7 @@ export class FocalPoint {
       this.shouldSave = false;
       this.$button.parents('.buttons').css({opacity: ''});
       this.renderButton();
+      Craft.cp.announce(Craft.t('app', 'Saved'));
 
       // Refresh Live Preview
       Craft.Preview.refresh();

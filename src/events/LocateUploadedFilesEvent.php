@@ -8,13 +8,13 @@
 namespace craft\events;
 
 use craft\base\ElementInterface;
-use yii\base\Event;
+use craft\base\Event;
 
 /**
  * LocateUploadedFilesEvent event class.
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
- * @since 3.7.42
+ * @since 4.0.2
  */
 class LocateUploadedFilesEvent extends Event
 {

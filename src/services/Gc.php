@@ -8,26 +8,29 @@
 namespace craft\services;
 
 use Craft;
-use craft\base\BlockElementInterface;
 use craft\base\ElementInterface;
+use craft\base\NestedElementInterface;
 use craft\config\GeneralConfig;
+use craft\console\Application as ConsoleApplication;
 use craft\db\Connection;
 use craft\db\Query;
 use craft\db\Table;
+use craft\elements\Address;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
 use craft\elements\GlobalSet;
-use craft\elements\MatrixBlock;
 use craft\elements\Tag;
 use craft\elements\User;
 use craft\errors\FsException;
 use craft\fs\Temp;
+use craft\helpers\Console;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 use craft\records\Volume;
 use craft\records\VolumeFolder;
 use DateTime;
+use ReflectionMethod;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
@@ -59,7 +62,7 @@ class Gc extends Component
     /**
      * @var bool whether [[hardDelete()]] should delete *all* soft-deleted rows,
      * rather than just the ones that were deleted long enough ago to be ready
-     * for hard-deletion per the <config4:softDeleteDuration> config setting.
+     * for hard-deletion per the <config5:softDeleteDuration> config setting.
      */
     public bool $deleteAllTrashed = false;
 
@@ -68,6 +71,12 @@ class Gc extends Component
      * @since 4.0.0
      */
     public string|array|Connection $db = 'db';
+
+    /**
+     * @var bool Whether CLI output should be muted.
+     * @since 5.4.9
+     */
+    public bool $silent = false;
 
     /**
      * @var GeneralConfig
@@ -96,10 +105,12 @@ class Gc extends Component
             return;
         }
 
-        Craft::$app->getDrafts()->purgeUnsavedDrafts();
-        Craft::$app->getUsers()->purgeExpiredPendingUsers();
+        $this->_purgeUnsavedDrafts();
+        $this->_purgePendingUsers();
         $this->_deleteStaleSessions();
         $this->_deleteStaleAnnouncements();
+        $this->_deleteStaleElementActivity();
+        $this->_deleteStaleBulkElementOps();
 
         // elements should always go first
         $this->hardDeleteElements();
@@ -107,43 +118,54 @@ class Gc extends Component
         $this->hardDelete([
             Table::CATEGORYGROUPS,
             Table::ENTRYTYPES,
-            Table::FIELDGROUPS,
+            Table::FIELDS,
             Table::SECTIONS,
             Table::TAGGROUPS,
         ]);
 
+        $this->deletePartialElements(Address::class, Table::ADDRESSES, 'id');
         $this->deletePartialElements(Asset::class, Table::ASSETS, 'id');
         $this->deletePartialElements(Category::class, Table::CATEGORIES, 'id');
         $this->deletePartialElements(Entry::class, Table::ENTRIES, 'id');
         $this->deletePartialElements(GlobalSet::class, Table::GLOBALSETS, 'id');
-        $this->deletePartialElements(MatrixBlock::class, Table::MATRIXBLOCKS, 'id');
         $this->deletePartialElements(Tag::class, Table::TAGS, 'id');
         $this->deletePartialElements(User::class, Table::USERS, 'id');
 
-        $this->deletePartialElements(Asset::class, Table::CONTENT, 'elementId');
-        $this->deletePartialElements(Category::class, Table::CONTENT, 'elementId');
-        $this->deletePartialElements(Entry::class, Table::CONTENT, 'elementId');
-        $this->deletePartialElements(GlobalSet::class, Table::CONTENT, 'elementId');
-        $this->deletePartialElements(Tag::class, Table::CONTENT, 'elementId');
-        $this->deletePartialElements(User::class, Table::CONTENT, 'elementId');
+        $this->deleteOrphanedFieldLayouts(Asset::class, Table::VOLUMES);
+        $this->deleteOrphanedFieldLayouts(Category::class, Table::CATEGORYGROUPS);
+        $this->deleteOrphanedFieldLayouts(Entry::class, Table::ENTRYTYPES);
+        $this->deleteOrphanedFieldLayouts(GlobalSet::class, Table::GLOBALSETS);
+        $this->deleteOrphanedFieldLayouts(Tag::class, Table::TAGGROUPS);
 
-        $this->_deleteOrphanedDraftsAndRevisions();
-        Craft::$app->getSearch()->deleteOrphanedIndexes();
+        $this->_deleteUnsupportedSiteEntries();
+        $this->deleteOrphanedNestedElements(Address::class, Table::ADDRESSES);
+        $this->deleteOrphanedNestedElements(Entry::class, Table::ENTRIES);
 
         // Fire a 'run' event
+        // Note this should get fired *before* orphaned drafts & revisions are deleted
+        // (see https://github.com/craftcms/cms/issues/14309)
         if ($this->hasEventHandlers(self::EVENT_RUN)) {
             $this->trigger(self::EVENT_RUN);
         }
 
+        $this->_deleteOrphanedDraftsAndRevisions();
+        $this->_deleteOrphanedSearchIndexes();
+        $this->_deleteOrphanedRelations();
+        $this->_deleteOrphanedStructureElements();
+
+        $this->_hardDeleteStructures();
+
         $this->hardDelete([
-            Table::STRUCTURES,
             Table::FIELDLAYOUTS,
             Table::SITES,
         ]);
 
         $this->hardDeleteVolumes();
-
         $this->removeEmptyTempFolders();
+        $this->_gcCache();
+
+        // Invalidate all element caches so any hard-deleted elements don't look like they still exist
+        Craft::$app->getElements()->invalidateAllCaches();
     }
 
     /**
@@ -155,6 +177,7 @@ class Gc extends Component
             return;
         }
 
+        $this->_stdout("    > deleting trashed volumes and their folders ... ");
         $condition = $this->_hardDeleteCondition();
 
         $volumes = (new Query())->select(['id'])->from([Table::VOLUMES])->where($condition)->all();
@@ -174,12 +197,13 @@ class Gc extends Component
         }
 
         Volume::deleteAll(['id' => $volumeIds]);
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
      * Hard-deletes eligible elements.
      *
-     * Any soft-deleted block elements which have revisions will be skipped, as their revisions may still be needed by the owner element.
+     * Any soft-deleted nested elements which have revisions will be skipped, as their revisions may still be needed by the owner element.
      *
      * @since 4.0.0
      */
@@ -190,15 +214,17 @@ class Gc extends Component
         }
 
         $normalElementTypes = [];
-        $blockElementTypes = [];
+        $nestedElementTypes = [];
 
         foreach (Craft::$app->getElements()->getAllElementTypes() as $elementType) {
-            if (is_subclass_of($elementType, BlockElementInterface::class)) {
-                $blockElementTypes[] = $elementType;
+            if (is_subclass_of($elementType, NestedElementInterface::class)) {
+                $nestedElementTypes[] = $elementType;
             } else {
                 $normalElementTypes[] = $elementType;
             }
         }
+
+        $this->_stdout('    > deleting trashed elements ... ');
 
         if ($normalElementTypes) {
             Db::delete(Table::ELEMENTS, [
@@ -208,38 +234,47 @@ class Gc extends Component
             ]);
         }
 
-        if ($blockElementTypes) {
-            // Only hard-delete block elements that don't have any revisions
-            $elementsTable = Table::ELEMENTS;
-            $revisionsTable = Table::REVISIONS;
-            $params = [];
-            $conditionSql = $this->db->getQueryBuilder()->buildCondition([
-                'and',
-                $this->_hardDeleteCondition('e'),
-                [
-                    'e.type' => $blockElementTypes,
-                    'r.id' => null,
-                ],
-            ], $params);
+        if (!empty($nestedElementTypes)) {
+            // first get nested elements which are not nested (owned) and that don't have any revisions
+            $ids1 = (new Query())
+                ->select('e.id')
+                ->from(['e' => Table::ELEMENTS])
+                ->leftJoin(['r' => Table::REVISIONS], '[[r.canonicalId]] = [[e.id]]')
+                ->leftJoin(['eo' => Table::ELEMENTS_OWNERS], '[[eo.elementId]] = COALESCE([[e.canonicalId]], [[e.id]])')
+                ->where([
+                    'and',
+                    $this->_hardDeleteCondition('e'),
+                    [
+                        'e.type' => $nestedElementTypes,
+                        'r.id' => null,
+                        'eo.elementId' => null,
+                    ],
+                ])
+                ->column();
 
-            if ($this->db->getIsMysql()) {
-                $sql = <<<SQL
-DELETE [[e]].* FROM $elementsTable [[e]]
-LEFT JOIN $revisionsTable [[r]] ON [[r.canonicalId]] = [[e.id]]
-WHERE $conditionSql
-SQL;
-            } else {
-                $sql = <<<SQL
-DELETE FROM $elementsTable
-USING $elementsTable [[e]]
-LEFT JOIN $revisionsTable [[r]] ON [[r.canonicalId]] = [[e.id]]
-WHERE
-  $elementsTable.[[id]] = [[e.id]] AND $conditionSql
-SQL;
+            // then get any nested elements that don't have any revisions, including nested ones
+            $ids2 = (new Query())
+                ->select('e.id')
+                ->from(['e' => Table::ELEMENTS])
+                ->leftJoin(['r' => Table::REVISIONS], '[[r.canonicalId]] = COALESCE([[e.canonicalId]], [[e.id]])')
+                ->where([
+                    'and',
+                    $this->_hardDeleteCondition('e'),
+                    [
+                        'e.type' => $nestedElementTypes,
+                        'r.id' => null,
+                    ],
+                ])
+                ->column();
+
+            $ids = array_unique(array_merge($ids1, $ids2));
+
+            if (!empty($ids)) {
+                Db::delete(Table::ELEMENTS, ['id' => $ids]);
             }
-
-            $this->db->createCommand($sql, $params)->execute();
         }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
@@ -260,44 +295,61 @@ SQL;
         }
 
         foreach ($tables as $table) {
+            $this->_stdout("    > deleting trashed rows in the `$table` table ... ");
             Db::delete($table, $condition);
+            $this->_stdout("done\n", Console::FG_GREEN);
         }
     }
 
     /**
      * Deletes elements that are missing data in the given element extension table.
      *
-     * @param string $elementType The element type
-     * @phpstan-param class-string<ElementInterface> $elementType
+     * @param class-string<ElementInterface> $elementType The element type
      * @param string $table The extension table name
      * @param string $fk The column name that contains the foreign key to `elements.id`
      * @since 3.6.6
      */
     public function deletePartialElements(string $elementType, string $table, string $fk): void
     {
-        $elementsTable = Table::ELEMENTS;
+        $this->_stdout(sprintf('    > deleting partial %s data ... ', $elementType::lowerDisplayName()));
 
-        if ($this->db->getIsMysql()) {
-            $sql = <<<SQL
-DELETE [[e]].* FROM $elementsTable [[e]]
-LEFT JOIN $table [[t]] ON [[t.$fk]] = [[e.id]]
-WHERE
-  [[e.type]] = :type AND
-  [[t.$fk]] IS NULL
-SQL;
-        } else {
-            $sql = <<<SQL
-DELETE FROM $elementsTable
-USING $elementsTable [[e]]
-LEFT JOIN $table [[t]] ON [[t.$fk]] = [[e.id]]
-WHERE
-  $elementsTable.[[id]] = [[e.id]] AND
-  [[e.type]] = :type AND
-  [[t.$fk]] IS NULL
-SQL;
+        $ids = (new Query())
+            ->select('e.id')
+            ->from(['e' => Table::ELEMENTS])
+            ->leftJoin(['t' => $table], "[[t.$fk]] = [[e.id]]")
+            ->where([
+                'e.type' => $elementType,
+                "t.$fk" => null,
+            ])
+            ->column();
+
+        if (!empty($ids)) {
+            Db::delete(Table::ELEMENTS, ['id' => $ids]);
         }
 
-        $this->db->createCommand($sql, ['type' => $elementType])->execute();
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _purgeUnsavedDrafts()
+    {
+        if ($this->_generalConfig->purgeUnsavedDraftsDuration === 0) {
+            return;
+        }
+
+        $this->_stdout('    > purging unsaved drafts that have gone stale ... ');
+        Craft::$app->getDrafts()->purgeUnsavedDrafts();
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _purgePendingUsers()
+    {
+        if ($this->_generalConfig->purgePendingUsersDuration === 0) {
+            return;
+        }
+
+        $this->_stdout('    > purging pending users with stale activation codes ... ');
+        Craft::$app->getUsers()->purgeExpiredPendingUsers();
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
@@ -310,15 +362,18 @@ SQL;
      */
     public function removeEmptyTempFolders(): void
     {
+        $this->_stdout('    > removing empty temp folders ... ');
+
         $emptyFolders = (new Query())
-            ->from(['folders' => Table::VOLUMEFOLDERS])
             ->select(['folders.id', 'folders.path'])
+            ->from(['folders' => Table::VOLUMEFOLDERS])
             ->leftJoin(['assets' => Table::ASSETS], '[[assets.folderId]] = [[folders.id]]')
             ->where([
                 'folders.volumeId' => null,
                 'assets.id' => null,
             ])
             ->andWhere(['not', ['folders.parentId' => null]])
+            ->andWhere(['not', ['folders.path' => null]])
             ->pairs();
 
         $fs = Craft::createObject(Temp::class);
@@ -330,6 +385,7 @@ SQL;
         }
 
         VolumeFolder::deleteAll(['id' => array_keys($emptyFolders)]);
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
@@ -351,51 +407,321 @@ SQL;
             return;
         }
 
+        $this->_stdout('    > deleting stale user sessions ... ');
         $interval = DateTimeHelper::secondsToInterval($this->_generalConfig->purgeStaleUserSessionDuration);
         $expire = DateTimeHelper::currentUTCDateTime();
         $pastTime = $expire->sub($interval);
-
         Db::delete(Table::SESSIONS, ['<', 'dateUpdated', Db::prepareDateForDb($pastTime)]);
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
      * Deletes any feature announcement rows that have gone stale.
-     *
      */
     private function _deleteStaleAnnouncements(): void
     {
+        $this->_stdout('    > deleting stale feature announcements ... ');
         Db::delete(Table::ANNOUNCEMENTS, ['<', 'dateRead', Db::prepareDateForDb(new DateTime('7 days ago'))]);
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
+    /**
+     * Deletes any stale element activity logs.
+     */
+    private function _deleteStaleElementActivity(): void
+    {
+        $this->_stdout('    > deleting stale element activity records ... ');
+        Db::delete(Table::ELEMENTACTIVITY, ['<', 'timestamp', Db::prepareDateForDb(new DateTime('1 minute ago'))]);
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    /**
+     * Deletes any stale bulk element operation records.
+     */
+    private function _deleteStaleBulkElementOps(): void
+    {
+        $this->_stdout('    > deleting stale bulk element operation records ... ');
+        Db::delete(Table::ELEMENTS_BULKOPS, ['<', 'timestamp', Db::prepareDateForDb(new DateTime('2 weeks ago'))]);
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    /**
+     * Deletes entries for sites that aren’t enabled by their section.
+     *
+     * This can happen if you entrify a category group, disable one of the sites in the newly-created section’s
+     * settings, then deploy those changes to another environment, apply project config changes, and re-run the
+     * entrify command. (https://github.com/craftcms/cms/issues/13383)
+     */
+    private function _deleteUnsupportedSiteEntries(): void
+    {
+        $this->_stdout('    > deleting entries in unsupported sites ... ');
+
+        $siteIds = Craft::$app->getSites()->getAllSiteIds(true);
+        $deleteIds = [];
+
+        // get sections that are not enabled for given site
+        foreach (Craft::$app->getEntries()->getAllSections() as $section) {
+            $sectionSettings = $section->getSiteSettings();
+            foreach ($siteIds as $siteId) {
+                if (!isset($sectionSettings[$siteId])) {
+                    $ids = (new Query())
+                        ->select('es.id')
+                        ->from(['es' => Table::ELEMENTS_SITES])
+                        ->leftJoin(['en' => Table::ENTRIES], '[[en.id]] = [[es.elementId]]')
+                        ->where([
+                            'en.sectionId' => $section->id,
+                            'es.siteId' => $siteId,
+                        ])
+                        ->column();
+
+                    $deleteIds = array_merge($deleteIds, $ids);
+                }
+            }
+        }
+
+        if (!empty($deleteIds)) {
+            Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIds]);
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    /**
+     * Deletes elements which have a `fieldId` value, but it’s set to an invalid field ID,
+     * or they're missing a row in the `elements_owners` table.
+     *
+     * @param class-string<ElementInterface> $elementType The element type
+     * @param string $table The extension table name
+     * @param string $fieldFk The column name that contains the foreign key to `fields.id`
+     * @since 5.4.2
+     */
+    public function deleteOrphanedNestedElements(string $elementType, string $table, string $fieldFk = 'fieldId'): void
+    {
+        $this->_stdout(sprintf('    > deleting orphaned nested %s ... ', $elementType::pluralLowerDisplayName()));
+
+        $ids1 = (new Query())
+            ->select('el.id')
+            ->from(['el' => Table::ELEMENTS])
+            ->innerJoin(['t' => $table], '[[t.id]] = [[el.id]]')
+            ->leftJoin(['eo' => Table::ELEMENTS_OWNERS], '[[eo.elementId]] = [[el.id]]')
+            ->where([
+                'and',
+                ['not', ["t.$fieldFk" => null]],
+                ['eo.elementId' => null],
+            ])
+            ->column();
+
+        $ids2 = (new Query())
+            ->select('el.id')
+            ->from(['el' => Table::ELEMENTS])
+            ->innerJoin(['t' => $table], '[[t.id]] = [[el.id]]')
+            ->leftJoin(['f' => Table::FIELDS], "[[f.id]] = [[t.$fieldFk]]")
+            ->where([
+                'and',
+                ['not', ["t.$fieldFk" => null]],
+                ['f.id' => null],
+            ])
+            ->column();
+
+        $ids = array_unique(array_merge($ids1, $ids2));
+
+        if (!empty($ids)) {
+            Db::delete(Table::ELEMENTS, ['id' => $ids]);
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
 
     /**
      * Deletes any orphaned rows in the `drafts` and `revisions` tables.
-     *
      */
     private function _deleteOrphanedDraftsAndRevisions(): void
     {
-        $elementsTable = Table::ELEMENTS;
+        $this->_stdout('    > deleting orphaned drafts and revisions ... ');
 
         foreach (['draftId' => Table::DRAFTS, 'revisionId' => Table::REVISIONS] as $fk => $table) {
+            $ids = (new Query())
+                ->select('t.id')
+                ->from(['t' => $table])
+                ->leftJoin(['e' => Table::ELEMENTS], "[[e.$fk]] = [[t.id]]")
+                ->where(['e.id' => null])
+                ->column();
+
+            if (!empty($ids)) {
+                Db::delete($table, ['id' => $ids]);
+            }
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _deleteOrphanedSearchIndexes(): void
+    {
+        $this->_stdout('    > deleting orphaned search indexes ... ');
+        Craft::$app->getSearch()->deleteOrphanedIndexes();
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _deleteOrphanedRelations(): void
+    {
+        $this->_stdout('    > deleting orphaned relations ... ');
+
+        $ids = (new Query())
+            ->select('r.id')
+            ->from(['r' => Table::RELATIONS])
+            ->leftJoin(['e' => Table::ELEMENTS], '[[e.id]] = [[r.targetId]]')
+            ->where(['e.id' => null])
+            ->column();
+
+        if (!empty($ids)) {
+            Db::delete(Table::RELATIONS, ['id' => $ids]);
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _deleteOrphanedStructureElements(): void
+    {
+        $this->_stdout('    > deleting orphaned structure elements ... ');
+
+        $ids = (new Query())
+            ->select('se.id')
+            ->from(['se' => Table::STRUCTUREELEMENTS])
+            ->leftJoin(['e' => Table::ELEMENTS], '[[e.id]] = [[se.elementId]]')
+            ->where([
+                'and',
+                ['not', ['se.elementId' => null]],
+                ['e.id' => null],
+            ])
+            ->column();
+
+        if (!empty($ids)) {
+            Db::delete(Table::STRUCTUREELEMENTS, ['id' => $ids]);
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    /**
+     * Deletes field layouts that are no longer used.
+     *
+     * @param class-string<ElementInterface> $elementType The element type
+     * @param string $table The  table name that contains a foreign key to `fieldlayouts.id`
+     * @param string $fk The column name that contains the foreign key to `fieldlayouts.id`
+     * @since 5.5.0
+     */
+    public function deleteOrphanedFieldLayouts(string $elementType, string $table, string $fk = 'fieldLayoutId'): void
+    {
+        $this->_stdout(sprintf('    > deleting orphaned %s field layouts ... ', $elementType::lowerDisplayName()));
+
+        $ids = (new Query())
+            ->select('fl.id')
+            ->from(['fl' => Table::FIELDLAYOUTS])
+            ->leftJoin(['t' => $table], "[[t.$fk]] = [[fl.id]]")
+            ->where(['fl.type' => $elementType, "t.$fk" => null])
+            ->column();
+
+        if (!empty($ids)) {
+            Db::delete(Table::FIELDLAYOUTS, ['id' => $ids]);
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    /**
+     * Hard delete structures data
+     * Any soft-deleted structure elements which have revisions will be skipped, as their revisions may still be needed by the owner element.
+     *
+     * @return void
+     * @throws \yii\db\Exception
+     */
+    private function _hardDeleteStructures(): void
+    {
+        // get IDs of structures that can be deleted;
+        // those are the ones for which the elements don't have any revisions
+        $structuresTable = Table::STRUCTURES;
+        $structureElementsTable = Table::STRUCTUREELEMENTS;
+        $elementsTable = Table::ELEMENTS;
+        $revisionsTable = Table::REVISIONS;
+
+        $params = [];
+
+        $structureIds = (new Query())
+            ->select('[[s.id]]')
+            ->distinct()
+            ->from(['s' => $structuresTable])
+            ->leftJoin(['se' => $structureElementsTable], '[[s.id]] = [[se.structureId]]')
+            ->leftJoin(['e' => $elementsTable], '[[e.id]] = [[se.elementId]]')
+            ->leftJoin(['r' => $revisionsTable], '[[r.canonicalId]] = coalesce([[e.canonicalId]],[[e.id]])')
+            ->where([
+                'and',
+                ['not', ['se.elementId' => null]],
+                $this->_hardDeleteCondition('s'),
+                [
+                    'r.canonicalId' => null,
+                ],
+            ])
+            ->column();
+
+        if (!empty($structureIds)) {
+            $ids = implode(',', $structureIds);
+            $conditionSql = $this->db->getQueryBuilder()->buildCondition($this->_hardDeleteCondition('s'), $params);
+
+            // and now perform the actual deletion based on those IDs
             if ($this->db->getIsMysql()) {
                 $sql = <<<SQL
-DELETE [[t]].* FROM $table [[t]]
-LEFT JOIN $elementsTable [[e]] ON [[e.$fk]] = [[t.id]]
-WHERE [[e.id]] IS NULL
+DELETE [[s]].* FROM $structuresTable [[s]]
+WHERE [[s.id]] IN ($ids)
+AND $conditionSql
 SQL;
             } else {
                 $sql = <<<SQL
-DELETE FROM $table
-USING $table [[t]]
-LEFT JOIN $elementsTable [[e]] ON [[e.$fk]] = [[t.id]]
-WHERE
-  $table.[[id]] = [[t.id]] AND
-  [[e.id]] IS NULL
+DELETE FROM $structuresTable
+USING $structuresTable [[s]]
+WHERE 
+    $structuresTable.[[id]] = [[s.id]] AND 
+    [[s.id]] IN ($ids) AND
+    $conditionSql
 SQL;
             }
-
-            $this->db->createCommand($sql)->execute();
+            $this->db->createCommand($sql, $params)->execute();
         }
+    }
+
+    private function _gcCache(): void
+    {
+        $cache = Craft::$app->getCache();
+
+        // gc() isn't always implemented, or defined by an interface,
+        // so we have to be super defensive here :-/
+
+        if (!method_exists($cache, 'gc')) {
+            return;
+        }
+
+        $method = new ReflectionMethod($cache, 'gc');
+
+        if (!$method->isPublic()) {
+            return;
+        }
+
+        $requiredArgs = $method->getNumberOfRequiredParameters();
+        $firstArg = $method->getParameters()[0] ?? null;
+        $hasForceArg = $firstArg && $firstArg->getName() === 'force';
+
+        if ($requiredArgs > 1 || ($requiredArgs === 1 && !$hasForceArg)) {
+            return;
+        }
+
+        $this->_stdout('    > garbage-collecting data caches ... ');
+
+        if ($hasForceArg) {
+            $cache->gc(true);
+        } else {
+            $cache->gc();
+        }
+
+        $this->_stdout("done\n", Console::FG_GREEN);
     }
 
     /**
@@ -419,5 +745,12 @@ SQL;
         }
 
         return $condition;
+    }
+
+    private function _stdout(string $string, ...$format): void
+    {
+        if (!$this->silent && Craft::$app instanceof ConsoleApplication) {
+            Console::stdout($string, ...$format);
+        }
     }
 }

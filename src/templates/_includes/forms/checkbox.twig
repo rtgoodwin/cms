@@ -1,25 +1,28 @@
+{% from '_includes/forms' import text %}
 {%- apply spaceless %}
 
 {% set id = id ?? "checkbox#{random()}" %}
 {% set label = checkboxLabel ?? label ?? null %}
 
+{% set aria = (inputAttributes.aria ?? {})|merge(aria ?? {}) %}
 {% set inputAttributes = {
     id: id,
     class: (class ?? [])|explodeClass|merge([
-        (toggle ?? reverseToggle ?? false) ? 'fieldtoggle' : null,
+        (targetPrefix ?? toggle ?? reverseToggle ?? false) ? 'fieldtoggle' : null,
         'checkbox'
     ]|filter),
     checked: (checked ?? false) and checked,
     autofocus: (autofocus ?? false) and not craft.app.request.isMobileBrowser(true),
     disabled: (disabled ?? false) ? true : false,
-    aria: {
-        labelledby: labelledBy ?? false,
-        describedby: describedBy ?? false,
-    },
-    data: {
+    aria: aria|merge({
+        labelledby: (aria.label ?? false) ? false : (labelledBy ?? false),
+        describedby: describedBy ?? aria.describedby ?? false,
+    }),
+    data: (data ?? {})|merge({
+        'target-prefix': targetPrefix ?? false,
         target: toggle ?? false,
         'reverse-target': reverseToggle ?? false,
-    }
+    }),
 }|merge(inputAttributes ?? [], recursive=true) %}
 
 {% if block('attr') is defined %}
@@ -33,7 +36,14 @@
 {{ input('checkbox', name ?? null, value ?? 1, inputAttributes) }}
 
 <label for="{{ id }}">
-    {{ label }}
+    {% if custom ?? false %}
+        {{ text({
+            value: value ?? null,
+            class: 'small',
+        }) }}
+    {% else %}
+        {{ label }}
+    {% endif %}
     {% if info ?? null %}
         <span class="info">{{ info|md|raw }}</span>
     {% endif %}

@@ -4,9 +4,11 @@ namespace craft\base\conditions;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\elements\conditions\ElementCondition;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\helpers\App;
 use craft\helpers\Cp;
+use stdClass;
 
 /**
  * BaseElementSelectConditionRule provides a base implementation for element query condition rules that are composed of an element select input.
@@ -18,14 +20,6 @@ use craft\helpers\Cp;
 abstract class BaseElementSelectConditionRule extends BaseConditionRule
 {
     /**
-     * @inheritdoc
-     */
-    public static function supportsProjectConfig(): bool
-    {
-        return false;
-    }
-
-    /**
      * @var int|string|null
      * @see getElementId()
      * @see setElementId()
@@ -35,7 +29,7 @@ abstract class BaseElementSelectConditionRule extends BaseConditionRule
     /**
      * Returns the element type that can be selected.
      *
-     * @return string
+     * @return class-string<ElementInterface>
      */
     abstract protected function elementType(): string;
 
@@ -70,13 +64,39 @@ abstract class BaseElementSelectConditionRule extends BaseConditionRule
     }
 
     /**
+     * Defines the element select config.
+     *
+     * @return array
+     * @since 5.5.0
+     */
+    protected function elementSelectConfig(): array
+    {
+        $element = $this->_element();
+        return [
+            'name' => 'elementId',
+            'elements' => $element ? [$element] : [],
+            'elementType' => $this->elementType(),
+            'sources' => $this->sources(),
+            'criteria' => $this->criteria(),
+            'condition' => $this->selectionCondition(),
+            'single' => true,
+        ];
+    }
+
+    /**
      * @param bool $parse Whether to parse the value for an environment variable
      * @return int|string|null
      */
     public function getElementId(bool $parse = true): int|string|null
     {
         if ($parse && is_string($this->_elementId)) {
-            return App::parseEnv($this->_elementId);
+            $elementId = App::parseEnv($this->_elementId);
+            if ($this->condition instanceof ElementCondition && isset($this->condition->referenceElement)) {
+                $referenceElement = $this->condition->referenceElement;
+            } else {
+                $referenceElement = new stdClass();
+            }
+            return Craft::$app->getView()->renderObjectTemplate($elementId, $referenceElement);
         }
         return $this->_elementId;
     }
@@ -115,26 +135,17 @@ abstract class BaseElementSelectConditionRule extends BaseConditionRule
                 'suggestionFilter' => fn($value) => is_int($value) && $value > 0,
                 'required' => true,
                 'id' => 'elementId',
+                'class' => 'code',
                 'name' => 'elementId',
                 'value' => $this->getElementId(false),
-                'fieldClass' => 'fullwidth',
+                'tip' => Craft::t('app', 'This can be set to an environment variable, or a Twig template that outputs an ID.'),
                 'placeholder' => Craft::t('app', '{type} ID', [
                     'type' => $this->elementType()::displayName(),
                 ]),
             ]);
         }
 
-        $element = $this->_element();
-
-        return Cp::elementSelectHtml([
-            'name' => 'elementId',
-            'elements' => $element ? [$element] : [],
-            'elementType' => $this->elementType(),
-            'sources' => $this->sources(),
-            'criteria' => $this->criteria(),
-            'condition' => $this->selectionCondition(),
-            'single' => true,
-        ]);
+        return Cp::elementSelectHtml($this->elementSelectConfig());
     }
 
     /**
@@ -147,10 +158,10 @@ abstract class BaseElementSelectConditionRule extends BaseConditionRule
             return null;
         }
 
-        /** @var string|ElementInterface $elementType */
-        /** @phpstan-var class-string<ElementInterface>|ElementInterface $elementType */
-        $elementType = $this->elementType();
-        return $elementType::find()
+        return $this->elementType()::find()
+            ->site('*')
+            ->preferSites(array_filter([Cp::requestedSite()?->id]))
+            ->unique()
             ->id($elementId)
             ->status(null)
             ->one();
@@ -190,14 +201,14 @@ abstract class BaseElementSelectConditionRule extends BaseConditionRule
         }
 
         if (is_numeric($value)) {
-            return (int)$value === $elementId;
+            return (int)$value === (int)$elementId;
         }
 
         if (is_array($value)) {
             foreach ($value as $val) {
                 if (
                     $val instanceof ElementInterface && $val->id === $elementId ||
-                    is_numeric($val) && (int)$val === $elementId
+                    is_numeric($val) && (int)$val === (int)$elementId
                 ) {
                     return true;
                 }

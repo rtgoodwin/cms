@@ -9,6 +9,7 @@ namespace craft\models;
 
 use craft\base\imagetransforms\ImageTransformerInterface;
 use craft\base\Model;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\ImageTransforms;
 use craft\validators\DateTimeValidator;
 use DateTime;
@@ -34,8 +35,7 @@ class ImageTransformIndex extends Model
     public ?int $assetId = null;
 
     /**
-     * @var string The image transformer
-     * @phpstan-var class-string<ImageTransformerInterface>
+     * @var class-string<ImageTransformerInterface> The image transformer
      */
     public string $transformer = ImageTransform::DEFAULT_TRANSFORMER;
 
@@ -97,6 +97,22 @@ class ImageTransformIndex extends Model
     /**
      * @inheritdoc
      */
+    public function init(): void
+    {
+        parent::init();
+
+        // Only respect inProgress if it's been less than 30 seconds since the last time the index was updated
+        if ($this->inProgress) {
+            $duration = DateTimeHelper::currentTimeStamp() - ($this->dateUpdated?->getTimestamp() ?? 0);
+            if ($duration > 30) {
+                $this->inProgress = false;
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
@@ -133,6 +149,10 @@ class ImageTransformIndex extends Model
 
         if ($this->format) {
             $this->_transform->format = $this->format;
+        }
+
+        if ($this->id) {
+            $this->_transform->indexId = $this->id;
         }
 
         return $this->_transform;

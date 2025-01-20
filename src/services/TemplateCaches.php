@@ -13,9 +13,12 @@ use craft\helpers\DateTimeHelper;
 use craft\helpers\Html;
 use craft\helpers\StringHelper;
 use DateTime;
+use Illuminate\Support\Collection;
 use Throwable;
 use yii\base\Component;
 use yii\base\Exception;
+use yii\caching\TagDependency;
+use yii\web\AssetBundle;
 
 /**
  * Template Caches service.
@@ -32,6 +35,12 @@ class TemplateCaches extends Component
      * @see _isTemplateCachingEnabled()
      */
     private bool $_enabled;
+
+    /**
+     * @var bool Whether global template caches should be enabled for this request
+     * @see _isTemplateCachingEnabled()
+     */
+    private bool $_enabledGlobally;
 
     /**
      * @var string|null The current request's path
@@ -51,7 +60,7 @@ class TemplateCaches extends Component
     public function getTemplateCache(string $key, bool $global, bool $registerResources = false): ?string
     {
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return null;
         }
 
@@ -62,12 +71,20 @@ class TemplateCaches extends Component
             return null;
         }
 
-        [$body, $tags, $bufferedJs, $bufferedScripts, $bufferedCss, $bufferedJsFiles, $bufferedCssFiles] = array_pad($data, 7, null);
+        [$body, $cacheInfo, $bufferedJs, $bufferedScripts, $bufferedCss, $bufferedJsFiles, $bufferedCssFiles, $bufferedHtml, $bufferedMetaTags, $bufferedAssetBundles] = array_pad($data, 10, null);
 
-        // If we're actively collecting element cache tags, add this cache's tags to the collection
-        Craft::$app->getElements()->collectCacheTags($tags);
+        // If we're actively collecting element cache info, register this cache's tags and duration
+        $elementsService = Craft::$app->getElements();
+        if ($elementsService->getIsCollectingCacheInfo()) {
+            if (isset($cacheInfo['tags'])) {
+                $elementsService->collectCacheTags($cacheInfo['tags']);
+                $elementsService->setCacheExpiryDate(DateTimeHelper::toDateTime($cacheInfo['expiryDate']));
+            } else {
+                $elementsService->collectCacheTags($cacheInfo);
+            }
+        }
 
-        // Register JS and CSS tags
+        // Register JS, CSS and meta tags
         if ($registerResources) {
             $this->_registerResources(
                 $bufferedJs ?? [],
@@ -75,6 +92,9 @@ class TemplateCaches extends Component
                 $bufferedCss ?? [],
                 $bufferedJsFiles ?? [],
                 $bufferedCssFiles ?? [],
+                $bufferedHtml ?? [],
+                $bufferedMetaTags ?? [],
+                $bufferedAssetBundles ?? [],
             );
         }
 
@@ -86,18 +106,19 @@ class TemplateCaches extends Component
      *
      * @param bool $withResources Whether JS and CSS code registered with [[\craft\web\View::registerJs()]],
      * [[\craft\web\View::registerScript()]], [[\craft\web\View::registerCss()]],
-     * [[\craft\web\View::registerJsFile()]], and [[\craft\web\View::registerCssFile()]] should be captured and
-     * included in the cache. If this is `true`, be sure to pass `$withResources = true` to [[endTemplateCache()]]
-     * as well.
+     * [[\craft\web\View::registerJsFile()]], [[\craft\web\View::registerCssFile()]], and [[\craft\web\View::registerHtml()]]
+     * should be captured and included in the cache. If this is `true`, be sure to pass `$withResources = true`
+     * to [[endTemplateCache()]] as well.
+     * @param bool $global Whether the cache should be stored globally.
      */
-    public function startTemplateCache(bool $withResources = false): void
+    public function startTemplateCache(bool $withResources = false, bool $global = false): void
     {
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return;
         }
 
-        Craft::$app->getElements()->startCollectingCacheTags();
+        Craft::$app->getElements()->startCollectingCacheInfo();
 
         if ($withResources) {
             $view = Craft::$app->getView();
@@ -106,6 +127,9 @@ class TemplateCaches extends Component
             $view->startCssBuffer();
             $view->startJsFileBuffer();
             $view->startCssFileBuffer();
+            $view->startHtmlBuffer();
+            $view->startMetaTagBuffer();
+            $view->startAssetBundleBuffer();
         }
     }
 
@@ -114,24 +138,24 @@ class TemplateCaches extends Component
      *
      * @param string $key The template cache key.
      * @param bool $global Whether the cache should be stored globally.
-     * @param string|null $duration How long the cache should be stored for. Should be a [relative time format](https://php.net/manual/en/datetime.formats.relative.php).
+     * @param string|null $duration How long the cache should be stored for. Should be a [relative time statement](https://www.php.net/manual/en/datetime.formats.php#datetime.formats.relative).
      * @param mixed $expiration When the cache should expire.
      * @param string $body The contents of the cache.
      * @param bool $withResources Whether JS and CSS code registered with [[\craft\web\View::registerJs()]],
      * [[\craft\web\View::registerScript()]], [[\craft\web\View::registerCss()]],
-     * [[\craft\web\View::registerJsFile()]], and [[\craft\web\View::registerCssFile()]] should be captured
-     * and included in the cache.
+     * [[\craft\web\View::registerJsFile()]], [[\craft\web\View::registerCssFile()]], and [[\craft\web\View::registerHtml()]]
+     * should be captured and included in the cache.
      * @throws Exception if this is a console request and `false` is passed to `$global`
      * @throws Throwable
      */
     public function endTemplateCache(string $key, bool $global, ?string $duration, mixed $expiration, string $body, bool $withResources = false): void
     {
         // Make sure template caching is enabled
-        if ($this->_isTemplateCachingEnabled() === false) {
+        if ($this->_isTemplateCachingEnabled($global) === false) {
             return;
         }
 
-        $dep = Craft::$app->getElements()->stopCollectingCacheTags();
+        [$dep, $maxDuration] = Craft::$app->getElements()->stopCollectingCacheInfo();
 
         if ($withResources) {
             $view = Craft::$app->getView();
@@ -140,18 +164,35 @@ class TemplateCaches extends Component
             $bufferedCss = $view->clearCssBuffer();
             $bufferedJsFiles = $view->clearJsFileBuffer();
             $bufferedCssFiles = $view->clearCssFileBuffer();
+            $bufferedHtml = $view->clearHtmlBuffer();
+            $bufferedMetaTags = $view->clearMetaTagBuffer();
+            $bufferedAssetBundles = $view->clearAssetBundleBuffer();
         }
 
         // If there are any transform generation URLs in the body, don't cache it.
         // stripslashes($body) in case the URL has been JS-encoded or something.
-        if (StringHelper::contains(stripslashes($body), 'assets/generate-transform')) {
-            return;
+        $saveCache = !StringHelper::contains(stripslashes($body), 'assets/generate-transform');
+
+        if ($saveCache) {
+            if (!$dep) {
+                $dep = new TagDependency();
+            }
+
+            // Always add a `template` tag
+            $dep->tags[] = 'template';
+
+            if ($maxDuration) {
+                $expiryDate = DateTimeHelper::now()->modify("+$maxDuration seconds");
+                $cacheInfo = [
+                    'tags' => $dep->tags,
+                    'expiryDate' => DateTimeHelper::toIso8601($expiryDate),
+                ];
+            } else {
+                $cacheInfo = $dep->tags;
+            }
+
+            $cacheValue = [$body, $cacheInfo];
         }
-
-        // Always add a `template` tag
-        $dep->tags[] = 'template';
-
-        $cacheValue = [$body, $dep->tags];
 
         if ($withResources) {
             // Parse the JS/CSS code and tag attributes out of the <script> and <style> tags
@@ -159,23 +200,63 @@ class TemplateCaches extends Component
             $bufferedCss = $this->_parseInlineResourceTags($bufferedCss);
             $bufferedJsFiles = array_map(fn(array $tags) => $this->_parseExternalResourceTags($tags, 'src'), $bufferedJsFiles);
             $bufferedCssFiles = $this->_parseExternalResourceTags($bufferedCssFiles, 'href');
+            $bufferedMetaTags = $this->_parseSelfClosingTags($bufferedMetaTags);
 
-            array_push($cacheValue, $bufferedJs, $bufferedScripts, $bufferedCss, $bufferedJsFiles, $bufferedCssFiles);
+            $bufferedAssetBundles = Collection::make($bufferedAssetBundles)
+                ->map(fn(AssetBundle $bundle, string $name) => [$name, $bundle->jsOptions['position'] ?? null])
+                ->values()
+                ->all();
+
+            if ($saveCache) {
+                array_push(
+                    $cacheValue,
+                    $bufferedJs,
+                    $bufferedScripts,
+                    $bufferedCss,
+                    $bufferedJsFiles,
+                    $bufferedCssFiles,
+                    $bufferedHtml,
+                    $bufferedMetaTags,
+                    $bufferedAssetBundles,
+                );
+            }
 
             // Re-register the JS and CSS
-            $this->_registerResources($bufferedJs, $bufferedScripts, $bufferedCss, $bufferedJsFiles, $bufferedCssFiles);
+            $this->_registerResources(
+                $bufferedJs,
+                $bufferedScripts,
+                $bufferedCss,
+                $bufferedJsFiles,
+                $bufferedCssFiles,
+                $bufferedHtml,
+                $bufferedMetaTags,
+                $bufferedAssetBundles,
+            );
+        }
+
+        if (!$saveCache) {
+            return;
         }
 
         $cacheKey = $this->_cacheKey($key, $global);
 
+        // Normalize duration/expiration into an integer duration
         if ($duration !== null) {
             $expiration = (new DateTime($duration));
         }
-
         if ($expiration !== null) {
-            $duration = DateTimeHelper::toDateTime($expiration)->getTimestamp() - time();
+            $duration = DateTimeHelper::toDateTime($expiration)->getTimestamp() - DateTimeHelper::currentTimeStamp();
         }
 
+        if ($duration <= 0) {
+            $duration = null;
+        }
+
+        if ($maxDuration) {
+            $duration = $duration ? min($duration, $maxDuration) : $maxDuration;
+        }
+
+        /** @phpstan-ignore-next-line */
         Craft::$app->getCache()->set($cacheKey, $cacheValue, $duration, $dep);
     }
 
@@ -184,6 +265,20 @@ class TemplateCaches extends Component
         return array_map(function($tag) {
             $tag = Html::parseTag($tag);
             return [$tag['children'][0]['value'], $tag['attributes']];
+        }, $tags);
+    }
+
+    /**
+     * Parse each tag and return an array of its attributes
+     * where the key is the name of the attribute and the value is its value.
+     *
+     * @param array $tags
+     * @return array
+     */
+    private function _parseSelfClosingTags(array $tags): array
+    {
+        return array_map(function($tag) {
+            return Html::parseTagAttributes($tag);
         }, $tags);
     }
 
@@ -211,6 +306,9 @@ class TemplateCaches extends Component
         array $bufferedCss,
         array $bufferedJsFiles,
         array $bufferedCssFiles,
+        array $bufferedHtml,
+        array $bufferedMetaTags,
+        array $bufferedAssetBundles,
     ): void {
         $view = Craft::$app->getView();
 
@@ -240,22 +338,45 @@ class TemplateCaches extends Component
         foreach ($bufferedCssFiles as $key => [$url, $options]) {
             $view->registerCssFile($url, $options, $key);
         }
+
+        foreach ($bufferedHtml as $pos => $tags) {
+            foreach ($tags as $key => $html) {
+                $view->registerHtml($html, $pos, $key);
+            }
+        }
+
+        foreach ($bufferedMetaTags as $key => $options) {
+            $view->registerMetaTag($options, $key);
+        }
+
+        foreach ($bufferedAssetBundles as [$name, $position]) {
+            $view->registerAssetBundle($name, $position);
+        }
     }
 
     /**
      * Returns whether template caching is enabled, based on the 'enableTemplateCaching' config setting.
      *
+     * @param bool $global Whether this is for a globally-scoped cache
      * @return bool Whether template caching is enabled
      */
-    private function _isTemplateCachingEnabled(): bool
+    private function _isTemplateCachingEnabled(bool $global): bool
     {
         if (!isset($this->_enabled)) {
-            $this->_enabled = (
-                Craft::$app->getConfig()->getGeneral()->enableTemplateCaching &&
-                !Craft::$app->getRequest()->getIsConsoleRequest()
-            );
+            if (!Craft::$app->getConfig()->getGeneral()->enableTemplateCaching) {
+                $this->_enabled = $this->_enabledGlobally = false;
+            } else {
+                // Don't enable template caches for Live Preview/tokenized requests
+                $request = Craft::$app->getRequest();
+                if ($request->getIsPreview() || $request->getHadToken()) {
+                    $this->_enabled = $this->_enabledGlobally = false;
+                } else {
+                    $this->_enabled = !$request->getIsConsoleRequest();
+                    $this->_enabledGlobally = true;
+                }
+            }
         }
-        return $this->_enabled;
+        return $global ? $this->_enabledGlobally : $this->_enabled;
     }
 
     /**
@@ -295,19 +416,22 @@ class TemplateCaches extends Component
             throw new Exception('Not possible to determine the request path for console commands.');
         }
 
-        if (Craft::$app->getRequest()->getIsCpRequest()) {
+        $isCpRequest = $request->getIsCpRequest();
+        if ($isCpRequest) {
             $this->_path = 'cp:';
         } else {
             $this->_path = 'site:';
         }
 
-        $this->_path .= Craft::$app->getRequest()->getPathInfo();
-        if (Craft::$app->getDb()->getIsMysql()) {
+        $this->_path .= $request->getPathInfo();
+        if (!Craft::$app->getDb()->getSupportsMb4()) {
             $this->_path = StringHelper::encodeMb4($this->_path);
         }
 
-        if (($pageNum = Craft::$app->getRequest()->getPageNum()) != 1) {
-            $this->_path .= '/' . Craft::$app->getConfig()->getGeneral()->getPageTrigger() . $pageNum;
+        $pageNum = $request->getPageNum();
+        if ($pageNum !== 1) {
+            $pageTrigger = $isCpRequest ? 'p' : Craft::$app->getConfig()->getGeneral()->getPageTrigger();
+            $this->_path .= sprintf('/%s%s', $pageTrigger, $pageNum);
         }
 
         return $this->_path;

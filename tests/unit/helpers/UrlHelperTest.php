@@ -31,6 +31,10 @@ class UrlHelperTest extends TestCase
     public const NON_ABSOLUTE_URL = 'craftcms.com/';
     public const NON_ABSOLUTE_URL_WWW = 'www.craftcms.com/';
     public const PROTOCOL_RELATIVE_URL = '//craftcms.com/';
+    public const EMAIL_URL = 'mailto:test@abc.com';
+    public const TEL_URL = 'tel:+10123456789';
+    public const FILE_PATH_1 = 'C:';
+    public const FILE_PATH_2 = 'C:\foo\bar.txt';
 
     /**
      * @var UnitTester
@@ -159,7 +163,15 @@ class UrlHelperTest extends TestCase
      */
     public function testEncodeParams(string $expected, string $url): void
     {
-        $this->assertSame($expected, UrlHelper::encodeParams($url));
+        self::assertSame($expected, UrlHelper::encodeParams($url));
+    }
+
+    /**
+     * @dataProvider encodeUrlDataProvider
+     */
+    public function testEncodeUrl(string $expected, string $url): void
+    {
+        self::assertSame($expected, UrlHelper::encodeUrl($url));
     }
 
     /**
@@ -250,10 +262,10 @@ class UrlHelperTest extends TestCase
      */
     public function testActionUrl(): void
     {
-        $expected = str_replace('https', 'http', TestSetup::SITE_URL) . 'index.php?p=actions/endpoint';
+        $expected = Craft::getAlias('@web/index.php?p=actions/endpoint');
         self::assertSame($expected, UrlHelper::actionUrl('endpoint'));
 
-        $expected = TestSetup::SITE_URL . 'actions/endpoint';
+        $expected = Craft::getAlias('@web/actions/endpoint');
         self::assertSame($expected, UrlHelper::actionUrl('endpoint', null, null, false));
     }
 
@@ -270,7 +282,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function buildQueryDataProvider(): array
+    public static function buildQueryDataProvider(): array
     {
         return [
             ['', []],
@@ -294,7 +306,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function isAbsoluteUrlDataProvider(): array
+    public static function isAbsoluteUrlDataProvider(): array
     {
         return [
             'absolute-url' => [true, self::ABSOLUTE_URL],
@@ -303,13 +315,17 @@ class UrlHelperTest extends TestCase
             'absolute-url-www' => [true, self::ABSOLUTE_URL_WWW],
             'non-url' => [false, self::NON_ABSOLUTE_URL],
             'non-absolute-url-www' => [false, self::NON_ABSOLUTE_URL_WWW],
+            'email-url' => [true, self::EMAIL_URL],
+            'tel-url' => [true, self::TEL_URL],
+            'file-path-1' => [false, self::FILE_PATH_1],
+            'file-path-2' => [false, self::FILE_PATH_2],
         ];
     }
 
     /**
      * @return array
      */
-    public function isFulUrlDataProvider(): array
+    public static function isFulUrlDataProvider(): array
     {
         return [
             'absolute-url' => [true, self::ABSOLUTE_URL],
@@ -329,7 +345,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function isRootRelativeUrlDataProvider(): array
+    public static function isRootRelativeUrlDataProvider(): array
     {
         return [
             'root-relative-true' => [true, '/22'],
@@ -342,7 +358,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function cpUrlCreationDataProvider(): array
+    public static function cpUrlCreationDataProvider(): array
     {
         return [
             'test-empty' => ['{cpUrl}', '', []],
@@ -379,7 +395,7 @@ class UrlHelperTest extends TestCase
      *
      * @return array
      */
-    public function stripQueryStringDataProvider(): array
+    public static function stripQueryStringDataProvider(): array
     {
         return [
             'invalid-query-string' => [
@@ -406,7 +422,7 @@ class UrlHelperTest extends TestCase
      *
      * @return array
      */
-    public function urlWithParametersDataProvider(): array
+    public static function urlWithParametersDataProvider(): array
     {
         return [
             'with-fragment' => [
@@ -467,7 +483,7 @@ class UrlHelperTest extends TestCase
      *
      * @return array
      */
-    public function urlWithTokenDataProvider(): array
+    public static function urlWithTokenDataProvider(): array
     {
         $https = true;
         $baseUrl = self::ABSOLUTE_URL_HTTPS;
@@ -506,7 +522,7 @@ class UrlHelperTest extends TestCase
      *
      * @return array
      */
-    public function urlWithSchemeDataProvider(): array
+    public static function urlWithSchemeDataProvider(): array
     {
         return [
             'no-scheme' => [
@@ -560,7 +576,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function encodeParamsDataProvider(): array
+    public static function encodeParamsDataProvider(): array
     {
         return [
             ['http://example.test', 'http://example.test?'],
@@ -572,11 +588,24 @@ class UrlHelperTest extends TestCase
     }
 
     /**
+     * @return array
+     */
+    public function encodeUrlDataProvider(): array
+    {
+        return [
+            ['https://domain/fr/offices/gen%C3%AAve', 'https://domain/fr/offices/genêve'],
+            ['https://domain/fr/offices/gen%C3%AAve?foo=bar', 'https://domain/fr/offices/genêve?foo=bar'],
+            ['https://domain/fr/offices/gen%C3%AAve?foo=bar', 'https://domain/fr/offices/gen%C3%AAve?foo=bar'],
+            ['foo+bar', 'foo bar'],
+        ];
+    }
+
+    /**
      * Tests for UrlHelper::rootRelativeUrl()
      *
      * @return array
      */
-    public function rootRelativeUrlDataProvider(): array
+    public static function rootRelativeUrlDataProvider(): array
     {
         return [
             ['/', ''],
@@ -598,7 +627,7 @@ class UrlHelperTest extends TestCase
     /**
      * @return array
      */
-    public function urlFunctionDataProvider(): array
+    public static function urlFunctionDataProvider(): array
     {
         return [
             'base' => [
@@ -623,7 +652,7 @@ class UrlHelperTest extends TestCase
         ];
     }
 
-    public function hostInfoDataProvider(): array
+    public static function hostInfoDataProvider(): array
     {
         return [
             ['https://google.com', 'https://google.com'],
@@ -634,7 +663,7 @@ class UrlHelperTest extends TestCase
         ];
     }
 
-    public function siteUrlDataProvider(): array
+    public static function siteUrlDataProvider(): array
     {
         return [
             ['{siteUrl}endpoint', 'endpoint'],

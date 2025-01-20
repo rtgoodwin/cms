@@ -1,8 +1,17 @@
-{% extends "_layouts/cp" %}
+{% extends '_layouts/cp.twig' %}
 
 {% set fullPageForm = true %}
 
-{% import "_includes/forms" as forms %}
+{% set formActions = [
+    {
+        label: 'Save and continue editing'|t('app'),
+        redirect: 'settings/tags/{id}'|hash,
+        shortcut: true,
+        retainScroll: true,
+    },
+] %}
+
+{% import '_includes/forms.twig' as forms %}
 
 {% block content %}
     {{ actionInput('tags/save-tag-group') }}

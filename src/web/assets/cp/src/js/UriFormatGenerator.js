@@ -6,7 +6,7 @@
 Craft.UriFormatGenerator = Craft.BaseInputGenerator.extend({
   generateTargetValue: function (sourceVal) {
     // Remove HTML tags
-    sourceVal = sourceVal.replace('/<(.*?)>/g', '');
+    sourceVal = sourceVal.replace(/<(.*?)>/g, '');
 
     // Make it lowercase
     sourceVal = sourceVal.toLowerCase();
@@ -21,12 +21,6 @@ Craft.UriFormatGenerator = Craft.BaseInputGenerator.extend({
     // Get the "words"
     var words = Craft.filterArray(sourceVal.split(/[^a-z0-9]+/));
 
-    var uriFormat = words.join(Craft.slugWordSeparator);
-
-    if (uriFormat && this.settings.suffix) {
-      uriFormat += this.settings.suffix;
-    }
-
-    return uriFormat;
+    return words.join(Craft.slugWordSeparator);
   },
 });

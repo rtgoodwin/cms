@@ -7,20 +7,29 @@
 
 namespace craft\db;
 
+use ArrayAccess;
+use ArrayIterator;
 use craft\base\ClonefixTrait;
 use craft\events\DefineBehaviorsEvent;
 use craft\helpers\ArrayHelper;
 use Illuminate\Support\Collection;
+use IteratorAggregate;
 use yii\base\Exception;
+use yii\base\NotSupportedException;
+use yii\base\UnknownPropertyException;
 use yii\db\Connection as YiiConnection;
 
 /**
  * Class Query
  *
+ * @template TKey of array-key
+ * @template TValue
+ * @implements ArrayAccess<TKey, TValue>
+ *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
-class Query extends \yii\db\Query
+class Query extends \yii\db\Query implements ArrayAccess, IteratorAggregate
 {
     use ClonefixTrait;
 
@@ -49,14 +58,107 @@ class Query extends \yii\db\Query
     }
 
     /**
+     * Required by the IteratorAggregate interface.
+     *
+     * @return ArrayIterator
+     * @since 4.2.0
+     */
+    public function getIterator(): ArrayIterator
+    {
+        return new ArrayIterator($this->all());
+    }
+
+    /**
+     * Required by the ArrayAccess interface.
+     *
+     * @param mixed $offset
+     * @return bool
+     * @since 4.2.0
+     */
+    public function offsetExists(mixed $offset): bool
+    {
+        if (is_numeric($offset)) {
+            $offset = $this->offset;
+            $limit = $this->limit;
+            $this->offset = $offset;
+            $this->limit = 1;
+            $exists = $this->exists();
+            $this->offset = $offset;
+            $this->limit = $limit;
+            return $exists;
+        }
+
+        return $this->__isset($offset);
+    }
+
+    /**
+     * Required by the ArrayAccess interface.
+     *
+     * @param mixed $offset
+     * @return mixed
+     * @throws UnknownPropertyException
+     * @since 4.2.0
+     */
+    public function offsetGet(mixed $offset): mixed
+    {
+        if (is_numeric($offset)) {
+            $element = $this->nth($offset);
+            if ($element) {
+                return $element;
+            }
+        }
+
+        return $this->__get($offset);
+    }
+
+    /**
+     * Required by the ArrayAccess interface.
+     *
+     * @param mixed $offset
+     * @param mixed $value
+     * @throws NotSupportedException
+     * @throws UnknownPropertyException
+     * @since 4.2.0
+     */
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if (is_numeric($offset)) {
+            throw new NotSupportedException('Queries do not support setting values using array syntax.');
+        }
+
+        $this->__set($offset, $value);
+    }
+
+    /**
+     * Required by the ArrayAccess interface.
+     *
+     * @param mixed $offset
+     * @return void
+     * @throws NotSupportedException
+     * @since 4.2.0
+     */
+    public function offsetUnset(mixed $offset): void
+    {
+        if (is_numeric($offset)) {
+            throw new NotSupportedException('Queries do not support unsetting values using array syntax.');
+        }
+
+        $this->__unset($offset);
+    }
+
+    /**
      * @inheritdoc
      */
     public function behaviors(): array
     {
         // Fire a 'defineBehaviors' event
-        $event = new DefineBehaviorsEvent();
-        $this->trigger(self::EVENT_DEFINE_BEHAVIORS, $event);
-        return $event->behaviors;
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_BEHAVIORS)) {
+            $event = new DefineBehaviorsEvent();
+            $this->trigger(self::EVENT_DEFINE_BEHAVIORS, $event);
+            return $event->behaviors;
+        }
+
+        return [];
     }
 
     /**
@@ -112,6 +214,42 @@ class Query extends \yii\db\Query
         return parent::orWhere($condition, $params);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function groupBy($columns): static
+    {
+        $this->splitColumns($columns);
+        return parent::groupBy($columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function addGroupBy($columns): static
+    {
+        $this->splitColumns($columns);
+        return parent::addGroupBy($columns);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function normalizeSelect($columns): array
+    {
+        $this->splitColumns($columns);
+        return parent::normalizeSelect($columns);
+    }
+
+    private function splitColumns(mixed &$columns): void
+    {
+        if (is_string($columns)) {
+            // match commas that are not preceded by `DECIMAL(` and one or two digits
+            // e.g. the comma in `DECIMAL(65,15)` shouldn't be matched, but the one in `test12, test13` should
+            $columns = preg_split('/(?<!DECIMAL\(\d)(?<!DECIMAL\(\d\d)\s*,\s*/', trim($columns), -1, PREG_SPLIT_NO_EMPTY);
+        }
+    }
+
     // Execution functions
     // -------------------------------------------------------------------------
 
@@ -146,6 +284,7 @@ class Query extends \yii\db\Query
 
     /**
      * @inheritdoc
+     * @return array<TKey,TValue>
      */
     public function all($db = null): array
     {
@@ -161,7 +300,7 @@ class Query extends \yii\db\Query
      *
      * @param YiiConnection|null $db The database connection used to generate the SQL statement.
      * If this parameter is not given, the `db` application component will be used.
-     * @return Collection A collection of the resulting elements.
+     * @return Collection<TKey,TValue> A collection of the resulting elements.
      * @since 4.0.0
      */
     public function collect(?YiiConnection $db = null): Collection
@@ -171,6 +310,7 @@ class Query extends \yii\db\Query
 
     /**
      * @inheritdoc
+     * @return TValue|null
      */
     public function one($db = null): mixed
     {

@@ -11,6 +11,7 @@ use Craft;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\FileHelper;
+use craft\helpers\Session;
 use craft\helpers\StringHelper;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
@@ -57,8 +58,7 @@ class Webpack extends Component
     /**
      * Returns the environment file.
      *
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return string|null
      * @throws ReflectionException
      */
@@ -96,8 +96,7 @@ class Webpack extends Component
     }
 
     /**
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return string
      * @throws ReflectionException
      */
@@ -112,8 +111,7 @@ class Webpack extends Component
     /**
      * Load the environment variables.
      *
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return array|null
      * @throws ReflectionException
      */
@@ -128,7 +126,7 @@ class Webpack extends Component
         $envFile = $this->_getEnvFilePath($class);
 
         // TODO: Use DotEnv::parse() when we version is bumped.
-        $fileContents = file_exists($envFile) ? @file_get_contents($envFile) : null;
+        $fileContents = $envFile && file_exists($envFile) ? @file_get_contents($envFile) : null;
 
         if (!$fileContents) {
             return $this->_envFileVariables[$class] = [];
@@ -147,8 +145,7 @@ class Webpack extends Component
     }
 
     /**
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return string|null
      * @throws Exception
      */
@@ -158,8 +155,7 @@ class Webpack extends Component
     }
 
     /**
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return string|null
      * @throws Exception
      */
@@ -171,8 +167,7 @@ class Webpack extends Component
     /**
      * Get the dev server public path.
      *
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return string
      * @throws Exception
      */
@@ -199,11 +194,9 @@ class Webpack extends Component
      * Returns the running status of the webpack dev server.
      *
      * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
      * @param string $loopback
      * @return bool
      * @throws GuzzleException
-     * @throws ReflectionException
      */
     private function _isDevServerRunning(string $class, string $loopback): bool
     {
@@ -216,7 +209,11 @@ class Webpack extends Component
             return $this->_isDevServerRunning[$class] = $this->_matchAsset($this->_serverResponse[$loopback], $class);
         }
 
-        $client = Craft::createGuzzleClient();
+        // Close the PHP session in case this takes a while
+        Session::close();
+
+        // Make sure the request isn't too strict for people running the dev server using https and outside the container
+        $client = Craft::createGuzzleClient(['verify' => false]);
         try {
             $res = $client->get(StringHelper::ensureRight($loopback, '/') . 'which-asset');
             if ($res->getStatusCode() !== 200) {
@@ -238,8 +235,7 @@ class Webpack extends Component
 
     /**
      * @param array $json
-     * @param string $class
-     * @phpstan-param class-string<AssetBundle> $class
+     * @param class-string<AssetBundle> $class
      * @return bool
      */
     private function _matchAsset(array $json, string $class): bool

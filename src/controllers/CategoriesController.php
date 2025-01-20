@@ -13,6 +13,7 @@ use craft\elements\Category;
 use craft\errors\InvalidElementException;
 use craft\helpers\Cp;
 use craft\helpers\ElementHelper;
+use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\models\CategoryGroup;
 use craft\models\CategoryGroup_SiteSettings;
@@ -58,7 +59,7 @@ class CategoriesController extends Controller
 
         $groups = Craft::$app->getCategories()->getAllGroups();
 
-        return $this->renderTemplate('settings/categories/index', [
+        return $this->renderTemplate('settings/categories/index.twig', [
             'categoryGroups' => $groups,
         ]);
     }
@@ -113,7 +114,7 @@ class CategoriesController extends Controller
         $variables['groupId'] = $groupId;
         $variables['categoryGroup'] = $categoryGroup;
 
-        return $this->renderTemplate('settings/categories/_edit', $variables);
+        return $this->renderTemplate('settings/categories/_edit.twig', $variables);
     }
 
     /**
@@ -221,11 +222,7 @@ class CategoriesController extends Controller
             throw new ForbiddenHttpException('User not permitted to edit categories');
         }
 
-        $this->view->registerTranslations('app', [
-            'New category',
-        ]);
-
-        return $this->renderTemplate('categories/_index', [
+        return $this->renderTemplate('categories/_index.twig', [
             'groupHandle' => $groupHandle,
             'groups' => $groups,
         ]);
@@ -254,8 +251,6 @@ class CategoriesController extends Controller
             throw new ForbiddenHttpException('User not authorized to edit content in any sites.');
         }
 
-        $user = Craft::$app->getUser()->getIdentity();
-
         // Create & populate the draft
         $category = Craft::createObject(Category::class);
         $category->siteId = $site->id;
@@ -268,7 +263,7 @@ class CategoriesController extends Controller
         }
 
         // Make sure the user is allowed to create this category
-        if (!$category->canSave($user)) {
+        if (!Craft::$app->getElements()->canSave($category)) {
             throw new ForbiddenHttpException('User not authorized to save this category.');
         }
 
@@ -285,9 +280,9 @@ class CategoriesController extends Controller
         // Save it
         $category->setScenario(Element::SCENARIO_ESSENTIALS);
         if (!Craft::$app->getDrafts()->saveElementAsDraft($category, Craft::$app->getUser()->getId(), null, null, false)) {
-            return $this->asModelFailure($category, Craft::t('app', 'Couldn’t create {type}.', [
+            return $this->asModelFailure($category, StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t create {type}.', [
                 'type' => Category::lowerDisplayName(),
-            ]), 'category');
+            ])), 'category');
         }
 
         // Set its position in the structure if a before/after param was passed
@@ -355,11 +350,12 @@ class CategoriesController extends Controller
 
                 return $this->asModelFailure(
                     $category,
-                    Craft::t('app', 'Couldn’t duplicate category.'),
+                    Craft::t('app', 'Couldn’t duplicate {type}.', [
+                        'type' => Category::lowerDisplayName(),
+                    ]),
                     'category'
                 );
             } catch (Throwable $e) {
-                /** @phpstan-ignore-next-line */
                 throw new ServerErrorHttpException(Craft::t('app', 'An error occurred when duplicating the category.'), 0, $e);
             }
         }
@@ -375,7 +371,9 @@ class CategoriesController extends Controller
         if (!Craft::$app->getElements()->saveElement($category)) {
             return $this->asModelFailure(
                 $category,
-                Craft::t('app', 'Couldn’t save category.'),
+                StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
+                    'type' => Category::lowerDisplayName(),
+                ])),
                 $categoryVariable
             );
         }
@@ -484,42 +482,6 @@ class CategoriesController extends Controller
     }
 
     /**
-     * Displays a category.
-     *
-     * @param Category $category
-     * @return Response
-     * @throws ServerErrorHttpException if the category doesn't have a URL for the site it's configured with, or if the category's site ID is invalid
-     */
-    private function _showCategory(Category $category): Response
-    {
-        $categoryGroupSiteSettings = $category->getGroup()->getSiteSettings();
-
-        if (!isset($categoryGroupSiteSettings[$category->siteId]) || !$categoryGroupSiteSettings[$category->siteId]->hasUrls) {
-            throw new ServerErrorHttpException('The category ' . $category->id . ' doesn’t have a URL for the site ' . $category->siteId . '.');
-        }
-
-        $site = Craft::$app->getSites()->getSiteById($category->siteId, true);
-
-        if (!$site) {
-            throw new ServerErrorHttpException('Invalid site ID: ' . $category->siteId);
-        }
-
-        Craft::$app->language = $site->language;
-        Craft::$app->set('locale', Craft::$app->getI18n()->getLocaleById($site->language));
-
-        // Have this category override any freshly queried categories with the same ID/site
-        if ($category->id) {
-            Craft::$app->getElements()->setPlaceholderElement($category);
-        }
-
-        $this->getView()->getTwig()->disableStrictVariables();
-
-        return $this->renderTemplate($categoryGroupSiteSettings[$category->siteId]->template, [
-            'category' => $category,
-        ]);
-    }
-
-    /**
      * Returns the HTML for a Categories field input, based on a given list of selected category IDs.
      *
      * @return Response
@@ -551,7 +513,7 @@ class CategoriesController extends Controller
             }
         }
 
-        $html = $this->getView()->renderTemplate('_components/fieldtypes/Categories/input',
+        $html = $this->getView()->renderTemplate('_components/fieldtypes/Categories/input.twig',
             [
                 'elements' => $categories,
                 'id' => $this->request->getParam('id'),

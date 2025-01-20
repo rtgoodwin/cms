@@ -17,7 +17,10 @@ use craft\image\Raster;
 use craft\image\Svg;
 use craft\image\SvgAllowedAttributes;
 use enshrined\svgSanitize\Sanitizer;
+use Imagine\Gd\Imagine as GdImagine;
+use Imagine\Image\Format;
 use Imagine\Imagick\Imagick;
+use Imagine\Imagick\Imagine as ImagickImagine;
 use Throwable;
 use yii\base\Component;
 use yii\base\Exception;
@@ -119,11 +122,15 @@ class Images extends Component
         $supportedFormats = $this->supportedImageFormats;
 
         if ($this->getSupportsWebP()) {
-            $supportedFormats[] = 'webp';
+            $supportedFormats[] = Format::ID_WEBP;
         }
 
         if ($this->getSupportsAvif()) {
-            $supportedFormats[] = 'avif';
+            $supportedFormats[] = Format::ID_AVIF;
+        }
+
+        if ($this->getSupportsHeic()) {
+            $supportedFormats[] = Format::ID_HEIC;
         }
 
         return $supportedFormats;
@@ -184,18 +191,31 @@ class Images extends Component
      */
     public function getSupportsWebP(): bool
     {
-        return $this->getIsImagick() ? !empty(Imagick::queryFormats('WEBP')) : function_exists('imagewebp');
+        $info = $this->getIsImagick() ? ImagickImagine::getDriverInfo() : GdImagine::getDriverInfo();
+        return $info->isFormatSupported(Format::ID_WEBP);
     }
 
-
     /**
-     * Returns whether the Avif image format is supported.
+     * Returns whether the AVIF image format is supported.
      *
      * @return bool
      */
     public function getSupportsAvif(): bool
     {
-        return $this->getIsImagick() ? !empty(Imagick::queryFormats('AVIF')) : function_exists('imageavif');
+        $info = $this->getIsImagick() ? ImagickImagine::getDriverInfo() : GdImagine::getDriverInfo();
+        return $info->isFormatSupported(Format::ID_AVIF);
+    }
+
+    /**
+     * Returns whether the HEIC/HEIF image format is supported.
+     *
+     * @return bool
+     * @since 4.3.6
+     */
+    public function getSupportsHeic(): bool
+    {
+        $info = $this->getIsImagick() ? ImagickImagine::getDriverInfo() : GdImagine::getDriverInfo();
+        return $info->isFormatSupported(Format::ID_HEIC);
     }
 
     /**
@@ -232,7 +252,7 @@ class Images extends Component
      * The code was adapted from http://www.php.net/manual/en/function.imagecreatefromjpeg.php#64155.
      * It will first attempt to do it with available memory. If that fails,
      * Craft will bump the memory to amount defined by the
-     * <config4:phpMaxMemoryLimit> config setting, then try again.
+     * <config5:phpMaxMemoryLimit> config setting, then try again.
      *
      * @param string $filePath The path to the image file.
      * @param bool $toTheMax If set to true, will set the PHP memory to the config setting phpMaxMemoryLimit.
@@ -264,8 +284,7 @@ class Images extends Component
         // If we can't find out the imagesize, chances are, we won't be able to anything about it.
         if (!is_array($imageInfo)) {
             Craft::warning('Could not determine image information for ' . $filePath);
-
-            return false;
+            return true;
         }
 
         $K64 = 65536;

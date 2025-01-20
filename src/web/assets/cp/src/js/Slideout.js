@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 (function ($) {
   /** global: Craft */
   /** global: Garnish */
@@ -9,23 +11,12 @@
       $outerContainer: null,
       $container: null,
       $shade: null,
+      $liveRegion: $('<span class="visually-hidden" role="status"></span>'),
       isOpen: false,
+      useMobileStyles: null,
 
       init: function (contents, settings) {
         this.setSettings(settings, Craft.Slideout.defaults);
-
-        if (!Garnish.isMobileBrowser()) {
-          this.$shade = $('<div class="slideout-shade"/>').appendTo(
-            Garnish.$bod
-          );
-
-          if (this.settings.closeOnShadeClick) {
-            this.addListener(this.$shade, 'click', (ev) => {
-              ev.stopPropagation();
-              this.close();
-            });
-          }
-        }
 
         this.$outerContainer = $('<div/>', {
           class: 'slideout-container hidden',
@@ -40,13 +31,15 @@
           .data('slideout', this)
           .appendTo(this.$outerContainer);
 
-        Garnish.addModalAttributes(this.$outerContainer);
-
-        if (Garnish.isMobileBrowser()) {
-          this.$container.addClass('so-mobile');
+        if (this.$container.attr('id')) {
+          Craft.Slideout.instances[this.$container.attr('id')] = this;
         }
 
+        Garnish.addModalAttributes(this.$outerContainer);
+
         Craft.trapFocusWithin(this.$container);
+
+        this.$liveRegion.appendTo(this.$container);
 
         if (this.settings.autoOpen) {
           this.open();
@@ -62,17 +55,66 @@
 
         this._cancelTransitionListeners();
 
-        // Move the shade + container to the end of <body> so they get the highest sub-z-indexes
-        if (this.$shade) {
+        const activePreview =
+          Craft.Preview.getActive() || Craft.LivePreview.getActive();
+        this.useMobileStyles = activePreview || Craft.useMobileStyles();
+
+        this.$outerContainer.removeClass('so-mobile so-lp');
+        this.$container.removeClass('so-mobile so-lp');
+
+        if (activePreview) {
+          this.$outerContainer.addClass('so-lp');
+          this.$container.addClass('so-lp');
+        } else if (this.useMobileStyles) {
+          this.$container.addClass('so-mobile');
+        }
+
+        if (activePreview || !this.useMobileStyles) {
+          if (!this.$shade) {
+            this.$shade = $('<div class="slideout-shade"/>');
+
+            if (this.settings.closeOnShadeClick) {
+              this.addListener(this.$shade, 'click', (ev) => {
+                ev.stopPropagation();
+                this.close();
+              });
+            }
+          }
+
+          // Keep the shade + container to the end of <body> so they get the highest sub-z-indexes
+          if (activePreview) {
+          }
+
           this.$shade.appendTo(Garnish.$bod).show();
+        } else if (this.$shade) {
+          this.$shade.remove();
+          delete this.$shade;
         }
 
         this.$outerContainer.appendTo(Garnish.$bod).removeClass('hidden');
 
-        if (Garnish.isMobileBrowser()) {
-          this.$container.css('top', '100vh');
+        if (activePreview) {
+          // keep the width equal to the editp ane width
+          this.updateWidthsForPreviewPane(activePreview);
+          const dragHandler = () => {
+            if (this.isOpen) {
+              this.updateWidthsForPreviewPane(activePreview);
+            }
+          };
+          activePreview.on('drag', dragHandler);
+          activePreview.on('beforeClose', () => {
+            activePreview.off('drag', dragHandler);
+          });
+        }
+
+        if (this.useMobileStyles) {
+          this.$container
+            .css('top', '100vh')
+            .css(Garnish.ltr ? 'left' : 'right', '');
         } else {
-          this.$container.css(Garnish.ltr ? 'left' : 'right', '100vw');
+          this.$container
+            .css('top', '')
+            .css(Garnish.ltr ? 'left' : 'right', '100vw');
         }
 
         this.$container.one('transitionend.slideout', () => {
@@ -99,6 +141,14 @@
 
         this.isOpen = true;
         this.trigger('open');
+      },
+
+      updateWidthsForPreviewPane: function (activePreview) {
+        const width = activePreview.$editorContainer.width() - 1;
+        if (this.$shade) {
+          this.$shade.width(width);
+        }
+        this.$outerContainer.css('width', `calc(${width}px - var(--m) * 2)`);
       },
 
       setTriggerElement: function (trigger) {
@@ -158,6 +208,11 @@
         this.$outerContainer = null;
         this.$container = null;
 
+        Craft.Slideout.instances = Craft.filterObject(
+          Craft.Slideout.instances,
+          (instance) => instance !== this
+        );
+
         this.base();
       },
     },
@@ -170,10 +225,11 @@
         closeOnShadeClick: true,
         triggerElement: null,
       },
+      instances: {},
       openPanels: [],
       addPanel: function (panel) {
         Craft.Slideout.openPanels.unshift(panel);
-        if (Garnish.isMobileBrowser()) {
+        if (panel.useMobileStyles) {
           panel.$container.css('top', 0);
         } else {
           Craft.Slideout.updateStyles();
@@ -183,7 +239,7 @@
         Craft.Slideout.openPanels = Craft.Slideout.openPanels.filter(
           (m) => m !== panel
         );
-        if (Garnish.isMobileBrowser()) {
+        if (panel.useMobileStyles) {
           panel.$container.css('top', '100vh');
         } else {
           panel.$container.css(Garnish.ltr ? 'left' : 'right', '100vw');
@@ -195,7 +251,7 @@
         Craft.Slideout.openPanels.forEach((panel, i) => {
           panel.$container.css(
             Garnish.ltr ? 'left' : 'right',
-            `${50 * ((totalPanels - i) / totalPanels)}vw`
+            `${45 * ((totalPanels - i) / totalPanels)}vw`
           );
         });
 

@@ -40,12 +40,12 @@
         </li>
         <li>
           <a
-            href="https://id.craftcms.com/"
-            title="Craft ID"
+            href="https://console.craftcms.com/"
+            title="Craft Console"
             @click="$emit('itemClick')"
           >
             <c-icon icon="world" class="tw-w-6 tw-h-6" />
-            Craft ID
+            Craft Console
           </a>
         </li>
       </ul>
@@ -61,7 +61,9 @@
       ...mapState({
         categories: (state) => state.pluginStore.categories,
         CraftEdition: (state) => state.craft.CraftEdition,
+        CraftTeam: (state) => state.craft.CraftTeam,
         CraftPro: (state) => state.craft.CraftPro,
+        CraftEnterprise: (state) => state.craft.CraftEnterprise,
         licensedEdition: (state) => state.craft.licensedEdition,
       }),
     },

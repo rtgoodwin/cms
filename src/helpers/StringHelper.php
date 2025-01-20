@@ -7,9 +7,11 @@
 
 namespace craft\helpers;
 
+use BackedEnum;
 use Craft;
 use HTMLPurifier_Config;
 use IteratorAggregate;
+use LitEmoji\LitEmoji;
 use Normalizer;
 use Stringy\Stringy as BaseStringy;
 use voku\helper\ASCII;
@@ -37,6 +39,12 @@ class StringHelper extends \yii\helpers\StringHelper
      * @see asciiCharMap()
      */
     private static array $_asciiCharMaps;
+
+    /**
+     * @var string[]|false
+     * @see escapeShortcodes()
+     */
+    private static array|false $_shortcodeEscapeMap;
 
     /**
      * Gets the substring after the first occurrence of a separator.
@@ -117,7 +125,7 @@ class StringHelper extends \yii\helpers\StringHelper
 
     /**
      * Returns ASCII character mappings, merging in any custom defined mappings
-     * from the <config4:customAsciiCharMappings> config setting.
+     * from the <config5:customAsciiCharMappings> config setting.
      *
      * @param bool $flat Whether the mappings should be returned as a flat array (é => e)
      * @param string|null $language Whether to include language-specific mappings (only applied if $flat is true)
@@ -349,8 +357,7 @@ class StringHelper extends \yii\helpers\StringHelper
         if (App::checkForValidIconv()) {
             $str = HtmlPurifier::convertToUtf8($str, $config);
         } else {
-            $encoding = static::encoding($str);
-            $str = mb_convert_encoding($str, 'utf-8', $encoding);
+            $str = mb_convert_encoding($str, self::UTF8);
         }
 
         return $str;
@@ -459,7 +466,7 @@ class StringHelper extends \yii\helpers\StringHelper
         // So, by converting from UTF-8 to UTF-32, we magically
         // get the correct hex encoding.
         return static::replaceMb4($str, static function($char) {
-            $unpacked = unpack('H*', mb_convert_encoding($char, 'UTF-32', 'UTF-8'));
+            $unpacked = unpack('H*', mb_convert_encoding($char, 'UTF-32', self::UTF8));
             return isset($unpacked[1]) ? '&#x' . ltrim($unpacked[1], '0') . ';' : '';
         });
     }
@@ -814,7 +821,7 @@ class StringHelper extends \yii\helpers\StringHelper
      */
     public static function isUtf8(string $str): bool
     {
-        return static::encoding($str) === 'utf-8';
+        return mb_check_encoding($str, self::UTF8);
     }
 
     /**
@@ -908,13 +915,19 @@ class StringHelper extends \yii\helpers\StringHelper
     public static function lines(string $str): array
     {
         $lines = BaseStringy::create($str)->lines();
+        return array_map(fn(BaseStringy $line) => (string)$line, $lines);
+    }
 
-        foreach ($lines as $i => $line) {
-            $lines[$i] = $line;
-        }
-
-        /** @var string[] $lines */
-        return $lines;
+    /**
+     * Returns the first line of a string.
+     *
+     * @param string $str
+     * @return string
+     * @since 5.5.0
+     */
+    public static function firstLine(string $str): string
+    {
+        return (string)BaseStringy::create($str)->lines()[0];
     }
 
     /**
@@ -1246,10 +1259,6 @@ class StringHelper extends \yii\helpers\StringHelper
      */
     public static function replaceMb4(string $str, callable|string $replace): string
     {
-        if (!static::containsMb4($str)) {
-            return $str;
-        }
-
         return preg_replace_callback('/./u', function(array $match) use ($replace): string {
             if (strlen($match[0]) >= 4) {
                 return is_callable($replace) ? $replace($match[0]) : $replace;
@@ -1680,7 +1689,7 @@ class StringHelper extends \yii\helpers\StringHelper
     }
 
     /**
-     * Converts an object to its string representation. If the object is an array, will glue the array elements togeter
+     * Converts an object to its string representation. If the object is an array, will glue the array elements together
      * with the $glue param. Otherwise will cast the object to a string.
      *
      * @param mixed $object The object to convert to a string.
@@ -1703,6 +1712,10 @@ class StringHelper extends \yii\helpers\StringHelper
             }
 
             return implode($glue, $stringValues);
+        }
+
+        if ($object instanceof BackedEnum) {
+            return $object->value;
         }
 
         return '';
@@ -1789,6 +1802,36 @@ class StringHelper extends \yii\helpers\StringHelper
 
         // Split on the words and return
         return static::splitOnWords($str);
+    }
+
+    /**
+     * Returns a handle-safe version of a string.
+     *
+     * @param string $str
+     * @return string
+     * @since 4.4.0
+     */
+    public static function toHandle(string $str): string
+    {
+        // Remove HTML tags
+        $handle = static::stripHtml($str);
+
+        // Remove inner-word punctuation
+        $handle = preg_replace('/[\'"‘’“”\[\]\(\)\{\}:]/', '', $handle);
+
+        // Make it lowercase
+        $handle = static::toLowerCase($handle);
+
+        // Convert extended ASCII characters to basic ASCII
+        $handle = static::toAscii($handle);
+
+        // Handle must start with a letter
+        $handle = preg_replace('/^[^a-z]+/', '', $handle);
+
+        // Replace any remaining non-alphanumeric or underscore characters with spaces
+        $handle = preg_replace('/[^a-z0-9_]/', ' ', $handle);
+
+        return static::toCamelCase($handle);
     }
 
     /**
@@ -1916,5 +1959,101 @@ class StringHelper extends \yii\helpers\StringHelper
         }
 
         return $combined;
+    }
+
+    /**
+     * Converts emoji to shortcodes.
+     *
+     * @param string $str
+     * @return string
+     * @since 4.4.3
+     */
+    public static function emojiToShortcodes(string $str): string
+    {
+        // Add delimiters around all 4-byte chars
+        $dl = '__MB4_DL__';
+        $dr = '__MB4_DR__';
+        $str = static::replaceMb4($str, fn($char) => sprintf('%s%s%s', $dl, $char, $dr));
+
+        // Strip out consecutive delimiters
+        $str = str_replace(sprintf('%s%s', $dr, $dl), '', $str);
+
+        // Replace all 4-byte sequences individually
+        return preg_replace_callback("/$dl(.+?)$dr/", fn($m) => LitEmoji::unicodeToShortcode($m[1]), $str);
+    }
+
+    /**
+     * Converts shortcodes to emoji.
+     *
+     * @param string $str
+     * @return string
+     * @since 4.4.3
+     */
+    public static function shortcodesToEmoji(string $str): string
+    {
+        return LitEmoji::shortcodeToUnicode($str);
+    }
+
+    /**
+     * Escapes shortcodes.
+     *
+     * @param string $str
+     * @return string
+     * @since 4.5.0
+     */
+    public static function escapeShortcodes(string $str): string
+    {
+        $map = self::shortcodeEscapeMap();
+        if ($map === false) {
+            return $str;
+        }
+        return str_replace(array_keys($map), $map, $str);
+    }
+
+    /**
+     * Unscapes shortcodes.
+     *
+     * @param string $str
+     * @return string
+     * @since 4.5.0
+     */
+    public static function unescapeShortcodes(string $str): string
+    {
+        $map = self::shortcodeEscapeMap();
+        if ($map === false) {
+            return $str;
+        }
+        return str_replace($map, array_keys($map), $str);
+    }
+
+    private static function shortcodeEscapeMap(): array|false
+    {
+        if (!isset(self::$_shortcodeEscapeMap)) {
+            $path = Craft::$app->getPath()->getVendorPath() . '/elvanto/litemoji/src/shortcodes-array.php';
+            if (file_exists($path)) {
+                $shortcodes = array_keys(require $path);
+                self::$_shortcodeEscapeMap = array_combine(
+                    array_map(fn(string $shortcode) => ":$shortcode:", $shortcodes),
+                    array_map(fn(string $shortcode) => "\\:$shortcode\\:", $shortcodes),
+                );
+            } else {
+                Craft::warning('Unable to escape shortcodes: shortcodes-array.php doesn’t exist at the expected location.');
+                self::$_shortcodeEscapeMap = false;
+            }
+        }
+
+        return self::$_shortcodeEscapeMap;
+    }
+
+    /**
+     * Indents each line in the given string.
+     *
+     * @param string $str
+     * @return string
+     * @since 5.2.0
+     */
+    public static function indent(string $str, string $indent = '    '): string
+    {
+        return implode("\n", array_map(fn(string $line) => $indent . $line, static::lines($str)));
     }
 }

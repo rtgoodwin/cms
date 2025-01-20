@@ -33,7 +33,7 @@ class Feed extends Widget
      */
     public static function icon(): ?string
     {
-        return Craft::getAlias('@appicons/feed.svg');
+        return 'rss';
     }
 
     /**
@@ -81,7 +81,7 @@ class Feed extends Widget
      */
     public function getSettingsHtml(): ?string
     {
-        return Craft::$app->getView()->renderTemplate('_components/widgets/Feed/settings',
+        return Craft::$app->getView()->renderTemplate('_components/widgets/Feed/settings.twig',
             [
                 'widget' => $this,
             ]);
@@ -125,7 +125,7 @@ class Feed extends Widget
             );
         }
 
-        return Craft::$app->getView()->renderTemplate('_components/widgets/Feed/body', [
+        return Craft::$app->getView()->renderTemplate('_components/widgets/Feed/body.twig', [
             'feed' => $data,
         ]);
     }

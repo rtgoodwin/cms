@@ -46,7 +46,11 @@ class ConfigHelperTest extends TestCase
      */
     public function testDurationInSeconds(int $expected, mixed $value): void
     {
-        self::assertSame($expected, ConfigHelper::durationInSeconds($value));
+        self::assertContains(ConfigHelper::durationInSeconds($value), [
+            $expected,
+            $expected + (60 * 60),
+            $expected - (60 * 60),
+        ]);
     }
 
     /**
@@ -89,7 +93,7 @@ class ConfigHelperTest extends TestCase
     /**
      * @return array
      */
-    public function localizedValueDataProvider(): array
+    public static function localizedValueDataProvider(): array
     {
         return [
             // Ensure if array that it is accessed by the handle and returns the value of the index.
@@ -116,7 +120,7 @@ class ConfigHelperTest extends TestCase
     /**
      * @return array
      */
-    public function sizeInBytesDataProvider(): array
+    public static function sizeInBytesDataProvider(): array
     {
         return [
             [5368709120, '5G'],
@@ -134,7 +138,7 @@ class ConfigHelperTest extends TestCase
     /**
      * @return array
      */
-    public function durationInSecondsDataProvider(): array
+    public static function durationInSecondsDataProvider(): array
     {
         return [
             [86400, 'P1D'],

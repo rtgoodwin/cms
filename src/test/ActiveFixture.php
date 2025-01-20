@@ -8,19 +8,24 @@
 namespace craft\test;
 
 use Craft;
+use craft\elements\Entry;
+use craft\helpers\ArrayHelper;
+use craft\models\FieldLayout;
 use yii\base\InvalidArgumentException;
 use yii\db\ActiveRecord;
 use yii\db\TableSchema;
-use yii\test\ActiveFixture as BaseActiveFixture;
+use yii\test\ActiveFixture as YiiActiveFixture;
+use yii\test\BaseActiveFixture;
 
 /**
  * Class Fixture.
  *
+ * @property ActiveRecord[] $data
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @author Global Network Group | Giel Tettelaar <giel@yellowflash.net>
  * @since 3.6.0
  */
-class ActiveFixture extends BaseActiveFixture
+class ActiveFixture extends YiiActiveFixture
 {
     /**
      * @var array
@@ -34,7 +39,10 @@ class ActiveFixture extends BaseActiveFixture
     {
         $tableSchema = $this->getTableSchema();
         $this->data = [];
-        foreach ($this->getData() as $row) {
+
+        $fieldsService = Craft::$app->getFields();
+
+        foreach ($this->getData() as $key => $row) {
             $modelClass = $this->modelClass;
 
             // Fixture data may pass in props that are not for the db. We thus run an extra check to ensure
@@ -42,16 +50,26 @@ class ActiveFixture extends BaseActiveFixture
             $correctRow = $row;
 
             // Set the field layout if it exists.
+            $fieldLayout = null;
             if (isset($row['fieldLayoutType'])) {
-                $fieldLayoutType = $row['fieldLayoutType'];
-                unset($row['fieldLayoutType']);
-
-                $fieldLayout = Craft::$app->getFields()->getLayoutByType($fieldLayoutType);
-                if ($fieldLayout->id) {
-                    $row['fieldLayoutId'] = $fieldLayout->id;
-                } else {
+                $fieldLayoutType = ArrayHelper::remove($row, 'fieldLayoutType');
+                $fieldLayout = $fieldsService->getLayoutByType($fieldLayoutType);
+                if ($fieldLayout->id === null) {
                     codecept_debug("Field layout with type: $fieldLayoutType could not be found");
                 }
+            } elseif (isset($row['fieldLayoutUid'])) {
+                $fieldLayoutUid = ArrayHelper::remove($row, 'fieldLayoutUid');
+                $fieldLayout = $fieldsService->getLayoutByUid($fieldLayoutUid);
+                if (!$fieldLayout) {
+                    $fieldLayout = new FieldLayout([
+                        'type' => Entry::class,
+                        'uid' => $fieldLayoutUid,
+                    ]);
+                    $fieldsService->saveLayout($fieldLayout);
+                }
+            }
+            if ($fieldLayout?->id !== null) {
+                $row['fieldLayoutId'] = $fieldLayout->id;
             }
 
             foreach ($row as $columnName => $rowValue) {
@@ -63,7 +81,8 @@ class ActiveFixture extends BaseActiveFixture
                 throw new InvalidArgumentException('Unable to save fixture data');
             }
 
-            $this->ids[] = $arInstance->id;
+            $this->data[$key] = $arInstance;
+            $this->ids[$key] = $arInstance->id;
         }
     }
 
@@ -72,17 +91,12 @@ class ActiveFixture extends BaseActiveFixture
      */
     public function unload(): void
     {
-        /** @var ActiveRecord $modelClass */
-        $modelClass = $this->modelClass;
-        foreach ($this->ids as $id) {
-            $arInstance = $modelClass::find()
-                ->where(['id' => $id])
-                ->one();
-
-            if ($arInstance && !$arInstance->delete()) {
-                throw new InvalidArgumentException('Unable to delete AR instance');
-            }
+        foreach ($this->data as $arInstance) {
+            $arInstance->delete();
         }
+
+        $this->ids = [];
+        BaseActiveFixture::unload();
     }
 
     /**

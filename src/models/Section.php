@@ -8,14 +8,19 @@
 namespace craft\models;
 
 use Craft;
+use craft\base\Chippable;
+use craft\base\CpEditable;
+use craft\base\Iconic;
 use craft\base\Model;
 use craft\db\Query;
 use craft\db\Table;
 use craft\elements\Entry;
+use craft\enums\PropagationMethod;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Db;
 use craft\helpers\ProjectConfig as ProjectConfigHelper;
 use craft\helpers\StringHelper;
+use craft\helpers\UrlHelper;
 use craft\records\Section as SectionRecord;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
@@ -29,7 +34,7 @@ use craft\validators\UniqueValidator;
  * @property EntryType[] $entryTypes Entry types
  * @property bool $hasMultiSiteEntries Whether entries in this section support multiple sites
  */
-class Section extends Model
+class Section extends Model implements Chippable, CpEditable, Iconic
 {
     public const TYPE_SINGLE = 'single';
     public const TYPE_CHANNEL = 'channel';
@@ -46,6 +51,15 @@ class Section extends Model
     public const DEFAULT_PLACEMENT_BEGINNING = 'beginning';
     /** @since 3.7.0 */
     public const DEFAULT_PLACEMENT_END = 'end';
+
+    /**
+     * @inheritdoc
+     */
+    public static function get(int|string $id): ?static
+    {
+        /** @phpstan-ignore-next-line */
+        return Craft::$app->getEntries()->getSectionById($id);
+    }
 
     /**
      * @var int|null ID
@@ -68,9 +82,15 @@ class Section extends Model
     public ?string $handle = null;
 
     /**
-     * @var string|null Type
+     * @var self::TYPE_*|null Type
      */
     public ?string $type = null;
+
+    /**
+     * @var int Max authors
+     * @since 5.0.0
+     */
+    public int $maxAuthors = 1;
 
     /**
      * @var int|null Max levels
@@ -83,19 +103,19 @@ class Section extends Model
     public bool $enableVersioning = true;
 
     /**
-     * @var string Propagation method
-     * @phpstan-var self::PROPAGATION_METHOD_NONE|self::PROPAGATION_METHOD_SITE_GROUP|self::PROPAGATION_METHOD_LANGUAGE|self::PROPAGATION_METHOD_ALL|self::PROPAGATION_METHOD_CUSTOM
+     * @var PropagationMethod Propagation method
      *
      * This will be set to one of the following:
      *
-     * - `none` – Only save entries in the site they were created in
-     * - `siteGroup` – Save entries to other sites in the same site group
-     * - `language` – Save entries to other sites with the same language
-     * - `all` – Save entries to all sites enabled for this section
+     *  - [[PropagationMethod::None]] – Only save entries in the site they were created in
+     *  - [[PropagationMethod::SiteGroup]] – Save  entries to other sites in the same site group
+     *  - [[PropagationMethod::Language]] – Save entries to other sites with the same language
+     *  - [[PropagationMethod::Custom]] – Let each entry choose which sites it should be saved to
+     *  - [[PropagationMethod::All]] – Save entries to all sites supported by the owner element
      *
      * @since 3.2.0
      */
-    public string $propagationMethod = self::PROPAGATION_METHOD_ALL;
+    public PropagationMethod $propagationMethod = PropagationMethod::All;
 
     /**
      * @var string Default placement
@@ -133,7 +153,7 @@ class Section extends Model
             $this->previewTargets = [
                 [
                     'label' => Craft::t('app', 'Primary {type} page', [
-                        'type' => StringHelper::toLowerCase(Entry::displayName()),
+                        'type' => Entry::lowerDisplayName(),
                     ]),
                     'urlFormat' => '{url}',
                 ],
@@ -146,12 +166,31 @@ class Section extends Model
     /**
      * @inheritdoc
      */
+    public function getUiLabel(): string
+    {
+        return Craft::t('site', $this->name);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function attributeLabels(): array
     {
         return [
             'handle' => Craft::t('app', 'Handle'),
             'name' => Craft::t('app', 'Name'),
             'type' => Craft::t('app', 'Section Type'),
+            'entryTypes' => $this->type === self::TYPE_SINGLE
+                ? Craft::t('app', 'Entry Type')
+                : Craft::t('app', 'Entry Types'),
         ];
     }
 
@@ -162,6 +201,7 @@ class Section extends Model
     {
         $rules = parent::defineRules();
         $rules[] = [['id', 'structureId', 'maxLevels'], 'number', 'integerOnly' => true];
+        $rules[] = [['maxAuthors'], 'number', 'integerOnly' => true, 'min' => 1];
         $rules[] = [['handle'], HandleValidator::class, 'reservedWords' => ['id', 'dateCreated', 'dateUpdated', 'uid', 'title']];
         $rules[] = [
             ['type'], 'in', 'range' => [
@@ -170,17 +210,8 @@ class Section extends Model
                 self::TYPE_STRUCTURE,
             ],
         ];
-        $rules[] = [
-            ['propagationMethod'], 'in', 'range' => [
-                self::PROPAGATION_METHOD_NONE,
-                self::PROPAGATION_METHOD_SITE_GROUP,
-                self::PROPAGATION_METHOD_LANGUAGE,
-                self::PROPAGATION_METHOD_ALL,
-                self::PROPAGATION_METHOD_CUSTOM,
-            ],
-        ];
-        $rules[] = [['name', 'handle'], UniqueValidator::class, 'targetClass' => SectionRecord::class];
-        $rules[] = [['name', 'handle', 'type', 'propagationMethod', 'siteSettings'], 'required'];
+        $rules[] = [['handle'], UniqueValidator::class, 'targetClass' => SectionRecord::class];
+        $rules[] = [['name', 'handle', 'type', 'entryTypes', 'propagationMethod', 'siteSettings'], 'required'];
         $rules[] = [['name', 'handle'], 'string', 'max' => 255];
         $rules[] = [['siteSettings'], 'validateSiteSettings'];
         $rules[] = [['defaultPlacement'], 'in', 'range' => [self::DEFAULT_PLACEMENT_BEGINNING, self::DEFAULT_PLACEMENT_END]];
@@ -263,7 +294,7 @@ class Section extends Model
         }
 
         // Set them with setSiteSettings() so they get indexed by site ID and setSection() gets called on them
-        $this->setSiteSettings(Craft::$app->getSections()->getSectionSiteSettings($this->id));
+        $this->setSiteSettings(Craft::$app->getEntries()->getSectionSiteSettings($this->id));
 
         return $this->_siteSettings;
     }
@@ -275,7 +306,10 @@ class Section extends Model
      */
     public function setSiteSettings(array $siteSettings): void
     {
-        $this->_siteSettings = ArrayHelper::index($siteSettings, 'siteId');
+        $this->_siteSettings = ArrayHelper::index(
+            $siteSettings,
+            fn(Section_SiteSettings $siteSettings) => $siteSettings->siteId,
+        );
 
         foreach ($this->_siteSettings as $settings) {
             $settings->setSection($this);
@@ -323,7 +357,7 @@ class Section extends Model
             return [];
         }
 
-        $this->_entryTypes = Craft::$app->getSections()->getEntryTypesBySectionId($this->id);
+        $this->_entryTypes = Craft::$app->getEntries()->getEntryTypesBySectionId($this->id);
 
         return $this->_entryTypes;
     }
@@ -350,8 +384,24 @@ class Section extends Model
         return (
             Craft::$app->getIsMultiSite() &&
             count($this->getSiteSettings()) > 1 &&
-            $this->propagationMethod !== self::PROPAGATION_METHOD_NONE
+            $this->propagationMethod !== PropagationMethod::None
         );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCpEditUrl(): ?string
+    {
+        return $this->id ? UrlHelper::cpUrl("settings/sections/$this->id") : null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIcon(): ?string
+    {
+        return 'newspaper';
     }
 
     /**
@@ -366,8 +416,10 @@ class Section extends Model
             'name' => $this->name,
             'handle' => $this->handle,
             'type' => $this->type,
+            'entryTypes' => array_map(fn(EntryType $entryType) => $entryType->uid, $this->getEntryTypes()),
             'enableVersioning' => $this->enableVersioning,
-            'propagationMethod' => $this->propagationMethod,
+            'maxAuthors' => $this->maxAuthors,
+            'propagationMethod' => $this->propagationMethod->value,
             'siteSettings' => [],
             'defaultPlacement' => $this->defaultPlacement ?? self::DEFAULT_PLACEMENT_END,
         ];

@@ -70,6 +70,12 @@ import './CraftSupportWidget.scss';
         this.$triggerElement.focus();
       },
 
+      closeSearchScreen: function () {
+        this.gotoScreen(Craft.CraftSupportWidget.SCREEN_HOME);
+        this.focusTrigger();
+        this.$triggerElement.attr('aria-expanded', 'false');
+      },
+
       gotoScreen: function (screen) {
         // Are we right in the middle of a transition?
         if (this.$nextScreen) {
@@ -160,8 +166,10 @@ import './CraftSupportWidget.scss';
     {
       $body: null,
       $formContainer: null,
+      $cancelBtn: null,
       mode: null,
       bodyStartHeight: null,
+      csHeadingText: null,
 
       $searchResultsContainer: null,
       $searchResults: null,
@@ -180,8 +188,9 @@ import './CraftSupportWidget.scss';
       sendingSupportTicket: false,
 
       afterInit: function () {
-        this.$body = this.$screen.find('.cs-body-text:first').trigger('focus');
+        this.$body = this.$screen.find('.cs-body-text:first').focus();
         this.$formContainer = this.$screen.children('.cs-forms');
+        this.$cancelBtn = this.$screen.find('.cancel');
 
         // Search mode stuff
         this.$searchResultsContainer = this.$screen.children(
@@ -196,10 +205,10 @@ import './CraftSupportWidget.scss';
         this.$searchParams = this.$searchForm.children(
           '.cs-search-params:first'
         );
-        this.$searchSubmit = this.$searchForm.children('.submit:first');
+        this.$searchSubmit = this.$searchForm.find('.submit:first');
         this.addListener(this.$searchForm, 'submit', 'handleSearchFormSubmit');
         this.addListener(
-          this.$searchForm.find('> p > a'),
+          this.$searchForm.find('.cs-button-wrapper > p > a'),
           'click',
           'handleSupportLinkClick'
         );
@@ -224,6 +233,7 @@ import './CraftSupportWidget.scss';
         this.bodyStartHeight = this.$body.height();
         this.addListener(this.$body, 'input', 'handleBodyTextChange');
         this.addListener(this.$body, 'keydown', 'handleBodyKeydown');
+        this.addListener(this.$cancelBtn, 'click', 'handleCancelClick');
         this.prepForSearch(false);
       },
 
@@ -256,7 +266,7 @@ import './CraftSupportWidget.scss';
             this.$searchSubmit.removeAttr('aria-disabled');
           } else {
             this.$searchSubmit.addClass('disabled');
-            this.$searchSubmit.attr('aria-disabled', true);
+            this.$searchSubmit.attr('aria-disabled', 'true');
           }
         } else {
           if (text) {
@@ -268,13 +278,30 @@ import './CraftSupportWidget.scss';
         }
       },
 
+      handleHeadingChange: function () {
+        const $csHeading = this.$formContainer.parent().find('.cs-heading');
+        if ($csHeading.length > 0) {
+          if (this.mode == BaseSearchScreen.MODE_SUPPORT) {
+            this.csHeadingText = $csHeading.text();
+            $csHeading.text(Craft.t('app', 'Contact Developer Support'));
+          } else {
+            if (this.csHeadingText !== null) {
+              $csHeading.text(this.csHeadingText);
+              this.csHeadingText = null;
+            }
+          }
+        }
+      },
+
+      handleCancelClick: function () {
+        this.widget.closeSearchScreen();
+      },
+
       handleBodyKeydown: function (ev) {
         switch (ev.keyCode) {
           case Garnish.ESC_KEY:
             if (this.mode === BaseSearchScreen.MODE_SEARCH) {
-              this.widget.gotoScreen(Craft.CraftSupportWidget.SCREEN_HOME);
-              this.widget.focusTrigger();
-              this.widget.$triggerElement.attr('aria-expanded', false);
+              this.widget.closeSearchScreen();
             } else if (!this.sendingSupportTicket) {
               this.prepForSearch(true);
             }
@@ -412,13 +439,13 @@ import './CraftSupportWidget.scss';
       },
 
       reinit: function () {
-        this.$body.trigger('focus');
+        this.$body.focus();
       },
 
       prepForSearch: function (animate) {
         this.mode = BaseSearchScreen.MODE_SEARCH;
 
-        this.$body.velocity('stop').trigger('focus');
+        this.$body.velocity('stop').focus();
 
         if (this.$supportErrorList) {
           this.$supportErrorList.remove();
@@ -435,6 +462,7 @@ import './CraftSupportWidget.scss';
 
         // In case there's already a search value
         this.handleBodyTextChange();
+        this.handleHeadingChange();
         this.search();
       },
 
@@ -444,7 +472,7 @@ import './CraftSupportWidget.scss';
 
         this.mode = BaseSearchScreen.MODE_SUPPORT;
 
-        this.$body.velocity('stop').trigger('focus');
+        this.$body.velocity('stop').focus();
 
         if (animate) {
           this.$body.velocity({height: this.bodyStartHeight * 2});
@@ -456,6 +484,7 @@ import './CraftSupportWidget.scss';
 
         // In case there's already a search value
         this.handleBodyTextChange();
+        this.handleHeadingChange();
       },
 
       swapForms: function ($out, $in, animate) {
@@ -530,7 +559,7 @@ import './CraftSupportWidget.scss';
         }
 
         if (response.success) {
-          Craft.cp.displayNotice(Craft.t('app', 'Message sent successfully.'));
+          Craft.cp.displaySuccess(Craft.t('app', 'Message sent successfully.'));
           this.$body.val('');
           this.$supportMessage.val('');
           this.$supportAttachment.val('');

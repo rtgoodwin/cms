@@ -8,6 +8,9 @@
 namespace craft\models;
 
 use Craft;
+use craft\base\Chippable;
+use craft\base\CpEditable;
+use craft\base\FieldLayoutProviderInterface;
 use craft\base\Model;
 use craft\behaviors\FieldLayoutBehavior;
 use craft\db\Table;
@@ -15,9 +18,11 @@ use craft\elements\Category;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
+use craft\helpers\UrlHelper;
 use craft\records\CategoryGroup as CategoryGroupRecord;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
+use DateTime;
 
 /**
  * CategoryGroup model.
@@ -27,12 +32,24 @@ use craft\validators\UniqueValidator;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
-class CategoryGroup extends Model
+class CategoryGroup extends Model implements
+    Chippable,
+    CpEditable,
+    FieldLayoutProviderInterface
 {
     /** @since 3.7.0 */
     public const DEFAULT_PLACEMENT_BEGINNING = 'beginning';
     /** @since 3.7.0 */
     public const DEFAULT_PLACEMENT_END = 'end';
+
+    /**
+     * @inheritdoc
+     */
+    public static function get(int|string $id): ?static
+    {
+        /** @phpstan-ignore-next-line */
+        return Craft::$app->getCategories()->getGroupById($id);
+    }
 
     /**
      * @var int|null ID
@@ -77,6 +94,12 @@ class CategoryGroup extends Model
     public ?string $uid = null;
 
     /**
+     * @var DateTime|null The date that the category group was trashed
+     * @since 4.4.0
+     */
+    public ?DateTime $dateDeleted = null;
+
+    /**
      * @var CategoryGroup_SiteSettings[]
      */
     private array $_siteSettings;
@@ -92,6 +115,30 @@ class CategoryGroup extends Model
                 'elementType' => Category::class,
             ],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getUiLabel(): string
+    {
+        return Craft::t('site', $this->name);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCpEditUrl(): ?string
+    {
+        return $this->id ? UrlHelper::cpUrl("settings/categories/$this->id") : null;
     }
 
     /**
@@ -162,6 +209,24 @@ class CategoryGroup extends Model
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getHandle(): ?string
+    {
+        return $this->handle;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getFieldLayout(): FieldLayout
+    {
+        /** @var FieldLayoutBehavior $behavior */
+        $behavior = $this->getBehavior('fieldLayout');
+        return $behavior->getFieldLayout();
+    }
+
+    /**
      * Returns the group's site-specific settings.
      *
      * @return CategoryGroup_SiteSettings[]
@@ -177,7 +242,7 @@ class CategoryGroup extends Model
         }
 
         // Set them with setSiteSettings() so setGroup() gets called on them
-        $this->setSiteSettings(ArrayHelper::index(Craft::$app->getCategories()->getGroupSiteSettings($this->id), 'siteId'));
+        $this->setSiteSettings(Craft::$app->getCategories()->getGroupSiteSettings($this->id));
 
         return $this->_siteSettings;
     }
@@ -189,7 +254,10 @@ class CategoryGroup extends Model
      */
     public function setSiteSettings(array $siteSettings): void
     {
-        $this->_siteSettings = $siteSettings;
+        $this->_siteSettings = ArrayHelper::index(
+            $siteSettings,
+            fn(CategoryGroup_SiteSettings $siteSettings) => $siteSettings->siteId,
+        );
 
         foreach ($this->_siteSettings as $settings) {
             $settings->setGroup($this);

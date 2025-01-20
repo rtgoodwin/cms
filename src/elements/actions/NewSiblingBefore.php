@@ -31,6 +31,20 @@ class NewSiblingBefore extends ElementAction
     /**
      * @inheritdoc
      */
+    public function setElementType(string $elementType): void
+    {
+        parent::setElementType($elementType);
+
+        if (!isset($this->label)) {
+            $this->label = Craft::t('app', 'Create a new {type} before', [
+                'type' => $elementType::lowerDisplayName(),
+            ]);
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getTriggerLabel(): string
     {
         return $this->label;
@@ -45,9 +59,9 @@ class NewSiblingBefore extends ElementAction
 (() => {
     new Craft.ElementActionTrigger({
         type: $type,
-        batch: false,
-        activate: \$selectedItems => {
-            Craft.redirectTo(Craft.getUrl($newSiblingUrl, 'before=' + \$selectedItems.find('.element').data('id')));
+        bulk: false,
+        activate: (selectedItems, elementIndex) => {
+            Craft.redirectTo(Craft.getUrl($newSiblingUrl, 'before=' + selectedItems.find('.element').data('id')));
         },
     });
 })();

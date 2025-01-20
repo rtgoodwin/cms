@@ -1,18 +1,16 @@
 /** global: Craft */
 /** global: Garnish */
 /**
- * Asset Select input
+ * Asset select input
  */
 Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
-  requestId: 0,
-  hud: null,
   $uploadBtn: null,
   uploader: null,
   progressBar: null,
+  openPreviewTimeout: null,
 
   init: function () {
     this.base.apply(this, arguments);
-
     if (this.settings.canUpload) {
       this._attachUploader();
     }
@@ -24,7 +22,12 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
       'keydown',
       this._onKeyDown.bind(this)
     );
-    this.elementSelect.on('focusItem', this._onElementFocus.bind(this));
+  },
+
+  elementSelectSettings() {
+    return Object.assign(this.base(), {
+      makeFocusable: true,
+    });
   },
 
   /**
@@ -39,61 +42,27 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
     }
   },
 
-  onAddElements: function () {
-    this.$elements
-      .find('.elementthumb')
-      .addClass('open-preview')
-      .on('click', (ev) => {
-        this.elementSelect.focusItem($(ev.target).parent());
-        this.openPreview();
-        ev.stopPropagation();
-      });
-    this.base();
+  clearOpenPreviewTimeout: function () {
+    if (this.openPreviewTimeout) {
+      clearTimeout(this.openPreviewTimeout);
+      this.openPreviewTimeout = null;
+    }
   },
 
-  openPreview: function () {
+  openPreview: function ($element) {
     if (Craft.PreviewFileModal.openInstance) {
-      Craft.PreviewFileModal.openInstance.selfDestruct();
+      Craft.PreviewFileModal.openInstance.hide();
     } else {
-      var $element = this.elementSelect.$focusedItem;
+      if (!$element) {
+        $element = this.$elements
+          .filter(':focus')
+          .add(this.$elements.has(':focus'));
+      }
 
       if ($element.length) {
-        this._loadPreview($element);
+        Craft.PreviewFileModal.showForAsset($element, this.elementSelect);
       }
     }
-  },
-
-  /**
-   * Handle element being focused
-   * @private
-   */
-  _onElementFocus: function (ev) {
-    var $element = $(ev.item);
-
-    if (Craft.PreviewFileModal.openInstance && $element.length) {
-      this._loadPreview($element);
-    }
-  },
-
-  /**
-   * Load the preview for an Asset element
-   * @private
-   */
-  _loadPreview: function ($element) {
-    var settings = {
-      minGutter: 50,
-    };
-
-    if ($element.data('image-width')) {
-      settings.startingWidth = $element.data('image-width');
-      settings.startingHeight = $element.data('image-height');
-    }
-
-    new Craft.PreviewFileModal(
-      $element.data('id'),
-      this.elementSelect,
-      settings
-    );
   },
 
   /**
@@ -103,22 +72,6 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
     this.progressBar = new Craft.ProgressBar(
       $('<div class="progress-shade"></div>').appendTo(this.$container)
     );
-
-    var options = {
-      url: Craft.getActionUrl('assets/upload'),
-      dropZone: this.$container,
-      formData: {
-        fieldId: this.settings.fieldId,
-      },
-    };
-
-    if (this.settings.sourceElementId) {
-      options.formData.elementId = this.settings.sourceElementId;
-    }
-
-    if (this.settings.criteria.siteId) {
-      options.formData.siteId = this.settings.criteria.siteId;
-    }
 
     if (this.$addElementBtn) {
       this.$uploadBtn = $('<button/>', {
@@ -135,7 +88,7 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
             ? Craft.t('app', 'Upload a file')
             : Craft.t('app', 'Upload files'),
       }).insertAfter(this.$addElementBtn);
-      options.fileInput = $('<input/>', {
+      this.$fileInput = $('<input/>', {
         type: 'file',
         class: 'hidden',
         multiple: this.settings.limit != 1,
@@ -145,14 +98,10 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
       Garnish.$win.trigger('resize');
     }
 
-    // If CSRF protection isn't enabled, these won't be defined.
-    if (
-      typeof Craft.csrfTokenName !== 'undefined' &&
-      typeof Craft.csrfTokenValue !== 'undefined'
-    ) {
-      // Add the CSRF token
-      options.formData[Craft.csrfTokenName] = Craft.csrfTokenValue;
-    }
+    var options = {
+      dropZone: this.$container,
+      fileInput: this.$fileInput,
+    };
 
     if (typeof this.settings.criteria.kind !== 'undefined') {
       options.allowedKinds = this.settings.criteria.kind;
@@ -164,8 +113,24 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
     options.events.fileuploadstart = this._onUploadStart.bind(this);
     options.events.fileuploadprogressall = this._onUploadProgress.bind(this);
     options.events.fileuploaddone = this._onUploadComplete.bind(this);
+    options.events.fileuploadfail = this._onUploadFailure.bind(this);
 
-    this.uploader = new Craft.Uploader(this.$container, options);
+    this.uploader = Craft.createUploader(
+      this.settings.fsType,
+      this.$container,
+      options
+    );
+
+    const params = {
+      fieldId: this.settings.fieldId,
+    };
+    if (this.settings.sourceElementId) {
+      params.elementId = this.settings.sourceElementId;
+    }
+    if (this.settings.criteria.siteId) {
+      params.siteId = this.settings.criteria.siteId;
+    }
+    this.uploader.setParams(params);
 
     if (this.$uploadBtn) {
       this.$uploadBtn.on('click', (ev) => {
@@ -203,19 +168,6 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
 
     var $newElement = element.$element;
 
-    // Make a couple tweaks
-    $newElement.addClass('removable');
-    $newElement.prepend(
-      '<input type="hidden" name="' +
-        this.settings.name +
-        '[]" value="' +
-        element.id +
-        '">' +
-        '<a class="delete icon" title="' +
-        Craft.t('app', 'Remove') +
-        '"></a>'
-    );
-
     $newElement.appendTo(this.$elementsContainer);
 
     var margin = -($newElement.outerWidth() + 10);
@@ -247,45 +199,93 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
   /**
    * On upload progress.
    */
-  _onUploadProgress: function (event, data) {
-    var progress = parseInt((data.loaded / data.total) * 100, 10);
+  _onUploadProgress: function (event, data = null) {
+    data = event instanceof CustomEvent ? event.detail : data;
+
+    var progress = parseInt(Math.min(data.loaded / data.total, 1) * 100, 10);
     this.progressBar.setProgressPercentage(progress);
   },
 
   /**
    * On a file being uploaded.
    */
-  _onUploadComplete: function (event, data) {
-    if (data.result.error) {
-      alert(data.result.error);
-    } else {
-      var parameters = {
-        elementId: data.result.assetId,
-        siteId: this.settings.criteria.siteId,
-        thumbSize: this.settings.viewMode,
-      };
+  _onUploadComplete: function (event, data = null) {
+    const result = event instanceof CustomEvent ? event.detail : data.result;
 
-      Craft.sendActionRequest('POST', 'elements/get-element-html', {
-        data: parameters,
+    Craft.sendActionRequest('POST', 'app/render-elements', {
+      data: {
+        elements: [
+          {
+            type: 'craft\\elements\\Asset',
+            id: result.assetId,
+            siteId: this.settings.criteria.siteId,
+            instances: [
+              {
+                context: 'field',
+                ui: ['list', 'large'].includes(this.settings.viewMode)
+                  ? 'chip'
+                  : 'card',
+                size: this.settings.viewMode === 'large' ? 'large' : 'small',
+              },
+            ],
+          },
+        ],
+      },
+    })
+      .then(async ({data}) => {
+        const elementInfo = Craft.getElementInfo(
+          data.elements[result.assetId][0]
+        );
+        this.selectElements([elementInfo]);
+
+        await Craft.appendHeadHtml(data.headHtml);
+        await Craft.appendBodyHtml(data.bodyHtml);
+
+        // Last file
+        if (this.uploader.isLastUpload()) {
+          this.progressBar.hideProgressBar();
+          this.$container.removeClass('uploading');
+          this.$container.trigger('change');
+        }
       })
-        .then((response) => {
-          var html = $(response.data.html);
-          Craft.appendHeadHtml(response.data.headHtml);
-          this.selectUploadedFile(Craft.getElementInfo(html));
+      .catch((error) => {
+        if (error && error.response) {
+          Craft.cp.displayError(response.data.message);
+        } else {
+          Craft.cp.displayError();
+          throw error;
+        }
+      });
 
-          // Last file
-          if (this.uploader.isLastUpload()) {
-            this.progressBar.hideProgressBar();
-            this.$container.removeClass('uploading');
-            this.$container.trigger('change');
-          }
-        })
-        .catch(({response}) => {
-          alert(response.data.message);
-        });
+    Craft.cp.runQueue();
+  },
 
-      Craft.cp.runQueue();
+  /**
+   * On Upload Failure.
+   */
+  _onUploadFailure: function (event, data = null) {
+    const response =
+      event instanceof CustomEvent ? event.detail : data?.jqXHR?.responseJSON;
+
+    let {message, filename, errors} = response || {};
+
+    filename = filename || data?.files?.[0].name;
+
+    let errorMessages = errors ? Object.values(errors).flat() : [];
+
+    if (!message) {
+      if (errorMessages.length) {
+        message = errorMessages.join('\n');
+      } else if (filename) {
+        message = Craft.t('app', 'Upload failed for “{filename}”.', {filename});
+      } else {
+        message = Craft.t('app', 'Upload failed.');
+      }
     }
+
+    Craft.cp.displayError(message);
+    this.progressBar.hideProgressBar();
+    this.$container.removeClass('uploading');
   },
 
   /**

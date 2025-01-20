@@ -45,6 +45,14 @@ abstract class BaseConditionRule extends Component implements ConditionRuleInter
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getLabelHint(): ?string
+    {
+        return null;
+    }
+
+    /**
      * @var string|null UUID
      */
     public ?string $uid = null;
@@ -139,7 +147,10 @@ abstract class BaseConditionRule extends Component implements ConditionRuleInter
      *
      * @return string
      */
-    abstract protected function inputHtml(): string;
+    protected function inputHtml(): string
+    {
+        return '';
+    }
 
     /**
      * Returns the option label for a given operator.
@@ -176,7 +187,7 @@ abstract class BaseConditionRule extends Component implements ConditionRuleInter
 
         return
             Html::beginTag('div', [
-                'class' => ['flex', 'flex-nowrap', 'flex-start'],
+                'class' => ['flex', 'flex-start'],
             ]) .
             (count($operators) > 1
                 ? (
@@ -207,7 +218,7 @@ abstract class BaseConditionRule extends Component implements ConditionRuleInter
     protected function defineRules(): array
     {
         return [
-            [['uid'], 'safe'],
+            [['uid', 'condition'], 'safe'],
             [
                 ['operator'],
                 function() {

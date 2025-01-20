@@ -1,5 +1,10 @@
+import * as d3 from 'd3';
+
 /** global: Craft */
 /** global: Garnish */
+/** global: $ */
+/** global: jQuery */
+/** global: d3FormatLocaleDefinition */
 
 // Use old jQuery prefilter behavior
 // see https://jquery.com/upgrade-guide/3.5/
@@ -13,11 +18,15 @@ jQuery.htmlPrefilter = function (html) {
 $.extend(Craft, {
   navHeight: 48,
 
+  isIterable(obj) {
+    return obj && typeof obj[Symbol.iterator] === 'function';
+  },
+
   /**
    * @callback indexKeyCallback
    * @param {Object} currentValue
    * @param {number} [index]
-   * @return {string}
+   * @returns {string}
    */
   /**
    * Indexes an array of objects by a specified key
@@ -26,22 +35,20 @@ $.extend(Craft, {
    * @param {(string|indexKeyCallback)} key
    */
   index: function (arr, key) {
-    if (!$.isArray(arr)) {
-      throw 'The first argument passed to Craft.index() must be an array.';
+    if (arr instanceof NodeList || this.isIterable(arr)) {
+      arr = Array.from(arr);
+    } else if (!Array.isArray(arr)) {
+      throw 'The first argument passed to Craft.index() must be an array, NodeList, or iterable object.';
     }
 
-    return arr.reduce((index, obj, i) => {
-      index[typeof key === 'string' ? obj[key] : key(obj, i)] = obj;
-      return index;
-    }, {});
+    if (typeof key === 'string') {
+      const k = key;
+      key = (item) => item[k];
+    }
+
+    return Object.fromEntries(arr.map((item) => [key(item), item]));
   },
 
-  /**
-   * @callback indexKeyCallback
-   * @param {Object} currentValue
-   * @param {number} [index]
-   * @return {string}
-   */
   /**
    * Groups an array of objects by a specified key
    *
@@ -49,7 +56,7 @@ $.extend(Craft, {
    * @param {(string|indexKeyCallback)} key
    */
   group: function (arr, key) {
-    if (!$.isArray(arr)) {
+    if (!Array.isArray(arr)) {
       throw 'The first argument passed to Craft.group() must be an array.';
     }
 
@@ -72,7 +79,7 @@ $.extend(Craft, {
    * @param {string} category
    * @param {string} message
    * @param {Object} params
-   * @return string
+   * @returns {string}
    */
   t: function (category, message, params) {
     if (
@@ -163,18 +170,16 @@ $.extend(Craft, {
   _parseToken: function (token, args) {
     // parsing pattern based on ICU grammar:
     // http://icu-project.org/apiref/icu4c/classMessageFormat.html#details
-    const param = Craft.trim(token[0]);
+    const param = token[0].trim();
     if (typeof args[param] === 'undefined') {
       return `{${token.join(',')}}`;
     }
     const arg = args[param];
-    const type =
-      typeof token[1] !== 'undefined' ? Craft.trim(token[1]) : 'none';
+    const type = typeof token[1] !== 'undefined' ? token[1].trim() : 'none';
     switch (type) {
       case 'number':
         return (() => {
-          let format =
-            typeof token[2] !== 'undefined' ? Craft.trim(token[2]) : null;
+          let format = typeof token[2] !== 'undefined' ? token[2].trim() : null;
           if (format !== null && format !== 'integer') {
             throw `Message format 'number' is only supported for integer values.`;
           }
@@ -199,10 +204,10 @@ $.extend(Craft, {
           let c = select.length;
           let message = false;
           for (let i = 0; i + 1 < c; i++) {
-            if (Garnish.isArray(select[i]) || !Garnish.isArray(select[i + 1])) {
+            if (Array.isArray(select[i]) || !Array.isArray(select[i + 1])) {
               return false;
             }
-            let selector = Craft.trim(select[i++]);
+            let selector = select[i++].trim();
             if (
               (message === false && selector === 'other') ||
               selector == arg
@@ -239,7 +244,7 @@ $.extend(Craft, {
             ) {
               return false;
             }
-            let selector = Craft.trim(plural[i++]);
+            let selector = plural[i++].trim();
             let selectorChars = [...selector];
 
             if (i === 1 && selector.substring(0, 7) === 'offset:') {
@@ -247,14 +252,11 @@ $.extend(Craft, {
               if (pos === -1) {
                 throw 'Message pattern is invalid.';
               }
-              offset = parseInt(
-                Craft.trim(selectorChars.slice(7, pos).join(''))
-              );
-              selector = Craft.trim(
-                selectorChars
-                  .slice(pos + 1, pos + 1 + selectorChars.length)
-                  .join('')
-              );
+              offset = parseInt(selectorChars.slice(7, pos).join('').trim());
+              selector = selectorChars
+                .slice(pos + 1, pos + 1 + selectorChars.length)
+                .join('')
+                .trim();
             }
             if (
               (message === false && selector === 'other') ||
@@ -295,7 +297,8 @@ $.extend(Craft, {
    * Formats a number.
    *
    * @param {string} number
-   * @return string D3 format
+   * @param {string} [format] D3 format
+   * @returns {string}
    */
   formatNumber: function (number, format) {
     if (typeof format == 'undefined') {
@@ -323,7 +326,7 @@ $.extend(Craft, {
    * Escapes some HTML.
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    */
   escapeHtml: function (str) {
     return $('<div/>').text(str).html();
@@ -333,7 +336,7 @@ $.extend(Craft, {
    * Escapes special regular expression characters.
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    */
   escapeRegex: function (str) {
     // h/t https://stackoverflow.com/a/9310752
@@ -344,7 +347,7 @@ $.extend(Craft, {
    * Returns the text in a string that might contain HTML tags.
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    */
   getText: function (str) {
     return $('<div/>').html(str).text();
@@ -354,7 +357,7 @@ $.extend(Craft, {
    * Encodes a URI copmonent. Mirrors PHP's rawurlencode().
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    * @see http://stackoverflow.com/questions/1734250/what-is-the-equivalent-of-javascripts-encodeuricomponent-in-php
    */
   encodeUriComponent: function (str) {
@@ -379,7 +382,7 @@ $.extend(Craft, {
   /**
    * Selects the full value of a given text input.
    *
-   * @param input
+   * @param {(jQuery|HTMLElement|string)} input
    */
   selectFullValue: function (input) {
     var $input = $(input);
@@ -400,17 +403,20 @@ $.extend(Craft, {
    * Formats an ID out of an input name.
    *
    * @param {string} inputName
-   * @return string
+   * @returns {string}
    */
   formatInputId: function (inputName) {
-    return this.rtrim(inputName.replace(/[^\w\-]+/g, '-'), '-');
+    // IDs must begin with a letter
+    let id = inputName.replace(/^[^A-Za-z]+/, '');
+    id = this.rtrim(id.replace(/[^A-Za-z0-9_.]+/g, '-'), '-');
+    return id || this.randomString(10);
   },
 
   /**
    * @param {string} [path]
-   * @param {Object|string} [params]
+   * @param {(Object|string)} [params]
    * @param {string} [baseUrl]
-   * @return string
+   * @returns {string}
    */
   getUrl: function (path, params, baseUrl) {
     if (typeof path !== 'string') {
@@ -514,7 +520,7 @@ $.extend(Craft, {
 
         // Is the path param already set?
         if (typeof params[Craft.pathParam] !== 'undefined') {
-          let basePath = Craft.rtrim(params[Craft.pathParam]);
+          let basePath = params[Craft.pathParam].trimEnd();
           path = basePath + (path ? '/' + path : '');
         }
 
@@ -540,8 +546,8 @@ $.extend(Craft, {
 
   /**
    * @param {string} [path]
-   * @param {Object|string} [params]
-   * @return string
+   * @param {(Object|string)} [params]
+   * @returns {string}
    */
   getCpUrl: function (path, params) {
     return this.getUrl(path, params, Craft.baseCpUrl);
@@ -549,8 +555,8 @@ $.extend(Craft, {
 
   /**
    * @param {string} [path]
-   * @param {Object|string} [params]
-   * @return string
+   * @param {(Object|string)} [params]
+   * @returns {string}
    */
   getSiteUrl: function (path, params) {
     return this.getUrl(path, params, Craft.baseSiteUrl);
@@ -560,8 +566,8 @@ $.extend(Craft, {
    * Returns an action URL.
    *
    * @param {string} action
-   * @param {Object|string} [params]
-   * @return string
+   * @param {(Object|string)} [params]
+   * @returns {string}
    */
   getActionUrl: function (action, params) {
     return Craft.getUrl(action, params, Craft.actionUrl);
@@ -593,6 +599,13 @@ $.extend(Craft, {
     }
 
     history.replaceState({}, '', url);
+
+    // If there's a site crumb menu, update each of its URLs
+    const siteLinks = document.querySelectorAll('#site-crumb-menu a[href]');
+    for (const link of siteLinks) {
+      const site = this.getQueryParam('site', link.href);
+      link.href = this.getUrl(url, {site});
+    }
   },
 
   /**
@@ -609,7 +622,7 @@ $.extend(Craft, {
    * Replaces the page’s current URL based on the given query param name and value, leaving the current URI, other query params, and hash intact.
    *
    * @param {string} name
-   * @param value
+   * @param {*} value
    */
   setQueryParam(name, value) {
     const baseUrl = document.location.origin + document.location.pathname;
@@ -628,7 +641,7 @@ $.extend(Craft, {
    * Returns the current URL with a certain page added to it.
    *
    * @param {int} page
-   * @return {string}
+   * @returns {string}
    */
   getPageUrl: function (page) {
     let url = document.location.origin + document.location.pathname;
@@ -668,7 +681,7 @@ $.extend(Craft, {
   /**
    * Returns a hidden CSRF token input, if CSRF protection is enabled.
    *
-   * @return string
+   * @returns {string}
    */
   getCsrfInput: function () {
     if (Craft.csrfTokenName) {
@@ -685,13 +698,19 @@ $.extend(Craft, {
   },
 
   /**
+   * @callback postActionRequestCallback
+   * @param {?Object} response
+   * @param {string} textStatus
+   * @param {Object} jqXHR
+   */
+  /**
    * Posts an action request to the server.
    *
    * @param {string} action
-   * @param {Object|undefined} data
-   * @param {function|undefined} callback
-   * @param {Object|undefined} options
-   * @return jqXHR
+   * @param {Object} [data]
+   * @param {postActionRequestCallback} [callback]
+   * @param {Object} [options]
+   * @returns {Object}
    * @deprecated in 3.4.6. sendActionRequest() should be used instead
    */
   postActionRequest: function (action, data, callback, options) {
@@ -727,14 +746,20 @@ $.extend(Craft, {
               return;
             }
 
-            if (typeof Craft.cp !== 'undefined') {
-              Craft.cp.displayError();
-            } else {
-              alert(Craft.t('app', 'A server error occurred.'));
+            if (jqXHR.status !== 400) {
+              if (typeof Craft.cp !== 'undefined') {
+                Craft.cp.displayError();
+              } else {
+                alert(Craft.t('app', 'A server error occurred.'));
+              }
             }
 
             if (callback) {
-              callback(null, textStatus, jqXHR);
+              callback(
+                jqXHR.status === 400 ? jqXHR.responseJSON : null,
+                textStatus,
+                jqXHR
+              );
             }
           },
         },
@@ -752,10 +777,10 @@ $.extend(Craft, {
 
   _actionHeaders: function () {
     let headers = {
-      'X-Registered-Asset-Bundles': Object.keys(
-        Craft.registeredAssetBundles
-      ).join(','),
-      'X-Registered-Js-Files': Object.keys(Craft.registeredJsFiles).join(','),
+      'X-Registered-Asset-Bundles': [
+        ...new Set(Craft.registeredAssetBundles),
+      ].join(','),
+      'X-Registered-Js-Files': [...new Set(Craft.registeredJsFiles)].join(','),
     };
 
     if (Craft.csrfTokenValue) {
@@ -768,7 +793,7 @@ $.extend(Craft, {
   /**
    * Sends a request to a Craft/plugin action
    * @param {string} method The request action to use ('GET' or 'POST')
-   * @param {string|null} [action] The action to request
+   * @param {?string} [action] The action to request
    * @param {Object} [options] Axios request options
    * @returns {Promise}
    * @since 3.4.6
@@ -806,7 +831,15 @@ $.extend(Craft, {
         // Force Safari to not load from cache
         v: new Date().getTime(),
       });
-      axios.request(options).then(resolve).catch(reject);
+      axios
+        .request(options)
+        .then((response) => {
+          if (response.headers['x-csrf-token']) {
+            Craft.csrfTokenValue = response.headers['x-csrf-token'];
+          }
+          resolve(response);
+        })
+        .catch(reject);
     });
   },
 
@@ -818,7 +851,7 @@ $.extend(Craft, {
    * @returns {Promise}
    * @since 3.3.16
    */
-  sendApiRequest: function (method, uri, options) {
+  sendApiRequest: function (method, uri, options = {}) {
     return new Promise((resolve, reject) => {
       options = options ? $.extend({}, options) : {};
       let cancelToken = options.cancelToken || null;
@@ -873,8 +906,8 @@ $.extend(Craft, {
   /**
    * Returns the headers that should be sent with API requests.
    *
-   * @param {Object|null} cancelToken
-   * @return {Promise}
+   * @param {Object} [cancelToken]
+   * @returns {Promise}
    */
   _getApiHeaders: function (cancelToken) {
     return new Promise((resolve, reject) => {
@@ -972,8 +1005,8 @@ $.extend(Craft, {
    *
    * @param {string} method the request method to use
    * @param {string} url the URL
-   * @param {string|Object} [body] the request body, if method = POST
-   * @return {Promise}
+   * @param {(string|Object)} [body] the request body, if method = POST
+   * @returns {Promise}
    */
   downloadFromUrl: function (method, url, body) {
     return new Promise((resolve, reject) => {
@@ -1027,7 +1060,7 @@ $.extend(Craft, {
    * Converts a comma-delimited string into an array.
    *
    * @param {string} str
-   * @return array
+   * @returns array
    */
   stringToArray: function (str) {
     if (typeof str !== 'string') {
@@ -1042,85 +1075,142 @@ $.extend(Craft, {
   },
 
   /**
+   * @callback findDeltaDataCallback
+   * @param {string} deltaName
+   * @param {Array} params
+   */
+  /**
    * Compares old and new post data, and removes any values that haven't
    * changed within the given list of delta namespaces.
    *
    * @param {string} oldData
    * @param {string} newData
    * @param {Object} deltaNames
-   * @param {function|null} [callback] Callback function that should be called whenever a new group of modified params has been found
+   * @param {findDeltaDataCallback|null} [callback] Callback function that should be called whenever a new group of modified params has been found
    * @param {Object} [initialDeltaValues] Initial delta values. If undefined, `Craft.initialDeltaValues` will be used.
-   * @param {Object} [modifiedDeltaNames} List of delta names that should be considered modified regardles of their param values
-   * @return {string}
+   * @param {Object} [forceModifiedDeltaNames] List of delta names that should be considered modified regardless of their param values
+   * @param {boolean} [asArray] Whether the params should be returned as an array
+   * @returns {string}
    */
   findDeltaData: function (
     oldData,
     newData,
     deltaNames,
-    callback,
-    initialDeltaValues,
-    modifiedDeltaNames
+    callback = null,
+    initialDeltaValues = {},
+    forceModifiedDeltaNames = [],
+    asArray = false
+  ) {
+    const [modifiedDeltaNames, groupedNewParams] = this.findModifiedDeltaNames(
+      oldData,
+      newData,
+      deltaNames,
+      initialDeltaValues,
+      forceModifiedDeltaNames
+    );
+
+    // Figure out which of the new params should actually be posted
+    let params = groupedNewParams.__root__;
+    for (let name of modifiedDeltaNames) {
+      params = params.concat(groupedNewParams[name]);
+      params.push(`modifiedDeltaNames[]=${name}`);
+      if (callback) {
+        callback(name, groupedNewParams[name]);
+      }
+    }
+
+    return asArray ? params : params.join('&');
+  },
+
+  /**
+   * Returns the delta names that have been modified, given old and new form data.
+   *
+   * @param {string} oldData
+   * @param {string} newData
+   * @param {Object} deltaNames
+   * @param {Object} [initialDeltaValues] Initial delta values. If undefined, `Craft.initialDeltaValues` will be used.
+   * @param {Object} [modifiedDeltaNames] List of delta names that should be considered modified regardless of their param values
+   * @param {boolean} [mostSpecific] Whether the most specific modified delta names should be returned
+   * @returns {Array}
+   */
+  findModifiedDeltaNames: function (
+    oldData,
+    newData,
+    deltaNames,
+    initialDeltaValues = {},
+    modifiedDeltaNames = [],
+    mostSpecific = false
   ) {
     // Make sure oldData and newData are always strings. This is important because further below String.split is called.
     oldData = typeof oldData === 'string' ? oldData : '';
     newData = typeof newData === 'string' ? newData : '';
-    deltaNames = $.isArray(deltaNames) ? deltaNames : [];
-    initialDeltaValues = $.isPlainObject(initialDeltaValues)
-      ? initialDeltaValues
-      : {};
-    modifiedDeltaNames = $.isArray(modifiedDeltaNames)
-      ? modifiedDeltaNames
-      : [];
+    if (!Array.isArray(deltaNames)) {
+      deltaNames = [];
+    }
+    if (!$.isPlainObject(initialDeltaValues)) {
+      initialDeltaValues = {};
+    }
+    if (!Array.isArray(modifiedDeltaNames)) {
+      modifiedDeltaNames = [];
+    }
 
     // Sort the delta namespaces from least -> most specific
-    deltaNames.sort(function (a, b) {
+    deltaNames.sort((a, b) => {
       if (a.length === b.length) {
         return 0;
+      }
+      if (mostSpecific) {
+        return a.length < b.length ? 1 : -1;
       }
       return a.length > b.length ? 1 : -1;
     });
 
-    // Group all of the old & new params by namespace
-    var groupedOldParams = this._groupParamsByDeltaNames(
+    // Group all the old & new params by namespace
+    const groupedOldParams = this._groupParamsByDeltaNames(
       oldData.split('&'),
       deltaNames,
       false,
       initialDeltaValues
     );
-    var groupedNewParams = this._groupParamsByDeltaNames(
+    const groupedNewParams = this._groupParamsByDeltaNames(
       newData.split('&'),
       deltaNames,
       true,
       false
     );
 
-    // Figure out which of the new params should actually be posted
-    var params = groupedNewParams.__root__;
-    for (var n = 0; n < deltaNames.length; n++) {
+    for (let name of deltaNames) {
       if (
-        Craft.inArray(deltaNames[n], modifiedDeltaNames) ||
-        (typeof groupedNewParams[deltaNames[n]] === 'object' &&
-          (typeof groupedOldParams[deltaNames[n]] !== 'object' ||
-            JSON.stringify(groupedOldParams[deltaNames[n]]) !==
-              JSON.stringify(groupedNewParams[deltaNames[n]])))
+        !modifiedDeltaNames.includes(name) &&
+        typeof groupedNewParams[name] === 'object' &&
+        (typeof groupedOldParams[name] !== 'object' ||
+          JSON.stringify(groupedOldParams[name]) !==
+            JSON.stringify(groupedNewParams[name]))
       ) {
-        params = params.concat(groupedNewParams[deltaNames[n]]);
-        params.push('modifiedDeltaNames[]=' + deltaNames[n]);
-        if (callback) {
-          callback(deltaNames[n], groupedNewParams[deltaNames[n]]);
-        }
+        modifiedDeltaNames.push(name);
       }
     }
 
-    return params.join('&');
+    // Sort the delta namespaces from least -> most specific
+    modifiedDeltaNames.sort((a, b) => {
+      if (a.length === b.length) {
+        return 0;
+      }
+      if (mostSpecific) {
+        return a.length < b.length ? 1 : -1;
+      }
+      return a.length > b.length ? 1 : -1;
+    });
+
+    return [modifiedDeltaNames, groupedNewParams];
   },
 
   /**
    * @param {Object} params
    * @param {Object} deltaNames
    * @param {boolean} withRoot
-   * @param {boolean|Object} initialValues
-   * @returns {{}}
+   * @param {(boolean|Object)} initialValues
+   * @returns {Object}
    * @private
    */
   _groupParamsByDeltaNames: function (
@@ -1135,37 +1225,38 @@ $.extend(Craft, {
       grouped.__root__ = [];
     }
 
+    // sort delta names from most to least specific
+    deltaNames = deltaNames.sort((a, b) => b.length - a.length);
+
+    for (let name of deltaNames) {
+      grouped[name] = [];
+    }
+
     const encodeURIComponentExceptEqualChar = (o) =>
       encodeURIComponent(o).replace('%3D', '=');
 
     params = params.map((p) => decodeURIComponent(p));
 
-    paramLoop: for (let p = 0; p < params.length; p++) {
-      // loop through the delta names from most -> least specific
-      for (let n = deltaNames.length - 1; n >= 0; n--) {
-        const paramName = params[p].substring(0, deltaNames[n].length + 1);
-        if (
-          paramName === deltaNames[n] + '=' ||
-          paramName === deltaNames[n] + '['
-        ) {
-          if (typeof grouped[deltaNames[n]] === 'undefined') {
-            grouped[deltaNames[n]] = [];
+    paramLoop: for (let param of params) {
+      for (let name of deltaNames) {
+        const paramName = param.substring(0, name.length + 1);
+        if ([`${name}=`, `${name}[`].includes(paramName)) {
+          if (typeof grouped[name] === 'undefined') {
+            grouped[name] = [];
           }
-          grouped[deltaNames[n]].push(
-            encodeURIComponentExceptEqualChar(params[p])
-          );
+          grouped[name].push(encodeURIComponentExceptEqualChar(param));
           continue paramLoop;
         }
       }
 
       if (withRoot) {
-        grouped.__root__.push(encodeURIComponentExceptEqualChar(params[p]));
+        grouped.__root__.push(encodeURIComponentExceptEqualChar(param));
       }
     }
 
     if (initialValues) {
       const serializeParam = (name, value) => {
-        if ($.isArray(value) || $.isPlainObject(value)) {
+        if (Array.isArray(value) || $.isPlainObject(value)) {
           value = $.param(value);
         } else if (typeof value === 'string') {
           value = encodeURIComponent(value);
@@ -1200,10 +1291,10 @@ $.extend(Craft, {
   },
 
   /**
-   * Expands an array of POST array-style strings into an actual array.
+   * Expands an object of POST array-style strings into an actual array.
    *
    * @param {Object} arr
-   * @return array
+   * @returns {Array}
    */
   expandPostArray: function (arr) {
     var expanded = {};
@@ -1263,8 +1354,8 @@ $.extend(Craft, {
   /**
    * Creates a form element populated with hidden inputs based on a string of serialized form data.
    *
-   * @param {string} data
-   * @returns {jQuery|HTMLElement}
+   * @param {string} [data]
+   * @returns {(jQuery|HTMLElement)}
    */
   createForm: function (data) {
     var $form = $('<form/>', {
@@ -1295,10 +1386,10 @@ $.extend(Craft, {
    * Compares two variables and returns whether they are equal in value.
    * Recursively compares array and object values.
    *
-   * @param obj1
-   * @param obj2
-   * @param sortObjectKeys Whether object keys should be sorted before being compared. Default is true.
-   * @return boolean
+   * @param {*} obj1
+   * @param {*} obj2
+   * @param {boolean} [sortObjectKeys] Whether object keys should be sorted before being compared. Default is true.
+   * @returns boolean
    */
   compare: function (obj1, obj2, sortObjectKeys) {
     // Compare the types
@@ -1306,19 +1397,19 @@ $.extend(Craft, {
       return false;
     }
 
-    if (typeof obj1 === 'object') {
+    if (typeof obj1 === 'object' && obj1 !== null && obj2 !== null) {
       // Compare the lengths
       if (obj1.length !== obj2.length) {
         return false;
       }
 
       // Is one of them an array but the other is not?
-      if (obj1 instanceof Array !== obj2 instanceof Array) {
+      if (Array.isArray(obj1) !== Array.isArray(obj2)) {
         return false;
       }
 
       // If they're actual objects (not arrays), compare the keys
-      if (!(obj1 instanceof Array)) {
+      if (!Array.isArray(obj1)) {
         if (typeof sortObjectKeys === 'undefined' || sortObjectKeys === true) {
           if (
             !Craft.compare(
@@ -1359,7 +1450,7 @@ $.extend(Craft, {
    * Returns an array of an object's keys.
    *
    * @param {Object} obj
-   * @return string
+   * @returns {string[]}
    */
   getObjectKeys: function (obj) {
     var keys = [];
@@ -1380,11 +1471,11 @@ $.extend(Craft, {
    *
    * Userd by ltrim() and rtrim()
    *
-   * @param {string|object} chars
-   * @return string
+   * @param {(string|Object)} chars
+   * @returns {string}
    */
   escapeChars: function (chars) {
-    if (!Garnish.isArray(chars)) {
+    if (!Array.isArray(chars)) {
       chars = chars.split();
     }
 
@@ -1401,17 +1492,17 @@ $.extend(Craft, {
    * Trim characters off of the beginning of a string.
    *
    * @param {string} str
-   * @param {string|object|undefined} [chars] The characters to trim off. Defaults to a space if left blank.
-   * @return string
+   * @param {(string|Object)} [chars] The characters to trim off. Defaults to a space if left blank.
+   * @returns {string}
    */
   ltrim: function (str, chars) {
     if (!str) {
       return str;
     }
     if (typeof chars === 'undefined') {
-      chars = ' \t\n\r\0\x0B';
+      return str.trimStart();
     }
-    var re = new RegExp('^[' + Craft.escapeChars(chars) + ']+');
+    const re = new RegExp('^[' + Craft.escapeChars(chars) + ']+');
     return str.replace(re, '');
   },
 
@@ -1419,17 +1510,17 @@ $.extend(Craft, {
    * Trim characters off of the end of a string.
    *
    * @param {string} str
-   * @param {string|object|undefined} [chars] The characters to trim off. Defaults to a space if left blank.
-   * @return string
+   * @param {(string|Object)} [chars] The characters to trim off. Defaults to a space if left blank.
+   * @returns {string}
    */
   rtrim: function (str, chars) {
     if (!str) {
       return str;
     }
     if (typeof chars === 'undefined') {
-      chars = ' \t\n\r\0\x0B';
+      return str.trimEnd();
     }
-    var re = new RegExp('[' + Craft.escapeChars(chars) + ']+$');
+    const re = new RegExp('[' + Craft.escapeChars(chars) + ']+$');
     return str.replace(re, '');
   },
 
@@ -1437,10 +1528,16 @@ $.extend(Craft, {
    * Trim characters off of the beginning and end of a string.
    *
    * @param {string} str
-   * @param {string|object|undefined} [chars] The characters to trim off. Defaults to a space if left blank.
-   * @return string
+   * @param {(string|Object)} [chars] The characters to trim off. Defaults to a space if left blank.
+   * @returns {string}
    */
   trim: function (str, chars) {
+    if (!str) {
+      return str;
+    }
+    if (typeof chars === 'undefined') {
+      return str.trim();
+    }
     str = Craft.ltrim(str, chars);
     str = Craft.rtrim(str, chars);
     return str;
@@ -1451,18 +1548,103 @@ $.extend(Craft, {
    *
    * @param {string} str
    * @param {string} substr
-   * @return boolean
+   * @param {boolean} [caseInsensitive=false]
+   * @returns {boolean}
    */
-  startsWith: function (str, substr) {
-    return str.substring(0, substr.length) === substr;
+  startsWith: function (str, substr, caseInsensitive = false) {
+    if (caseInsensitive) {
+      return str.toLowerCase().startsWith(substr.toLowerCase());
+    }
+    return str.startsWith(substr);
   },
 
+  /**
+   * Returns whether a string ends with another string.
+   *
+   * @param {string} str
+   * @param {string} substr
+   * @param {boolean} [caseInsensitive=false]
+   * @returns {boolean}
+   */
+  endsWith: function (str, substr, caseInsensitive = false) {
+    if (caseInsensitive) {
+      return str.toLowerCase().endsWith(substr.toLowerCase());
+    }
+    return str.endsWith(substr);
+  },
+
+  /**
+   * Ensures a string starts with another string.
+   *
+   * @param {string} str
+   * @param {string} substr
+   * @param {boolean} [caseInsensitive=false]
+   * @return {string}
+   */
+  ensureStartsWith: function (str, substr, caseInsensitive = false) {
+    if (!Craft.startsWith(str, substr, caseInsensitive)) {
+      str = substr + str;
+    }
+    return str;
+  },
+
+  /**
+   * Ensures a string ends with another string.
+   *
+   * @param {string} str
+   * @param {string} substr
+   * @param {boolean} [caseInsensitive=false]
+   * @return {string}
+   */
+  ensureEndsWith: function (str, substr, caseInsensitive = false) {
+    if (!Craft.endsWith(str, substr, caseInsensitive)) {
+      str += substr;
+    }
+    return str;
+  },
+
+  /**
+   * Removes a string from the beginning of another string.
+   *
+   * @param {string} str
+   * @param {string} substr
+   * @param {boolean} [caseInsensitive=false]
+   * @return {string}
+   */
+  removeLeft: function (str, substr, caseInsensitive = false) {
+    if (Craft.startsWith(str, substr, caseInsensitive)) {
+      return str.slice(substr.length);
+    }
+    return str;
+  },
+
+  /**
+   * Removes a string from the end of another string.
+   *
+   * @param {string} str
+   * @param {string} substr
+   * @param {boolean} [caseInsensitive=false]
+   * @return {string}
+   */
+  removeRight: function (str, substr, caseInsensitive = false) {
+    if (Craft.endsWith(str, substr, caseInsensitive)) {
+      return str.slice(0, -substr.length);
+    }
+    return str;
+  },
+
+  /**
+   * @callback filterArrayCallback
+   * @param {*} value
+   * @param {number} index
+   * @return {boolean}
+   */
   /**
    * Filters an array.
    *
    * @param {Object} arr
-   * @param {function} callback A user-defined callback function. If null, we'll just remove any elements that equate to false.
-   * @return array
+   * @param {filterArrayCallback} [callback] A user-defined callback function. If null, we'll just remove any elements that equate to false.
+   * @returns {Array}
    */
   filterArray: function (arr, callback) {
     var filtered = [];
@@ -1485,11 +1667,31 @@ $.extend(Craft, {
   },
 
   /**
+   * @callback filterObjectCallback
+   * @param {*} value
+   * @param {string} key
+   * @return {boolean}
+   */
+  /**
+   * Filters an object by a callback method.
+   *
+   * @param {Object} obj
+   * @param {filterObjectCallback} [callback] A user-defined callback function. If null, values that equate to false will be removed.
+   * @returns {Object}
+   */
+  filterObject(obj, callback) {
+    if (typeof callback === 'undefined') {
+      callback = (v) => !!v;
+    }
+    return Object.fromEntries(Object.entries(obj).filter(callback));
+  },
+
+  /**
    * Returns whether an element is in an array (unlike jQuery.inArray(), which returns the element’s index, or -1).
    *
-   * @param elem
-   * @param arr
-   * @return boolean
+   * @param {*} elem
+   * @param {(Object|Array)} arr
+   * @returns {boolean}
    */
   inArray: function (elem, arr) {
     if ($.isPlainObject(arr)) {
@@ -1501,9 +1703,9 @@ $.extend(Craft, {
   /**
    * Removes an element from an array.
    *
-   * @param elem
-   * @param {Object} arr
-   * @return boolean Whether the element could be found or not.
+   * @param {*} elem
+   * @param {Array} arr
+   * @returns {boolean} Whether the element could be found or not.
    */
   removeFromArray: function (elem, arr) {
     var index = $.inArray(elem, arr);
@@ -1518,8 +1720,8 @@ $.extend(Craft, {
   /**
    * Returns the last element in an array.
    *
-   * @param {Object} arr
-   * @return mixed
+   * @param {Array} arr
+   * @returns {*}
    */
   getLast: function (arr) {
     if (!arr.length) {
@@ -1533,7 +1735,7 @@ $.extend(Craft, {
    * Makes the first character of a string uppercase.
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    */
   uppercaseFirst: function (str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
@@ -1543,7 +1745,7 @@ $.extend(Craft, {
    * Makes the first character of a string lowercase.
    *
    * @param {string} str
-   * @return string
+   * @returns {string}
    */
   lowercaseFirst: function (str) {
     return str.charAt(0).toLowerCase() + str.slice(1);
@@ -1567,18 +1769,33 @@ $.extend(Craft, {
     };
   },
 
-  getQueryParams: function () {
-    return Object.fromEntries(
-      new URLSearchParams(window.location.search).entries()
-    );
+  /**
+   * Returns a URL’s query params as an object.
+   * @param {string} [url] The URL. The window’s URL will be used by default.
+   * @returns Object
+   */
+  getQueryParams: function (url) {
+    let qs;
+    if (url) {
+      const m = url.match(/\?.+/);
+      if (!m) {
+        return {};
+      }
+      qs = m[0];
+    } else {
+      qs = window.location.search;
+    }
+    return Object.fromEntries(new URLSearchParams(qs).entries());
   },
 
-  getQueryParam: function (name) {
-    // h/t https://stackoverflow.com/a/901144/1688568
-    const params = new Proxy(new URLSearchParams(window.location.search), {
-      get: (searchParams, prop) => searchParams.get(prop),
-    });
-    return params[name];
+  /**
+   * Returns a query param.
+   * @param {string} name The param name
+   * @param {string} [url] The URL. The window’s URL will be used by default.
+   * @returns Object
+   */
+  getQueryParam: function (name, url) {
+    return this.getQueryParams(url)[name];
   },
 
   isSameHost: function (url) {
@@ -1674,8 +1891,8 @@ $.extend(Craft, {
    * Converts extended ASCII characters to ASCII.
    *
    * @param {string} str
-   * @param {Object|undefined} charMap
-   * @return string
+   * @param {Object} [charMap]
+   * @returns {string}
    */
   asciiString: function (str, charMap) {
     // Normalize NFD chars to NFC
@@ -1728,7 +1945,10 @@ $.extend(Craft, {
    * @returns {string}
    */
   namespaceId: function (id, namespace) {
-    return Craft.formatInputId(namespace ? `${namespace}-${id}` : id);
+    return (
+      (namespace ? `${Craft.formatInputId(namespace)}-` : '') +
+      Craft.formatInputId(id)
+    );
   },
 
   randomString: function (length) {
@@ -1746,7 +1966,7 @@ $.extend(Craft, {
    * Creates a validation error list.
    *
    * @param {Object} errors
-   * @return jQuery
+   * @returns {jQuery}
    */
   createErrorList: function (errors) {
     var $ul = $(document.createElement('ul')).addClass('errors');
@@ -1760,70 +1980,78 @@ $.extend(Craft, {
     return $ul;
   },
 
-  /**
-   * Appends HTML to the page `<head>`.
-   *
-   * @param {string} html
-   */
-  appendHeadHtml: function (html) {
+  _existingCss: null,
+  _existingJs: null,
+
+  _appendHtml: async function (html, $parent) {
     if (!html) {
       return;
     }
 
-    // Prune out any link tags that are already included
-    var $existingCss = $('link[href]');
+    const nodes = $.parseHTML(html.trim(), true).filter((node) => {
+      if (node.nodeName === 'LINK' && node.href) {
+        if (!this._existingCss) {
+          this._existingCss = $('link[href]')
+            .toArray()
+            .map((n) => n.href.replace(/&/g, '&amp;'));
+        }
 
-    if ($existingCss.length) {
-      var existingCss = [];
-      var href;
+        if (this._existingCss.includes(node.href)) {
+          return false;
+        }
 
-      for (var i = 0; i < $existingCss.length; i++) {
-        href = $existingCss.eq(i).attr('href').replace(/&/g, '&amp;');
-        existingCss.push(Craft.escapeRegex(href));
+        this._existingCss.push(node.href);
+        return true;
       }
 
-      const regexp = new RegExp(
-        '<link\\s[^>]*href="(?:' + existingCss.join('|') + ')".*?></link>',
-        'g'
-      );
+      if (node.nodeName === 'SCRIPT' && node.src) {
+        if (!this._existingJs) {
+          this._existingJs = $('script[src]')
+            .toArray()
+            .map((n) => n.src.replace(/&/g, '&amp;'));
+        }
 
-      html = html.replace(regexp, '');
-    }
+        // if this is a cross-domain JS resource, use our app/resource-js proxy to load it
+        if (
+          node.src.startsWith(this.resourceBaseUrl) &&
+          !this.isSameHost(node.src)
+        ) {
+          node.src = this.getActionUrl('app/resource-js', {
+            url: node.src,
+          });
+        }
 
-    $('head').append(html);
+        if (this._existingJs.includes(node.src)) {
+          return false;
+        }
+
+        this._existingJs.push(node.src);
+      }
+
+      return true;
+    });
+
+    $parent.append(nodes);
+  },
+
+  /**
+   * Appends HTML to the page `<head>`.
+   *
+   * @param {string} html
+   * @returns {Promise}
+   */
+  appendHeadHtml: async function (html) {
+    await this._appendHtml(html, $('head'));
   },
 
   /**
    * Appends HTML to the page `<body>`.
    *
    * @param {string} html
+   * @returns {Promise}
    */
-  appendBodyHtml: function (html) {
-    if (!html) {
-      return;
-    }
-
-    // Prune out any script tags that are already included
-    var $existingJs = $('script[src]');
-
-    if ($existingJs.length) {
-      var existingJs = [];
-      var src;
-
-      for (var i = 0; i < $existingJs.length; i++) {
-        src = $existingJs.eq(i).attr('src').replace(/&/g, '&amp;');
-        existingJs.push(Craft.escapeRegex(src));
-      }
-
-      var regexp = new RegExp(
-        '<script\\s[^>]*src="(?:' + existingJs.join('|') + ')".*?></script>',
-        'g'
-      );
-
-      html = html.replace(regexp, '');
-    }
-
-    Garnish.$bod.append(html);
+  appendBodyHtml: async function (html) {
+    await this._appendHtml(html, Garnish.$bod);
   },
 
   /**
@@ -1850,14 +2078,15 @@ $.extend(Craft, {
     $('.fieldtoggle', $container).fieldtoggle();
     $('.lightswitch', $container).lightswitch();
     $('.nicetext', $container).nicetext();
-    $('.formsubmit', $container).formsubmit();
-    $('.menubtn:not([data-disclosure-trigger])', $container).menubtn();
-    $('[data-disclosure-trigger]', $container).disclosureMenu();
     $('.datetimewrapper', $container).datetime();
     $(
       '.datewrapper > input[type="date"], .timewrapper > input[type="time"]',
       $container
     ).datetimeinput();
+    $('.formsubmit', $container).formsubmit();
+    // menus last, since they can mess with the DOM
+    $('.menubtn:not([data-disclosure-trigger])', $container).menubtn();
+    $('[data-disclosure-trigger]', $container).disclosureMenu();
 
     // Open outbound links in new windows
     // hat tip: https://stackoverflow.com/a/2911045/1688568
@@ -1875,6 +2104,8 @@ $.extend(Craft, {
   _elementIndexClasses: {},
   _elementSelectorModalClasses: {},
   _elementEditorClasses: {},
+  _uploaderClasses: {},
+  _authFormHandlers: {},
 
   /**
    * Registers an element index class for a given element type.
@@ -1895,6 +2126,24 @@ $.extend(Craft, {
   },
 
   /**
+   * Registers a file uploader class for a given filesystem type.
+   *
+   * @param {string} fsType
+   * @param {function} func
+   */
+  registerUploaderClass: function (fsType, func) {
+    if (typeof this._uploaderClasses[fsType] !== 'undefined') {
+      throw (
+        'An asset uploader class has already been registered for the filesystem type “' +
+        fsType +
+        '”.'
+      );
+    }
+
+    this._uploaderClasses[fsType] = func;
+  },
+
+  /**
    * Registers an element selector modal class for a given element type.
    *
    * @param {string} elementType
@@ -1912,31 +2161,21 @@ $.extend(Craft, {
     this._elementSelectorModalClasses[elementType] = func;
   },
 
-  /**
-   * Registers an element editor class for a given element type.
-   *
-   * @param {string} elementType
-   * @param {function} func
-   */
-  registerElementEditorClass: function (elementType, func) {
-    if (typeof this._elementEditorClasses[elementType] !== 'undefined') {
-      throw (
-        'An element editor class has already been registered for the element type “' +
-        elementType +
-        '”.'
-      );
+  registerAuthFormHandler(method, func) {
+    if (typeof this._authFormHandlers[method] !== 'undefined') {
+      throw `An authentication form handler has already been registered for the method “${method}”.`;
     }
 
-    this._elementEditorClasses[elementType] = func;
+    this._authFormHandlers[method] = func;
   },
 
   /**
    * Creates a new element index for a given element type.
    *
    * @param {string} elementType
-   * @param $container
+   * @param {jQuery} $container
    * @param {Object} settings
-   * @return BaseElementIndex
+   * @returns {BaseElementIndex}
    */
   createElementIndex: function (elementType, $container, settings) {
     var func;
@@ -1948,6 +2187,26 @@ $.extend(Craft, {
     }
 
     return new func(elementType, $container, settings);
+  },
+
+  /**
+   * Creates a file uploader for a given filesystem type.
+   *
+   * @param {string} fsType
+   * @param {jQuery} $container
+   * @param {Object} settings
+   * @returns {Uploader}
+   */
+  createUploader: function (fsType, $container, settings) {
+    const func =
+      typeof this._uploaderClasses[fsType] !== 'undefined'
+        ? this._uploaderClasses[fsType]
+        : Craft.Uploader;
+
+    const uploader = new func($container, settings);
+    uploader.fsType = fsType;
+
+    return uploader;
   },
 
   /**
@@ -1968,11 +2227,32 @@ $.extend(Craft, {
     return new func(elementType, settings);
   },
 
+  createAuthFormHandler(method, container, onSuccess, showError) {
+    if (typeof this._authFormHandlers[method] === 'undefined') {
+      throw `No authentication form has been registered for the method "${method}".`;
+    }
+
+    if (container instanceof jQuery) {
+      if (!container.length) {
+        throw 'No form element specified.';
+      }
+      container = container[0];
+    }
+
+    if (!showError) {
+      showError = (error) => {
+        Craft.cp.displayError(error);
+      };
+    }
+
+    return new this._authFormHandlers[method](container, onSuccess, showError);
+  },
+
   /**
    * Creates a new element editor slideout for a given element type.
    *
    * @param {string} elementType
-   * @param element $element
+   * @param {(jQuery|HTMLElement|string)} element
    * @param {Object} settings
    */
   createElementEditor: function (elementType, element, settings) {
@@ -1996,7 +2276,7 @@ $.extend(Craft, {
    * Retrieves a value from localStorage if it exists.
    *
    * @param {string} key
-   * @param defaultValue
+   * @param {*} [defaultValue]
    */
   getLocalStorage: function (key, defaultValue) {
     key = 'Craft-' + Craft.systemUid + '.' + key;
@@ -2015,7 +2295,7 @@ $.extend(Craft, {
    * Saves a value to localStorage.
    *
    * @param {string} key
-   * @param value
+   * @param {*} value
    */
   setLocalStorage: function (key, value) {
     if (typeof localStorage !== 'undefined') {
@@ -2032,7 +2312,7 @@ $.extend(Craft, {
 
   /**
    * Removes a value from localStorage.
-   * @param key
+   * @param {string} key
    */
   removeLocalStorage: function (key) {
     if (typeof localStorage !== 'undefined') {
@@ -2042,7 +2322,7 @@ $.extend(Craft, {
 
   /**
    * Returns a cookie value, if it exists, otherwise returns `false`
-   * @return {(string|boolean)}
+   * @returns {(string|boolean)}
    */
   getCookie: function (name) {
     // Adapted from https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
@@ -2099,13 +2379,13 @@ $.extend(Craft, {
   },
 
   /**
-   * Returns element information from it's HTML.
+   * Returns element information from its DOM element.
    *
-   * @param element
-   * @returns object
+   * @param {(jQuery|HTMLElement|string)} element
+   * @returns {Object}
    */
   getElementInfo: function (element) {
-    var $element = $(element);
+    let $element = $(element);
 
     if (!$element.hasClass('element')) {
       $element = $element.find('.element:first');
@@ -2117,7 +2397,7 @@ $.extend(Craft, {
       label: $element.data('label'),
       status: $element.data('status'),
       url: $element.data('url'),
-      hasThumb: $element.hasClass('hasthumb'),
+      hasThumb: $element.hasClass('has-thumb'),
       $element: $element,
     };
   },
@@ -2125,11 +2405,11 @@ $.extend(Craft, {
   /**
    * Changes an element to the requested size.
    *
-   * @param element
-   * @param size
+   * @param {(jQuery|HTMLElement|string))} element
+   * @param {string} size
    */
   setElementSize: function (element, size) {
-    var $element = $(element);
+    const $element = $(element);
 
     if (size !== 'small' && size !== 'large') {
       size = 'small';
@@ -2139,12 +2419,12 @@ $.extend(Craft, {
       return;
     }
 
-    var otherSize = size === 'small' ? 'large' : 'small';
+    const otherSize = size === 'small' ? 'large' : 'small';
 
     $element.addClass(size).removeClass(otherSize);
 
-    if ($element.hasClass('hasthumb')) {
-      var $oldImg = $element.find('> .elementthumb > img'),
+    if ($element.hasClass('has-thumb')) {
+      const $oldImg = $element.find('> .thumb > img'),
         imgSize = size === 'small' ? '30' : '100',
         $newImg = $('<img/>', {
           sizes: imgSize + 'px',
@@ -2159,6 +2439,186 @@ $.extend(Craft, {
     }
   },
 
+  refreshElementInstances(elementId) {
+    const $elements = $(`div.element[data-id="${elementId}"][data-settings]`);
+    if (!$elements.length) {
+      return;
+    }
+    const elementsBySite = {};
+    for (let i = 0; i < $elements.length; i++) {
+      const $element = $elements.eq(i);
+      const siteId = $element.data('site-id');
+      if (typeof elementsBySite[siteId] === 'undefined') {
+        elementsBySite[siteId] = {
+          key: i,
+          type: $element.data('type'),
+          id: elementId,
+          fieldId: $element.data('field-id'),
+          ownerId: $element.data('owner-id'),
+          siteId,
+          instances: [],
+        };
+      }
+      elementsBySite[siteId].instances.push($element.data('settings'));
+    }
+    const data = {
+      elements: Object.values(elementsBySite),
+    };
+    Craft.sendActionRequest('POST', 'app/render-elements', {data}).then(
+      ({data}) => {
+        const instances = data.elements[elementId] || {};
+        for (let key of Object.keys(instances)) {
+          const $element = $elements.eq(key);
+          const $replacement = $(instances[key]);
+          const replacementAttributes = $replacement[0].attributes;
+          for (let attribute of replacementAttributes) {
+            if (attribute.name === 'class') {
+              $element.addClass(attribute.value);
+            } else {
+              $element.attr(attribute.name, attribute.value);
+            }
+          }
+          for (let attribute of $element[0].attributes) {
+            if (replacementAttributes[attribute.name] === undefined) {
+              $element.removeAttr(attribute.name);
+            }
+          }
+          const $actions = $element
+            .find(
+              '> .chip-content .chip-actions,> .card-actions-container .card-actions'
+            )
+            .detach();
+          const $inputs = $element.find('input,button').detach();
+          $element.html($replacement.html()).removeClass('error');
+
+          if ($actions.length) {
+            const $oldStatus = $actions.find('span.status');
+            const $newStatus = $replacement.find(
+              '> .chip-content .chip-actions span.status,> .card-actions-container .card-actions span.status'
+            );
+
+            if (
+              $oldStatus.length &&
+              $newStatus.length &&
+              $oldStatus[0].classList !== $newStatus[0].classList
+            ) {
+              $actions.find('span.status').replaceWith($newStatus);
+            }
+
+            $element
+              .find(
+                '> .chip-content .chip-actions,> .card-actions-container .card-actions'
+              )
+              .replaceWith($actions);
+          }
+          if ($inputs.length) {
+            $inputs.appendTo($element);
+          }
+        }
+        Craft.cp.elementThumbLoader.load($elements);
+      }
+    );
+  },
+
+  refreshComponentInstances(type, id) {
+    const $chips = $(
+      `div.chip[data-type="${$.escapeSelector(
+        type
+      )}"][data-id="${id}"][data-settings]`
+    );
+    if (!$chips.length) {
+      return;
+    }
+    const instances = [];
+    for (let i = 0; i < $chips.length; i++) {
+      instances.push($chips.eq(i).data('settings'));
+    }
+    const data = {
+      components: [{type, id, instances}],
+    };
+    Craft.sendActionRequest('POST', 'app/render-components', {data}).then(
+      ({data}) => {
+        for (let i = 0; i < data.components[type][id].length; i++) {
+          const $chip = $chips.eq(i);
+          const $replacement = $(data.components[type][id][i]);
+          for (let attribute of $replacement[0].attributes) {
+            if (attribute.name === 'class') {
+              $chip.addClass(attribute.value);
+            } else {
+              $chip.attr(attribute.name, attribute.value);
+            }
+          }
+          const $actions = $chip.find('.chip-actions').detach();
+          const $inputs = $chip.find('input,button').detach();
+          $chip.html($replacement.html());
+          if ($actions.length) {
+            $chip.find('.chip-actions').replaceWith($actions);
+          }
+          if ($inputs.length) {
+            $inputs.appendTo($chip);
+          }
+        }
+      }
+    );
+  },
+
+  /**
+   * Adds actions to a chip or card.
+   *
+   * @param {jQuery|HTMLElement} chip
+   * @param {Array} actions
+   */
+  addActionsToChip(chip, actions) {
+    if (!actions?.length) {
+      return;
+    }
+
+    const $actions = $(chip).find(
+      '> .chip-content > .chip-actions, > .card-actions-container > .card-actions'
+    );
+    let $actionMenuBtn = $actions.find('.action-btn');
+
+    if (!$actionMenuBtn.length) {
+      // the chip/card doesn't have an action menu yet, so add one
+      const menuId = `actions-${Math.floor(Math.random() * 1000000)}`;
+      const labelId = `${menuId}-label`;
+      const $label = $('<label/>', {
+        id: labelId,
+        class: 'visually-hidden',
+        text: Craft.t('app', 'Actions'),
+      }).appendTo($actions);
+      $actionMenuBtn = $('<button/>', {
+        class: 'btn action-btn',
+        type: 'button',
+        title: Craft.t('app', 'Actions'),
+        'aria-controls': menuId,
+        'aria-describedby': labelId,
+        'data-disclosure-trigger': 'true',
+      }).insertAfter($label);
+      $('<div/>', {
+        id: menuId,
+        class: 'menu menu--disclosure',
+      }).insertAfter($actionMenuBtn);
+    }
+
+    const disclosureMenu = $actionMenuBtn
+      .disclosureMenu()
+      .data('disclosureMenu');
+
+    const safeActions = actions.filter((a) => !a.destructive);
+    const destructiveActions = actions.filter((a) => a.destructive);
+
+    if (safeActions.length) {
+      disclosureMenu.addItems(safeActions, disclosureMenu.addGroup());
+    }
+
+    if (destructiveActions.length) {
+      disclosureMenu.addItems(destructiveActions, disclosureMenu.addGroup());
+    }
+
+    Craft.initUiElements(disclosureMenu.$container);
+  },
+
   /**
    * Submits a form.
    * @param {Object} $form
@@ -2169,6 +2629,7 @@ $.extend(Craft, {
    * @param {Object} [options.params] Additional params that should be added to the form, defined as name/value pairs
    * @param {Object} [options.data] Additional data to be passed to the submit event
    * @param {boolean} [options.retainScroll] Whether the scroll position should be stored and reapplied on the next page load
+   * @param {boolean} [options.requireElevatedSession] Whether an elevated session is required
    */
   submitForm: function ($form, options) {
     if (typeof options === 'undefined') {
@@ -2179,10 +2640,22 @@ $.extend(Craft, {
       return;
     }
 
+    if (options.requireElevatedSession) {
+      Craft.elevatedSessionManager.requireElevatedSession(() => {
+        this._submitFormInternal($form, options);
+      });
+    } else {
+      this._submitFormInternal($form, options);
+    }
+  },
+
+  _submitFormInternal($form, options) {
+    const namespace = options.namespace ?? null;
+
     if (options.action) {
       $('<input/>', {
         type: 'hidden',
-        name: 'action',
+        name: this.namespaceInputName('action', namespace),
         val: options.action,
       }).appendTo($form);
     }
@@ -2190,7 +2663,7 @@ $.extend(Craft, {
     if (options.redirect) {
       $('<input/>', {
         type: 'hidden',
-        name: 'redirect',
+        name: this.namespaceInputName('redirect', namespace),
         val: options.redirect,
       }).appendTo($form);
     }
@@ -2200,7 +2673,7 @@ $.extend(Craft, {
         let value = options.params[name];
         $('<input/>', {
           type: 'hidden',
-          name: name,
+          name: this.namespaceInputName(name, namespace),
           val: value,
         }).appendTo($form);
       }
@@ -2222,6 +2695,14 @@ $.extend(Craft, {
   },
 
   /**
+   * Releases focus within a container.
+   * @param {Object} container
+   */
+  releaseFocusWithin: function (container) {
+    Garnish.releaseFocusWithin(container);
+  },
+
+  /**
    * Sets focus to the first focusable element within a container.
    * @param {Object} container
    */
@@ -2230,11 +2711,43 @@ $.extend(Craft, {
   },
 
   /**
+   * Reduces an input’s value to characters that match the given regex pattern.
+   * @param {jQuery|HTMLElement} input
+   * @param {RegExp} regex
+   */
+  filterInputVal: function (input, regex) {
+    const $input = $(input);
+    const val = $input.val();
+    let selectionStart = $input[0].selectionStart;
+    let newVal = '';
+    for (let i = 0; i < val.length; i++) {
+      if (val[i].match(regex)) {
+        newVal += val[i];
+      } else if (i < selectionStart) {
+        selectionStart--;
+      }
+    }
+    if (newVal !== val) {
+      $input.val(newVal);
+      $input[0].setSelectionRange(selectionStart, selectionStart);
+    }
+  },
+
+  /**
+   * Reduces an input’s value to numeric characters.
+   * @param {jQuery|HTMLElement} input
+   * @param {RegExp} regex
+   */
+  filterNumberInputVal: function (input) {
+    this.filterInputVal(input, /[0-9.,\-]/);
+  },
+
+  /**
    * Sets/removes attributes on an element.
    *
    * Attributes set to `null` or `false` will be removed.
    *
-   * @param element
+   * @param {(jQuery|HTMLElement|string)} element
    * @param {Object} attributes
    */
   setElementAttributes: function (element, attributes) {
@@ -2251,7 +2764,7 @@ $.extend(Craft, {
         $element.removeAttr(name);
       } else if (value === true) {
         $element.attr(name, '');
-      } else if ($.isArray(value) || $.isPlainObject(value)) {
+      } else if (Array.isArray(value) || $.isPlainObject(value)) {
         if (Craft.dataAttributes.includes(name)) {
           // Make sure it's an object
           value = Object.assign({}, value);
@@ -2263,7 +2776,7 @@ $.extend(Craft, {
             if (subValue === null || subValue === false) {
               continue;
             }
-            if ($.isPlainObject(subValue) || $.isArray(subValue)) {
+            if ($.isPlainObject(subValue) || Array.isArray(subValue)) {
               subValue = JSON.stringify(subValue);
             } else if (subValue === true) {
               subValue = '';
@@ -2290,6 +2803,17 @@ $.extend(Craft, {
       }
     }
   },
+
+  isVisible: function () {
+    return (
+      typeof document.visibilityState === 'undefined' ||
+      document.visibilityState === 'visible'
+    );
+  },
+
+  useMobileStyles: function () {
+    return Garnish.isMobileBrowser() || document.body.clientWidth < 600;
+  },
 });
 
 // -------------------------------------------
@@ -2303,54 +2827,29 @@ if (typeof BroadcastChannel !== 'undefined') {
   Craft.broadcaster = new BroadcastChannel(channelName);
   Craft.messageReceiver = new BroadcastChannel(channelName);
 
+  Craft.broadcaster.addEventListener('message', (ev) => {
+    switch (ev.data.event) {
+      case 'beforeTrackJobProgress':
+        Craft.cp.cancelJobTracking();
+        break;
+
+      case 'trackJobProgress':
+        Craft.cp.setJobData(ev.data.jobData);
+
+        if (Craft.cp.jobInfo.length) {
+          // Check again after a longer delay than usual,
+          // as it looks like another browser tab is driving for now
+          const delay = Craft.cp.getNextJobDelay() + 1000;
+          Craft.cp.trackJobProgress(delay);
+        }
+
+        break;
+    }
+  });
+
   Craft.messageReceiver.addEventListener('message', (ev) => {
     if (ev.data.event === 'saveElement') {
-      // Are there any instances of the same element on the page?
-      const $elements = $(
-        `div.element[data-id="${ev.data.id}"][data-settings]`
-      );
-      if (!$elements.length) {
-        return;
-      }
-      const data = {
-        type: $elements.data('type'),
-        id: ev.data.id,
-        instances: [],
-      };
-      for (let i = 0; i < $elements.length; i++) {
-        const $element = $elements.eq(i);
-        data.instances.push(
-          Object.assign(
-            {
-              siteId: $element.data('site-id'),
-            },
-            $element.data('settings')
-          )
-        );
-      }
-      Craft.sendActionRequest('POST', 'app/render-element', {data}).then(
-        ({data}) => {
-          for (let i = 0; i < $elements.length; i++) {
-            const $element = $elements.eq(i);
-            if (data.elementHtml[i]) {
-              const $replacement = $(data.elementHtml[i]);
-              for (let attribute of $replacement[0].attributes) {
-                if (attribute.name === 'class') {
-                  $element.addClass(attribute.value);
-                } else {
-                  $element.attr(attribute.name, attribute.value);
-                }
-              }
-              const $inputs = $element.find('input,button').detach();
-              $element.html($replacement.html());
-              if ($inputs.length) {
-                $inputs.prependTo($element);
-              }
-            }
-          }
-          new Craft.ElementThumbLoader().load($elements);
-        }
-      );
+      Craft.refreshElementInstances(ev.data.id);
     }
   });
 }
@@ -2452,7 +2951,7 @@ $.extend($.fn, {
    */
   checkboxselect: function () {
     return this.each(function () {
-      if (!$.data(this, 'checkboxselect')) {
+      if (!$.data(this, 'checkboxSelect')) {
         new Garnish.CheckboxSelect(this);
       }
     });
@@ -2520,22 +3019,56 @@ $.extend($.fn, {
 
   formsubmit: function () {
     // Secondary form submit buttons
-    return this.on('click', function (ev) {
-      let $btn = $(ev.currentTarget);
-      let params = $btn.data('params') || {};
+    return this.on('activate', function (ev) {
+      const $btn = $(ev.currentTarget);
+      const params = $btn.data('params') || {};
       if ($btn.data('param')) {
         params[$btn.data('param')] = $btn.data('value');
       }
 
-      let $anchor = $btn.data('menu') ? $btn.data('menu').$anchor : $btn;
-      let $form = $anchor.attr('data-form')
-        ? $('#' + $anchor.attr('data-form'))
-        : $anchor.closest('form');
+      let $form;
+      let namespace = null;
+
+      if ($btn.attr('data-form') === 'false') {
+        $form = Craft.createForm()
+          .addClass('hidden')
+          .append(Craft.getCsrfInput())
+          .appendTo(Garnish.$bod);
+      } else {
+        let $anchor = $btn.closest('.menu--disclosure').length
+          ? $btn.closest('.menu--disclosure').data('trigger').$trigger
+          : $btn.data('menu')
+            ? $btn.data('menu').$anchor
+            : $btn;
+
+        let isFullPage = $anchor.parents('.slideout').length == 0;
+
+        if (isFullPage) {
+          $form = $anchor.attr('data-form')
+            ? $('#' + $anchor.attr('data-form'))
+            : $btn.attr('data-form')
+              ? $('#' + $btn.attr('data-form'))
+              : $anchor.closest('form');
+        } else {
+          $form = $anchor.closest('form');
+          namespace = $anchor.parents('.slideout').data('cpScreen').namespace;
+        }
+
+        if ($anchor.data('disclosureMenu')) {
+          $anchor.data('disclosureMenu').hide();
+        }
+      }
 
       Craft.submitForm($form, {
         confirm: $btn.data('confirm'),
         action: $btn.data('action'),
         redirect: $btn.data('redirect'),
+        retainScroll: Garnish.hasAttr($btn, 'data-retain-scroll'),
+        requireElevatedSession: Garnish.hasAttr(
+          $btn,
+          'data-require-elevated-session'
+        ),
+        namespace: namespace,
         params: params,
         data: $.extend(
           {
@@ -2563,12 +3096,12 @@ $.extend($.fn, {
     });
   },
 
-  disclosureMenu: function () {
+  disclosureMenu: function (settings) {
     return this.each(function () {
       const $trigger = $(this);
       // Only instantiate if it's not already a disclosure trigger, and it references a disclosure content
       if (!$trigger.data('trigger') && $trigger.attr('aria-controls')) {
-        new Garnish.DisclosureMenu($trigger);
+        new Garnish.DisclosureMenu($trigger, settings);
       }
     });
   },
@@ -2580,7 +3113,7 @@ $.extend($.fn, {
       let checkValue = () => {
         let hasValue = false;
         for (let i = 0; i < $inputs.length; i++) {
-          if ($inputs.eq(i).val()) {
+          if ($inputs.eq(i).val() && !$inputs.eq(i).is(':disabled')) {
             hasValue = true;
             break;
           }
