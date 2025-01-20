@@ -1,7 +1,7 @@
-version: '3.9'
 services:
   postgres:
-    image: postgres:11-alpine
+    env_file: ../../tests-playwright/.env
+    image: postgres:14-alpine
     ports:
       - ${PLAYWRIGHT_POSTGRES_PORT:-54329}:5432
     environment:
@@ -13,12 +13,13 @@ services:
       interval: 5s
       retries: 3
   playwright:
+    env_file: ../../tests-playwright/.env
     build:
       context: ../../
       target: craft
       dockerfile: ./node_modules/@craftcms/playwright/Dockerfile
     ports:
-      - ${PLAYWRIGHT_SITE_PORT:-8089}:80
+      - ${PLAYWRIGHT_SITE_PORT:-52370}:8080
     environment:
       CRAFT_APP_ID: ${PLAYWRIGHT_CRAFT_APP_ID:-CraftCMS}
       CRAFT_ENVIRONMENT: ${PLAYWRIGHT_CRAFT_ENVIRONMENT:-dev}
@@ -38,3 +39,5 @@ services:
         condition: service_healthy
     volumes:
       - ${PLAYWRIGHT_REPO_PATH:-../../.}:/app/repos/repo/
+      - ./webserver/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./webserver/supervisord.d/nginx.ini:/etc/supervisord.d/nginx.ini

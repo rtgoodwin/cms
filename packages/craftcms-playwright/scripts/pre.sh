@@ -29,9 +29,10 @@ fi
 # Check if init script has been run
 DB_BACKUP_DOESNT_EXIST=$(docker compose exec playwright sh -c "ls -la /app/backup | grep 'cannot access'")
 
-if [ "$DB_BACKUP_DOESNT_EXIST" ]
+if [ "${#DB_BACKUP_DOESNT_EXIST}" ]
 then
   echo "Running init scripts…"
+  echo $INIT_SCRIPT_PATH
   docker compose exec playwright $INIT_SCRIPT_PATH
 fi
 

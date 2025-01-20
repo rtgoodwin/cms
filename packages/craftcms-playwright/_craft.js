@@ -39,7 +39,7 @@ const projectConfigRestore = async () => {
   process.stdout.write('\n');
   try {
     const {stdout, stderr} = await nodeExec(
-      `${dockerCli} cp -vfrp /app/backup/project /app/config/.`
+      `${dockerCli} cp -vfrp /app/backup/project /app/config/`
     );
     return {stdout, stderr};
   } catch (e) {

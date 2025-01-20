@@ -9,13 +9,17 @@ module.exports = async (config) => {
     config.projects[0].use;
 
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  const context = await browser.newContext();
+  const page = await context.newPage();
 
   await page.goto(new URL('./login', baseURL).href);
-  await page.fill('#loginName', username);
-  await page.fill('#password', password);
+  await page.fill('.login-username', username);
+  await page.fill('.login-password', password);
 
-  await Promise.all([page.waitForNavigation(), page.click('button#submit')]);
+  //await Promise.all([page.waitForNavigation(), page.click('button#submit')]);
+  await page.click('.login-form button[type="submit"]')
+  await page.waitForURL('**/admin/dashboard');
+
 
   const title = page.locator('h1');
   await expect(title).toHaveText('Dashboard');

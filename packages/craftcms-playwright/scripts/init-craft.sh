@@ -1,45 +1,62 @@
 #!/bin/bash
 
 # Add safe directory to allow commands later in the process
-su -c 'git config --global --add safe.directory /app/repos/repo' appuser
+git config --global --add safe.directory /app/repos/repo
 
-# Copy PHP files from the package to the Craft project install
-su -c 'cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/DbBackup.php /app/modules/.' appuser
-su -c 'cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/app.php /app/config/.' appuser
-
-# Switch to app directory
+# Switch to /app directory
 cd /app || exit
 
+echo "$PWD"
+
+if [ ! -d "modules" ]
+then
+  echo "creating modules dir"
+  mkdir modules
+fi
+
+if [ ! -d "config" ]
+then
+  echo "creating config dir"
+  mkdir config
+fi
+
+cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/DbBackup.php /app/modules/
+cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/app.php /app/config/
+
 # Install Craft
-su -c "./craft install/craft --interactive=0 --username=admin --password=NewPassword --site-name=Playwright --email=playwright@craftcms.com --site-url=http://127.0.0.1/ --language=en_US" appuser
+echo "install craft"
+./craft install/craft --interactive=0 --username=admin --password=NewPassword --site-name=Playwright --email=playwright@craftcms.com --site-url=http://127.0.0.1/ --language=en_US
 
 # Switch Craft's edition and apply changes
-su -c "sed -i \"s/edition: solo/edition: pro/g\" config/project/project.yaml" appuser
-su -c "./craft project-config/apply" appuser
+sed -i "s/edition: solo/edition: pro/g" config/project/project.yaml
+./craft project-config/apply
 
 # Create backup directory
-su -c "mkdir backup" appuser
+mkdir backup
 
 # Backup DB
-su -c "./craft db/backup backup/db.sql" appuser
+./craft db/backup backup/db.sql
 
 # Backup Project Config files
-su -c "cp -vfrp ./config/project ./backup/." appuser
+cp -vfrp config/project backup/
 
 # Switch to repo directory
 cd /app/repos/repo || exit
 
 # Get the latest tagged version from the repo
-REPO_VERSION=$(su -c 'git describe --tags --abbrev=0' appuser)
+REPO_VERSION=$(git describe --tags --abbrev=0)
+
+echo "$REPO_VERSION"
 
 # Switch to app directory
 cd /app || exit
 
 # Get the package name for the repo that is being worked on
-PACKAGE_NAME=$(cat ./repos/repo/composer.json | grep -oE "\"name\": \"([a-zA-Z0-9\/\-]*?)\"" | sed -e "s/\"//g" | sed -e "s/name: //g")
+PACKAGE_NAME=$(cat /app/repos/repo/composer.json | grep -oE "\"name\": \"([a-zA-Z0-9\/\-]*?)\"" | sed -e "s/\"//g" | sed -e "s/name: //g")
 
-# Create composer CLI command to add the `repositories` key for symlinking
-REPOSITORIES_CMD="composer config repositories.repo '{\"type\": \"path\", \"url\": \"./repos/*\", \"options\": {\"versions\": {\""$PACKAGE_NAME"\": \""$REPO_VERSION"\"}}}'"
+echo "$PACKAGE_NAME"
+## Create composer CLI command to add the `repositories` key for symlinking
+REPOSITORIES_CMD="composer config repositories.repo '{\"type\": \"path\", \"url\": \"/app/repos/*\", \"options\": {\"versions\": {\""$PACKAGE_NAME"\": \""$REPO_VERSION"\"}}}'"
 
 # Set config items in `composer.json`
 composer config prefer-stable true && composer config minimum-stability "dev"
@@ -48,7 +65,7 @@ composer config prefer-stable true && composer config minimum-stability "dev"
 eval "$REPOSITORIES_CMD"
 
 # Composer require the current repo that is being worked on to create the symlink
-su -c "composer require $PACKAGE_NAME:*" appuser
+composer require $PACKAGE_NAME:*
 
-# Backup composer files
-su -c "cp -vfrp composer.* ./backup/." appuser
+## Backup composer files
+cp -vfrp composer.* /app/backup/
