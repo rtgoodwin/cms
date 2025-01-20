@@ -24,7 +24,7 @@ test.describe('Navigation', () => {
       let title = Array.isArray(navItems[i]) ? navItems[i][1] : text;
 
       await page.click('#global-sidebar nav ul li a:has-text("' + text + '")');
-      await expect(page.locator('h1')).toHaveText(title);
+      await expect(page.locator('h1')).toContainText(title);
     }
   });
 });

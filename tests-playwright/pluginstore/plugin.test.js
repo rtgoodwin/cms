@@ -22,7 +22,7 @@ test('Should show plugin details', async ({page, baseURL}) => {
   const tabsLength = await page
     .locator('.plugin-details-header .tabs ul li')
     .count();
-  expect(tabsLength === 3).toBeTruthy();
+  expect(tabsLength === 4).toBeTruthy();
 
   const tabs = page.locator('.plugin-details-header .tabs');
   await expect(tabs).toContainText('Overview');

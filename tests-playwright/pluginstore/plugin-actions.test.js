@@ -81,6 +81,8 @@ test.describe('Plugin Actions', () => {
       response.url().includes('composer-remove')
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Fcomposer-remove
     await expect(status).toContainText('The plugin was removed successfully.');
-    await page.waitForResponse((response) => response.url().includes('finish')); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Ffinish
+    await page.waitForResponse((response) =>
+      response.url().includes('finish')
+    ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Ffinish
   });
 });
