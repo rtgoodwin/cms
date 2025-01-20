@@ -9,7 +9,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@playwright/test": "^1.21.1"
+    "@playwright/test": "^1.47.0"
   },
   "bin": {
     "craft-playwright": "./cli.js"
