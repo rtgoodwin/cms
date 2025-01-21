@@ -16,7 +16,6 @@ module.exports = async (config) => {
   await page.fill('.login-username', username);
   await page.fill('.login-password', password);
 
-  //await Promise.all([page.waitForNavigation(), page.click('button#submit')]);
   await page.click('.login-form button[type="submit"]')
   await page.waitForURL('**/admin/dashboard');
 
