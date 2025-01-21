@@ -3,76 +3,163 @@
  */
 
 Craft.GlobalAnimationController = Garnish.Base.extend({
-  $images: null,
   resizeObserver: null,
+  extensions: ['.gif', '.webp'],
 
   init: function () {
-    this.$images = $();
-    const $images = this.getPotentiallyAnimatedImages();
+    // Get all images present on page load
+    const images = this.filterImagesByExtension(
+      document.querySelectorAll('img')
+    );
 
-    // Create resize observer
+    for (let i = 0; i < images.length; i++) {
+      this._hideAnimation(images[i]);
+    }
+
     this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.contentBoxSize) {
-          const $targetImage = $(entry.target);
+          const targetImage = entry.target;
 
           if (entry.contentRect.width > 0 || entry.contentRect.height > 0) {
-            this.pauseImage($targetImage);
+            console.log('hello');
+            this._hideAnimation(targetImage);
           }
         }
       }
     });
 
-    this.addImages($images);
+    this._createImageAddedObserver();
   },
 
-  getPotentiallyAnimatedImages: function (container = Garnish.$doc) {
-    const $container = $(container);
+  _createImageAddedObserver: function () {
+    const targetNode = document.querySelector('body');
 
-    return $(container).find(
-      'img[src*=".gif"],img[srcset*=".gif"],img[src*=".webp"],img[srcset*=".webp"]'
+    // Options for the observer (which mutations to observe)
+    const config = {attributes: true, childList: true, subtree: true};
+
+    // Callback function to execute when mutations are observed
+    const callback = (mutationList, observer) => {
+      for (const mutation of mutationList) {
+        if (mutation.type === 'childList') {
+          if (mutation.addedNodes) {
+            for (const node of mutation.addedNodes) {
+              if (node.nodeName === 'IMG') {
+                if (this.couldBeAnimated(node)) {
+                  this._hideAnimation(node);
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(callback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+
+    // Later, you can stop observing
+    //observer.disconnect();
+  },
+
+  /**
+   * Hides the image animation by placing a canvas element with the first frame
+   * @param image
+   * @returns {Promise<void>}
+   */
+  _hideAnimation: async function (image) {
+    // If image already has an animation controller, return
+    if ($(image).data('animationController')) return;
+
+    // Wait until it's completely loaded
+    await this.waitForImage(image);
+    const $image = $(image);
+    const $parent = $image.parent();
+    let $canvas = $parent.find('[data-image-cover]');
+    const width = $image.width();
+    const height = $image.height();
+
+    if ($canvas.length === 0) {
+      $image.attr({
+        'data-width': width,
+        'data-height': height,
+      });
+      $canvas = this.getCanvas($image);
+      $parent.css({
+        position: 'relative',
+      });
+      $canvas.insertBefore($image);
+    } else if ($canvas.length > 0 && this.imageSizeChanged($image)) {
+      console.log('redraw');
+      // Replace canvas
+      $canvas.remove();
+      const $newCanvas = this.getCanvas($image);
+      $newCanvas.insertBefore($image);
+    }
+
+    // Create toggle button
+    this.createToggle(image);
+
+    // Add resize observer
+    this.resizeObserver.observe(image);
+
+    $(image).data('animationController', this);
+  },
+
+  getAllControlledImages: function () {
+    return document.querySelectorAll('img[data-animation-controller]');
+  },
+
+  /**
+   * Filters a NodeList by images that could be animated
+   * @param {NodeList} images
+   * @returns {Array}
+   */
+  filterImagesByExtension: function (images) {
+    return Array.from(images).filter((image) => this.couldBeAnimated(image));
+  },
+
+  couldBeAnimated: function (image) {
+    const src = image.src;
+    const srcset = image.srcset;
+
+    return this.extensions.some(
+      (extension) => src.includes(extension) || srcset.includes(extension)
     );
   },
 
-  addImagesInContainer: function (container) {
-    const $animated = this.getPotentiallyAnimatedImages(container);
-
-    if ($animated.length === 0) return;
-
-    this.addImages($animated);
-  },
-
-  addImages: function ($images) {
-    if ($images.length === 0) return;
-
-    // Add images to collection
-    this.$images = this.$images.add($images);
-
-    // Go through each image and create toggle + cover
-    for (let i = 0; i < $images.length; i++) {
-      const $image = $($images[i]);
-
-      // If image has already been added, return
-      if ($image.data('animation-controller')) {
-        console.warn('Image has already been added to animation controller');
-        return;
-      }
-
-      if ($image[0].complete) {
-        this.pauseImage($image);
-        this.createToggle($image);
-        this.resizeObserver.observe($image[0]);
-      } else {
-        this.addListener($image, 'load', () => {
-          this.pauseImage($image);
-          this.createToggle($image);
-          this.resizeObserver.observe($image[0]);
-        });
-      }
-
-      $image.data('animation-controller', this);
-    }
-  },
+  // addImages: function ($images) {
+  //   if ($images.length === 0) return;
+  //
+  //   // Add images to collection
+  //   this.$images = this.$images.add($images);
+  //
+  //   // Go through each image and create toggle + cover
+  //   for (let i = 0; i < $images.length; i++) {
+  //     const $image = $($images[i]);
+  //
+  //     // If image has already been added, return
+  //     if ($image.data('animation-controller')) {
+  //       console.warn('Image has already been added to animation controller');
+  //       return;
+  //     }
+  //
+  //     if ($image[0].complete) {
+  //       this._hideAnimation($image);
+  //       this.resizeObserver.observe($image[0]);
+  //     } else {
+  //       this.addListener($image, 'load', () => {
+  //         this._hideAnimation($image);
+  //         this.resizeObserver.observe($image[0]);
+  //       });
+  //     }
+  //
+  //     $image.data('animation-controller', this);
+  //   }
+  // },
 
   getToggleEnabled: function (image) {
     return !$(image).attr('data-disable-toggle');
@@ -100,6 +187,11 @@ Craft.GlobalAnimationController = Garnish.Base.extend({
     );
   },
 
+  /**
+   * Gets a canvas element with the first frame of the image
+   * @param image
+   * @returns {*|jQuery}
+   */
   getCanvas: function (image) {
     const $image = $(image);
     const width = $image.width();
@@ -126,30 +218,19 @@ Craft.GlobalAnimationController = Garnish.Base.extend({
     return $canvas;
   },
 
-  pauseImage: function (image) {
-    const $image = $(image);
-    const $parent = $image.parent();
-    let $canvas = $parent.find('[data-image-cover]');
-    const width = $image.width();
-    const height = $image.height();
-
-    if ($canvas.length === 0) {
-      $image.attr({
-        'data-width': width,
-        'data-height': height,
-      });
-      $canvas = this.getCanvas($image);
-      $parent.css({
-        position: 'relative',
-      });
-      $canvas.insertBefore($image);
-    } else if ($canvas.length > 0 && this.imageSizeChanged($image)) {
-      console.log('redraw');
-      // Replace canvas
-      $canvas.remove();
-      const $newCanvas = this.getCanvas($image);
-      $newCanvas.insertBefore($image);
-    }
+  /**
+   * Waits for the image to be loaded
+   * @param image
+   * @returns {Promise<unknown>}
+   */
+  waitForImage: async function (image) {
+    return new Promise((res) => {
+      if (image.complete) {
+        return res();
+      }
+      image.onload = () => res();
+      image.onerror = () => res();
+    });
   },
 
   createToggle: function (image) {
@@ -186,12 +267,22 @@ Craft.GlobalAnimationController = Garnish.Base.extend({
     }
   },
 
+  /**
+   * Pauses all images in a NodeList.
+   * @param {NodeList} images - The list of images to pause
+   */
   pauseAll: function () {
-    for (let i = 0; i < this.$images.length; i++) {
-      this.pause(this.$images[i]);
+    const images = Array.from(this.getAllControlledImages());
+
+    for (let i = 0; i < images.length; i++) {
+      this.pause(images[i]);
     }
   },
 
+  /**
+   * Pauses an image by toggling the canvas visibility and button state
+   * @param image
+   */
   pause: function (image) {
     const $image = $(image);
     const $coverImage = this.getAnimationCoverImage($image);
@@ -206,8 +297,9 @@ Craft.GlobalAnimationController = Garnish.Base.extend({
   },
 
   playAll: function () {
-    for (let i = 0; i < this.$images.length; i++) {
-      this.play(this.$images[i]);
+    const images = Array.from(this.getAllControlledImages());
+    for (let i = 0; i < this.images.length; i++) {
+      this.play(this.images[i]);
     }
   },
 
