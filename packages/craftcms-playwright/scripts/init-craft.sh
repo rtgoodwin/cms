@@ -8,6 +8,14 @@ cd /app || exit
 
 echo "$PWD"
 
+# Install Craft
+echo "install craft"
+./craft install/craft --interactive=0 --username=admin --password=NewPassword --site-name=Playwright --email=playwright@craftcms.com --site-url=http://127.0.0.1/ --language=en_US
+
+# Switch Craft's edition and apply changes
+sed -i "s/edition: solo/edition: pro/g" config/project/project.yaml
+./craft project-config/apply
+
 if [ ! -d "modules" ]
 then
   echo "creating modules dir"
@@ -20,24 +28,23 @@ then
   mkdir config
 fi
 
+# autoload modules via composer
+sed -i "s/\"prefer-stable\": true,/\"prefer-stable\": true,\n  \"autoload\": {\"psr-4\": {\"modules\\\\\\\\\": \"modules\/\"}},/g" composer.json
+composer dump-autoload
+
 cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/DbBackup.php /app/modules/
 cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/app.php /app/config/
 
-# Install Craft
-echo "install craft"
-./craft install/craft --interactive=0 --username=admin --password=NewPassword --site-name=Playwright --email=playwright@craftcms.com --site-url=http://127.0.0.1/ --language=en_US
-
-# Switch Craft's edition and apply changes
-sed -i "s/edition: solo/edition: pro/g" config/project/project.yaml
-./craft project-config/apply
 
 # Create backup directory
 mkdir backup
 
 # Backup DB
-./craft db/backup backup/db.sql
+echo "backup DB"
+./craft db/backup --interactive=0 --overwrite=1 backup/db.sql
 
 # Backup Project Config files
+echo "backup Project Congif files"
 cp -vfrp config/project backup/
 
 # Switch to repo directory
@@ -68,4 +75,5 @@ eval "$REPOSITORIES_CMD"
 composer require $PACKAGE_NAME:*
 
 ## Backup composer files
+echo "backup composer files"
 cp -vfrp composer.* /app/backup/

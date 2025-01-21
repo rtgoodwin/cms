@@ -22,8 +22,7 @@ use craft\helpers\App;
 return [
     'id' => App::env('CRAFT_APP_ID') ?: 'CraftCMS',
     'modules' => [
-        /** @phpstan-ignore-next-line */
         'db-backup' => \modules\DbBackup::class,
     ],
-    //'bootstrap' => ['db-backup'],
+    'bootstrap' => ['db-backup'],
 ];

@@ -3,6 +3,7 @@
 namespace modules;
 
 use Craft;
+use craft\db\Connection;
 use craft\db\Table;
 use craft\events\BackupEvent;
 use craft\helpers\ArrayHelper;
@@ -16,8 +17,14 @@ class DbBackup extends \yii\base\Module
         Craft::setAlias('@modules', __DIR__);
         parent::init();
 
-        Event::on(\craft\db\Connection::class, \craft\db\Connection::EVENT_BEFORE_CREATE_BACKUP, function(BackupEvent $event) {
-            ArrayHelper::removeValue($event->ignoreTables, Table::SESSIONS);
+        Craft::$app->onInit(function() {
+            Event::on(
+                Connection::class,
+                Connection::EVENT_BEFORE_CREATE_BACKUP,
+                function(BackupEvent $event) {
+                    ArrayHelper::removeValue($event->ignoreTables, Table::SESSIONS);
+                }
+            );
         });
     }
 }
