@@ -73,7 +73,7 @@ export class AnimationBlocker {
     return $canvas;
   }
 
-  private static async waitForImage(image: HTMLImageElement) : Promise<void> {
+  private static async waitForImage(image: HTMLImageElement): Promise<void> {
     return new Promise((res) => {
       if (image.complete) {
         return res();
@@ -83,7 +83,9 @@ export class AnimationBlocker {
     });
   }
 
-  private static imageSizeChanged(image: HTMLImageElement): boolean | undefined {
+  private static imageSizeChanged(
+    image: HTMLImageElement
+  ): boolean | undefined {
     const width: number = image.clientWidth;
     const height: number = image.clientHeight;
     const prevWidth: string | undefined = image.dataset.width;
@@ -122,7 +124,10 @@ export class AnimationBlocker {
     const imageWidth: number = image.clientWidth;
     const imageHeight: number = image.clientHeight;
 
-    return imageWidth >= AnimationBlocker.minToggleableWidth && imageHeight >= AnimationBlocker.minToggleableHeight;
+    return (
+      imageWidth >= AnimationBlocker.minToggleableWidth &&
+      imageHeight >= AnimationBlocker.minToggleableHeight
+    );
   }
 
   static couldBeAnimated(image: HTMLImageElement): boolean {
@@ -135,7 +140,8 @@ export class AnimationBlocker {
   }
 
   static hideAllAnimations(): void {
-    const images: HTMLImageElement[] = AnimationBlocker.getAllPotentiallyAnimated();
+    const images: HTMLImageElement[] =
+      AnimationBlocker.getAllPotentiallyAnimated();
     for (let i = 0; i < images.length; i++) {
       AnimationBlocker.hideAnimation(images[i]);
     }
@@ -167,7 +173,8 @@ export class AnimationBlocker {
       console.log('redraw');
       // Replace canvas
       $canvas.remove();
-      const newCanvas: HTMLCanvasElement = AnimationBlocker.getCanvasElement(image);
+      const newCanvas: HTMLCanvasElement =
+        AnimationBlocker.getCanvasElement(image);
       $(newCanvas).insertBefore($image);
     }
 
@@ -179,12 +186,17 @@ export class AnimationBlocker {
     // $(image).data('animationController', this);
   }
 
-  static filterImagesByExtension(images: NodeListOf<HTMLImageElement>): HTMLImageElement[] {
-    return Array.from(images).filter((image) => AnimationBlocker.couldBeAnimated(image));
+  static filterImagesByExtension(
+    images: NodeListOf<HTMLImageElement>
+  ): HTMLImageElement[] {
+    return Array.from(images).filter((image) =>
+      AnimationBlocker.couldBeAnimated(image)
+    );
   }
 
   static getAllPotentiallyAnimated(): HTMLImageElement[] {
-    const allImages: NodeListOf<HTMLImageElement> = document.querySelectorAll('img');
+    const allImages: NodeListOf<HTMLImageElement> =
+      document.querySelectorAll('img');
     return AnimationBlocker.filterImagesByExtension(allImages);
   }
 }
