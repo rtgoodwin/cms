@@ -72,7 +72,8 @@ Craft.CP = Garnish.Base.extend(
     resizeTimeout: null,
 
     init: function () {
-      this.globalAnimationController = new Craft.GlobalAnimationController();
+      //this.globalAnimationController = new Craft.GlobalAnimationController();
+      this.globalAnimationController = new Craft.AnimationBlocker();
       this.elementThumbLoader = new Craft.ElementThumbLoader();
 
       // Is this session going to expire?
