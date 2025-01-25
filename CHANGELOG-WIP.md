@@ -1,5 +1,8 @@
 # Release Notes for Craft CMS 5.7 (WIP)
 
+### Administration
+- The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
+
 ### Extensibility
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 
