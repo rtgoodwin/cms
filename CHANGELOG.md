@@ -4,11 +4,13 @@
 
 - Fixed a bug where Entries fields’ entry select modals could show expand/collapse toggles for Structure sections, for elements that didn’t have any selectable descendants. ([#16506](https://github.com/craftcms/cms/issues/16506))
 - Fixed a bug where native fields (e.g. Title) were showing changed statuses when viewing revisions, if they had been updated since the time the revision was created.
+- Fixed a bug where eager-loading element queries could create an excessive amount of cache invalidation tags.
 - Added a `cp.login.alternative-login-methods` hook to the system login template.
 - Fixed a bug where Color fields’ custom color inputs were including presets based on the color palette.
 - Fixed a bug where nested Matrix entries weren’t getting assigned a post date if they were created while saving the owner element with a custom validation scenario. ([#16504](https://github.com/craftcms/cms/pull/16504))
 - Fixed a bug where plugin settings pages weren’t displaying a read-only notice and had Save buttons, when `allowAdminChanges` was `false`. ([#16509](https://github.com/craftcms/cms/pull/16509))
 - Fixed a bug where eager-loading elements on nested entries resulted in a large number of database queries.
+- Fixed a bug where field action menus were showing on fields that didn’t have a label or visible field handle. ([#16510](https://github.com/craftcms/cms/discussions/16510))
 
 ## 5.6.1 - 2025-01-22
 
