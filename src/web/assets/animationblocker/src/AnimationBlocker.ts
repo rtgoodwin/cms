@@ -34,7 +34,7 @@ export class AnimationBlocker {
             for (const node of mutation.addedNodes) {
               if (node.nodeName === 'IMG') {
                 if (this.couldBeAnimated(node as HTMLImageElement)) {
-                  AnimationBlocker.hideAnimation(node as HTMLImageElement);
+                  this.hideAnimation(node as HTMLImageElement);
                 }
               }
             }
@@ -96,11 +96,7 @@ export class AnimationBlocker {
    * @private
    */
   private static createToggle(image: HTMLImageElement): void {
-    if (
-      !AnimationBlocker.isToggleEnabled(image) ||
-      AnimationBlocker.getToggle(image)
-    )
-      return;
+    if (!this.isToggleEnabled(image) || this.getToggle(image)) return;
 
     const $image = $(image);
     const $wrapper = $image.parent();
@@ -136,7 +132,7 @@ export class AnimationBlocker {
    * @private
    */
   private static createCover(image: HTMLImageElement): void {
-    if (AnimationBlocker.getCover(image)) return;
+    if (this.getCover(image)) return;
 
     const $image = $(image);
     const width = $image.width();
@@ -183,7 +179,7 @@ export class AnimationBlocker {
    * @private
    */
   private static removeCover(image: HTMLImageElement) {
-    const $cover = AnimationBlocker.getCover(image);
+    const $cover = this.getCover(image);
     $cover.remove();
   }
 
@@ -219,8 +215,8 @@ export class AnimationBlocker {
     const imageHeight: number = image.clientHeight;
 
     return (
-      imageWidth >= AnimationBlocker.minToggleableWidth &&
-      imageHeight >= AnimationBlocker.minToggleableHeight
+      imageWidth >= this.minToggleableWidth &&
+      imageHeight >= this.minToggleableHeight
     );
   }
 
@@ -233,7 +229,7 @@ export class AnimationBlocker {
     if ($(image).data('animationController')) return;
 
     // Wait until it's completely loaded
-    await AnimationBlocker.waitForImage(image);
+    await this.waitForImage(image);
     const $image = $(image);
     const $parent = $image.parent();
     let $canvas = $parent.find('[data-image-cover]');
@@ -248,14 +244,14 @@ export class AnimationBlocker {
         'data-width': width,
         'data-height': height,
       });
-      AnimationBlocker.createCover($image);
-    } else if ($canvas.length > 0 && AnimationBlocker.imageSizeChanged(image)) {
+      this.createCover($image);
+    } else if ($canvas.length > 0 && this.imageSizeChanged(image)) {
       // Replace canvas
-      AnimationBlocker.removeCover(image);
-      AnimationBlocker.createCover($image);
+      this.removeCover(image);
+      this.createCover($image);
     }
 
-    AnimationBlocker.createToggle(image);
+    this.createToggle(image);
     $(image).data('animationController', this);
   }
 
@@ -263,19 +259,16 @@ export class AnimationBlocker {
    * Hides the animation of all images on the page
    */
   private static hideAllAnimations(): void {
-    const images: HTMLImageElement[] =
-      AnimationBlocker.getAllPotentiallyAnimated();
+    const images: HTMLImageElement[] = this.getAllPotentiallyAnimated();
     for (let i = 0; i < images.length; i++) {
-      AnimationBlocker.hideAnimation(images[i]);
+      this.hideAnimation(images[i]);
     }
   }
 
   private static filterImagesByExtension(
     images: NodeListOf<HTMLImageElement>
   ): HTMLImageElement[] {
-    return Array.from(images).filter((image) =>
-      AnimationBlocker.couldBeAnimated(image)
-    );
+    return Array.from(images).filter((image) => this.couldBeAnimated(image));
   }
 
   private static play(image: HTMLImageElement): void {
@@ -314,7 +307,7 @@ export class AnimationBlocker {
     const src = image.src;
     const srcset = image.srcset;
 
-    return AnimationBlocker.extensions.some(
+    return this.extensions.some(
       (extension) => src.includes(extension) || srcset.includes(extension)
     );
   }
@@ -322,6 +315,6 @@ export class AnimationBlocker {
   static getAllPotentiallyAnimated(): HTMLImageElement[] {
     const allImages: NodeListOf<HTMLImageElement> =
       document.querySelectorAll('img');
-    return AnimationBlocker.filterImagesByExtension(allImages);
+    return this.filterImagesByExtension(allImages);
   }
 }

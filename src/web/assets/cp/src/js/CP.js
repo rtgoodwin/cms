@@ -9,7 +9,7 @@
 Craft.CP = Garnish.Base.extend(
   {
     elementThumbLoader: null,
-    globalAnimationController: null,
+    animationBlocker: null,
     authManager: null,
     announcerTimeout: null,
     modalLayers: [],
@@ -72,7 +72,6 @@ Craft.CP = Garnish.Base.extend(
     resizeTimeout: null,
 
     init: function () {
-      this.globalAnimationController = new Craft.AnimationBlocker();
       this.elementThumbLoader = new Craft.ElementThumbLoader();
 
       // Is this session going to expire?
@@ -158,6 +157,15 @@ Craft.CP = Garnish.Base.extend(
       // Alerts
       if (this.$alerts.length) {
         this.initAlerts();
+      }
+
+      // Global Animation Controller
+      if (
+        Garnish.prefersReducedMotion() ||
+        Garnish.$bod.hasClass('prevent-autoplay')
+      ) {
+        this.animationBlocker = this.animationBlocker =
+          new Craft.AnimationBlocker();
       }
 
       // Toggles
