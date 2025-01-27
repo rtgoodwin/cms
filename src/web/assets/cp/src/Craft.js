@@ -32,9 +32,6 @@ import './js/CpModal.js';
 // Tabs
 import './js/Tabs.js';
 
-// Animation controller
-import './js/GlobalAnimationController.js';
-
 // Element thumb loader
 import './js/ElementThumbLoader.js';
 
