@@ -637,15 +637,24 @@ li.breadcrumb-toggle-wrapper {
 }
 
 .animated-image-toggle {
-  @include mixins.touch-target;
+  --background-color: rgb(0 0 0 / 70%);
+  display: flex;
   position: absolute;
-  inset-block-start: 50%;
-  inset-inline-start: 50%;
-  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
   height: 40px;
   width: 40px;
-  background-color: rgb(0 0 0 / 70%);
-  color: var(--white);
+  border-radius: 50%;
+  inset-block-end: 5px;
+  inset-inline-end: 5px;
+  border: 3px solid var(--white) !important;
+  background-color: var(--background-color) !important;
+  fill: var(--white);
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 #account-menu {

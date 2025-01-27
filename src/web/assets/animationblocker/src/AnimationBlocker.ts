@@ -110,7 +110,7 @@ export class AnimationBlocker {
       'data-animation-toggle': true,
       'aria-label': Craft.t('app', 'Play'),
       class: 'animated-image-toggle btn',
-    });
+    }).html(this.playIcon);
 
     $wrapper.append($toggle);
 
