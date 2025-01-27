@@ -12,6 +12,10 @@ export class AnimationBlocker {
     AnimationBlocker.hideAllAnimations();
   }
 
+  /**
+   * Creates a MutationObserver to watch for added images
+   * @private
+   */
   private static createImageAddedObserver(): MutationObserver {
     const targetNode: HTMLBodyElement = document.querySelector('body')!;
 
@@ -47,6 +51,11 @@ export class AnimationBlocker {
     //observer.disconnect();
   }
 
+  /**
+   * Waits for an image to load
+   * @param image
+   * @private
+   */
   private static async waitForImage(image: HTMLImageElement): Promise<void> {
     return new Promise((res) => {
       if (image.complete) {
@@ -57,6 +66,11 @@ export class AnimationBlocker {
     });
   }
 
+  /**
+   * Checks if the image's size has changed
+   * @param image
+   * @private
+   */
   private static imageSizeChanged(
     image: HTMLImageElement
   ): boolean | undefined {
@@ -78,7 +92,11 @@ export class AnimationBlocker {
    * @private
    */
   private static createToggle(image: HTMLImageElement): void {
-    if (!AnimationBlocker.isToggleEnabled(image)) return;
+    if (
+      !AnimationBlocker.isToggleEnabled(image) ||
+      AnimationBlocker.getToggle(image)
+    )
+      return;
 
     const $image = $(image);
     const $wrapper = $image.parent();
@@ -98,6 +116,12 @@ export class AnimationBlocker {
     });
   }
 
+  /**
+   * Gets the toggle button associated with an image
+   * @param image
+   * @returns {HTMLButtonElement}
+   * @private
+   */
   private static getToggle(image: HTMLImageElement): HTMLButtonElement {
     const $parent = $(image).parent();
     return $parent.find('[data-animation-toggle]')[0] as HTMLButtonElement;
@@ -109,6 +133,8 @@ export class AnimationBlocker {
    * @private
    */
   private static createCover(image: HTMLImageElement): void {
+    if (AnimationBlocker.getCover(image)) return;
+
     const $image = $(image);
     const width = $image.width();
     const height = $image.height();
@@ -218,11 +244,7 @@ export class AnimationBlocker {
     }
 
     AnimationBlocker.createToggle(image);
-    //
-    //
-    // this.resizeObserver.observe(image);
-    //
-    // $(image).data('animationController', this);
+    $(image).data('animationController', this);
   }
 
   /**
