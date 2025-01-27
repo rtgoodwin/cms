@@ -3,6 +3,10 @@ export class AnimationBlocker {
   private static minToggleableHeight: number = 100;
   private static minToggleableWidth: number = 100;
   #imageAddedObserver = AnimationBlocker.createImageAddedObserver();
+  private static playIcon: string =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>';
+  private static pauseIcon: string =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"/></svg>';
 
   protected get imageAddedObserver() {
     return this.#imageAddedObserver;
@@ -103,7 +107,6 @@ export class AnimationBlocker {
 
     const $toggle = $('<button/>', {
       type: 'button',
-      'data-icon': 'play',
       'data-animation-toggle': true,
       'aria-label': Craft.t('app', 'Play'),
       class: 'animated-image-toggle btn',
@@ -184,16 +187,25 @@ export class AnimationBlocker {
     $cover.remove();
   }
 
+  /**
+   * Toggles the animation of an image
+   * @param event
+   * @private
+   */
   private static handleToggleClick(event: Event): void {
-    const $toggle = $(event.target);
-    const $image = $toggle.parent().find('img');
-    const isPaused =
-      $image[0].getAttribute('data-animation-state') === 'paused';
+    const target = event.target as HTMLElement;
+    const toggle = target!.closest('button') as HTMLButtonElement;
+    const parent = toggle.parentElement!;
+    const image = parent.querySelector('img')!;
+
+    if (!image) return;
+
+    const isPaused = image.getAttribute('data-animation-state') === 'paused';
 
     if (isPaused) {
-      this.play($image[0]);
+      this.play(image);
     } else {
-      this.pause($image[0]);
+      this.pause(image);
     }
   }
 
@@ -275,7 +287,7 @@ export class AnimationBlocker {
     image.setAttribute('data-animation-state', 'playing');
     cover.classList.add('hidden');
     toggleBtn.setAttribute('aria-label', Craft.t('app', 'Pause'));
-    toggleBtn.setAttribute('data-icon', 'pause');
+    toggleBtn.innerHTML = this.pauseIcon;
   }
 
   /**
@@ -291,7 +303,7 @@ export class AnimationBlocker {
     image.setAttribute('data-animation-state', 'paused');
     cover.classList.remove('hidden');
     toggleBtn.setAttribute('aria-label', Craft.t('app', 'Play'));
-    toggleBtn.setAttribute('data-icon', 'play');
+    toggleBtn.innerHTML = this.playIcon;
   }
 
   /**
