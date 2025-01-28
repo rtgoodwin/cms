@@ -2471,8 +2471,7 @@ craft-copy-attribute {
 
     &:not(.disabled, .inactive, .loading) {
       &:hover,
-      &.hover,
-      &:focus {
+      &.hover {
         border: var(--primary-button-border--hover) !important;
         background: var(--primary-button-bg--hover) !important;
         box-shadow: var(--primary-button-shadow--hover) !important;
@@ -8648,7 +8647,7 @@ tr.indexingSession td.progress div.progressContainer div.progressInfo {
 
 .select:not(.selectize) select {
   &:hover:not(:disabled) {
-    @include mixins.select-input-focused-styles;
+    @include mixins.select-input-hovered-styles;
   }
 
   @include mixins.focus-styles {
