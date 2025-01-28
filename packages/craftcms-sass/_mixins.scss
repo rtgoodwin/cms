@@ -219,12 +219,6 @@ $menuBorderRadius: $mediumBorderRadius;
 
 // Other
 
-@mixin focus-styles {
-  body &:focus-visible {
-    @content;
-  }
-}
-
 @mixin svg-mask($color) {
   rect,
   circle,
