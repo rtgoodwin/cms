@@ -1992,7 +1992,10 @@ ul.icons {
   &.link-btn {
     border: none;
     background: transparent;
-    box-shadow: none;
+
+    &:not(:focus) {
+      box-shadow: none;
+    }
   }
 
   &.chromeless {
