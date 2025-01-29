@@ -1992,10 +1992,6 @@ ul.icons {
   &.link-btn {
     border: none;
     background: transparent;
-
-    &:not(:focus) {
-      box-shadow: none;
-    }
   }
 
   &.chromeless {
@@ -2562,13 +2558,9 @@ div.btn.submit input {
     margin-inline-end: -1px;
   }
 
-  &:focus {
+  &:focus-visible {
     background-color: color.adjust(mixins.$grey200, $alpha: -0.9);
     border-color: transparent;
-
-    .reduce-focus-visibility &:not(:focus-visible) {
-      border: 1px dashed var(--medium-hairline-color);
-    }
   }
 
   &:not(.disabled) {
@@ -2614,7 +2606,7 @@ div.btn.submit input {
       @include mixins.light-focus-ring;
     }
 
-    &:focus {
+    &:focus-visible {
       z-index: 1;
       box-shadow: none;
 
@@ -2622,14 +2614,6 @@ div.btn.submit input {
         z-index: 1;
         box-shadow: var(--focus-ring);
       }
-
-      .reduce-focus-visibility &:not(:focus-visible) .label {
-        box-shadow: none;
-      }
-    }
-
-    .reduce-focus-visibility &:focus-visible .label {
-      box-shadow: var(--focus-ring);
     }
 
     &:not(.has-action-menu) {
@@ -8141,18 +8125,9 @@ div.checkbox.indeterminate::before {
   text-align: center;
 }
 
-body:not(.reduce-focus-visibility) {
-  input.checkbox:focus + label::before,
-  :focus div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.checkbox:focus-visible + label::before,
-  :focus-visible div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
+input.checkbox:focus-visible + label::before,
+:focus-visible div.checkbox::before {
+  @include mixins.input-focused-styles;
 }
 
 .checkbox-icon {
@@ -8275,18 +8250,9 @@ div.radio.checked::after,
   background: var(--gray-900);
 }
 
-body:not(.reduce-focus-visibility) {
-  input.radio:focus + label::before,
-  :focus div.radio::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.radio:focus-visible + label::before,
-  :focus-visible div.radio::before {
-    @include mixins.input-focused-styles;
-  }
+input.radio:focus-visible + label::before,
+:focus-visible div.radio::before {
+  @include mixins.input-focused-styles;
 }
 
 /* multiselect */
