@@ -219,7 +219,9 @@ export default Base.extend(
       // Check for visibility of trigger
       if (this.$triggerElement.is(':hidden')) {
         if (this.$triggerElement.closest('.menu--disclosure')) {
-          const menuId = this.$triggerElement.closest('.menu--disclosure').attr('id');
+          const menuId = this.$triggerElement
+            .closest('.menu--disclosure')
+            .attr('id');
           $focusTarget = $(`[aria-controls="${menuId}"]`);
         }
       }
