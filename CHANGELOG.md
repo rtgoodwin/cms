@@ -1,10 +1,14 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.14.2 - 2025-01-28
 
 - Fixed a bug where Entries fields’ entry select modals could show expand/collapse toggles for Structure sections, for elements that didn’t have any selectable descendants. ([#16506](https://github.com/craftcms/cms/issues/16506))
+- Fixed a bug where changes to custom fields within Matrix blocks weren’t getting merged into existing drafts for the same owner element. ([#16519](https://github.com/craftcms/cms/issues/16519))
 - Fixed a bug where native fields (e.g. Title) were showing changed statuses when viewing revisions, if they had been updated since the time the revision was created.
 - Fixed a bug where eager-loading element queries could create an excessive amount of cache invalidation tags.
+- Fixed a bug where it was possible to enable elements for new sites with validation errors. ([#16505](https://github.com/craftcms/cms/issues/16505))
+- Fixed a bug where setting `transaction: true` in the Codeception configuration wasn’t rolling back database DML changes after a test. ([#16546](https://github.com/craftcms/cms/issues/16546))
+- Fixed a bug where ʻokina characters weren’t being removed in auto-generated slugs. ([#16548](https://github.com/craftcms/cms/issues/16548))
 
 ## 4.14.1 - 2025-01-22
 
