@@ -227,6 +227,9 @@ import $ from 'jquery';
       },
       instances: {},
       openPanels: [],
+      totalPanels: function () {
+        return Craft.Slideout.openPanels.length;
+      },
       addPanel: function (panel) {
         Craft.Slideout.openPanels.unshift(panel);
         if (panel.useMobileStyles) {
@@ -236,6 +239,7 @@ import $ from 'jquery';
         }
       },
       removePanel: function (panel) {
+        const totalPanels = Craft.Slideout.totalPanels();
         Craft.Slideout.openPanels = Craft.Slideout.openPanels.filter(
           (m) => m !== panel
         );
@@ -245,9 +249,13 @@ import $ from 'jquery';
           panel.$container.css(Garnish.ltr ? 'left' : 'right', '100vw');
           Craft.Slideout.updateStyles();
         }
+
+        if (Craft.Slideout.totalPanels() === 0) {
+          panel.$outerContainer.css('display', 'none');
+        }
       },
       updateStyles: function () {
-        const totalPanels = Craft.Slideout.openPanels.length;
+        const totalPanels = Craft.Slideout.totalPanels();
         Craft.Slideout.openPanels.forEach((panel, i) => {
           panel.$container.css(
             Garnish.ltr ? 'left' : 'right',
