@@ -1532,7 +1532,7 @@ JS, [
 
         $translationDescription = $config['translationDescription'] ?? Craft::t('app', 'This field is translatable.');
         $translationIconHtml = Html::button('', [
-            'class' => ['t9n-indicator'],
+            'class' => ['t9n-indicator', 'prevent-autofocus'],
             'data' => [
                 'icon' => 'language',
             ],
@@ -1610,7 +1610,7 @@ JS, [
                         ($showActionMenu ? static::disclosureMenu($config['actionMenuItems'], [
                             'hiddenLabel' => Craft::t('app', 'Actions'),
                             'buttonAttributes' => [
-                                'class' => ['action-btn', 'small'],
+                                'class' => ['action-btn', 'small', 'prevent-autofocus'],
                             ],
                         ]) : '') .
                         ($showAttribute ? static::renderTemplate('_includes/forms/copytextbtn.twig', [
@@ -3365,9 +3365,19 @@ JS;
             // system icon name?
             if (preg_match('/^[a-z\-]+(\d?)$/', $icon)) {
                 $path = match ($icon) {
-                    'asterisk-slash', 'diamond-slash', 'element-card', 'element-card-slash', 'element-cards', 'graphql',
-                    'grip-dots', 'image-slash', 'list-flip', 'list-tree-flip', 'share-flip' =>
-                    Craft::getAlias("@app/icons/custom-icons/$icon.svg"),
+                    'asterisk-slash',
+                    'diamond-slash',
+                    'element-card',
+                    'gear-slash',
+                    'element-card-slash',
+                    'element-cards',
+                    'graphql',
+                    'grip-dots',
+                    'image-slash',
+                    'list-flip',
+                    'list-tree-flip',
+                    'share-flip',
+                    => Craft::getAlias("@app/icons/custom-icons/$icon.svg"),
                     default => Craft::getAlias("@appicons/$icon.svg"),
                 };
                 if (!file_exists($path)) {
