@@ -5,6 +5,7 @@
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
 
 ### Extensibility
+- Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 
 ### System
