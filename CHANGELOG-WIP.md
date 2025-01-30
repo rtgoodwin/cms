@@ -1,9 +1,14 @@
 # Release Notes for Craft CMS 5.7 (WIP)
 
+### Content Management
+- Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
+
 ### Administration
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
+- Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
 
 ### Extensibility
+- Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 
 ### System
