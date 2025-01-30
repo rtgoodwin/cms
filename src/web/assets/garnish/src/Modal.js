@@ -226,6 +226,10 @@ export default Base.extend(
         }
       }
 
+      if ($focusTarget?.length) {
+        $focusTarget.focus();
+      }
+
       this.visible = false;
       Garnish.Modal.visibleModal = null;
       Garnish.uiLayerManager.removeLayer();
