@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Allows viewing existing {type} and creating drafts for them.',
     'Already in your cart' => 'Already in your cart',
     'Alternative Text' => 'Alternative Text',
-    'Always show focus rings' => 'Always show focus rings',
     'Amber' => 'Amber',
     'An error occurred when duplicating the category.' => 'An error occurred when duplicating the category.',
     'An error occurred when duplicating the entry.' => 'An error occurred when duplicating the entry.',
