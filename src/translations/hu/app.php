@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Lehetővé teszi a meglévő {type} megtekintését és vázlatok létrehozását.',
     'Already in your cart' => 'Már a kosárban',
     'Alternative Text' => 'Alternatív szöveg',
-    'Always show focus rings' => 'Mindig mutassa a fókuszköröket',
     'Amber' => 'Borostyán',
     'An error occurred when duplicating the category.' => 'Hiba történt a kategória többszörözése közben.',
     'An error occurred when duplicating the entry.' => 'Hiba történt a bejegyzés többszörözése közben.',

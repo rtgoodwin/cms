@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Позволяет просматривать существующие типы {type} и создавать для них черновики.',
     'Already in your cart' => 'Уже в корзине',
     'Alternative Text' => 'Альтернативный текст',
-    'Always show focus rings' => 'Всегда показывать кольца фокусировки',
     'Amber' => 'Янтарный',
     'An error occurred when duplicating the category.' => 'При дублировании категории произошла ошибка.',
     'An error occurred when duplicating the entry.' => 'При дублировании записи произошла ошибка.',

@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => '기존 {type} 보기 및 이에 대한 드래프트 생성을 허용합니다.',
     'Already in your cart' => '이미 장바구니에 저장됨',
     'Alternative Text' => '대체 텍스트',
-    'Always show focus rings' => '항상 포커스 링 표시',
     'Amber' => '호박색',
     'An error occurred when duplicating the category.' => '카테고리를 복제하는 동안 오류가 발생했습니다.',
     'An error occurred when duplicating the entry.' => '항목을 복제하는 동안 오류가 발생했습니다.',

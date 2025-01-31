@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'อนุญาตให้ดู {type} ที่มีอยู่ และสร้างแบบร่างสำหรับรายการเหล่านั้น',
     'Already in your cart' => 'อยู่ในรถเข็นของคุณอยู่แล้ว',
     'Alternative Text' => 'ข้อความแสดงแทน',
-    'Always show focus rings' => 'แสดงวงโฟกัสเสมอ',
     'Amber' => 'สีอำพัน',
     'An error occurred when duplicating the category.' => 'เกิดข้อผิดพลาดขึ้นในขณะที่ทำซ้ำหมวดหมู่',
     'An error occurred when duplicating the entry.' => 'เกิดข้อผิดพลาดขึ้นในขณะที่ทำซ้ำรายการ',
