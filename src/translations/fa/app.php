@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'امکان مشاهده {type} موجود و ایجاد پیش‌نویس برای آنها را فراهم می‌کند.',
     'Already in your cart' => 'از قبل در سبد خرید شما وجود دارد',
     'Alternative Text' => 'متن جایگزین',
-    'Always show focus rings' => 'همیشه حلقه‌های فوکوس را نشان دهید',
     'Amber' => 'کهربایی',
     'An error occurred when duplicating the category.' => 'یک خطا در هنگام کپی کردن دسته بندی رخ داد.',
     'An error occurred when duplicating the entry.' => 'یک خطا در هنگام کپی کردن محتوا رخ داد.',
