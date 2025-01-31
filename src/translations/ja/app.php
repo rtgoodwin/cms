@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => '既存の{type}の表示とそれらの下書き作成を許可します。',
     'Already in your cart' => 'すでにカートに入っています',
     'Alternative Text' => '代替テキスト',
-    'Always show focus rings' => '常にフォーカスリングを表示',
     'Amber' => 'アンバー',
     'An error occurred when duplicating the category.' => 'カテゴリの複製時にエラーが発生しました。',
     'An error occurred when duplicating the entry.' => 'エントリの複製時にエラーが発生しました。',
