@@ -501,6 +501,7 @@ class Queue extends \yii\queue\cli\Queue implements QueueInterface
         $job = $this->serializer->unserialize($this->_jobData($result['job']));
 
         return ArrayHelper::filterEmptyStringsFromArray([
+            'class' => $job::class,
             'delay' => max(0, $result['timePushed'] + $result['delay'] - time()),
             'status' => $this->_status($result),
             'error' => $result['error'] ?? '',
@@ -940,7 +941,7 @@ EOD;
 
         if ($acquireLock) {
             $channel = $this->channel();
-            $mutexName = sprintf('%s::%s', __CLASS__, $channel);
+            $mutexName = sprintf('%s::%s', self::class, $channel);
             if (!$this->mutex->acquire($mutexName, $timeout ?? $this->mutexTimeout)) {
                 if ($throwException) {
                     throw new MutexException($mutexName, "Could not acquire a mutex lock for the queue ($channel).");

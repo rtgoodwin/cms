@@ -54,6 +54,17 @@ class User extends \yii\web\User
      */
     public string $elevatedSessionTimeoutParam = '__elevated_timeout';
 
+    /**
+     * @var string The session variable name used to store the original user ID, when impersonating another user.
+     * @since 5.6.0
+     */
+    public string $impersonatorIdParam = '__impersonator_id';
+
+    /**
+     * @see getImpersonator()
+     */
+    private UserElement|false $impersonator;
+
     // Authentication
     // -------------------------------------------------------------------------
 
@@ -109,11 +120,10 @@ class User extends \yii\web\User
     {
         // Set the default based on the config, if it’s not specified
         if ($defaultUrl === null) {
-            // Is this a control panel request and can they access the control panel?
-            if (Craft::$app->getRequest()->getIsCpRequest() && $this->checkPermission('accessCp')) {
-                $defaultUrl = UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
+            if ($this->getIsGuest()) {
+                $defaultUrl = UrlHelper::actionUrl('users/redirect');
             } else {
-                $defaultUrl = UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
+                $defaultUrl = $this->getDefaultReturnUrl();
             }
         }
 
@@ -123,6 +133,22 @@ class User extends \yii\web\User
         // i.e. if there was a {siteUrl} tag in the Site URL setting, but no matching environment variable,
         // so they ended up on something like http://example.com/%7BsiteUrl%7D/some/path
         return str_replace(['{', '}'], '', $url);
+    }
+
+    /**
+     * Returns the default return URL.
+     *
+     * @return string
+     * @since 5.6.2
+     */
+    public function getDefaultReturnUrl(): string
+    {
+        // Is this a control panel request and can they access the control panel?
+        if (Craft::$app->getRequest()->getIsCpRequest() && $this->checkPermission('accessCp')) {
+            return UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
+        }
+
+        return UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
     }
 
     /**
@@ -238,6 +264,58 @@ class User extends \yii\web\User
         }
 
         return 0;
+    }
+
+    /**
+     * Returns the original user, if the current user is being impersonated.
+     *
+     * @return UserElement|null
+     * @since 5.6.0
+     */
+    public function getImpersonator(): ?UserElement
+    {
+        if (!isset($this->impersonator)) {
+            $impersonatorId = SessionHelper::get($this->impersonatorIdParam);
+            if (!$impersonatorId) {
+                return null;
+            }
+
+            $impersonator = UserElement::find()
+                ->id($impersonatorId)
+                ->one();
+
+            $this->impersonator = $impersonator?->can('impersonateUsers')
+                ? $impersonator
+                : false;
+        }
+
+        return $this->impersonator ?: null;
+    }
+
+    /**
+     * Returns the ID of the original user, if the current user is being impersonated.
+     *
+     * @return int|null
+     * @since 5.6.0
+     */
+    public function getImpersonatorId(): ?int
+    {
+        return $this->getImpersonator()?->id;
+    }
+
+    /**
+     * Sets the ID of the original user, if the current user is being impersonated.
+     *
+     * @param int|null $id
+     * @since 5.6.0
+     */
+    public function setImpersonatorId(?int $id): void
+    {
+        if ($id) {
+            SessionHelper::set($this->impersonatorIdParam, $id);
+        } else {
+            SessionHelper::remove($this->impersonatorIdParam);
+        }
     }
 
     // Authorization
@@ -367,13 +445,13 @@ class User extends \yii\web\User
         $this->_clearOtherSessionParams();
 
         // Save the username cookie if they're not being impersonated
-        $impersonating = SessionHelper::get(UserElement::IMPERSONATE_KEY) !== null;
-        if (!$impersonating) {
+        $impersonator = $this->getImpersonator();
+        if (!$impersonator) {
             $this->sendUsernameCookie($identity);
         }
 
         // Update the user record
-        if (!$impersonating) {
+        if (!$impersonator) {
             Craft::$app->getUsers()->handleValidLogin($identity);
         }
 
@@ -488,7 +566,8 @@ class User extends \yii\web\User
     {
         /** @var UserElement $identity */
         // Delete the impersonation session, if there is one
-        SessionHelper::remove(UserElement::IMPERSONATE_KEY);
+        SessionHelper::remove($this->impersonatorIdParam);
+        $this->impersonator = false;
 
         $this->_clearOtherSessionParams();
 
@@ -529,8 +608,7 @@ class User extends \yii\web\User
 
         // Make sure 2FA data doesn't bleed over
         $authService = Craft::$app->getAuth();
-        SessionHelper::remove($authService->userIdParam);
-        SessionHelper::remove($authService->sessionDurationParam);
+        $authService->setUser(null);
         SessionHelper::remove($authService->passkeyCreationOptionsParam);
     }
 }

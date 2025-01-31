@@ -15,6 +15,7 @@ use craft\behaviors\RevisionBehavior;
 use craft\db\CoalesceColumnsExpression;
 use craft\db\Command;
 use craft\db\Connection;
+use craft\db\ExcludeDescendantIdsExpression;
 use craft\db\Query;
 use craft\db\Table;
 use craft\elements\actions\Delete;
@@ -37,6 +38,7 @@ use craft\enums\AttributeStatus;
 use craft\enums\Color;
 use craft\errors\InvalidFieldException;
 use craft\events\AuthorizationCheckEvent;
+use craft\events\DefineAltActionsEvent;
 use craft\events\DefineAttributeHtmlEvent;
 use craft\events\DefineAttributeKeywordsEvent;
 use craft\events\DefineEagerLoadingMapEvent;
@@ -367,6 +369,13 @@ abstract class Element extends Component implements ElementInterface
      * @since 4.0.0
      */
     public const EVENT_DEFINE_ADDITIONAL_BUTTONS = 'defineAdditionalButtons';
+
+    /**
+     * @event DefineAltActionsEvent The event that is triggered when defining alternative form actions for the element.
+     * @see getAltActions()
+     * @since 5.6.0
+     */
+    public const EVENT_DEFINE_ALT_ACTIONS = 'defineAltActions';
 
     /**
      * @event DefineMenuItemsEvent The event that is triggered when defining action menu items..
@@ -1211,6 +1220,7 @@ abstract class Element extends Component implements ElementInterface
             'inlineEditing' => $viewState['inlineEditing'] ?? false,
             'nestedInputNamespace' => $viewState['nestedInputNamespace'] ?? null,
             'tableName' => static::pluralDisplayName(),
+            'elementQuery' => self::elemnetQueryWithAllDescendants($elementQuery),
         ];
 
         $db = Craft::$app->getDb();
@@ -1304,10 +1314,32 @@ abstract class Element extends Component implements ElementInterface
             }
         }
 
+        foreach ($elements as $element) {
+            $element->viewMode = $viewState['mode'];
+        }
+
         $variables['elements'] = $elements;
         $template = '_elements/' . $viewState['mode'] . 'view/' . ($includeContainer ? 'container' : 'elements');
 
         return Craft::$app->getView()->renderTemplate($template, $variables);
+    }
+
+    private static function elemnetQueryWithAllDescendants(ElementQueryInterface $elementQuery): ElementQueryInterface
+    {
+        if (is_array($elementQuery->where)) {
+            foreach ($elementQuery->where as $key => $condition) {
+                if ($condition instanceof ExcludeDescendantIdsExpression) {
+                    $elementQuery = clone $elementQuery;
+                    unset($elementQuery->where[$key]);
+                    break;
+                }
+            }
+        } elseif ($elementQuery->where instanceof ExcludeDescendantIdsExpression) {
+            $elementQuery = clone $elementQuery;
+            $elementQuery->where = null;
+        }
+
+        return $elementQuery;
     }
 
     /**
@@ -1376,7 +1408,6 @@ abstract class Element extends Component implements ElementInterface
                 'mode' => 'structure',
                 'title' => Craft::t('app', 'Display in a structured table'),
                 'icon' => Craft::$app->getLocale()->getOrientation() === 'rtl' ? 'structurertl' : 'structure',
-                'availableOnMobile' => false,
                 'structuresOnly' => true,
             ],
             [
@@ -1559,19 +1590,19 @@ abstract class Element extends Component implements ElementInterface
         $attributes = [
             'dateCreated' => [
                 'label' => Craft::t('app', 'Date Created'),
-                'placeholder' => (new \DateTime())->sub(new \DateInterval('P16D')),
+                'placeholder' => fn() => (new \DateTime())->sub(new \DateInterval('P16D')),
             ],
             'dateUpdated' => [
                 'label' => Craft::t('app', 'Date Updated'),
-                'placeholder' => (new \DateTime())->sub(new \DateInterval('P15D')),
+                'placeholder' => fn() => (new \DateTime())->sub(new \DateInterval('P15D')),
             ],
             'id' => [
                 'label' => Craft::t('app', 'ID'),
-                'placeholder' => 4321,
+                'placeholder' => fn() => 4321,
             ],
             'uid' => [
                 'label' => Craft::t('app', 'UID'),
-                'placeholder' => 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+                'placeholder' => fn() => 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
             ],
         ];
 
@@ -1580,15 +1611,15 @@ abstract class Element extends Component implements ElementInterface
                 'link' => [
                     'label' => Craft::t('app', 'Link'),
                     'icon' => 'world',
-                    'placeholder' => ElementHelper::linkAttributeHtml('#'),
+                    'placeholder' => fn() => ElementHelper::linkAttributeHtml('#'),
                 ],
                 'slug' => [
                     'label' => Craft::t('app', 'Slug'),
-                    'placeholder' => Craft::t('app', 'Slug'),
+                    'placeholder' => fn() => Craft::t('app', 'Slug'),
                 ],
                 'uri' => [
                     'label' => Craft::t('app', 'URI'),
-                    'placeholder' => ElementHelper::uriAttributeHtml(Craft::t('app', 'link/to/something'), '#'),
+                    'placeholder' => fn() => ElementHelper::uriAttributeHtml(Craft::t('app', 'link/to/something'), '#'),
                 ],
             ]);
         }
@@ -1603,7 +1634,10 @@ abstract class Element extends Component implements ElementInterface
     {
         return match ($attribute['value']) {
             'link', 'uri' => $attribute['placeholder'],
-            default => ElementHelper::attributeHtml($attribute['placeholder'] ?? $attribute['label']),
+            default => ElementHelper::attributeHtml(is_callable($attribute['placeholder'] ?? null)
+                ? $attribute['placeholder']()
+                : $attribute['placeholder'] ?? $attribute['label']
+            ),
         };
     }
 
@@ -2424,6 +2458,12 @@ abstract class Element extends Component implements ElementInterface
     private $_serializeFields = false;
 
     /**
+     * @var bool
+     * @see getIsCrossSiteCopyable()
+     */
+    private bool $_isCrossSiteCopyable;
+
+    /**
      * @inheritdoc
      */
     public function __construct($config = [])
@@ -2622,6 +2662,7 @@ abstract class Element extends Component implements ElementInterface
             $names['searchScore'],
             $names['updateSearchIndexForOwner'],
             $names['updatingFromDerivative'],
+            $names['viewMode'],
         );
 
         $names['canonicalId'] = true;
@@ -3476,6 +3517,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function getCardBodyHtml(): ?string
     {
+        $this->viewMode = 'cards';
         $html = '';
 
         foreach ($this->getFieldLayout()?->getCardBodyElements($this) ?? [] as $item) {
@@ -3738,6 +3780,75 @@ abstract class Element extends Component implements ElementInterface
         }
 
         return '';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getAltActions(): array
+    {
+        $isUnpublishedDraft = $this->getIsUnpublishedDraft();
+        $elementsService = Craft::$app->getElements();
+        $canSaveCanonical = $elementsService->canSaveCanonical($this);
+
+        $altActions = [
+            [
+                'label' => $isUnpublishedDraft && $canSaveCanonical
+                    ? Craft::t('app', 'Create and continue editing')
+                    : Craft::t('app', 'Save and continue editing'),
+                'redirect' => '{cpEditUrl}',
+                'shortcut' => true,
+                'retainScroll' => true,
+                'eventData' => ['autosave' => false],
+            ],
+        ];
+
+        if ($this->getIsCanonical() || $this->isProvisionalDraft) {
+            $newElement = $this->createAnother();
+            if ($newElement && $elementsService->canSave($newElement)) {
+                $altActions[] = [
+                    'label' => $isUnpublishedDraft && $canSaveCanonical
+                        ? Craft::t('app', 'Create and add another')
+                        : Craft::t('app', 'Save and add another'),
+                    'shortcut' => true,
+                    'shift' => true,
+                    'eventData' => ['autosave' => false],
+                    'params' => ['addAnother' => 1],
+                ];
+            }
+
+            if ($canSaveCanonical && $isUnpublishedDraft) {
+                $altActions[] = [
+                    'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Save {type}', [
+                        'type' => Craft::t('app', 'draft'),
+                    ])),
+                    'action' => 'elements/save-draft',
+                    'redirect' => sprintf('%s#', ElementHelper::postEditUrl($this)),
+                    'eventData' => ['autosave' => false],
+                ];
+            }
+
+            if (!$this->getIsRevision() && $elementsService->canDuplicateAsDraft($this)) {
+                $altActions[] = [
+                    'label' => Craft::t('app', 'Save as a new {type}', [
+                        'type' => static::lowerDisplayName(),
+                    ]),
+                    'action' => 'elements/duplicate',
+                    'redirect' => '{cpEditUrl}',
+                ];
+            }
+        }
+
+        // Fire a 'defineAltActions' event
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_ALT_ACTIONS)) {
+            $event = new DefineAltActionsEvent([
+                'altActions' => $altActions,
+            ]);
+            $this->trigger(self::EVENT_DEFINE_ALT_ACTIONS, $event);
+            return $event->altActions;
+        }
+
+        return $altActions;
     }
 
     /**
@@ -4710,7 +4821,7 @@ JS, [
      */
     private function _outdatedAttributes(): array
     {
-        if (!static::trackChanges() || $this->getIsCanonical()) {
+        if (!static::trackChanges() || $this->getIsCanonical() || $this->getIsRevision()) {
             return [];
         }
 
@@ -4984,7 +5095,7 @@ JS, [
      */
     private function _outdatedFields(): array
     {
-        if (!static::trackChanges() || !$this->getIsDraft() || $this->getIsCanonical()) {
+        if (!static::trackChanges() || $this->getIsCanonical() || $this->getIsRevision()) {
             return [];
         }
 
@@ -5400,6 +5511,24 @@ JS, [
         return $this->_currentRevision ?: null;
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function getIsCrossSiteCopyable(): bool
+    {
+        if (!isset($this->_isCrossSiteCopyable)) {
+            $this->_isCrossSiteCopyable = (
+                Craft::$app->getIsMultiSite() &&
+                // check if user can edit this element in other sites
+                count(ElementHelper::editableSiteIdsForElement($this)) > 1 &&
+                // also check if the element exists in other sites
+                !empty(array_diff(array_keys(ElementHelper::siteStatusesForElement($this, true)), [$this->siteId]))
+            );
+        }
+
+        return $this->_isCrossSiteCopyable;
+    }
+
     // Indexes, etc.
     // -------------------------------------------------------------------------
 
@@ -5443,7 +5572,9 @@ JS, [
     {
         // Fire a 'defineAttributeHtml' event
         if ($this->hasEventHandlers(self::EVENT_DEFINE_ATTRIBUTE_HTML)) {
-            $event = new DefineAttributeHtmlEvent(['attribute' => $attribute]);
+            $event = new DefineAttributeHtmlEvent([
+                'attribute' => $attribute,
+            ]);
             $this->trigger(self::EVENT_DEFINE_ATTRIBUTE_HTML, $event);
             if (isset($event->html)) {
                 return $event->html;
@@ -6022,7 +6153,7 @@ JS,
             $this->trigger(self::EVENT_BEFORE_SAVE, $event);
             return $event->isValid;
         }
-        
+
         return true;
     }
 
