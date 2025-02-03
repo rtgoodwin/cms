@@ -376,7 +376,9 @@ class Color extends Field implements InlineEditableFieldInterface, MergeableFiel
                 'options' => array_filter([
                     ...array_map(
                         fn(array $color) => [
-                            'label' => $color['label'] ?? $color['color'],
+                            'label' => isset($color['label']) && $color['label'] !== ''
+                                ? Craft::t('site', $color['label'])
+                                : $color['color'],
                             'value' => $color['color'],
                         ],
                         $this->palette,
@@ -421,7 +423,6 @@ class Color extends Field implements InlineEditableFieldInterface, MergeableFiel
                     'describedBy' => $this->describedBy,
                     'name' => "$this->handle[custom]",
                     'value' => $isCustom ? $value->getHex() : null,
-                    'presets' => $this->getPresets(),
                 ]) .
                 Html::endTag('div');
         } elseif ($value && !$isInPalette) {

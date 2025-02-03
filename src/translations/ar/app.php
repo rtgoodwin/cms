@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'يسمح بعرض إدخالات {type} الحالية وإنشاء مسودات لها.',
     'Already in your cart' => 'في السلة بالفعل',
     'Alternative Text' => 'نص بديل',
-    'Always show focus rings' => 'أظهر دائمًا حلقات التركيز',
     'Amber' => 'عنبري',
     'An error occurred when duplicating the category.' => 'حدث خطأ عند عمل نسخة مماثلة من الفئة.',
     'An error occurred when duplicating the entry.' => 'حدث خطأ عند عمل نسخة مماثلة من الإدخال.',

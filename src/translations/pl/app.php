@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Umożliwia przeglądanie istniejących {type} i tworzenie dla nich szkiców.',
     'Already in your cart' => 'Jest już w koszyku',
     'Alternative Text' => 'Tekst alternatywny',
-    'Always show focus rings' => 'Zawsze pokazuj pierścienie fokusu',
     'Amber' => 'Bursztynowy',
     'An error occurred when duplicating the category.' => 'Podczas duplikowania kategorii wystąpił błąd.',
     'An error occurred when duplicating the entry.' => 'Podczas duplikowania pozycji wystąpił błąd.',

@@ -1954,27 +1954,15 @@ ul.icons {
   text-wrap: nowrap;
   background-color: var(--button-bg);
 
-  &:not(:focus) {
-    box-shadow: var(--button-shadow);
-  }
-
   &:hover {
     border: var(--button-border--hover);
     background: var(--button-bg--hover);
-
-    &:not(:focus) {
-      box-shadow: var(--button-shadow--hover);
-    }
   }
 
   &:active,
   &.active {
     border: var(--button-border--active);
     background: var(--button-bg--active);
-
-    &:not(:focus) {
-      box-shadow: var(--button-shadow--active);
-    }
   }
 
   &:not([aria-current]) {
@@ -1992,7 +1980,6 @@ ul.icons {
   &.link-btn {
     border: none;
     background: transparent;
-    box-shadow: none;
   }
 
   &.chromeless {
@@ -2467,15 +2454,12 @@ craft-copy-attribute {
     border: var(--primary-button-border) !important;
     color: var(--primary-button-text-color) !important;
     background: var(--primary-button-bg) !important;
-    box-shadow: var(--primary-button-shadow) !important;
 
     &:not(.disabled, .inactive, .loading) {
       &:hover,
-      &.hover,
-      &:focus {
+      &.hover {
         border: var(--primary-button-border--hover) !important;
         background: var(--primary-button-bg--hover) !important;
-        box-shadow: var(--primary-button-shadow--hover) !important;
       }
 
       &:active,
@@ -2483,7 +2467,6 @@ craft-copy-attribute {
       &[aria-expanded='true'] {
         border: var(--primary-button-border--active) !important;
         background: var(--primary-button-bg--active) !important;
-        box-shadow: var(--primary-button-shadow--active) !important;
       }
     }
   }
@@ -2514,7 +2497,6 @@ craft-copy-attribute {
   border: var(--secondary-button-border) !important;
   color: var(--secondary-button-text-color) !important;
   background: var(--secondary-button-bg) !important;
-  box-shadow: var(--secondary-button-shadow) !important;
 }
 
 .secondary-buttons .btn.submit:not(.disabled, .inactive, .loading):hover,
@@ -2525,7 +2507,6 @@ craft-copy-attribute {
 .btn.secondary:not(.disabled, .inactive, .loading):focus {
   border: var(--secondary-button-border--hover) !important;
   background: var(--secondary-button-bg--hover) !important;
-  box-shadow: var(--secondary-button-shadow--hover) !important;
 }
 
 .secondary-buttons .btn.submit:not(.disabled, .inactive, .loading):active,
@@ -2537,7 +2518,6 @@ craft-copy-attribute {
 .btn.secondary:not(.disabled, .inactive, .loading)[aria-expanded='true'] {
   border: var(--secondary-button-border--active) !important;
   background: var(--secondary-button-bg--active) !important;
-  box-shadow: var(--secondary-button-shadow--active) !important;
 }
 
 div.btn.submit {
@@ -2560,13 +2540,9 @@ div.btn.submit input {
     margin-inline-end: -1px;
   }
 
-  &:focus {
+  &:focus-visible {
     background-color: color.adjust(mixins.$grey200, $alpha: -0.9);
     border-color: transparent;
-
-    .reduce-focus-visibility &:not(:focus-visible) {
-      border: 1px dashed var(--medium-hairline-color);
-    }
   }
 
   &:not(.disabled) {
@@ -2612,7 +2588,7 @@ div.btn.submit input {
       @include mixins.light-focus-ring;
     }
 
-    &:focus {
+    &:focus-visible {
       z-index: 1;
       box-shadow: none;
 
@@ -2620,14 +2596,6 @@ div.btn.submit input {
         z-index: 1;
         box-shadow: var(--focus-ring);
       }
-
-      .reduce-focus-visibility &:not(:focus-visible) .label {
-        box-shadow: none;
-      }
-    }
-
-    .reduce-focus-visibility &:focus-visible .label {
-      box-shadow: var(--focus-ring);
     }
 
     &:not(.has-action-menu) {
@@ -3001,7 +2969,7 @@ div.btn.submit input {
         }
       }
 
-      @include mixins.focus-styles {
+      &:focus-visible {
         box-shadow:
           inset 0 0 0 1px var(--hairline-color),
           var(--focus-ring);
@@ -5616,9 +5584,7 @@ table.data tbody tr:not(.disabled).active-drop-target {
         text-decoration: none;
       }
 
-      @include mixins.focus-styles {
-        box-shadow: none;
-
+      &:focus-visible {
         .tab-label {
           box-shadow: var(--inner-focus-ring);
         }
@@ -5874,8 +5840,12 @@ $min2ColWidth: 400px;
         padding-inline-start linear 100ms,
         padding-inline-end linear 100ms;
 
-      &.nested > .heading {
-        padding-inline-start: calc(var(--m) * 2);
+      &.nested {
+        padding-inline-start: 38px;
+
+        & > .heading {
+          padding-inline-start: 10px;
+        }
       }
 
       &.add {
@@ -5883,8 +5853,9 @@ $min2ColWidth: 400px;
 
         &::before {
           position: absolute;
+          inset-block-start: var(--m);
           inset-inline-start: 0;
-          width: 31px;
+          width: 48px;
           text-align: end;
           @include mixins.icon;
           content: 'plus';
@@ -5963,6 +5934,12 @@ $min2ColWidth: 400px;
       @media screen and (min-width: $min2ColWidth) {
         width: calc(100% - var(--heading-width));
         padding-inline: var(--s) var(--m);
+      }
+
+      // Fixes https://github.com/craftcms/cms/issues/16473
+      // h/t https://stackoverflow.com/a/66689926/1688568
+      > * {
+        min-width: 0;
       }
     }
 
@@ -7264,8 +7241,7 @@ $min2ColWidth: 400px;
   font-size: 1rem;
   position: relative;
 
-  @include mixins.focus-styles {
-    // Unset default
+  &:focus-visible {
     box-shadow: none;
     color: var(--white);
     background-color: var(--gray-800);
@@ -7660,7 +7636,7 @@ table.editable {
     @include mixins.input-focused-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 }
@@ -8131,18 +8107,9 @@ div.checkbox.indeterminate::before {
   text-align: center;
 }
 
-body:not(.reduce-focus-visibility) {
-  input.checkbox:focus + label::before,
-  :focus div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.checkbox:focus-visible + label::before,
-  :focus-visible div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
+input.checkbox:focus-visible + label::before,
+:focus-visible div.checkbox::before {
+  @include mixins.input-focused-styles;
 }
 
 .checkbox-icon {
@@ -8166,7 +8133,7 @@ body.reduce-focus-visibility {
 }
 
 .monaco-mouse-cursor-text {
-  @include mixins.focus-styles {
+  &:focus-visible {
     box-shadow: none !important;
   }
 }
@@ -8265,18 +8232,9 @@ div.radio.checked::after,
   background: var(--gray-900);
 }
 
-body:not(.reduce-focus-visibility) {
-  input.radio:focus + label::before,
-  :focus div.radio::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.radio:focus-visible + label::before,
-  :focus-visible div.radio::before {
-    @include mixins.input-focused-styles;
-  }
+input.radio:focus-visible + label::before,
+:focus-visible div.radio::before {
+  @include mixins.input-focused-styles;
 }
 
 /* multiselect */
@@ -8285,7 +8243,7 @@ body.reduce-focus-visibility {
   font-size: 14px;
   appearance: none;
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 
@@ -8642,10 +8600,10 @@ tr.indexingSession td.progress div.progressContainer div.progressInfo {
 
 .select:not(.selectize) select {
   &:hover:not(:disabled) {
-    @include mixins.select-input-focused-styles;
+    @include mixins.select-input-hovered-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.select-input-focused-styles;
   }
 }

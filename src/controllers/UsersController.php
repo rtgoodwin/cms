@@ -371,6 +371,16 @@ class UsersController extends Controller
     }
 
     /**
+     * Redirects the user to the default post-login URL.
+     *
+     * @return Response
+     */
+    public function actionRedirect(): Response
+    {
+        return $this->redirect(Craft::$app->getUser()->getDefaultReturnUrl());
+    }
+
+    /**
      * Logs a user in for impersonation.
      *
      * @return Response|null
@@ -657,7 +667,7 @@ class UsersController extends Controller
 
             $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($loginName);
 
-            if (!$user || !$user->getIsCredentialed()) {
+            if (!$user || !$user->getIsCredentialed() || !$user->getHasPassword()) {
                 $errors[] = Craft::$app->getConfig()->getGeneral()->useEmailAsUsername
                     ? Craft::t('app', 'Invalid email.')
                     : Craft::t('app', 'Invalid username or email.');
@@ -1309,7 +1319,6 @@ class UsersController extends Controller
             'language' => $this->request->getBodyParam('preferredLanguage', $user->getPreference('language')),
             'locale' => $preferredLocale,
             'weekStartDay' => $this->request->getBodyParam('weekStartDay', $user->getPreference('weekStartDay')),
-            'alwaysShowFocusRings' => (bool)$this->request->getBodyParam('alwaysShowFocusRings', $user->getPreference('alwaysShowFocusRings')),
             'useShapes' => (bool)$this->request->getBodyParam('useShapes', $user->getPreference('useShapes')),
             'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
             'disableAutofocus' => $this->request->getBodyParam('disableAutofocus', $user->getPreference('disableAutofocus')),

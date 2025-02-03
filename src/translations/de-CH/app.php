@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Kann vorhandene Typen {type} anzeigen und Entwürfe dafür erstellen.',
     'Already in your cart' => 'Bereits im Warenkorb',
     'Alternative Text' => 'Alternativer Text',
-    'Always show focus rings' => 'Fokusringe immer anzeigen',
     'Amber' => 'Bernstein',
     'An error occurred when duplicating the category.' => 'Bei der Duplizierung der Kategorie ist ein Fehler aufgetreten.',
     'An error occurred when duplicating the entry.' => 'Bei der Duplizierung des Eintrags ist ein Fehler aufgetreten.',

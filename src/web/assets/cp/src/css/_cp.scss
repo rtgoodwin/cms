@@ -60,13 +60,6 @@ body {
   :focus {
     outline-style: solid;
     outline-color: transparent;
-    box-shadow: var(--focus-ring);
-  }
-}
-
-.reduce-focus-visibility {
-  :focus:not(:focus-visible) {
-    box-shadow: none;
   }
 
   :focus-visible {
@@ -1188,7 +1181,7 @@ li.breadcrumb-toggle-wrapper {
   position: sticky;
   inset-block-end: 0;
   z-index: 1;
-  margin-block: calc(var(--s) + 1px) calc(var(--xl) * -1 + 2px);
+  margin-block: calc(var(--s) + 1px) calc(var(--padding) * -1 + 2px);
   margin-inline: calc(var(--padding) * -1 + 2px);
   background-color: var(--gray-050);
   border-radius: var(--small-border-radius);

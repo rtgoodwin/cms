@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Umožňuje prohlížet existující {type} a vytvářet pro ně návrhy.',
     'Already in your cart' => 'Položka je již ve Vašem košíku',
     'Alternative Text' => 'Alternativní text',
-    'Always show focus rings' => 'Vždy zobrazovat zaostřovací kroužky',
     'Amber' => 'Jantarová',
     'An error occurred when duplicating the category.' => 'Při duplikování kategorie došlo k chybě.',
     'An error occurred when duplicating the entry.' => 'Při duplikování zadaných údajů došlo k chybě.',
