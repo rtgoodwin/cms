@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Maakt weergave van bestaande {type} en het opstellen van concepten ervoor mogelijk.',
     'Already in your cart' => 'Is al in uw winkelwagen',
     'Alternative Text' => 'Alternatieve tekst',
-    'Always show focus rings' => 'Focusringen altijd weergeven',
     'Amber' => 'Amber',
     'An error occurred when duplicating the category.' => 'Er is een fout opgetreden bij het dupliceren van de categorie.',
     'An error occurred when duplicating the entry.' => 'Er is een fout opgetreden bij het dupliceren van de invoer.',

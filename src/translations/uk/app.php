@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Дає змогу переглядати наявні типи ({type}) і створювати для них чернетки.',
     'Already in your cart' => 'Уже в кошику',
     'Alternative Text' => 'Альтернативний текст',
-    'Always show focus rings' => 'Завжди показувати кільця фокусування',
     'Amber' => 'Бурштиновий',
     'An error occurred when duplicating the category.' => 'Під час дублювання категорії сталася помилка.',
     'An error occurred when duplicating the entry.' => 'Під час дублювання запису сталася помилка.',

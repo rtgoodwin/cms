@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => '允许查看现有的{type}并为其创建草稿。',
     'Already in your cart' => '已在购物车中',
     'Alternative Text' => '替代文本',
-    'Always show focus rings' => '始终显示聚焦环',
     'Amber' => '琥珀色',
     'An error occurred when duplicating the category.' => '复制类别时出错。',
     'An error occurred when duplicating the entry.' => '复制条目时出错。',

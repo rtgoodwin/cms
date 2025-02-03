@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Tillater visning av eksisterende {type} og opprettelse av utkast for dem.',
     'Already in your cart' => 'Allerede i handlekurven din',
     'Alternative Text' => 'Alternativ tekst',
-    'Always show focus rings' => 'Vis alltid fokusringer',
     'Amber' => 'Rav',
     'An error occurred when duplicating the category.' => 'Det oppsto en feil da kategorien skulle dupliseres.',
     'An error occurred when duplicating the entry.' => 'Det oppsto en feil da artikkelen skulle dupliseres.',

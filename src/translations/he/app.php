@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'מאפשר להציג {type} קיים וליצור טיוטות עבורו.',
     'Already in your cart' => 'כבר בעגלה שלך',
     'Alternative Text' => 'טקסט חלופי',
-    'Always show focus rings' => 'הצג תמיד טבעות מיקוד',
     'Amber' => 'ענבר',
     'An error occurred when duplicating the category.' => 'אירעה שגיאה בעת שכפול הקטגוריה.',
     'An error occurred when duplicating the entry.' => 'אירעה שגיאה בעת שכפול הערך.',

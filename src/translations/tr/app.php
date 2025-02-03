@@ -113,7 +113,6 @@ return [
     'Allows viewing existing {type} and creating drafts for them.' => 'Mevcut {type} türlerinin görüntülenmesine ve bunlar için taslaklar oluşturulmasına izin verir.',
     'Already in your cart' => 'Zaten sepetinizde',
     'Alternative Text' => 'Alternatif Metin',
-    'Always show focus rings' => 'Her zaman odak halkalarını göster',
     'Amber' => 'Kehribar',
     'An error occurred when duplicating the category.' => 'Kategori kopyalanırken bir hata oluştu.',
     'An error occurred when duplicating the entry.' => 'Giriş çoğaltılırken bir hata oluştu.',
