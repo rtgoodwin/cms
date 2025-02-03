@@ -1066,8 +1066,7 @@ JS, [
 
         $settings = $jsSettingsFn($form);
 
-        $isSlideout = Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id');
-        if ($isSlideout) {
+        if ($this->_isSlideout()) {
             $this->view->registerJsWithVars(fn($settings) => <<<JS
 $('#$containerId').data('elementEditorSettings', $settings);
 JS, [
@@ -1080,8 +1079,6 @@ JS, [
                 $settings,
             ]);
         }
-
-
 
         // Give the element a chance to do things here too
         $element->prepareEditScreen($response, $containerId);
@@ -1254,24 +1251,40 @@ JS, [
      */
     private function _actionMenuItems(ElementInterface $element, array $previewTargets): array
     {
-        $items = [];
-        if ($element->id) {
-            $isSlideout = Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id');
-
-            $items = array_filter(
-                $element->getActionMenuItems(),
-                function(array $item) use ($previewTargets, $isSlideout) {
-                    // filter out "Edit" item - no point showing edit action on the edit page,
-                    // and "View in a new tab" item, if we have at least one preview target, and it's not a slideout
-                    // as that action is already covered by the "View" button;
-                    // (https://github.com/craftcms/cms/issues/16556)
-                    return !str_starts_with($item['id'] ?? '', 'action-edit-') &&
-                        !(str_starts_with($item['id'] ?? '', 'action-view-') && !empty($previewTargets) && !$isSlideout);
-                },
-            );
+        if (!$element->id) {
+            return [];
         }
 
-        return $items;
+        $hideViewAction = !empty($previewTargets) && !$this->_isSlideout();
+
+        return array_filter(
+            $element->getActionMenuItems(),
+            function(array $item) use ($hideViewAction) {
+                // filter out "Edit" item - no point showing edit action on the edit page,
+                if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
+                    return false;
+                }
+
+                // and "View in a new tab" item, if we have at least one preview target, and it's not a slideout
+                // as that action is already covered by the "View" button;
+                // (https://github.com/craftcms/cms/issues/16556)
+                if ($hideViewAction && str_starts_with($item['id'] ?? '', 'action-view-')) {
+                    return false;
+                }
+
+                return true;
+            },
+        );
+    }
+
+    /**
+     * Returns whether this is for a slideout.
+     *
+     * @return bool
+     */
+    private function _isSlideout(): bool
+    {
+        return $this->request->getHeaders()->has('X-Craft-Container-Id');
     }
 
     private function _draftNotice(): string
