@@ -73,6 +73,11 @@ class User extends Element
     public static function getFieldDefinitions(): array
     {
         return Craft::$app->getGql()->prepareFieldDefinitions(array_merge(parent::getFieldDefinitions(), self::getElementFieldDefinitions(), self::getConditionalFields(), [
+            'affiliatedSiteHandle' => [
+                'name' => 'affiliatedSiteHandle',
+                'type' => Type::string(),
+                'description' => 'The handle of the site the user is affiliated with.',
+            ],
         ]), self::getName());
     }
 

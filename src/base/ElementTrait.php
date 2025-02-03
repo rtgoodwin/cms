@@ -223,7 +223,7 @@ trait ElementTrait
     public bool $resaving = false;
 
     /**
-     * @var ElementInterface|null The element that this element is being duplicated by.
+     * @var ElementInterface|null The element that this element is duplicating.
      */
     public ?ElementInterface $duplicateOf = null;
 
@@ -253,6 +253,12 @@ trait ElementTrait
      * @since 3.2.0
      */
     public bool $previewing = false;
+
+    /**
+     * @var string|null The view mode used to show this element (e.g. `structure`, `table`, `thumbs`, `cards`).
+     * @since 5.6.0
+     */
+    public ?string $viewMode = null;
 
     /**
      * @var bool Whether the element should definitely be saved, if it’s a nested element being considered
