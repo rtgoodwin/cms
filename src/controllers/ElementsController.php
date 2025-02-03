@@ -402,10 +402,7 @@ class ElementsController extends Controller
                 $isUnpublishedDraft,
                 $isDraft
             ))
-            ->actionMenuItems(fn() => $element->id ? array_filter(
-                $element->getActionMenuItems(),
-                fn(array $item) => !str_starts_with($item['id'] ?? '', 'action-edit-'),
-            ) : [])
+            ->actionMenuItems(fn() => $this->_actionMenuItems($element, $previewTargets))
             ->noticeHtml($notice)
             ->errorSummary(fn() => $this->_errorSummary($element))
             ->prepareScreen(
@@ -1246,6 +1243,35 @@ JS, [
         }
 
         return trim(implode("\n", $components));
+    }
+
+    /**
+     * Returns an array of action menu items for the element.
+     *
+     * @param ElementInterface $element
+     * @param array $previewTargets
+     * @return array
+     */
+    private function _actionMenuItems(ElementInterface $element, array $previewTargets): array
+    {
+        $items = [];
+        if ($element->id) {
+            $isSlideout = Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id');
+
+            $items = array_filter(
+                $element->getActionMenuItems(),
+                function(array $item) use ($previewTargets, $isSlideout) {
+                    // filter out "Edit" item - no point showing edit action on the edit page,
+                    // and "View in a new tab" item, if we have at least one preview target, and it's not a slideout
+                    // as that action is already covered by the "View" button;
+                    // (https://github.com/craftcms/cms/issues/16556)
+                    return !str_starts_with($item['id'] ?? '', 'action-edit-') &&
+                        !(str_starts_with($item['id'] ?? '', 'action-view-') && !empty($previewTargets) && !$isSlideout);
+                },
+            );
+        }
+
+        return $items;
     }
 
     private function _draftNotice(): string
