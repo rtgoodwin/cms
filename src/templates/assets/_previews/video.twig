@@ -1,10 +1,7 @@
-{% set a11yDefaults = craft.app.config.general.accessibilityDefaults %}
-{% set autoplayAttribute = not (currentUser.getPreference('preventAutoplay') ?? a11yDefaults['preventAutoplay'] ?? false) ? 'autoplay' %}
-
 {% set height = asset.alt ? '70%' : '100%' %}
 {% set transcriptHeight = '30%' %}
 
-<video {{ autoplayAttribute }} controls style="width: 100%; height: {{ height }};">
+<video autoplay controls style="width: 100%; height: {{ height }};">
   <source src="{{ url }}" type="{{ asset.mimeType }}">
   Your browser does not support the video tag.
 </video>

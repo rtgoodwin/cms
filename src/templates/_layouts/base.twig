@@ -8,7 +8,6 @@
     orientation,
     (currentUser.getPreference('useShapes') ?? a11yDefaults['useShapes'] ?? false) ? 'use-shapes',
     (currentUser.getPreference('underlineLinks') ?? a11yDefaults['underlineLinks'] ?? false) ? 'underline-links',
-    (currentUser.getPreference('preventAutoplay') ?? a11yDefaults['preventAutoplay'] ?? false) ? 'prevent-autoplay',
     requestedSite ? "site--#{requestedSite.handle}",
 ])|filter -%}
 

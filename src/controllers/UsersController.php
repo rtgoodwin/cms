@@ -1323,7 +1323,6 @@ class UsersController extends Controller
             'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
             'disableAutofocus' => $this->request->getBodyParam('disableAutofocus', $user->getPreference('disableAutofocus')),
             'notificationDuration' => $this->request->getBodyParam('notificationDuration', $user->getPreference('notificationDuration')),
-            'preventAutoplay' => (bool)$this->request->getBodyParam('preventAutoplay', $user->getPreference('preventAutoplay')),
         ];
 
         if ($user->admin) {

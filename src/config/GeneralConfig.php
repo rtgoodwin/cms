@@ -76,7 +76,6 @@ class GeneralConfig extends BaseConfig
      * - `underlineLinks` – Whether links should be underlined.
      * - `notificationDuration` – How long notifications should be shown before they disappear automatically (in
      *   milliseconds). Set to `0` to show them indefinitely.
-     * - `preventAutoplay` - Whether time-based media should be paused by default (i.e. videos, GIFs, etc.)
      *
      * ```php
      * ->accessibilityDefaults([
@@ -91,7 +90,6 @@ class GeneralConfig extends BaseConfig
         'useShapes' => false,
         'underlineLinks' => false,
         'notificationDuration' => 5000,
-        'preventAutoplay' => true,
     ];
 
     /**
@@ -3431,7 +3429,6 @@ class GeneralConfig extends BaseConfig
      * - `disableAutofocus` – Whether search inputs should be focused on page load.
      * - `notificationDuration` – How long notifications should be shown before they disappear automatically (in
      *   milliseconds). Set to `0` to show them indefinitely.
-     * - `preventAutoplay` – Whether time-based media should be paused by default (i.e. videos, GIFs, etc.)
      *
      * ```php
      * ->accessibilityDefaults([

@@ -143,14 +143,8 @@ Craft.CP = Garnish.Base.extend(
         this.initAlerts();
       }
 
-      // Global Animation Controller
-      if (
-        Garnish.prefersReducedMotion() ||
-        Garnish.$bod.hasClass('prevent-autoplay')
-      ) {
-        this.animationBlocker = this.animationBlocker =
-          new Craft.AnimationBlocker();
-      }
+      // Global Animation Blocker
+      this.animationBlocker = new Craft.AnimationBlocker();
 
       // Toggles
       this.addListener(this.$navToggle, 'click', 'toggleNav');
