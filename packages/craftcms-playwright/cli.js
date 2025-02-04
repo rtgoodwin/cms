@@ -32,7 +32,7 @@ const spawn = require('child_process').spawn;
     );
 
     pre.on('close', (code) => {
-      const tests = spawn('npx', ['playwright', 'test'], {
+      const tests = spawn('npx', ['playwright', 'test'].concat(args), {
         stdio: 'inherit',
       });
 
