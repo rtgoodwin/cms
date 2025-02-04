@@ -643,7 +643,7 @@ abstract class Field extends SavableComponent implements FieldInterface
 
         // Only DateTime objects and ISO-8601 strings should automatically be detected as dates
         if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {
-            return Db::prepareDateForDb($value);
+            return DateTimeHelper::toIso8601($value);
         }
 
         return $value;
@@ -652,17 +652,14 @@ abstract class Field extends SavableComponent implements FieldInterface
     /**
      * @inheritdoc
      */
-    public function serializeValueForExport(mixed $value, ?ElementInterface $element = null): mixed
+    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed
     {
-        if ($value instanceof DateTime) {
-            return DateTimeHelper::toIso8601($value);
+        // Dates should be stored in UTC w/o the time zone
+        if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {
+            return Db::prepareDateForDb($value);
         }
 
-        if (DateTimeHelper::isIso8601($value)) {
-            return $value;
-        }
-
-        return self::serializeValue($value, $element);
+        return $this->serializeValue($value, $element);
     }
 
     /**

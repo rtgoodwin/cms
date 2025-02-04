@@ -393,9 +393,8 @@ interface FieldInterface extends SavableComponentInterface
     public function normalizeValueFromRequest(mixed $value, ?ElementInterface $element = null): mixed;
 
     /**
-     * Prepares the field’s value to be stored somewhere, like the content table.
+     * Serializes the field’s value into a transportable format (either a scalar value or array of scalar values).
      *
-     * Data types that are JSON-encodable are safe (arrays, integers, strings, booleans, etc).
      * Whatever this returns should be something [[normalizeValue()]] can handle.
      *
      * @param mixed $value The raw field value
@@ -405,15 +404,17 @@ interface FieldInterface extends SavableComponentInterface
     public function serializeValue(mixed $value, ?ElementInterface $element = null): mixed;
 
     /**
-     * serializeValue equivalent, but used when exporting data,
-     * so that the dates can be returned in ISO8601 format.
+     * Serializes the field’s value into a transportable format (either a scalar value or array of scalar values),
+     * for database storage.
+     *
+     * Whatever this returns should be something [[normalizeValue()]] can handle.
      *
      * @param mixed $value
      * @param ElementInterface|null $element
      * @return mixed
      * @since 4.15.0
      */
-    public function serializeValueForExport(mixed $value, ?ElementInterface $element = null): mixed;
+    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed;
 
     /**
      * Copies the field’s value from one element to another.

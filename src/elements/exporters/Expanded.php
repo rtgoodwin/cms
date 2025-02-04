@@ -13,9 +13,7 @@ use craft\base\ElementExporter;
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
-use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
-use DateTime;
 
 /**
  * Expanded represents an "Expanded" element exporter.
@@ -69,11 +67,7 @@ class Expanded extends ElementExporter
             if ($fieldLayout !== null) {
                 foreach ($fieldLayout->getCustomFields() as $field) {
                     $value = $element->getFieldValue($field->handle);
-                    if ($value instanceof DateTime) {
-                        $elementArr[$field->handle] = DateTimeHelper::toIso8601($value);
-                    } else {
-                        $elementArr[$field->handle] = $field->serializeValueForExport($value, $element);
-                    }
+                    $elementArr[$field->handle] = $field->serializeValue($value, $element);
                 }
             }
             $data[] = $elementArr;
