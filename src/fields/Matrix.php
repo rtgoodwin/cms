@@ -763,6 +763,31 @@ class Matrix extends Field implements
     /**
      * @inheritdoc
      */
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
+    {
+        /** @var EntryQuery|ElementCollection $value */
+        $serialized = [];
+        $new = 0;
+
+        foreach ($value->all() as $entry) {
+            /** @var Entry $entry */
+            $entryId = $entry->id ?? sprintf('new%s', ++$new);
+            $serialized[$entryId] = [
+                'title' => $entry->title,
+                'slug' => $entry->slug,
+                'type' => $entry->getType()->handle,
+                'enabled' => $entry->enabled,
+                'collapsed' => $entry->collapsed,
+                'fields' => $entry->getSerializedFieldValuesForDb(),
+            ];
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function copyValue(ElementInterface $from, ElementInterface $to): void
     {
         // We'll do it later from afterElementPropagate()

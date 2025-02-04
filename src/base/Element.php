@@ -85,6 +85,7 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -4975,6 +4976,23 @@ JS, [
             if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
                 $value = $this->getFieldValue($field->handle);
                 $serializedValues[$field->handle] = $field->serializeValue($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
             }
         }
 

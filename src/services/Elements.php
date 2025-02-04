@@ -3743,7 +3743,7 @@ class Elements extends Component
                     if ($fieldLayout) {
                         foreach ($fieldLayout->getCustomFields() as $field) {
                             if (($saveContent || in_array($field->handle, $dirtyFields)) && $field::dbType() !== null) {
-                                $serializedValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
+                                $serializedValue = $field->serializeValueForDb($element->getFieldValue($field->handle), $element);
                                 if ($serializedValue !== null) {
                                     $content[$field->layoutElement->uid] = $serializedValue;
                                 } elseif (!$saveContent) {
