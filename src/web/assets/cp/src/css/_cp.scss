@@ -634,12 +634,12 @@ li.breadcrumb-toggle-wrapper {
   position: absolute;
   align-items: center;
   justify-content: center;
-  height: 40px;
-  width: 40px;
+  height: 44px;
+  width: 44px;
   border-radius: 50%;
-  inset-block-end: 5px;
-  inset-inline-end: 5px;
-  border: 2px solid var(--white) !important;
+  inset-block-end: 1em;
+  inset-inline-end: 1em;
+  border: 1px solid var(--white) !important;
   background-color: var(--gray-600);
   fill: var(--white);
   box-shadow: 0 0 10px rgb(0 0 0 / 70%);
