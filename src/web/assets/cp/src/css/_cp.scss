@@ -630,7 +630,6 @@ li.breadcrumb-toggle-wrapper {
 }
 
 .animated-image-toggle {
-  --background-color: rgb(0 0 0 / 70%);
   display: flex;
   position: absolute;
   align-items: center;
@@ -640,19 +639,24 @@ li.breadcrumb-toggle-wrapper {
   border-radius: 50%;
   inset-block-end: 5px;
   inset-inline-end: 5px;
-  border: 3px solid var(--white) !important;
-  background-color: var(--background-color) !important;
+  border: 2px solid var(--white) !important;
+  background-color: var(--gray-600);
   fill: var(--white);
+  box-shadow: 0 0 10px rgb(0 0 0 / 70%);
+
+  &:hover {
+    background-color: var(--gray-700);
+  }
 
   // Adjust the alignment of play a bit
   &[aria-label='Play'] svg {
     position: relative;
-    inset-inline-start: 0.1em;
+    inset-inline-start: 1px;
   }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 }
 
