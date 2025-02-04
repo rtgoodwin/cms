@@ -652,6 +652,22 @@ abstract class Field extends SavableComponent implements FieldInterface
     /**
      * @inheritdoc
      */
+    public function serializeValueForExport(mixed $value, ?ElementInterface $element = null): mixed
+    {
+        if ($value instanceof DateTime) {
+            return DateTimeHelper::toIso8601($value);
+        }
+
+        if (DateTimeHelper::isIso8601($value)) {
+            return $value;
+        }
+
+        return self::serializeValue($value, $element);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function copyValue(ElementInterface $from, ElementInterface $to): void
     {
         $value = $this->serializeValue($from->getFieldValue($this->handle), $from);

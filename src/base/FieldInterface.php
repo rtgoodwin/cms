@@ -405,6 +405,17 @@ interface FieldInterface extends SavableComponentInterface
     public function serializeValue(mixed $value, ?ElementInterface $element = null): mixed;
 
     /**
+     * serializeValue equivalent, but used when exporting data,
+     * so that the dates can be returned in ISO8601 format.
+     *
+     * @param mixed $value
+     * @param ElementInterface|null $element
+     * @return mixed
+     * @since 4.15.0
+     */
+    public function serializeValueForExport(mixed $value, ?ElementInterface $element = null): mixed;
+
+    /**
      * Copies the field’s value from one element to another.
      *
      * @param ElementInterface $from

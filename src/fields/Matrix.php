@@ -585,6 +585,28 @@ class Matrix extends Field implements EagerLoadingFieldInterface, GqlInlineFragm
     /**
      * @inheritdoc
      */
+    public function serializeValueForExport(mixed $value, ?ElementInterface $element = null): mixed
+    {
+        /** @var MatrixBlockQuery|Collection $value */
+        $serialized = [];
+        $new = 0;
+
+        foreach ($value->all() as $block) {
+            $blockId = $block->id ?? 'new' . ++$new;
+            $serialized[$blockId] = [
+                'type' => $block->getType()->handle,
+                'enabled' => $block->enabled,
+                'collapsed' => $block->collapsed,
+                'fields' => $block->getSerializedFieldValuesForExport(),
+            ];
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function copyValue(ElementInterface $from, ElementInterface $to): void
     {
         // We'll do it later from afterElementPropagate()

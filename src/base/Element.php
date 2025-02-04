@@ -58,6 +58,7 @@ use craft\fieldlayoutelements\BaseField;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
@@ -74,6 +75,7 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
 use Illuminate\Support\Collection;
 use Throwable;
 use Traversable;
@@ -4183,6 +4185,30 @@ abstract class Element extends Component implements ElementInterface
             if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
                 $value = $this->getFieldValue($field->handle);
                 $serializedValues[$field->handle] = $field->serializeValue($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * getSerializedFieldValues equivalent, but used when exporting data,
+     * so that the dates can be returned in ISO8601 format.
+     *
+     * @since 4.15.0
+     */
+    public function getSerializedFieldValuesForExport(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                if ($value instanceof DateTime) {
+                    $serializedValues[$field->handle] = DateTimeHelper::toIso8601($value);
+                } else {
+                    $serializedValues[$field->handle] = $field->serializeValueForExport($value, $this);
+                }
             }
         }
 
