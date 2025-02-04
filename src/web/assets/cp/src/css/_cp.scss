@@ -645,6 +645,8 @@ li.breadcrumb-toggle-wrapper {
   fill: var(--white);
 
   svg {
+    position: relative;
+    inset-inline-start: 0.1em;
     width: 20px;
     height: 20px;
   }
