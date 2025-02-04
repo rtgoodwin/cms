@@ -1,5 +1,8 @@
 const {test, expect} = require('@craftcms/playwright');
 
+let sectionName = 'My New Channel';
+let sectionHandle = 'myNewChannel';
+
 test.describe('Sections - Page', () => {
   // Make sure we start each test on the sections page
   test.beforeEach(async ({page}) => {
@@ -40,11 +43,8 @@ test.describe('Sections - New', () => {
   test('Create new channel', async ({page, baseURL}) => {
     await page.goto('./settings/sections/new');
 
-    await page.fill('#content input#name', 'My New Channel');
-    await expect(page.locator('#content input#handle')).toHaveValue(
-      'myNewChannel'
-    );
-
+    await page.fill('#content input#name', sectionName);
+    await expect(page.locator('#content input#handle')).toHaveValue(sectionHandle);
     await expect(page.locator('#content select#type')).toHaveValue('channel');
     await expect(page.locator('#content #entry-types .components')).toBeEmpty();
 
@@ -67,7 +67,7 @@ test.describe('Sections - New', () => {
 
     const urlRegExp = new RegExp(/settings\/sections\/\d+?$/, 'i');
     await expect(page).toHaveURL(urlRegExp);
-    await expect(page.locator('h1')).toHaveText('My New Channel');
+    await expect(page.locator('h1')).toHaveText(sectionName);
   });
 
   // Check if we can see the newly created section on the sections page
@@ -76,7 +76,7 @@ test.describe('Sections - New', () => {
 
     let sectionsTable = page.locator('#content #sections-vue-admin-table .vuetable');
     await expect(sectionsTable).toBeVisible();
-    await expect(sectionsTable).toContainText('My New Channel');
-    await expect(sectionsTable).toContainText('myNewChannel');
+    await expect(sectionsTable).toContainText(sectionName);
+    await expect(sectionsTable).toContainText(sectionHandle);
   });
 });

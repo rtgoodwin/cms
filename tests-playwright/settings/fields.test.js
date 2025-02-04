@@ -1,18 +1,21 @@
 const {test, expect} = require('@craftcms/playwright');
 
+let fieldName = 'My Plain Text Field';
+let fieldHandle = 'myPlainTextField';
+
 test.describe('Fields - Empty Page', () => {
-  // Make sure we start each test on the settings/fields page
+  // Make sure we start each test on the fields page
   test.beforeEach(async ({page}) => {
     await page.goto('./settings/fields');
   });
 
-  // Check if the settings/sections page shows empty sections message
+  // Check if the fields page shows empty fields message
   test('Check empty Fields page', async ({page, baseURL}) => {
     const zilch = page.locator('#content .zilch:visible p');
     await expect(zilch).toHaveText('No fields exist yet.');
   });
 
-  // Check New fields page loads
+  // Check new fields page loads
   test('New field page', async ({page, baseURL}) => {
     const newButtonSelector = '#header #action-buttons a.submit';
     const newSectionButton = page.locator(newButtonSelector);
@@ -35,24 +38,24 @@ test.describe('Fields - Empty Page', () => {
 });
 
 test.describe('Fields - New', () => {
-  // Check if we can add a new channel section and create entry type for it on the fly
+  // Check if we can add a new Plain Text field
   test('Create new field', async ({page, baseURL}) => {
     await page.goto('./settings/fields/new');
 
-    await page.fill('#content input#name', 'My Plain Text Field');
-    await expect(page.locator('#content input#handle')).toHaveValue('myPlainTextField');
+    await page.fill('#content input#name', fieldName);
+    await expect(page.locator('#content input#handle')).toHaveValue(fieldHandle);
 
     await page.click('#action-buttons button.menubtn');
     await page.click('#form-action-menu a:has-text("Save and continue editing")')
 
     const urlRegExp = new RegExp(/settings\/fields\/edit\/\d+?$/, 'i');
     await expect(page).toHaveURL(urlRegExp);
-    await expect(page.locator('h1')).toHaveText('My Plain Text Field');
+    await expect(page.locator('h1')).toHaveText(fieldName);
   });
 });
 
 test.describe('Fields - Page', () => {
-  // Make sure we start each test on the settings/fields page
+  // Make sure we start each test on the fields page
   test.beforeEach(async ({page}) => {
     await page.goto('./settings/fields');
   });
@@ -61,19 +64,19 @@ test.describe('Fields - Page', () => {
   test('Check fields page with content', async ({page, baseURL}) => {
     let fieldsTable = page.locator('#content #fields-vue-admin-table .vuetable');
     await expect(fieldsTable).toBeVisible();
-    await expect(fieldsTable).toContainText('My Plain Text Field');
-    await expect(fieldsTable).toContainText('myPlainTextField');
+    await expect(fieldsTable).toContainText(fieldName);
+    await expect(fieldsTable).toContainText(fieldHandle);
   });
 
-  // Check searching
+  // Check searching through fields
   test('Check searching', async ({page, baseURL}) => {
     let searchInput = page.locator('#content #fields-vue-admin-table .search input[placeholder="Search"]');
     await expect(searchInput).toBeVisible();
 
     await searchInput.fill('I dont exist');
     await expect(page.locator('#content #fields-vue-admin-table .zilch:visible p')).toHaveText('No results.');
-    
-    await searchInput.fill('My Plain Text Field');
-    await expect(page.locator('#content #fields-vue-admin-table .vuetable')).toContainText('myPlainTextField');
+
+    await searchInput.fill(fieldName);
+    await expect(page.locator('#content #fields-vue-admin-table .vuetable')).toContainText(fieldHandle);
   });
 });
