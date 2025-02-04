@@ -644,9 +644,13 @@ li.breadcrumb-toggle-wrapper {
   background-color: var(--background-color) !important;
   fill: var(--white);
 
-  svg {
+  // Adjust the alignment of play a bit
+  &[aria-label='Play'] svg {
     position: relative;
     inset-inline-start: 0.1em;
+  }
+
+  svg {
     width: 20px;
     height: 20px;
   }
