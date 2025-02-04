@@ -1,18 +1,18 @@
 const {test, expect} = require('@craftcms/playwright');
 
 test.describe('Sections - Page', () => {
-  // Make sure we start each test on the settings page
+  // Make sure we start each test on the sections page
   test.beforeEach(async ({page}) => {
     await page.goto('./settings/sections');
   });
 
-  // Check all the settings groups exist
-  test('Check Page', async ({page, baseURL}) => {
+  // Check if the sections page shows empty sections message
+  test('Check empty sections page', async ({page, baseURL}) => {
     const zilch = page.locator('#content .zilch:visible p');
     await expect(zilch).toHaveText('No sections exist yet.');
   });
 
-  // Check New section page loads
+  // Check if new section page loads
   test('New section page', async ({page, baseURL}) => {
     const newButtonSelector = '#header #action-buttons a.submit';
     const newSectionButton = page.locator(newButtonSelector);
@@ -35,61 +35,48 @@ test.describe('Sections - Page', () => {
   });
 });
 
-// test.describe('Sections - New', () => {
-//   // Make sure we start each test on the settings page
-//   test.beforeEach(async ({page, cleanDb}) => {
-//     await page.goto('./settings/sections/new');
-//   });
-//
-//   test('Create New Channel', async ({page, baseURL}) => {
-//     await page.fill('#content input#name', 'My New Channel');
-//     await expect(page.locator('#content input#handle')).toHaveValue(
-//       'myNewChannel'
-//     );
-//
-//     await expect(page.locator('#content select#type')).toHaveValue('channel');
-//
-//     await page.click(
-//       '#action-buttons button:has-text("Save and edit entry types")'
-//     );
-//     const urlRegExp = new RegExp(/settings\/sections\/\d+?\/entrytypes$/, 'i');
-//     await expect(page).toHaveURL(urlRegExp);
-//     await expect(page.locator('h1')).toHaveText('My New Channel Entry Types');
-//
-//     await expect(page.locator('#tabs div a')).toContainText([
-//       'Settings',
-//       'Entry Types',
-//     ]);
-//     await expect(
-//       page.locator('#tabs div a:has-text("Settings")')
-//     ).not.toHaveClass('sel');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Settings")')
-//     ).toHaveAttribute('aria-selected', 'false');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Settings")')
-//     ).toHaveAttribute('aria-controls', 'settings');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Settings")')
-//     ).toHaveAttribute('role', 'tab');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Entry Types")')
-//     ).toHaveClass('sel');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Entry Types")')
-//     ).toHaveAttribute('aria-selected', 'true');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Entry Types")')
-//     ).toHaveAttribute('aria-controls', 'entryTypes');
-//     await expect(
-//       page.locator('#tabs div a:has-text("Entry Types")')
-//     ).toHaveAttribute('role', 'tab');
-//
-//     await expect(page.locator('#crumbs nav ul li >> nth=-1 >> a')).toHaveText(
-//       'My New Channel'
-//     );
-//     await expect(
-//       page.locator('#crumbs nav ul li >> nth=-1 >> a')
-//     ).toHaveAttribute('href', new RegExp(/settings\/sections\/\d+?$/, 'i'));
-//   });
-// });
+test.describe('Sections - New', () => {
+  // Check if we can add a new channel section and create entry type for it on the fly
+  test('Create new channel', async ({page, baseURL}) => {
+    await page.goto('./settings/sections/new');
+
+    await page.fill('#content input#name', 'My New Channel');
+    await expect(page.locator('#content input#handle')).toHaveValue(
+      'myNewChannel'
+    );
+
+    await expect(page.locator('#content select#type')).toHaveValue('channel');
+    await expect(page.locator('#content #entry-types .components')).toBeEmpty();
+
+    await page.click('#content #entry-types .create-btn');
+
+    await expect(page.locator('.cp-screen.slideout')).toBeVisible();
+
+    let slideoutId = await (page.locator('.cp-screen.slideout').getAttribute('id'));
+    let slideout = page.locator('#' + slideoutId);
+
+    await slideout.getByLabel('Name').fill('Channel Entry Type');
+    await expect(slideout.getByLabel('Handle')).toHaveValue('channelEntryType');
+
+    await page.click('#' + slideoutId + ' .so-footer .btn.submit');
+
+    await expect(page.locator('#content #entry-types .components')).toContainText('Channel Entry Type');
+
+    await page.click('#action-buttons button.menubtn');
+    await page.click('#form-action-menu a:has-text("Save and continue editing")')
+
+    const urlRegExp = new RegExp(/settings\/sections\/\d+?$/, 'i');
+    await expect(page).toHaveURL(urlRegExp);
+    await expect(page.locator('h1')).toHaveText('My New Channel');
+  });
+
+  // Check if we can see the newly created section on the sections page
+  test('Check sections page with content', async ({page, baseURL}) => {
+    await page.goto('./settings/sections');
+
+    let sectionsTable = page.locator('#content #sections-vue-admin-table .vuetable');
+    await expect(sectionsTable).toBeVisible();
+    await expect(sectionsTable).toContainText('My New Channel');
+    await expect(sectionsTable).toContainText('myNewChannel');
+  });
+});
