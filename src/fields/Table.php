@@ -535,6 +535,39 @@ class Table extends Field
     /**
      * @inheritdoc
      */
+    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed
+    {
+        if (!is_array($value) || empty($this->columns)) {
+            return null;
+        }
+
+        $serialized = [];
+        $supportsMb4 = Craft::$app->getDb()->getSupportsMb4();
+
+        foreach ($value as $row) {
+            $serializedRow = [];
+            foreach ($this->columns as $colId => $column) {
+                if ($column['type'] === 'heading') {
+                    continue;
+                }
+
+                $value = $row[$colId];
+
+                if (is_string($value) && !$supportsMb4) {
+                    $value = StringHelper::emojiToShortcodes(StringHelper::escapeShortcodes($value));
+                }
+
+                $serializedRow[$colId] = parent::serializeValueForDb($value ?? null);
+            }
+            $serialized[] = $serializedRow;
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function searchKeywords(mixed $value, ElementInterface $element): string
     {
         if (!is_array($value) || empty($this->columns)) {

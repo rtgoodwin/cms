@@ -394,7 +394,7 @@ class Date extends Field implements PreviewableFieldInterface, SortableFieldInte
     /**
      * @inheritdoc
      */
-    public function serializeValue(mixed $value, ?ElementInterface $element = null): mixed
+    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed
     {
         if (!$value) {
             return null;

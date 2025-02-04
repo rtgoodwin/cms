@@ -74,6 +74,7 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
 use Illuminate\Support\Collection;
 use Throwable;
 use Traversable;
@@ -2538,7 +2539,7 @@ abstract class Element extends Component implements ElementInterface
 
                 if ($field::hasContentColumn()) {
                     $columnType = $field->getContentColumnType();
-                    $value = $field->serializeValue($this->getFieldValue($field->handle), $this);
+                    $value = $field->serializeValueForDb($this->getFieldValue($field->handle), $this);
 
                     if (is_array($columnType)) {
                         foreach ($columnType as $key => $type) {
@@ -4183,6 +4184,23 @@ abstract class Element extends Component implements ElementInterface
             if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
                 $value = $this->getFieldValue($field->handle);
                 $serializedValues[$field->handle] = $field->serializeValue($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
             }
         }
 
