@@ -652,7 +652,7 @@ abstract class Field extends SavableComponent implements FieldInterface
     /**
      * @inheritdoc
      */
-    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
     {
         // Dates should be stored in UTC w/o the time zone
         if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {

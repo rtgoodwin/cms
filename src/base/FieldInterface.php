@@ -410,11 +410,11 @@ interface FieldInterface extends SavableComponentInterface
      * Whatever this returns should be something [[normalizeValue()]] can handle.
      *
      * @param mixed $value
-     * @param ElementInterface|null $element
+     * @param ElementInterface $element
      * @return mixed
      * @since 4.15.0
      */
-    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed;
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed;
 
     /**
      * Copies the field’s value from one element to another.

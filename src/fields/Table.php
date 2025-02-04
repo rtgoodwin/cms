@@ -535,7 +535,7 @@ class Table extends Field
     /**
      * @inheritdoc
      */
-    public function serializeValueForDb(mixed $value, ?ElementInterface $element = null): mixed
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
     {
         if (!is_array($value) || empty($this->columns)) {
             return null;
@@ -557,7 +557,7 @@ class Table extends Field
                     $value = StringHelper::emojiToShortcodes(StringHelper::escapeShortcodes($value));
                 }
 
-                $serializedRow[$colId] = parent::serializeValueForDb($value ?? null);
+                $serializedRow[$colId] = parent::serializeValueForDb($value ?? null, $element);
             }
             $serialized[] = $serializedRow;
         }
