@@ -4,9 +4,7 @@ const craft = require('./_craft');
 const cleanAll = [
   async ({}, use) => {
     await use();
-    await craft.dbRestore();
-    await craft.projectConfigRestore();
-    await craft.composerRestore();
+    await craft.cleanAll();
   },
   {timeout: 120000},
 ];

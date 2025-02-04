@@ -8,6 +8,25 @@ const packagePath =
 const dockerCli = `docker compose --file=./${packagePath}/docker-compose.yaml exec --user appuser playwright`;
 const craftCli = '/app/craft';
 
+const loadFixture = async (name) => {
+  process.stdout.write('Loading Fixture ' + name);
+  process.stdout.write('\n');
+  try {
+    const {stdout, stderr} = await nodeExec(
+      `${dockerCli} ${craftCli} seeder/seed --fixtureNames=${name}`
+    );
+    return {stdout, stderr};
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+const cleanAll = async () => {
+  await dbRestore();
+  await projectConfigRestore();
+  await composerRestore();
+};
+
 const dbRestore = async () => {
   process.stdout.write('Restoring DB');
   process.stdout.write('\n');
@@ -68,4 +87,6 @@ module.exports = {
   dbRestore,
   projectConfigRestore,
   composerRestore,
+  loadFixture,
+  cleanAll,
 };

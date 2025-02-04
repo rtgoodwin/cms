@@ -33,6 +33,11 @@ sed -i "s/\"prefer-stable\": true,/\"prefer-stable\": true,\n  \"autoload\": {\"
 composer dump-autoload
 
 cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/DbBackup.php /app/modules/
+
+cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/seeder /app/modules/
+cp -vfrp /app/repos/repo/tests/fixtures /app/modules/seeder/
+sed -i "s/crafttests\\\\fixtures/modules\\\\seeder\\\\fixtures/g" /app/modules/seeder/fixtures/*Fixture.php
+
 cp -vfrp /app/repos/repo/node_modules/@craftcms/playwright/php/app.php /app/config/
 
 
