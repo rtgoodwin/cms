@@ -2,10 +2,17 @@
 
 ## Unreleased
 
+- Fixed a bug where transformed images could be slightly smaller than they should be when using the `fit` transform mode. ([#16622](https://github.com/craftcms/cms/issues/16622))
+- Fixed a bug where tests weren’t outputting exceptions thrown during Craft installation. ([#16624](https://github.com/craftcms/cms/issues/16624))
 - Fixed a bug where section-specific GraphQL queries (`<sectionHandle>Entries`) weren’t available if a Matrix or CKEditor field existed with the same handle as the section.
 - Fixed an error that could occur after reordering routes. ([#16610](https://github.com/craftcms/cms/pull/16610))
 - Fixed an error that occurred when a non-admin user attempted to copy a field value from another site.
 - Fixed a bug where the `migrate/up` and `migrate/all` commands were writing out changes to the project config YAML when there were already pending YAML changes. ([#16086](https://github.com/craftcms/cms/issues/16086))
+- Fixed a bug where fields were getting added to field layout tabs if they were dragged from the library, and dropped back on their library element. ([#16619](https://github.com/craftcms/cms/issues/16619))
+- Fixed a bug where field layout conditions weren’t getting applied after nested elements were added or removed. ([#16558](https://github.com/craftcms/cms/issues/16558))
+- Fixed a bug where element thumbs weren’t loading when an element editor’s content was refreshed after closing Live Preview.
+- Fixed a bug where changes to nested entries weren’t always showing when previewing elements. ([#16626](https://github.com/craftcms/cms/issues/16626))
+- Fixed a PHP error that occurred when an invalid token was passed to the `token` query string param. ([#16630](https://github.com/craftcms/cms/issues/16630))
 
 ## 5.6.4 - 2025-01-30
 
