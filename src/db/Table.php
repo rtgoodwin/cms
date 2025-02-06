@@ -106,4 +106,8 @@ abstract class Table
     public const WEBAUTHN = '{{%webauthn}}';
     public const WIDGETS = '{{%widgets}}';
     public const SEARCHINDEX = '{{%searchindex}}';
+    /** @since 5.7.0 */
+    public const SEARCHINDEXQUEUE = '{{%searchindexqueue}}';
+    /** @since 5.7.0 */
+    public const SEARCHINDEXQUEUE_FIELDS = '{{%searchindexqueue_fields}}';
 }
