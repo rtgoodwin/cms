@@ -5475,11 +5475,7 @@ JS, [
             return true;
         }
 
-        if (isset($this->_isFresh)) {
-            return $this->_isFresh;
-        }
-
-        return false;
+        return $this->_isFresh ?? false;
     }
 
     /**
