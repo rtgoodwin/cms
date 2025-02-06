@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where multi-site elements’ search indexes could be updated twice.
+- Fixed a potential phishing attack vector.
+
 ## 4.14.4 - 2025-02-04
 
 - Fixed an error that occurred when accessing the `edit/<elementId>` route for a draft that no longer existed.
