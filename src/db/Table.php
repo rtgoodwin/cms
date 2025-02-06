@@ -97,4 +97,8 @@ abstract class Table
     public const VOLUMES = '{{%volumes}}';
     public const WIDGETS = '{{%widgets}}';
     public const SEARCHINDEX = '{{%searchindex}}';
+    /** @since 4.15.0 */
+    public const SEARCHINDEXQUEUE = '{{%searchindexqueue}}';
+    /** @since 4.15.0 */
+    public const SEARCHINDEXQUEUE_FIELDS = '{{%searchindexqueue_fields}}';
 }
