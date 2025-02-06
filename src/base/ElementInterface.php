@@ -1423,7 +1423,7 @@ interface ElementInterface extends
      * need to be returned. Defaults to null, meaning all fields’ values will be
      * returned. If it is an array, only the fields in the array will be returned.
      * @return array
-     * @since 4.15.0
+     * @since 5.7.0
      */
     public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array;
 

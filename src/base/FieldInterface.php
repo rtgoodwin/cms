@@ -438,7 +438,7 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
      * @param mixed $value
      * @param ElementInterface $element
      * @return mixed
-     * @since 4.15.0
+     * @since 5.7.0
      */
     public function serializeValueForDb(mixed $value, ElementInterface $element): mixed;
 
