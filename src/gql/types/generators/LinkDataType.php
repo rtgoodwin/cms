@@ -64,7 +64,9 @@ class LinkDataType implements GeneratorInterface, SingleGeneratorInterface
                 'elementType' => Type::string(),
                 'elementId' => Type::int(),
                 'elementSiteId' => Type::int(),
+                'elementSlug' => Type::string(),
                 'elementTitle' => Type::string(),
+                'elementUri' => Type::string(),
             ], $typeName),
         ]));
     }
