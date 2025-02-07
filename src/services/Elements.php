@@ -1170,20 +1170,18 @@ class Elements extends Component
      */
     public function trackElementInBulkOps(ElementInterface $element): void
     {
-        if (empty($this->bulkKeys)) {
+        if (empty($this->bulkKeys) || $this->isMigrationRequest()) {
             return;
         }
 
         $timestamp = Db::prepareDateForDb(DateTimeHelper::now());
 
-        if (!$this->isMigrationRequest()) {
-            foreach (array_keys($this->bulkKeys) as $key) {
-                Db::upsert(Table::ELEMENTS_BULKOPS, [
-                    'elementId' => $element->id,
-                    'key' => $key,
-                    'timestamp' => $timestamp,
-                ], db: $this->bulkOpDb);
-            }
+        foreach (array_keys($this->bulkKeys) as $key) {
+            Db::upsert(Table::ELEMENTS_BULKOPS, [
+                'elementId' => $element->id,
+                'key' => $key,
+                'timestamp' => $timestamp,
+            ], db: $this->bulkOpDb);
         }
     }
 
