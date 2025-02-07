@@ -84,6 +84,7 @@ return [
     'After…' => 'پس از…',
     'Aliases' => 'نام های مستعار',
     'All Sites' => 'همه سایت ها',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'همگی انجام شد!',
     'All done' => 'همگی انجام شد',
     'All elements' => 'تمامی مؤلفه‌ها',
