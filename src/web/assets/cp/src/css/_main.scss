@@ -4628,6 +4628,10 @@ table.editable {
           }
         }
 
+        &.icon-cell {
+          padding-block: 6px;
+        }
+
         &.error {
           box-shadow: inset 0 0 0 1px var(--error-color);
         }
@@ -9023,6 +9027,16 @@ body {
     width: calc(20rem / 16);
     height: calc(20rem / 16);
     @include mixins.svg-mask(var(--ui-control-color));
+  }
+
+  &.small {
+    width: calc(22rem / 16);
+    height: calc(22rem / 16);
+
+    svg {
+      width: calc(14rem / 16);
+      height: calc(14rem / 16);
+    }
   }
 }
 

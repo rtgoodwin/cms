@@ -148,6 +148,7 @@ JS;
             'Choose which sites this source should be visible for.',
             'Choose which table columns should be visible for this source by default.',
             'Choose which user groups should have access to this source.',
+            'Choose',
             'Clear search',
             'Clear',
             'Close Preview',

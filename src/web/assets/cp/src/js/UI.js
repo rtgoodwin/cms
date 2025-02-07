@@ -646,6 +646,65 @@ Craft.ui = {
     );
   },
 
+  createIconPicker: function (config) {
+    const $container = $('<div/>', {
+      id: config.id,
+      class: 'icon-picker',
+    });
+
+    const $iconContainer = $('<div/>', {
+      class: 'icon-picker--icon',
+      lang: Craft.language,
+    }).appendTo($container);
+
+    if (config.small) {
+      $container.addClass('small');
+      $iconContainer.addClass('small');
+    }
+
+    if (!config.static) {
+      const $chooseBtn = this.createButton({
+        class: 'icon-picker--choose-btn',
+        label: Craft.t('app', 'Choose'),
+      }).appendTo($container);
+
+      const $removeBtn = this.createButton({
+        class: 'icon-picker--remove-btn hidden',
+        label: Craft.t('app', 'Remove'),
+      }).appendTo($container);
+
+      if (config.small) {
+        $chooseBtn.addClass('small');
+        $removeBtn.addClass('small');
+      }
+
+      if (config.name) {
+        $('<input/>', {
+          type: 'hidden',
+          name: config.name,
+        }).appendTo($container);
+      }
+    }
+
+    new Craft.IconPicker($container, {
+      freeOnly: config.freeOnly,
+    });
+
+    return $container;
+  },
+
+  createIconPickerField: function (config) {
+    if (!config.id) {
+      config.id = 'iconpicker' + Math.floor(Math.random() * 1000000000);
+    }
+    if (!config.labelId) {
+      config.labelId = `${config.id}-label`;
+    }
+    return this.createField(this.createIconPicker(config), config).addClass(
+      'iconpicker-field'
+    );
+  },
+
   createColorInput: function (config) {
     const id = config.id || 'color' + Math.floor(Math.random() * 1000000000);
     const containerId = config.containerId || id + '-container';
