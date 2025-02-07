@@ -84,6 +84,7 @@ return [
     'After…' => 'Dopo...',
     'Aliases' => 'Alias',
     'All Sites' => 'Tutti i siti',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Tutto fatto!',
     'All done' => 'Tutto fatto',
     'All elements' => 'Tutti gli elementi',
