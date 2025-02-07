@@ -84,6 +84,7 @@ return [
     'After…' => 'بعد…',
     'Aliases' => 'الأسماء المستعارة',
     'All Sites' => 'جميع المواقع',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'اكتمل الكل!',
     'All done' => 'اكتمل الكل',
     'All elements' => 'كل العناصر',
