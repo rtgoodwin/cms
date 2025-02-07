@@ -84,6 +84,7 @@ return [
     'After…' => 'אחרי…',
     'Aliases' => 'כינויים',
     'All Sites' => 'כל האתרים',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'הכל בוצע!',
     'All done' => 'הכל בוצע',
     'All elements' => 'כל התגיות',
