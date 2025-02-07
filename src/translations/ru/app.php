@@ -84,6 +84,7 @@ return [
     'After…' => 'После…',
     'Aliases' => 'Псевдонимы',
     'All Sites' => 'Все сайты',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Все готово!',
     'All done' => 'Все готово',
     'All elements' => 'Все элементы',
