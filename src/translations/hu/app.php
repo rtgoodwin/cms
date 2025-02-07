@@ -84,6 +84,7 @@ return [
     'After…' => 'Után…',
     'Aliases' => 'Aliasok',
     'All Sites' => 'Az összes webhely',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Minden rendben!',
     'All done' => 'Minden rendben',
     'All elements' => 'Összes elem',
