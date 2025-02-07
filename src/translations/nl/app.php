@@ -84,6 +84,7 @@ return [
     'After…' => 'Na…',
     'Aliases' => 'Aliassen',
     'All Sites' => 'Alle Sites',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Alles klaar!',
     'All done' => 'Alles klaar',
     'All elements' => 'Alle elementen',
