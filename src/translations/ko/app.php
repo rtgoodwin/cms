@@ -84,6 +84,7 @@ return [
     'After…' => '후…',
     'Aliases' => '별칭',
     'All Sites' => '모든 사이트',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => '모두 완료되었습니다!',
     'All done' => '모두 완료',
     'All elements' => '모든 요소',
