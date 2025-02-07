@@ -1111,6 +1111,17 @@ class Elements extends Component
     private array $bulkKeys = [];
 
     /**
+     * Returns the active bulk op keys.
+     *
+     * @return string[]
+     * @since 5.7.0
+     */
+    public function getBulkOpKeys(): array
+    {
+        return array_keys($this->bulkKeys);
+    }
+
+    /**
      * Begins tracking element saves and deletes as part of a bulk operation, identified by a unique key.
      *
      * @return string The bulk operation key

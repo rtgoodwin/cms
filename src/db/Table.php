@@ -26,6 +26,8 @@ abstract class Table
     public const ASSETS_SITES = '{{%assets_sites}}';
     /** @since 5.0 */
     public const AUTHENTICATOR = '{{%authenticator}}';
+    /** @since 5.7.0 */
+    public const BULKOPEVENTS = '{{%bulkopevents}}';
     /** @since 3.4.14 */
     public const CACHE = '{{%cache}}';
     public const CATEGORIES = '{{%categories}}';

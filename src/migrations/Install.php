@@ -237,6 +237,13 @@ class Install extends Migration
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);
+        $this->createTable(Table::BULKOPEVENTS, [
+            'key' => $this->char(10)->notNull(),
+            'senderClass' => $this->string()->notNull(),
+            'eventName' => $this->string()->notNull(),
+            'timestamp' => $this->dateTime()->notNull(),
+            'PRIMARY KEY([[key]], [[senderClass]], [[eventName]])',
+        ]);
         $this->createTable(Table::CATEGORIES, [
             'id' => $this->integer()->notNull(),
             'groupId' => $this->integer()->notNull(),
@@ -853,6 +860,7 @@ class Install extends Migration
         $this->createIndex(null, Table::ASSETS, ['filename', 'folderId'], false);
         $this->createIndex(null, Table::ASSETS, ['folderId'], false);
         $this->createIndex(null, Table::ASSETS, ['volumeId'], false);
+        $this->createIndex(null, Table::BULKOPEVENTS, ['timestamp'], false);
         $this->createIndex(null, Table::CATEGORIES, ['groupId'], false);
         $this->createIndex(null, Table::CATEGORYGROUPS, ['name'], false);
         $this->createIndex(null, Table::CATEGORYGROUPS, ['handle'], false);
