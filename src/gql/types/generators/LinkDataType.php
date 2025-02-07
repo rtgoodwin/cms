@@ -51,6 +51,7 @@ class LinkDataType implements GeneratorInterface, SingleGeneratorInterface
                 'type' => Type::string(),
                 'value' => Type::string(),
                 'label' => Type::string(),
+                'defaultLabel' => Type::string(),
                 'urlSuffix' => Type::string(),
                 'url' => Type::string(),
                 'link' => Type::string(),
