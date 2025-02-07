@@ -84,6 +84,7 @@ return [
     'After…' => 'Sonra…',
     'Aliases' => 'Takma adlar',
     'All Sites' => 'Tüm Siteler',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Hepsi tamam!',
     'All done' => 'Hepsi tamam',
     'All elements' => 'Tüm öğeler',
