@@ -359,6 +359,10 @@ class Queue extends \yii\queue\cli\Queue implements QueueInterface
             Db::delete($this->tableName, [
                 'id' => $id,
             ], [], $this->db);
+
+            if ($this->proxyQueue instanceof QueueWithReleaseInterface) {
+                $this->proxyQueue->release($id);
+            }
         });
     }
 
@@ -371,6 +375,10 @@ class Queue extends \yii\queue\cli\Queue implements QueueInterface
             Db::delete($this->tableName, [
                 'channel' => $this->channel(),
             ], [], $this->db);
+
+            if ($this->proxyQueue instanceof QueueWithReleaseInterface) {
+                $this->proxyQueue->releaseAll();
+            }
         });
     }
 
