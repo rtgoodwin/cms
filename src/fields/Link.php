@@ -213,13 +213,17 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
         $config['advancedFields'] ??= [];
 
         if (isset($config['showTargetField'])) {
+            if ($config['showTargetField'] === true) {
+                $config['advancedFields'][] = 'target';
+            }
             unset($config['showTargetField']);
-            $config['advancedFields'][] = 'target';
         }
 
         if (isset($config['showUrlSuffixField'])) {
+            if ($config['showUrlSuffixField'] === true) {
+                $config['advancedFields'][] = 'urlSuffix';
+            }
             unset($config['showUrlSuffixField']);
-            $config['advancedFields'][] = 'urlSuffix';
         }
 
         if (isset($config['graphqlMode'])) {
@@ -625,14 +629,6 @@ new Craft.LinkField($('#' + $id));
 JS, [
             $view->namespaceInputId($id),
         ]);
-
-        if (!$value) {
-            // Override the initial value being set to null by CustomField::inputHtml()
-            $view->setInitialDeltaValue($this->handle, [
-                'type' => $valueTypeId,
-                'value' => '',
-            ]);
-        }
 
         $typeInputName = "$this->handle[type]";
 
