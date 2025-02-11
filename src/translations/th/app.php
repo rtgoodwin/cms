@@ -84,6 +84,7 @@ return [
     'After…' => 'หลัง...',
     'Aliases' => 'นามแฝง',
     'All Sites' => 'เว็บไซต์ทั้งหมด',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'ทุกอย่างเสร็จเรียบร้อย',
     'All done' => 'เสร็จสิ้น',
     'All elements' => 'องค์ประกอบทั้งหมด',

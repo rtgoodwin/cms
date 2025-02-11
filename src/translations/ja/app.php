@@ -84,6 +84,7 @@ return [
     'After…' => '以降…',
     'Aliases' => '別名',
     'All Sites' => 'すべてのサイト',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'すべて完了！',
     'All done' => 'すべて完了',
     'All elements' => 'すべてのエレメント',

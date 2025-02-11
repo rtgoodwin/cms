@@ -84,6 +84,7 @@ return [
     'After…' => 'Po…',
     'Aliases' => 'Aliasy',
     'All Sites' => 'Všechny weby',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => 'Vše hotovo!',
     'All done' => 'Vše hotovo',
     'All elements' => 'Všechny prvky',

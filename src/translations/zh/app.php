@@ -84,6 +84,7 @@ return [
     'After…' => '在此之后…',
     'Aliases' => '别名',
     'All Sites' => '全部站点',
+    'All color values must be valid.' => 'All color values must be valid.',
     'All done!' => '全部完成！',
     'All done' => '全部完成',
     'All elements' => '所有元素',
