@@ -17,7 +17,7 @@ use yii\queue\Queue as BaseQueue;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
-interface QueueInterface extends QueueWithReleaseInterface
+interface QueueInterface extends ReleasableQueueInterface
 {
     /**
      * Runs all the queued-up jobs.

@@ -8,11 +8,12 @@
 namespace craft\queue;
 
 /**
- * QueueWithReleaseInterface defines the common interface to be implemented by queue classes that can release jobs.
+ * ReleasableQueueInterface defines the common interface to be implemented by queue classes that can release jobs.
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
+ * @since 4.15.0
  */
-interface QueueWithReleaseInterface
+interface ReleasableQueueInterface
 {
     /**
      * Releases all jobs.
