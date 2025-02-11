@@ -2,8 +2,6 @@
 
 ## Unreleased
 
-- Added `\craft\queue\QueueWithReleaseInterface`.
-- Releasing of jobs is now synchronized to the `craft\queue\Queue::$proxyQueue` when it implements `\craft\queue\QueueWithReleaseInterface`.  
 - Fixed a bug where multi-site elements’ search indexes could be updated twice.
 - Fixed a bug where the `utils/delete-empty-volume-folders` command was deleting folders that had no assets directly, but had subfolders. ([#16388](https://github.com/craftcms/cms/issues/16388))
 - Fixed a bug where some Matrix blocks weren’t getting propagated to newly-added sites of their owners, if any blocks had been modified. ([#16640](https://github.com/craftcms/cms/issues/16640))
