@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.6 - 2025-02-11
 
 - Fixed a bug where multi-site elements’ search indexes could be updated twice.
 - Fixed a bug where some nested Matrix entries weren’t getting propagated to newly-added sites of their owners, if any blocks had been modified. ([#16640](https://github.com/craftcms/cms/issues/16640))
@@ -9,6 +9,8 @@
 - Fixed a bug where “Fit” image transforms were showing the “Default Focal Point” setting. ([#16665](https://github.com/craftcms/cms/pull/16665))
 - Fixed a bug where the “Image Position” setting wasn’t saving for “Letterbox” image transforms. ([#16648](https://github.com/craftcms/cms/issues/16648))
 - Fixed a bug where the `up` command, the `app/migrate` action, and the Project Config utility weren’t aware of pending project config changes if a database backup was restored but caches weren’t cleared. ([#16668](https://github.com/craftcms/cms/issues/16668))
+- Fixed a bug where condition rules weren’t always getting created with their condition set. ([#16676](https://github.com/craftcms/cms/pull/16676))
+- Fixed an error that occurred when opening the filter HUD within the element selection modal for a relational field, if the user didn’t have permission to view the selected source outside of the field. ([#16678](https://github.com/craftcms/cms/issues/16678))
 - Fixed a bug where Number fields weren’t getting sorted properly in PostgreSQL. ([#15828](https://github.com/craftcms/cms/issues/15828))
 - Fixed a bug where Matrix fields’ “Default View Mode” settings included a “Display in a structured table” option. ([#16631](https://github.com/craftcms/cms/discussions/16631))
 - Fixed a bug where user addresses weren’t getting restored when soft-deleted users were restored. ([#16636](https://github.com/craftcms/cms/pull/16636))
@@ -18,7 +20,7 @@
 - Fixed a bug where Link fields’ “URL Suffix” and “Target” advanced fields were getting enabled even if they had been disabled in Craft 5.5. ([#16663](https://github.com/craftcms/cms/issues/16663))
 - Fixed an error that occurred when executing the `users/remove-2fa` command.
 - Fixed a potential phishing attack vector.
-- Fixed a styling issue.
+- Fixed styling issues. ([#16683](https://github.com/craftcms/cms/issues/16683), [#16684](https://github.com/craftcms/cms/issues/16684))
 
 ## 5.6.5.1 - 2025-02-04
 
