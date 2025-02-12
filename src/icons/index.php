@@ -637,6 +637,12 @@ return array(
     'terms' => ' block brick mystery prize question super mario ',
     'pro' => true,
   ),
+  'bluesky' =>
+  array(
+    'name' => ' bluesky ',
+    'terms' => ' social network ',
+    'pro' => false,
+  ),
   'bluetooth' =>
   array(
     'name' => ' bluetooth ',
@@ -4697,6 +4703,12 @@ return array(
   array(
     'name' => ' masks theater ',
     'terms' => ' art comedy mask perform performing performing arts theater theatre tragedy ',
+    'pro' => false,
+  ),
+  'mastodon' =>
+  array(
+    'name' => ' mastodon ',
+    'terms' => '  ',
     'pro' => false,
   ),
   'mattress-pillow' =>

@@ -7,6 +7,7 @@ $app = require(dirname(__DIR__) . '/bootstrap/console.php');
 
 $icons = [
     'brands/amazon.svg',
+    'brands/bluesky.svg',
     'brands/codepen.svg',
     'brands/discord.svg',
     'brands/dribbble.svg',
@@ -17,6 +18,7 @@ $icons = [
     'brands/kickstarter.svg',
     'brands/linkedin.svg',
     'brands/markdown.svg',
+    'brands/mastodon.svg',
     'brands/pinterest.svg',
     'brands/product-hunt.svg',
     'brands/rebel.svg',
