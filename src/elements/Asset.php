@@ -46,6 +46,7 @@ use craft\events\AssetEvent;
 use craft\events\DefineAssetUrlEvent;
 use craft\events\GenerateTransformEvent;
 use craft\fieldlayoutelements\assets\AltField;
+use craft\gql\interfaces\elements\Asset as AssetInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Assets;
 use craft\helpers\Cp;
@@ -72,6 +73,7 @@ use craft\validators\AssetLocationValidator;
 use craft\validators\DateTimeValidator;
 use craft\validators\StringValidator;
 use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use Throwable;
 use Twig\Markup;
@@ -344,6 +346,14 @@ class Asset extends Element
     public static function gqlTypeName(Volume $volume): string
     {
         return sprintf('%s_Asset', $volume->handle);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return AssetInterface::getType();
     }
 
     /**

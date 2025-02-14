@@ -21,6 +21,7 @@ use craft\elements\conditions\categories\CategoryCondition;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\CategoryQuery;
 use craft\elements\db\ElementQuery;
+use craft\gql\interfaces\elements\Category as CategoryInterface;
 use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\Html;
@@ -30,6 +31,7 @@ use craft\models\FieldLayout;
 use craft\records\Category as CategoryRecord;
 use craft\services\ElementSources;
 use craft\services\Structures;
+use GraphQL\Type\Definition\Type;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 
@@ -156,6 +158,14 @@ class Category extends Element
     public static function gqlTypeName(CategoryGroup $categoryGroup): string
     {
         return sprintf('%s_Category', $categoryGroup->handle);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return CategoryInterface::getType();
     }
 
     /**

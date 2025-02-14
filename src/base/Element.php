@@ -66,6 +66,7 @@ use craft\events\SetEagerLoadedElementsEvent;
 use craft\events\SetElementRouteEvent;
 use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\CustomField;
+use craft\gql\interfaces\Element as ElementGqlType;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -86,6 +87,7 @@ use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
 use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -2128,6 +2130,14 @@ abstract class Element extends Component implements ElementInterface
             'elementType' => User::class,
             'map' => $map,
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return ElementGqlType::getType();
     }
 
     /**
