@@ -18,6 +18,7 @@ use craft\enums\AttributeStatus;
 use craft\errors\InvalidFieldException;
 use craft\models\FieldLayout;
 use craft\models\Site;
+use GraphQL\Type\Definition\Type;
 use Twig\Markup;
 use yii\web\Response;
 
@@ -613,6 +614,14 @@ interface ElementInterface extends
      * should be ignored
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false;
+
+    /**
+     * Returns the base GraphQL type name that represents elements of this type.
+     *
+     * @return Type
+     * @since 5.7.0
+     */
+    public static function baseGqlType(): Type;
 
     /**
      * Returns the GraphQL scopes required by element’s context.
