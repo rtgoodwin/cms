@@ -287,6 +287,7 @@ JS;
             'No limit',
             'Notes',
             'Notice',
+            'Number of columns',
             'OK',
             'Open in a new tab',
             'Options',
