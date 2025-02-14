@@ -14,11 +14,13 @@
 - Added `bluesky`, `flickr`, `mastodon`, and `medium` icons.
 
 ### Development
-- Added `defaultLabel`, `elementSlug`, and `elementUri` nested fields to Link fields’ GraphQL data. ([#16637](https://github.com/craftcms/cms/issues/16637), [#16104](https://github.com/craftcms/cms/discussions/16104))
+- Added the `defaultLabel` nested field to Link fields’ GraphQL data. ([#16637](https://github.com/craftcms/cms/issues/16637))
+- Added `element`, `asset`, `entry`, etc., nested fields to Link fields’ GraphQL data. ([#16698](https://github.com/craftcms/cms/pull/16698))
 
 ### Extensibility
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Editable tables now support `icon` columns.
+- Added `craft\base\ElementInterface::baseGqlType()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
 - Added `craft\db\Table::BULKOPEVENTS`.
@@ -28,6 +30,7 @@
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\BaseOptionsField::$optionIcons`, which can be set to `true` by subclasses to enable the “Icon” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
+- Added `craft\fields\linktypes\BaseElementLinkType::elementGqlType()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
