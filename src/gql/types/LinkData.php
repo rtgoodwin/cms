@@ -36,9 +36,7 @@ class LinkData extends ObjectType
             'elementType' => $source->getElement() ? $source->getElement()::class : null,
             'elementId' => $source->getElement()?->id,
             'elementSiteId' => $source->getElement()?->siteId,
-            'elementSlug' => $source->getElement()?->slug,
             'elementTitle' => $source->getElement() ? (string)$source->getElement() : null,
-            'elementUri' => $source->getElement()?->uri,
             default => $source->$fieldName,
         };
     }
