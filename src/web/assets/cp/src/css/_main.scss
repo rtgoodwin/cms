@@ -7505,14 +7505,26 @@ $min2ColWidth: 400px;
   }
 }
 
-.menu--disclosure ul li {
-  & > a:not(.crumb-link),
-  & > .menu-item,
-  & > .menu-option {
-    --focus-ring: var(--inner-focus-ring);
+.menu--disclosure {
+  & > .search-container {
+    margin-inline: calc(var(--m) * -1);
+    padding: var(--m);
+    border-block-end: 1px solid var(--hairline-color);
+  }
 
-    &:hover {
-      @include mixins.disclosure-link-hover-styles;
+  ul li {
+    &.filtered {
+      display: none;
+    }
+
+    & > a:not(.crumb-link),
+    & > .menu-item,
+    & > .menu-option {
+      --focus-ring: var(--inner-focus-ring);
+
+      &:hover {
+        @include mixins.disclosure-link-hover-styles;
+      }
     }
   }
 }
