@@ -763,13 +763,9 @@ class Asset extends Element
                     ->offset($elementQuery->offset)
                     ->limit($elementQuery->limit);
 
-                $folders = array_map(function(array $result) {
-                    return new VolumeFolder($result);
-                }, $folderQuery->all());
+                $folders = array_map(fn(array $result) => new VolumeFolder($result), $folderQuery->all());
 
-                $foldersByPath = ArrayHelper::index($folders, function(VolumeFolder $folder) {
-                    return rtrim($folder->path, '/');
-                });
+                $foldersByPath = ArrayHelper::index($folders, fn(VolumeFolder $folder) => rtrim($folder->path, '/'));
 
                 foreach ($folders as $folder) {
                     $sourcePath = [$baseSourcePathStep];
@@ -2151,7 +2147,7 @@ JS,[
             return null;
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
 
         // Fire a 'beforeDefineUrl' event
         if ($this->hasEventHandlers(self::EVENT_BEFORE_DEFINE_URL)) {
@@ -2422,7 +2418,7 @@ JS,[
      */
     public function getMimeType(mixed $transform = null): ?string
     {
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         $transform = ImageTransforms::normalizeTransform($transform);
 
         if (!Image::canManipulateAsImage($this->getExtension()) || !$transform || !$transform->format) {
@@ -2450,7 +2446,7 @@ JS,[
             return $ext;
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         return ImageTransforms::normalizeTransform($transform)?->format ?? $ext;
     }
 
@@ -3479,7 +3475,7 @@ JS;
             return [null, null];
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
 
         if ($transform === null || !Image::canManipulateAsImage($this->getExtension())) {
             return [$this->_width, $this->_height];
@@ -3656,9 +3652,7 @@ JS;
         // Make sure it's *not* within a system directory though
         $systemDirs = $pathService->getSystemPaths();
         $systemDirs = array_map([$this, '_normalizeTempPath'], $systemDirs);
-        $systemDirs = array_filter($systemDirs, function($value) {
-            return ($value !== false);
-        });
+        $systemDirs = array_filter($systemDirs, fn($value) => $value !== false);
 
         foreach ($systemDirs as $dir) {
             if (str_starts_with($tempFilePath, $dir)) {
