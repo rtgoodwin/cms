@@ -21,7 +21,10 @@
     label: o.label is defined ? o.label : o,
 }) %}
 {% set options = options|map(o => o|merge({
-    data: (o.data ?? {})|merge(o.data.data ?? {})
+    data: (o.data ?? {})|merge(o.data.data ?? {})|merge({
+        color: o.data.color ?? o.color ?? null,
+        icon: o.data.icon ?? o.icon ?? null,
+    }|filter)
 })) %}
 
 {% if includeEnvVars ?? false %}

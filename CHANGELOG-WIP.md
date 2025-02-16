@@ -8,7 +8,7 @@
 - When a modal or slideout is triggered from a disclosure menu, focus is now set to the menu button when the modal/slideout is closed. ([#16587](https://github.com/craftcms/cms/pull/16587))
 
 ### Administration
-- Added “Icon” and “Color” settings to Dropdown field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
+- Added “Icon” and “Color” settings to Checkboxes, Dropdown, Multi-select, and Radio Buttons field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
 - Added `bluesky`, `flickr`, `mastodon`, and `medium` icons.
