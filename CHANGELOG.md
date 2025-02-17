@@ -1,5 +1,56 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where multiple “New file uploaded.” notifications could be shown at once. ([#16688](https://github.com/craftcms/cms/issues/16688))
+- Fixed an error that could occur during garbage collection if the database user didn’t have permission to disable foreign key constraints. ([#16700](https://github.com/craftcms/cms/issues/16700))
+- Fixed a bug where datepickers could have scrollbars. ([#16697](https://github.com/craftcms/cms/issues/16697))
+- Fixed a bug where asset files could be prematurely deleted when moved to a different volume, if an error occurred. ([#16686](https://github.com/craftcms/cms/issues/16686))
+- Fixed a bug where clearing out a Structure section’s Parent field wasn’t persisting if editing the entry for a newly-added site. ([#16691](https://github.com/craftcms/cms/issues/16691))
+- Fixed a bug where SVG asset transforms could get two `preserveAspectRatio` attributes. ([#16709](https://github.com/craftcms/cms/issues/16709))
+- Fixed a styling issue. ([#16699](https://github.com/craftcms/cms/issues/16699))
+- Fixed an error that could occur if a field’s input HTML contained `<style>` tags. ([nystudio107/craft-retour#329](https://github.com/nystudio107/craft-retour/issues/329))
+
+## 5.6.6 - 2025-02-11
+
+- Fixed a bug where multi-site elements’ search indexes could be updated twice.
+- Fixed a bug where some nested Matrix entries weren’t getting propagated to newly-added sites of their owners, if any blocks had been modified. ([#16640](https://github.com/craftcms/cms/issues/16640))
+- Fixed an error that could occur when deleting a draft.
+- Fixed an error that could occur when saving a Structure section entry, if it had an Assets field with a dynamic subpath that referenced `level`. ([#16661](https://github.com/craftcms/cms/pull/16661))
+- Fixed a bug where “Fit” image transforms were showing the “Default Focal Point” setting. ([#16665](https://github.com/craftcms/cms/pull/16665))
+- Fixed a bug where the “Image Position” setting wasn’t saving for “Letterbox” image transforms. ([#16648](https://github.com/craftcms/cms/issues/16648))
+- Fixed a bug where the `up` command, the `app/migrate` action, and the Project Config utility weren’t aware of pending project config changes if a database backup was restored but caches weren’t cleared. ([#16668](https://github.com/craftcms/cms/issues/16668))
+- Fixed a bug where condition rules weren’t always getting created with their condition set. ([#16676](https://github.com/craftcms/cms/pull/16676))
+- Fixed an error that occurred when opening the filter HUD within the element selection modal for a relational field, if the user didn’t have permission to view the selected source outside of the field. ([#16678](https://github.com/craftcms/cms/issues/16678))
+- Fixed a bug where Number fields weren’t getting sorted properly in PostgreSQL. ([#15828](https://github.com/craftcms/cms/issues/15828))
+- Fixed a bug where Matrix fields’ “Default View Mode” settings included a “Display in a structured table” option. ([#16631](https://github.com/craftcms/cms/discussions/16631))
+- Fixed a bug where user addresses weren’t getting restored when soft-deleted users were restored. ([#16636](https://github.com/craftcms/cms/pull/16636))
+- Fixed a bug where pressing the “New entry” button multiple times quickly would create multiple nested entries, circumventing the “Max Entries” settings. ([#16642](https://github.com/craftcms/cms/issues/16642))
+- Fixed a bug where Link fields without values were always getting marked as dirty when making another change to the element. ([#16649](https://github.com/craftcms/cms/pull/16649))
+- Fixed an error that could occur when programmatically duplicating a nested element for a new site. ([#16659](https://github.com/craftcms/cms/issues/16659))
+- Fixed a bug where Link fields’ “URL Suffix” and “Target” advanced fields were getting enabled even if they had been disabled in Craft 5.5. ([#16663](https://github.com/craftcms/cms/issues/16663))
+- Fixed an error that occurred when executing the `users/remove-2fa` command.
+- Fixed a potential phishing attack vector.
+- Fixed styling issues. ([#16683](https://github.com/craftcms/cms/issues/16683), [#16684](https://github.com/craftcms/cms/issues/16684))
+
+## 5.6.5.1 - 2025-02-04
+
+- Fixed an error that could occur when saving elements with nested elements on multi-site installs. ([#16609](https://github.com/craftcms/cms/issues/16609))
+
+## 5.6.5 - 2025-02-04
+
+- Fixed a bug where transformed images could be slightly smaller than they should be when using the `fit` transform mode. ([#16622](https://github.com/craftcms/cms/issues/16622))
+- Fixed a bug where tests weren’t outputting exceptions thrown during Craft installation. ([#16624](https://github.com/craftcms/cms/issues/16624))
+- Fixed a bug where section-specific GraphQL queries (`<sectionHandle>Entries`) weren’t available if a Matrix or CKEditor field existed with the same handle as the section.
+- Fixed an error that could occur after reordering routes. ([#16610](https://github.com/craftcms/cms/pull/16610))
+- Fixed an error that occurred when a non-admin user attempted to copy a field value from another site.
+- Fixed a bug where the `migrate/up` and `migrate/all` commands were writing out changes to the project config YAML when there were already pending YAML changes. ([#16086](https://github.com/craftcms/cms/issues/16086))
+- Fixed a bug where fields were getting added to field layout tabs if they were dragged from the library, and dropped back on their library element. ([#16619](https://github.com/craftcms/cms/issues/16619))
+- Fixed a bug where field layout conditions weren’t getting applied after nested elements were added or removed. ([#16558](https://github.com/craftcms/cms/issues/16558))
+- Fixed a bug where element thumbs weren’t loading when an element editor’s content was refreshed after closing Live Preview.
+- Fixed a bug where changes to nested entries weren’t always showing when previewing elements. ([#16626](https://github.com/craftcms/cms/issues/16626))
+- Fixed a PHP error that occurred when an invalid token was passed to the `token` query string param. ([#16630](https://github.com/craftcms/cms/issues/16630))
+
 ## 5.6.4 - 2025-01-30
 
 - Fixed an error that occurred when accessing the `edit/<elementId>` route for a draft that no longer existed.

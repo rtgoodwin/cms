@@ -569,7 +569,11 @@ JS, [
         }
 
         $copyFromSiteId = (int)$this->request->getRequiredBodyParam('fromSiteId');
-        $this->requirePermission("editSite:$copyFromSiteId");
+        $site = Craft::$app->getSites()->getSiteById($copyFromSiteId);
+        if (!$site) {
+            throw new BadRequestHttpException("Invalid site ID: $copyFromSiteId");
+        }
+        $this->requirePermission("editSite:$site->uid");
 
         $layoutElementUid = $this->request->getRequiredBodyParam('layoutElementUid');
         $namespace = $this->request->getBodyParam('namespace');
@@ -2001,8 +2005,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || !$element->getIsDraft()) {
             throw new BadRequestHttpException('No draft was identified by the request.');
@@ -2273,8 +2280,8 @@ JS, [
         bool $checkForProvisionalDraft = false,
         bool $strictSite = true,
     ): ElementInterface|Response|null {
-        $elementId = $elementId ?? $this->_elementId;
-        $elementUid = $elementUid ?? $this->_elementUid;
+        $elementId ??= $this->_elementId;
+        $elementUid ??= $this->_elementUid;
 
         $elementsService = Craft::$app->getElements();
         $user = static::currentUser();

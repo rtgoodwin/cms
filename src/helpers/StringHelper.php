@@ -1057,11 +1057,7 @@ class StringHelper extends \yii\helpers\StringHelper
         // repeat the steps until we've created a string of the right length
         for ($i = 0; $i < $length; $i++) {
             // pick a random number from 1 up to the number of valid chars
-            try {
-                $randomPick = random_int(0, $numValidChars - 1);
-            } catch (\Exception) {
-                $randomPick = rand(0, $numValidChars - 1);
-            }
+            $randomPick = random_int(0, $numValidChars - 1);
 
             // take the random character out of the string of valid chars
             $randomChar = $validChars[$randomPick];
@@ -1354,8 +1350,9 @@ class StringHelper extends \yii\helpers\StringHelper
      */
     public static function slugify(string $str, string $replacement = '-', ?string $language = null): string
     {
+        $language ??= Craft::$app->language;
+
         /** @var ASCII::*_LANGUAGE_CODE $language */
-        $language = $language ?? Craft::$app->language;
         return (string)BaseStringy::create($str)->slugify($replacement, $language);
     }
 
@@ -1583,9 +1580,9 @@ class StringHelper extends \yii\helpers\StringHelper
         // Normalize NFD chars to NFC
         $str = Normalizer::normalize($str, Normalizer::FORM_C);
 
-        /** @var ASCII::*_LANGUAGE_CODE $language */
-        $language = $language ?? Craft::$app->language;
+        $language ??= Craft::$app->language;
 
+        /** @var ASCII::*_LANGUAGE_CODE $language */
         return (string)BaseStringy::create($str)->toAscii($language);
     }
 
@@ -1630,9 +1627,7 @@ class StringHelper extends \yii\helpers\StringHelper
     public static function toKebabCase(string $str, string $glue = '-', bool $lower = true, bool $removePunctuation = true): string
     {
         $words = self::toWords($str, $lower, $removePunctuation);
-        $words = ArrayHelper::filterEmptyStringsFromArray(array_map(function($str) use ($glue) {
-            return trim($str, $glue);
-        }, $words));
+        $words = ArrayHelper::filterEmptyStringsFromArray(array_map(fn($str) => trim($str, $glue), $words));
 
         return implode($glue, $words);
     }

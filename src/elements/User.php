@@ -583,11 +583,10 @@ class User extends Element implements IdentityInterface
             return [
                 'elementType' => Address::class,
                 'map' => $map,
-                'createElement' => function(AddressQuery $query, array $result, self $source) {
+                'createElement' => fn(AddressQuery $query, array $result, self $source) =>
                     // set the addresses' owners to the source user elements
                     // (must get set before behaviors - see https://github.com/craftcms/cms/issues/13400)
-                    return $query->createElement(['owner' => $source] + $result);
-                },
+                    $query->createElement(['owner' => $source] + $result),
             ];
         }
 
@@ -1039,7 +1038,7 @@ class User extends Element implements IdentityInterface
         ];
 
         $rules[] = [
-            ['fullName', 'firstName', 'lastName'], function($attribute, $params, Validator $validator) {
+            ['fullName', 'firstName', 'lastName', 'username'], function($attribute, $params, Validator $validator) {
                 if (str_contains($this->$attribute, '://')) {
                     $validator->addError($this, $attribute, Craft::t('app', 'Invalid value “{value}”.'));
                 }
@@ -1233,6 +1232,15 @@ class User extends Element implements IdentityInterface
         }
 
         return $this->_addressManager;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function afterRestore(): void
+    {
+        $this->getAddressManager()->restoreNestedElements($this);
+        parent::afterRestore();
     }
 
     private function createAddressQuery(): AddressQuery
@@ -2328,9 +2336,7 @@ JS, [
                 return $this->email ? Html::mailto(Html::encode($this->email)) : '';
 
             case 'groups':
-                return implode(', ', array_map(function(UserGroup $group) {
-                    return Html::encode(Craft::t('site', $group->name));
-                }, $this->getGroups()));
+                return implode(', ', array_map(fn(UserGroup $group) => Html::encode(Craft::t('site', $group->name)), $this->getGroups()));
 
             case 'preferredLanguage':
                 $language = $this->getPreferredLanguage();
