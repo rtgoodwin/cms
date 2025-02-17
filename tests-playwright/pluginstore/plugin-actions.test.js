@@ -54,7 +54,7 @@ test.describe('Plugin Actions', () => {
 
     page.on('dialog', (dialog) => dialog.accept());
 
-    const uninstallBtnSelector = '#' + menuId + ' a:has-text("Uninstall")';
+    const uninstallBtnSelector = '#' + menuId + ' button:has-text("Uninstall")';
     await page.waitForSelector(uninstallBtnSelector);
     await page.click(uninstallBtnSelector);
 
@@ -65,7 +65,7 @@ test.describe('Plugin Actions', () => {
     let menuId2 = await menuBtn2.getAttribute('aria-controls');
     menuId2 = menuId2.replace('.', '\\.');
 
-    const removeBtnSelector = '#' + menuId2 + ' a:has-text("Remove")';
+    const removeBtnSelector = '#' + menuId2 + ' button:has-text("Remove")';
     await page.waitForSelector(removeBtnSelector);
     await page.click(removeBtnSelector);
 
