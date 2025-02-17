@@ -24,7 +24,6 @@ return [
     'modules' => [
         /** @phpstan-ignore-next-line */
         'db-backup' => \modules\DbBackup::class,
-        'seeder' => \modules\seeder\Seeder::class,
     ],
-    'bootstrap' => ['db-backup', 'seeder'],
+    'bootstrap' => ['db-backup'],
 ];

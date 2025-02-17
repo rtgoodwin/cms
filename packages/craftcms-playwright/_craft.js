@@ -13,7 +13,7 @@ const loadFixture = async (name) => {
   process.stdout.write('\n');
   try {
     const {stdout, stderr} = await nodeExec(
-      `${dockerCli} ${craftCli} seeder/seed --fixtureNames=${name}`
+      `${dockerCli} ${craftCli} fixture/load ${name} --namespace=modules\\\\seeder\\\\fixtures`
     );
     return {stdout, stderr};
   } catch (e) {
