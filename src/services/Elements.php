@@ -3374,6 +3374,10 @@ class Elements extends Component
                         }
                     }
 
+                    if (!empty($criteria['withProvisionalDrafts'])) {
+                        ElementHelper::swapInProvisionalDrafts($targetElementsForSource);
+                    }
+
                     $sourceElement->setEagerLoadedElements($plan->alias, $targetElementsForSource, $plan);
                     $sourceElement->setLazyEagerLoadedElements($plan->alias, $plan->lazy);
 
