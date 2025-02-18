@@ -36,21 +36,25 @@
         {{ 'Other:'|t('app') }}
     {% else %}
         <div class="flex flex-nowrap gap-xs">
-            {% if icon %}
-                {% set style = {
-                    '--icon-color': color,
-                }|filter %}
-                {{ tag('span', {
-                    class: 'cp-icon puny',
-                    style,
-                    html: icon,
-                }) }}
-            {% elseif color %}
-                <div class="color small">
-                    <div class="color-preview" style="background-color: {{ color }}"></div>
-                </div>
+            {% if icon or color %}
+                {% if icon %}
+                    {% set style = {
+                        '--icon-color': color,
+                    }|filter %}
+                    {{ tag('span', {
+                        class: 'cp-icon puny',
+                        style,
+                        html: icon,
+                    }) }}
+                {% else %}
+                    <div class="color small">
+                        <div class="color-preview" style="background-color: {{ color }}"></div>
+                    </div>
+                {% endif %}
+                <span>{{ label|raw }}</span>
+            {% else %}
+                {{ label|raw }}
             {% endif %}
-            <span>{{ label|raw }}</span>
         </div>
     {% endif %}
 {% endtag %}
