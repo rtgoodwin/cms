@@ -1,6 +1,7 @@
 {% set id = id ?? "menu-#{random()}" %}
 {% set withButton = withButton ?? false %}
 {% set buttonSpinner = buttonSpinner ?? false %}
+{% set withSearchInput = withSearchInput ?? false %}
 {% set disabled = disabled ?? false %}
 
 {% set hasSelected = items|map(i => i.items ?? [i])|flatten(1)|contains('selected') %}
@@ -137,6 +138,9 @@
 {% tag 'div' with {
   id: id,
   class: (class ?? [])|explodeClass|merge(['menu', 'menu--disclosure']),
+  data: {
+    'with-search-input': withSearchInput,
+  },
 } %}
   {% block menu %}
     {% set ulStarted = false %}

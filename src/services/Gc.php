@@ -35,6 +35,7 @@ use ReflectionMethod;
 use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
+use yii\db\Exception as DbException;
 use yii\di\Instance;
 
 /**
@@ -191,9 +192,7 @@ class Gc extends Component
         }
 
         $folders = (new Query())->select(['id', 'path'])->from([Table::VOLUMEFOLDERS])->where(['volumeId' => $volumeIds])->all();
-        usort($folders, function($a, $b) {
-            return substr_count($a['path'], '/') < substr_count($b['path'], '/');
-        });
+        usort($folders, fn($a, $b) => substr_count($a['path'], '/') < substr_count($b['path'], '/'));
 
         foreach ($folders as $folder) {
             VolumeFolder::deleteAll(['id' => $folder['id']]);
@@ -608,8 +607,16 @@ class Gc extends Component
         $this->_stdout('    > deleting orphaned foreign key rows ... ');
 
         // Disable FK checks
-        $qb = $this->db->getSchema()->getQueryBuilder();
-        $this->db->createCommand($qb->checkIntegrity(false))->execute();
+        try {
+            $this->db->transaction(function() {
+                $this->db->createCommand()->checkIntegrity(false)->execute();
+            });
+            $disabledFkChecks = true;
+        } catch (DbException) {
+            // the DB user probably didn't have permission
+            // see https://github.com/craftcms/cms/issues/15063#issuecomment-2194059768
+            $disabledFkChecks = false;
+        }
 
         $isMysql = $this->db->getIsMysql();
         foreach ($this->db->getSchema()->getTableSchemas() as $table) {
@@ -649,7 +656,9 @@ SQL;
         }
 
         // Re-enable FK checks
-        $this->db->createCommand($qb->checkIntegrity())->execute();
+        if ($disabledFkChecks) {
+            $this->db->createCommand()->checkIntegrity(true)->execute();
+        }
 
         $this->_stdout("done\n", Console::FG_GREEN);
     }
