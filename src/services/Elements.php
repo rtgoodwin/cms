@@ -66,7 +66,6 @@ use craft\models\ElementActivity;
 use craft\models\Section;
 use craft\queue\jobs\FindAndReplace;
 use craft\queue\jobs\UpdateElementSlugsAndUris;
-use craft\queue\jobs\UpdateSearchIndex;
 use craft\records\Element as ElementRecord;
 use craft\records\Element_SiteSettings as Element_SiteSettingsRecord;
 use craft\records\StructureElement as StructureElementRecord;
@@ -1112,6 +1111,17 @@ class Elements extends Component
     private array $bulkKeys = [];
 
     /**
+     * Returns the active bulk op keys.
+     *
+     * @return string[]
+     * @since 5.7.0
+     */
+    public function getBulkOpKeys(): array
+    {
+        return array_keys($this->bulkKeys);
+    }
+
+    /**
      * Begins tracking element saves and deletes as part of a bulk operation, identified by a unique key.
      *
      * @return string The bulk operation key
@@ -1171,20 +1181,18 @@ class Elements extends Component
      */
     public function trackElementInBulkOps(ElementInterface $element): void
     {
-        if (empty($this->bulkKeys)) {
+        if (empty($this->bulkKeys) || $this->isMigrationRequest()) {
             return;
         }
 
         $timestamp = Db::prepareDateForDb(DateTimeHelper::now());
 
-        if (!$this->isMigrationRequest()) {
-            foreach (array_keys($this->bulkKeys) as $key) {
-                Db::upsert(Table::ELEMENTS_BULKOPS, [
-                    'elementId' => $element->id,
-                    'key' => $key,
-                    'timestamp' => $timestamp,
-                ], db: $this->bulkOpDb);
-            }
+        foreach (array_keys($this->bulkKeys) as $key) {
+            Db::upsert(Table::ELEMENTS_BULKOPS, [
+                'elementId' => $element->id,
+                'key' => $key,
+                'timestamp' => $timestamp,
+            ], db: $this->bulkOpDb);
         }
     }
 
@@ -3745,7 +3753,7 @@ class Elements extends Component
                     if ($fieldLayout) {
                         foreach ($fieldLayout->getCustomFields() as $field) {
                             if (($saveContent || in_array($field->handle, $dirtyFields)) && $field::dbType() !== null) {
-                                $serializedValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
+                                $serializedValue = $field->serializeValueForDb($element->getFieldValue($field->handle), $element);
                                 if ($serializedValue !== null) {
                                     $content[$field->layoutElement->uid] = $serializedValue;
                                 } elseif (!$saveContent) {
@@ -3953,12 +3961,7 @@ class Elements extends Component
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {
             Craft::$app->getSearch()->indexElementAttributes($element, $searchableDirtyFields);
         } else {
-            Queue::push(new UpdateSearchIndex([
-                'elementType' => get_class($element),
-                'elementId' => $element->id,
-                'siteId' => $element->siteId,
-                'fieldHandles' => $searchableDirtyFields,
-            ]), 2048);
+            Craft::$app->getSearch()->queueIndexElement($element, $searchableDirtyFields);
         }
 
         $updateForOwner = (

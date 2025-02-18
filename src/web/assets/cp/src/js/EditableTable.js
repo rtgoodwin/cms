@@ -516,6 +516,16 @@ Craft.EditableTable = Garnish.Base.extend(
                 .appendTo($cell);
               break;
 
+            case 'icon':
+              Craft.ui
+                .createIconPicker({
+                  name: name,
+                  value: typeof value !== 'object' ? value : null,
+                  small: true,
+                })
+                .appendTo($cell);
+              break;
+
             case 'color':
               Craft.ui
                 .createColorInput({

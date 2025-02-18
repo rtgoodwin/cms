@@ -144,6 +144,15 @@
                                                 describedBy: describedBy,
                                             } only %}
                                         </div>
+                                    {%- case 'icon' -%}
+                                        {% include '_includes/forms/iconPicker' with {
+                                          name: cellName,
+                                          value,
+                                          small: true,
+                                          disabled: static,
+                                          labelledBy: headingId,
+                                          describedBy: describedBy,
+                                        } only %}
                                     {%- case 'color' -%}
                                         {% include "_includes/forms/color" with {
                                             name: cellName,

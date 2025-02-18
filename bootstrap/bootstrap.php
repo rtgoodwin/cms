@@ -228,16 +228,20 @@ Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/share-flip.svg");
 
 // Brands
 Craft::setAlias('@appicons/amazon.svg', "$brandIconsPath/amazon.svg");
+Craft::setAlias('@appicons/bluesky.svg', "$brandIconsPath/bluesky.svg");
 Craft::setAlias('@appicons/codepen.svg', "$brandIconsPath/codepen.svg");
 Craft::setAlias('@appicons/discord.svg', "$brandIconsPath/discord.svg");
 Craft::setAlias('@appicons/dribbble.svg', "$brandIconsPath/dribbble.svg");
 Craft::setAlias('@appicons/facebook.svg', "$brandIconsPath/facebook.svg");
+Craft::setAlias('@appicons/flickr.svg', "$brandIconsPath/flickr.svg");
 Craft::setAlias('@appicons/github.svg', "$brandIconsPath/github.svg");
 Craft::setAlias('@appicons/google.svg', "$brandIconsPath/google.svg");
 Craft::setAlias('@appicons/instagram.svg', "$brandIconsPath/instagram.svg");
 Craft::setAlias('@appicons/kickstarter.svg', "$brandIconsPath/kickstarter.svg");
 Craft::setAlias('@appicons/linkedin.svg', "$brandIconsPath/linkedin.svg");
 Craft::setAlias('@appicons/markdown.svg', "$brandIconsPath/markdown.svg");
+Craft::setAlias('@appicons/mastodon.svg', "$brandIconsPath/mastodon.svg");
+Craft::setAlias('@appicons/medium.svg', "$brandIconsPath/medium.svg");
 Craft::setAlias('@appicons/pinterest.svg', "$brandIconsPath/pinterest.svg");
 Craft::setAlias('@appicons/product-hunt.svg', "$brandIconsPath/product-hunt.svg");
 Craft::setAlias('@appicons/rebel.svg', "$brandIconsPath/rebel.svg");
