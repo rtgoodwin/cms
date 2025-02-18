@@ -78,7 +78,7 @@ use yii\caching\TagDependency;
 /**
  * The Elements service provides APIs for managing elements.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getElements()|`Craft::$app->elements`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getElements()|`Craft::$app->getElements()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
