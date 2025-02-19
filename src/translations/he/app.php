@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'הוסף קובץ נוסף',
     'Attach error logs' => 'צרף לוגים של שגיאות',
     'Attachment' => 'קובץ מצורף',
+    'Attributes' => 'Attributes',
     'Audio' => 'שמע',
     'Auth error' => 'שגיאת אימות',
     'Authentication method removed.' => 'שיטת האימות הוסרה.',
