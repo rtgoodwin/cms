@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Attach an additional file',
     'Attach error logs' => 'Attach error logs',
     'Attachment' => 'Attachment',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Auth error',
     'Authentication method removed.' => 'Authentication method removed.',
