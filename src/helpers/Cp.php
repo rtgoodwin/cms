@@ -1261,6 +1261,7 @@ class Cp
             ])
             ->values()
             ->all();
+        $sortOptionsKey = 'baseSortOptions';
 
         $tableColumns = Craft::$app->getElementSources()->getAvailableTableAttributes($elementType);
 
@@ -1348,6 +1349,9 @@ class Cp
                         'defaultDir' => $option['defaultDir'],
                     ], $elementSourcesService->getSortOptionsForFieldLayouts($config['fieldLayouts'])),
                 );
+                // Don't let sources.twig merge sortOptions with anything else!
+                $sortOptionsKey = 'sortOptions';
+
                 $tableColumns = array_merge(
                     $tableColumns,
                     $elementSourcesService->getTableAttributesForFieldLayouts($config['fieldLayouts']),
@@ -1408,7 +1412,7 @@ JS, [
             Html::tag('nav', $view->renderTemplate('_elements/sources', [
                 'elementType' => $elementType,
                 'sources' => $sources,
-                'baseSortOptions' => $sortOptions,
+                $sortOptionsKey => $sortOptions,
                 'tableColumns' => $tableColumns,
                 'defaultTableColumns' => $config['defaultTableColumns'],
             ], View::TEMPLATE_MODE_CP)) .
