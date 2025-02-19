@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'إرفاق ملف إضافي',
     'Attach error logs' => 'إرفاق سجلات الأخطاء',
     'Attachment' => 'المرفق',
+    'Attributes' => 'Attributes',
     'Audio' => 'صوت',
     'Auth error' => 'خطأ في المصادقة',
     'Authentication method removed.' => 'تمت إزالة طريقة المصادقة.',
