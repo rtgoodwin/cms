@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Eine zusätzliche Datei anhängen',
     'Attach error logs' => 'Fehler-Logs anhängen',
     'Attachment' => 'Anhang',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Authentifizierungsfehler',
     'Authentication method removed.' => 'Authentifizierungsmethode entfernt.',
