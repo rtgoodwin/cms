@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => '추가 파일을 첨부할까요',
     'Attach error logs' => '오류 로그를 첨부할까요',
     'Attachment' => '첨부파일',
+    'Attributes' => 'Attributes',
     'Audio' => '오디오',
     'Auth error' => '인증 오류',
     'Authentication method removed.' => '인증 방법이 제거되었습니다.',

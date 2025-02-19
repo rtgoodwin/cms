@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Připojit další soubor',
     'Attach error logs' => 'Připojit error logy',
     'Attachment' => 'Příloha',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Chyba ověření',
     'Authentication method removed.' => 'Metoda ověřování byla odstraněna.',

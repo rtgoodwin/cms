@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Bifoga en fil till',
     'Attach error logs' => 'Bifoga felloggar',
     'Attachment' => 'Bifogad fil',
+    'Attributes' => 'Attributes',
     'Audio' => 'Ljud',
     'Auth error' => 'Autentiseringsfel',
     'Authentication method removed.' => 'Autentiseringsmetod borttagen.',

@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'További fájl csatolása',
     'Attach error logs' => 'Hiba logok elküldése',
     'Attachment' => 'Melléklet',
+    'Attributes' => 'Attributes',
     'Audio' => 'Hang',
     'Auth error' => 'Hitelesítési hiba',
     'Authentication method removed.' => 'Hitelesítési módszer eltávolítva.',

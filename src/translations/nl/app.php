@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Voeg een extra bestand bij toe',
     'Attach error logs' => 'Log-bestanden bijvoegen',
     'Attachment' => 'Bijlage',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Authenticatiefout',
     'Authentication method removed.' => 'Verificatiemethode verwijderd.',

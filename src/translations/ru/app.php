@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Приложить дополнительный файл',
     'Attach error logs' => 'Приложить журналы ошибок',
     'Attachment' => 'Вложение',
+    'Attributes' => 'Attributes',
     'Audio' => 'Аудио',
     'Auth error' => 'Ошибка авторизации',
     'Authentication method removed.' => 'Метод авторизации удален.',

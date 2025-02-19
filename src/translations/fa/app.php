@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'ضمیمه کردن یک فایل اضافه',
     'Attach error logs' => 'ضمیمه کردن لاگ های خطا',
     'Attachment' => 'پیوست',
+    'Attributes' => 'Attributes',
     'Audio' => 'صدا',
     'Auth error' => 'خطای احراز هویت',
     'Authentication method removed.' => 'روش احراز هویت حذف شد.',

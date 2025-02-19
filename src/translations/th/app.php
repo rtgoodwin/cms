@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'แนบไฟล์เพิ่มเติม',
     'Attach error logs' => 'แนบบันทึกข้อผิดพลาด',
     'Attachment' => 'ไฟล์แนบ',
+    'Attributes' => 'Attributes',
     'Audio' => 'เสียง',
     'Auth error' => 'ข้อผิดพลาดในการรับรองความถูกต้อง',
     'Authentication method removed.' => 'นำวิธีการรับรองความถูกต้องออกแล้ว',

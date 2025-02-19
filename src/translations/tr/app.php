@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Başka bir dosya daha ekle',
     'Attach error logs' => 'Hata kayıtlarını ekle',
     'Attachment' => 'Ek',
+    'Attributes' => 'Attributes',
     'Audio' => 'Ses',
     'Auth error' => 'Kimlik doğrulama hatası',
     'Authentication method removed.' => 'Kimlik doğrulama yöntemi kaldırıldı.',

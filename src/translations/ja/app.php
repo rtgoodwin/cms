@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => '添付ファイルを追加する',
     'Attach error logs' => 'エラーログを添付する',
     'Attachment' => '添付',
+    'Attributes' => 'Attributes',
     'Audio' => 'オーディオ',
     'Auth error' => '認証エラー',
     'Authentication method removed.' => '認証方法が削除されました。',

@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => '附加额外的文件',
     'Attach error logs' => '附加错误日志',
     'Attachment' => '附件',
+    'Attributes' => 'Attributes',
     'Audio' => '音频',
     'Auth error' => '身份验证错误',
     'Authentication method removed.' => '身份验证方法已移除。',
