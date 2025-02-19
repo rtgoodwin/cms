@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Joindre un fichier supplémentaire',
     'Attach error logs' => 'Joindre des journaux d’erreurs',
     'Attachment' => 'Pièce jointe',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Erreur d\'authentification',
     'Authentication method removed.' => 'Méthode d\'authentification supprimée.',
