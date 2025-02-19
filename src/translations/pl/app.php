@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Załączyć dodatkowy plik',
     'Attach error logs' => 'Załączyć logi błędów',
     'Attachment' => 'Załącznik',
+    'Attributes' => 'Attributes',
     'Audio' => 'Audio',
     'Auth error' => 'Błąd uwierzytelniania',
     'Authentication method removed.' => 'Usunięto metodę uwierzytelniania.',
