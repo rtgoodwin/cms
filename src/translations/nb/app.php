@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Ønsker du å legge ved en ekstra fil',
     'Attach error logs' => 'Legge ved feilmeldingsloggen',
     'Attachment' => 'Vedlegg',
+    'Attributes' => 'Attributes',
     'Audio' => 'Lyd',
     'Auth error' => 'Autentiseringsfeil',
     'Authentication method removed.' => 'Autentiseringsmetode fjernet.',
