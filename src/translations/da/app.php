@@ -191,6 +191,7 @@ return [
     'Attach an additional file' => 'Vedhæft en ekstra fil',
     'Attach error logs' => 'Vedhæft fejllogs',
     'Attachment' => 'Vedhæftet fil',
+    'Attributes' => 'Attributes',
     'Audio' => 'Lyd',
     'Auth error' => 'Fejl ved godkendelse',
     'Authentication method removed.' => 'Godkendelsesmetode fjernet.',
