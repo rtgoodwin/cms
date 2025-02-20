@@ -1,12 +1,13 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.8 - 2025-02-19
 
 - Added `craft\base\Element::ancestors()`.
 - Added `craft\base\Element::descendants()`.
 - Fixed an error that occurred when deleting a category or Structure section entry if its ancestors were eager-loaded. ([#16722](https://github.com/craftcms/cms/issues/16722))
 - Fixed a bug where category and entry edit pages didn’t include breadcrumbs for any disabled ancestor elements.
 - Fixed a bug where the “Delete (with descendants)” bulk element action wasn’t deleting disabled descendants.
+- Fixed a bug where asset files could be deleted when modified. ([#16686](https://github.com/craftcms/cms/issues/16686))
 - Fixed an error that could occur if a Matrix field was saved from a console request. ([#16724](https://github.com/craftcms/cms/pull/16724))
 - Fixed a bug where the Sort field within element index View menus wasn’t updating after the sort attribute/direction was changed by pressing on a table header.
 
