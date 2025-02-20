@@ -2,6 +2,7 @@
 
 ### Administration
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
+- Dragging headings within the Customize Sources modal now also drags any subsequent sources. ([#16737](https://github.com/craftcms/cms/issues/16737))
 
 ### Extensibility
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
