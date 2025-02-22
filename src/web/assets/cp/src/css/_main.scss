@@ -8337,10 +8337,14 @@ td.errors .text,
 
   &.icon {
     &::before {
+      color: var(--ui-control-color);
+    }
+
+    svg,
+    &::before {
       position: absolute;
       inset-block-start: calc(50% - 7rem / 16);
       inset-inline-start: 9px;
-      color: var(--ui-control-color);
     }
   }
 
@@ -8424,11 +8428,8 @@ td.errors .text,
   }
 
   svg {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    inset-block-start: calc(50% - 7rem / 16);
-    inset-inline-start: 9px;
+    width: calc(14rem / 16);
+    height: calc(14rem / 16);
     fill: var(--ui-control-color);
   }
 }
