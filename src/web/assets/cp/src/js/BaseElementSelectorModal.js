@@ -343,15 +343,12 @@ Craft.BaseElementSelectorModal = Garnish.Modal.extend(
       this.addListener(Garnish.$win, 'resize', this.updateSidebarView);
       this.addListener(Garnish.$win, 'resize', this.updateModalBottomPadding);
 
-      Garnish.$bod.addClass('no-scroll');
-
       this.updateModalBottomPadding();
       this.updateSidebarView();
       this.base();
     },
 
     onHide: function () {
-      Garnish.$bod.removeClass('no-scroll');
       this.closeSidebar();
       this.base();
     },
