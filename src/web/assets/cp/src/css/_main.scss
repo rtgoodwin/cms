@@ -7542,7 +7542,7 @@ $min2ColWidth: 400px;
     margin-inline-end: 7px;
   }
 
-  .add {
+  .tagselect__input-wrapper {
     position: relative;
     z-index: 1;
     margin-inline: 0 7px;
@@ -8329,6 +8329,7 @@ td.errors .text,
   border: 1px solid var(--error-color) !important;
 }
 
+.tagselect__input-wrapper,
 .texticon {
   position: relative;
   cursor: text;
@@ -8336,10 +8337,14 @@ td.errors .text,
 
   &.icon {
     &::before {
+      color: var(--ui-control-color);
+    }
+
+    svg,
+    &::before {
       position: absolute;
       inset-block-start: calc(50% - 7rem / 16);
       inset-inline-start: 9px;
-      color: var(--ui-control-color);
     }
   }
 
@@ -8414,6 +8419,18 @@ td.errors .text,
     .clear-btn {
       inset-inline-end: 30px;
     }
+  }
+}
+
+.tagselect__input-wrapper {
+  &.icon.add::before {
+    content: none;
+  }
+
+  svg {
+    width: calc(14rem / 16);
+    height: calc(14rem / 16);
+    fill: var(--ui-control-color);
   }
 }
 
