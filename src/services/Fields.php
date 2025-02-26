@@ -30,6 +30,7 @@ use craft\fieldlayoutelements\CustomField;
 use craft\fields\Addresses as AddressesField;
 use craft\fields\Assets as AssetsField;
 use craft\fields\BaseRelationField;
+use craft\fields\ButtonGroup;
 use craft\fields\Categories as CategoriesField;
 use craft\fields\Checkboxes;
 use craft\fields\Color;
@@ -222,6 +223,7 @@ class Fields extends Component
         $fieldTypes = [
             AddressesField::class,
             AssetsField::class,
+            ButtonGroup::class,
             CategoriesField::class,
             Checkboxes::class,
             Color::class,

@@ -224,6 +224,7 @@ return [
     'Briefly describe your issue or idea.' => 'Briefly describe your issue or idea.',
     'Briefly describe your question.' => 'Briefly describe your question.',
     'Bug reports and feature requests' => 'Bug reports and feature requests',
+    'Button Group' => 'Button Group',
     'Buy now' => 'Buy now',
     'Buy {name}' => 'Buy {name}',
     'Bytes' => 'Bytes',
