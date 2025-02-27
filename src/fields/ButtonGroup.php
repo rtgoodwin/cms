@@ -165,12 +165,4 @@ JS, [
 
         return $html;
     }
-
-    /**
-     * @inheritdoc
-     */
-    protected function optionsSettingLabel(): string
-    {
-        return Craft::t('app', 'Radio Button Options');
-    }
 }
