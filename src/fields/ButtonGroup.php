@@ -44,6 +44,25 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
     }
 
     /**
+     * @var bool Whether buttons should only show their icons, hiding their text labels
+     */
+    public bool $iconsOnly = false;
+
+    /**
+     * @inheritdoc
+     */
+    public function getSettingsHtml(): ?string
+    {
+        return parent::getSettingsHtml() .
+            Cp::lightswitchFieldHtml([
+                'label' => Craft::t('app', 'Icons only'),
+                'instructions' => Craft::t('app', 'Whether buttons should only show their icons, hiding their text labels.'),
+                'name' => 'iconsOnly',
+                'on' => $this->iconsOnly,
+            ]);
+    }
+
+    /**
      * @inheritdoc
      */
     public function useFieldset(): bool
@@ -88,15 +107,26 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
 
         foreach ($this->translatedOptions(true, $value, $element) as $option) {
             $selected = $option['value'] === $value;
-            $labelHtml = Html::encode($option['label']);
-            if (!empty($option['icon'])) {
-                $labelHtml = Html::beginTag('div', ['class' => ['flex', 'flex-inline']]) .
-                    Html::tag('div', Cp::iconSvg($option['icon']), [
-                        'class' => ['cp-icon', 'small'],
-                    ]) .
-                    Html::tag('div', $labelHtml) .
-                    Html::endTag('div');
+
+            if ($this->iconsOnly && !empty($option['icon'])) {
+                $labelHtml = Html::tag('div', Cp::iconSvg($option['icon']), [
+                    'class' => 'cp-icon',
+                    'aria' => [
+                        'label' => $option['label'],
+                    ],
+                ]);
+            } else {
+                $labelHtml = Html::encode($option['label']);
+                if (!empty($option['icon'])) {
+                    $labelHtml = Html::beginTag('div', ['class' => ['flex', 'flex-inline', 'gap-xs']]) .
+                        Html::tag('div', Cp::iconSvg($option['icon']), [
+                            'class' => 'cp-icon',
+                        ]) .
+                        Html::tag('div', $labelHtml) .
+                        Html::endTag('div');
+                }
             }
+
             $html .= Cp::buttonHtml([
                 'labelHtml' => $labelHtml,
                 'type' => 'button',
