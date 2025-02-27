@@ -58,7 +58,7 @@ class UsersController extends Controller
     public ?bool $activate = null;
 
     /**
-     * @var bool Whether to send an activation email.
+     * @var bool Whether to send the user an activation email.
      * @since 4.15.0
      */
     public ?bool $sendActivationEmail = false;
@@ -108,6 +108,7 @@ class UsersController extends Controller
                 $options[] = 'admin';
                 $options[] = 'groups';
                 $options[] = 'groupIds';
+                $options[] = 'sendActivationEmail';
                 break;
             case 'delete':
                 $options[] = 'inheritor';
