@@ -32,10 +32,13 @@
           });
         }
 
+        const oldType = this.currentType;
+        const settings = $('<form/>')
+          .append(this.$container.clone())
+          .serialize();
+
         // Save & detach the current settings
-        this.typeSettings[this.currentType] = this.$container
-          .children()
-          .detach();
+        this.typeSettings[oldType] = this.$container.children().detach();
 
         this.currentType = this.$toggle.data('value');
 
@@ -54,12 +57,15 @@
 
         let data = {
           type: this.currentType,
+          oldType,
+          settings,
         };
         if (this.namespace) {
           data.namespace = this.namespace.replace(
             /__TYPE__/g,
             Craft.formatInputId(this.currentType)
           );
+          data.oldNamespace = this.namespace.replace(/__TYPE__/g, oldType);
         }
 
         Craft.sendActionRequest('POST', 'fields/render-settings', {
