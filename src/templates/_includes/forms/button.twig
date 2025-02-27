@@ -12,6 +12,7 @@
     class: (class ?? [])|explodeClass|merge([
         'btn',
         not (label or labelHtml) ? 'btn-empty' : null,
+        (disabled ?? false) ? 'disabled',
     ]|filter),
     data: {
         'busy-message': busyMessage,
