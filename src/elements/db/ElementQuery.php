@@ -209,6 +209,14 @@ class ElementQuery extends Query implements ElementQueryInterface
     public ?int $draftCreator = null;
 
     /**
+     * @var bool Whether only canonical elements should be included in the
+     * results, including elements that reference another canonical element via
+     * `canonicalId` so long as they aren’t a draft.
+     * @since 5.7.0
+     */
+    public bool $canonicalsOnly = false;
+
+    /**
      * @var bool Whether only unpublished drafts which have been saved after initial creation should be included in the results.
      * @since 3.6.6
      */
@@ -797,6 +805,16 @@ class ElementQuery extends Query implements ElementQueryInterface
         if ($value === true && $this->drafts === false) {
             $this->drafts = true;
         }
+        return $this;
+    }
+
+    /**
+     * @inheritdoc
+     * @uses $canonicalsOnly
+     */
+    public function canonicalsOnly(bool $value = true): static
+    {
+        $this->canonicalsOnly = $value;
         return $this;
     }
 
@@ -3126,7 +3144,16 @@ class ElementQuery extends Query implements ElementQueryInterface
                 ]);
             }
 
-            if ($this->savedDraftsOnly) {
+            if ($this->canonicalsOnly) {
+                $this->subQuery->andWhere([
+                    'or',
+                    ['elements.draftId' => null],
+                    [
+                        'elements.canonicalId' => null,
+                        ...($this->savedDraftsOnly ? ['drafts.saved' => true] : []),
+                    ],
+                ]);
+            } elseif ($this->savedDraftsOnly) {
                 $this->subQuery->andWhere([
                     'or',
                     ['elements.draftId' => null],
