@@ -66,6 +66,7 @@ use craft\events\SetEagerLoadedElementsEvent;
 use craft\events\SetElementRouteEvent;
 use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\CustomField;
+use craft\gql\interfaces\Element as ElementGqlType;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -85,6 +86,8 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -1220,7 +1223,7 @@ abstract class Element extends Component implements ElementInterface
             'inlineEditing' => $viewState['inlineEditing'] ?? false,
             'nestedInputNamespace' => $viewState['nestedInputNamespace'] ?? null,
             'tableName' => static::pluralDisplayName(),
-            'elementQuery' => self::elemnetQueryWithAllDescendants($elementQuery),
+            'elementQuery' => self::elementQueryWithAllDescendants($elementQuery),
         ];
 
         $db = Craft::$app->getDb();
@@ -1324,7 +1327,7 @@ abstract class Element extends Component implements ElementInterface
         return Craft::$app->getView()->renderTemplate($template, $variables);
     }
 
-    private static function elemnetQueryWithAllDescendants(ElementQueryInterface $elementQuery): ElementQueryInterface
+    private static function elementQueryWithAllDescendants(ElementQueryInterface $elementQuery): ElementQueryInterface
     {
         if (is_array($elementQuery->where)) {
             foreach ($elementQuery->where as $key => $condition) {
@@ -1881,7 +1884,7 @@ abstract class Element extends Component implements ElementInterface
         foreach ($elementStructureData as $elementStructureDatum) {
             foreach ($ancestorStructureData as $ancestorStructureDatum) {
                 if (
-                    $ancestorStructureDatum['structureId'] === $elementStructureDatum['structureId'] &&
+                    $ancestorStructureDatum['structureId'] == $elementStructureDatum['structureId'] &&
                     $ancestorStructureDatum['lft'] < $elementStructureDatum['lft'] &&
                     $ancestorStructureDatum['rgt'] > $elementStructureDatum['rgt'] &&
                     (!$parents || $ancestorStructureDatum['level'] == $elementStructureDatum['level'] - 1)
@@ -2131,6 +2134,14 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return ElementGqlType::getType();
+    }
+
+    /**
+     * @inheritdoc
      * @since 3.3.0
      */
     public static function gqlScopesByContext(mixed $context): array
@@ -2252,7 +2263,7 @@ abstract class Element extends Component implements ElementInterface
      * @var array<string,int>|null
      * @see validate()
      */
-    private ?array $_attributeNames;
+    private ?array $_attributeNames = null;
 
     /**
      * @var int|null
@@ -2653,6 +2664,8 @@ abstract class Element extends Component implements ElementInterface
             $names['hardDelete'],
             $names['mergingCanonicalChanges'],
             $names['newSiteIds'],
+            $names['isNewForSite'],
+            $names['isNewSite'],
             $names['previewing'],
             $names['propagateAll'],
             $names['propagating'],
@@ -2971,7 +2984,10 @@ abstract class Element extends Component implements ElementInterface
             array_unshift($rule, $attribute);
         }
 
-        if (is_callable($rule[1]) || $field->hasMethod($rule[1])) {
+        if (
+            (!is_string($rule[1]) || !isset(Validator::$builtInValidators[$rule[1]])) &&
+            (is_callable($rule[1]) || $field->hasMethod($rule[1]))
+        ) {
             // InlineValidator assumes that the closure is on the model being validated
             // so it won’t pass a reference to the element
             $rule['params'] = [
@@ -4548,11 +4564,21 @@ JS, [
             return $ancestors->filter(fn(ElementInterface $element) => $element->level >= $this->level - $dist);
         }
 
+        return $this->ancestors()->ancestorDist($dist);
+    }
+
+    /**
+     * Returns an element query for fetching the element’s ancestors.
+     *
+     * @return ElementQueryInterface
+     * @since 5.6.8
+     */
+    protected function ancestors(): ElementQueryInterface
+    {
         return static::find()
             ->structureId($this->structureId)
             ->ancestorOf($this)
-            ->siteId($this->siteId)
-            ->ancestorDist($dist);
+            ->siteId($this->siteId);
     }
 
     /**
@@ -4568,11 +4594,21 @@ JS, [
             return $descendants->filter(fn(ElementInterface $element) => $element->level <= $this->level + $dist);
         }
 
+        return $this->descendants()->descendantDist($dist);
+    }
+
+    /**
+     * Returns an element query for fetching the element’s descendants.
+     *
+     * @return ElementQueryInterface
+     * @since 5.6.8
+     */
+    protected function descendants(): ElementQueryInterface
+    {
         return static::find()
             ->structureId($this->structureId)
             ->descendantOf($this)
-            ->siteId($this->siteId)
-            ->descendantDist($dist);
+            ->siteId($this->siteId);
     }
 
     /**
@@ -4975,6 +5011,23 @@ JS, [
             if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
                 $value = $this->getFieldValue($field->handle);
                 $serializedValues[$field->handle] = $field->serializeValue($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
             }
         }
 
@@ -5398,7 +5451,6 @@ JS, [
                 }
 
                 // No takers. Just store it in the internal array then.
-                /** @phpstan-ignore-next-line */
                 $this->_eagerLoadedElements[$handle] = ElementCollection::make($elements);
         }
     }
@@ -5457,11 +5509,7 @@ JS, [
             return true;
         }
 
-        if (isset($this->_isFresh)) {
-            return $this->_isFresh;
-        }
-
-        return false;
+        return $this->_isFresh ?? false;
     }
 
     /**
@@ -6058,9 +6106,7 @@ JS,
         $formatter = Craft::$app->getFormatter();
 
         return array_merge([
-            Craft::t('app', 'ID') => function() {
-                return $this->id ?? false;
-            },
+            Craft::t('app', 'ID') => fn() => $this->id ?? false,
             Craft::t('app', 'Status') => function() {
                 if (!static::hasStatuses()) {
                     return false;

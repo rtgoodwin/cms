@@ -44,6 +44,7 @@ use craft\enums\PropagationMethod;
 use craft\events\DefineEntryTypesEvent;
 use craft\events\ElementCriteriaEvent;
 use craft\fieldlayoutelements\entries\EntryTitleField;
+use craft\gql\interfaces\elements\Entry as EntryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
@@ -63,6 +64,7 @@ use craft\validators\ArrayValidator;
 use craft\validators\DateCompareValidator;
 use craft\validators\DateTimeValidator;
 use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -740,7 +742,18 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public static function gqlTypeName(EntryType $entryType): string
     {
+        // Don't use override data
+        $entryType = $entryType->original ?? $entryType;
+
         return sprintf('%s_Entry', $entryType->handle);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return EntryInterface::getType();
     }
 
     /**
@@ -1236,7 +1249,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             $elementsService = Craft::$app->getElements();
             $user = Craft::$app->getUser()->getIdentity();
 
-            foreach ($this->getAncestors()->all() as $ancestor) {
+            $ancestors = $this->getAncestors();
+            if ($ancestors instanceof ElementQueryInterface) {
+                $ancestors->status(null);
+            }
+
+            foreach ($ancestors->all() as $ancestor) {
                 if ($elementsService->canView($ancestor, $user)) {
                     $crumbs[] = ['html' => Cp::elementChipHtml($ancestor)];
                 }
@@ -2703,6 +2721,8 @@ JS;
                 ->ancestorOf($this->getCanonicalId())
                 ->ancestorDist(1)
                 ->status(null)
+                ->site('*')
+                ->unique()
                 ->scalar();
 
             if ($parentId == $canonicalParentId) {
@@ -2758,7 +2778,8 @@ JS;
 
         if ($this->structureId) {
             // Remember the parent ID, in case the entry needs to be restored later
-            $parentId = $this->getAncestors(1)
+            $parentId = $this->ancestors()
+                ->ancestorDist(1)
                 ->status(null)
                 ->select(['elements.id'])
                 ->scalar();

@@ -117,7 +117,7 @@ import $ from 'jquery';
             .css(Garnish.ltr ? 'left' : 'right', '100vw');
         }
 
-        this.$container.one('transitionend.slideout', () => {
+        this._afterTransition(this.$container, () => {
           Craft.setFocusWithin(this.$container);
         });
 
@@ -167,17 +167,16 @@ import $ from 'jquery';
         this._cancelTransitionListeners();
 
         if (this.$shade) {
-          this.$shade
-            .removeClass('so-visible')
-            .one('transitionend.slideout', () => {
-              this.$shade.hide();
-            });
+          this.$shade.removeClass('so-visible');
+          this._afterTransition(this.$shade, () => {
+            this.$shade.hide();
+          });
         }
 
         Craft.Slideout.removePanel(this);
         Garnish.uiLayerManager.removeLayer();
         Garnish.resetModalBackgroundLayerVisibility();
-        this.$container.one('transitionend.slideout', () => {
+        this._afterTransition(this.$container, () => {
           this.$outerContainer.addClass('hidden');
           this.trigger('close');
         });
@@ -201,6 +200,21 @@ import $ from 'jquery';
           if (focusTarget) {
             focusTarget.focus();
           }
+        }
+      },
+
+      /**
+       * Performs the callback after the CSS transition has ended, or immediately if user prefers reduced motion
+       * @param $target
+       * @param callback
+       * @private
+       */
+      _afterTransition: function ($target, callback) {
+        // If a user prefers reduced motion, perform the callback immediately
+        if (Garnish.prefersReducedMotion()) {
+          callback();
+        } else {
+          $target.one('transitionend.slideout', callback);
         }
       },
 
@@ -256,7 +270,6 @@ import $ from 'jquery';
         }
       },
       removePanel: function (panel) {
-        const totalPanels = Craft.Slideout.totalPanels();
         Craft.Slideout.openPanels = Craft.Slideout.openPanels.filter(
           (m) => m !== panel
         );
@@ -265,10 +278,6 @@ import $ from 'jquery';
         } else {
           panel.$container.css(Garnish.ltr ? 'left' : 'right', '100vw');
           Craft.Slideout.updateStyles();
-        }
-
-        if (Craft.Slideout.totalPanels() === 0) {
-          panel.$outerContainer.css('display', 'none');
         }
       },
       updateStyles: function () {

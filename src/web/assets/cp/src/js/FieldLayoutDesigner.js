@@ -64,7 +64,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       // Set up the layout grids
       this.tabGrid = new Craft.Grid(this.$tabContainer, {
         itemSelector: '.fld-tab',
-        minColWidth: 24 * 12,
+        minColWidth: 24 * 13,
         fillMode: 'grid',
         snapToGrid: 24,
       });
@@ -474,6 +474,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
       hudClass: 'hud fld-library-hud',
       listenToMainResize: false,
       showOnInit: false,
+      orientations: ['right', 'bottom', 'left'],
     });
     hud.on('show', () => {
       this.designer.$libraryContainer.appendTo(hud.$main);

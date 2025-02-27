@@ -300,7 +300,7 @@ Craft.TableElementIndexView = Craft.BaseElementIndexView.extend({
   },
 
   initTableHeaders: function () {
-    if (this.settings.sortable || this.elementIndex.inlineEditing) {
+    if (this.elementIndex.inlineEditing) {
       return;
     }
 

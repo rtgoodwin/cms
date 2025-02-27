@@ -13,6 +13,7 @@ export default Base.extend(
     $container: null,
     $alignmentElement: null,
     $nextFocusableElement: null,
+    $searchInput: null,
 
     _viewportWidth: null,
     _viewportHeight: null,
@@ -89,7 +90,75 @@ export default Base.extend(
       }
       this.addDisclosureMenuEventListeners();
 
+      // add a search input?
+      this.settings.withSearchInput =
+        this.settings.withSearchInput ||
+        Garnish.hasAttr(this.$container, 'data-with-search-input');
+      if (this.settings.withSearchInput) {
+        this.addSearchInput();
+      }
+
       Garnish.DisclosureMenu.instances.push(this);
+    },
+
+    addSearchInput: function () {
+      const $outerContainer = $('<div/>', {
+        class: 'search-container',
+      }).prependTo(this.$container);
+      const $innerContainer = $('<div/>', {
+        class: 'texticon search icon clearable',
+      }).appendTo($outerContainer);
+      this.$searchInput = $('<input/>', {
+        class: 'fullwidth text',
+        type: 'text',
+        inputmode: 'search',
+        autocomplete: 'off',
+        placeholder: Craft.t('app', 'Search'),
+      }).appendTo($innerContainer);
+      const $clearBtn = $('<div/>', {
+        class: 'clear-btn hidden',
+        title: Craft.t('app', 'Clear'),
+        'aria-label': Craft.t('app', 'Clear'),
+      }).appendTo($innerContainer);
+
+      this.$searchInput.on('input', (ev) => {
+        const val = this.$searchInput.val().toLowerCase().replace(/['"]/g, '');
+        const $options = this.$container.find('li');
+
+        if (val) {
+          $clearBtn.removeClass('hidden');
+          let $matches = $();
+          $options.each((i, option) => {
+            const $option = $(option);
+            if ($option.text().toLowerCase().includes(val)) {
+              $matches = $matches.add($option);
+            }
+          });
+          $matches.removeClass('filtered');
+          $options.not($matches).addClass('filtered');
+        } else {
+          $clearBtn.addClass('hidden');
+          $options.removeClass('filtered');
+        }
+
+        this.setContainerPosition();
+      });
+
+      this.addListener(this.$searchInput, 'keydown', (ev) => {
+        switch (ev.keyCode) {
+          case Garnish.ESC_KEY:
+            this.$searchInput.val('').trigger('input');
+            break;
+          case Garnish.RETURN_KEY:
+            // they most likely don't want to submit the form from here
+            ev.preventDefault();
+            break;
+        }
+      });
+
+      this.addListener($clearBtn, 'click', () => {
+        this.$searchInput.val('').trigger('input').focus();
+      });
     },
 
     addDisclosureMenuEventListeners: function () {
@@ -221,6 +290,7 @@ export default Base.extend(
       }
 
       if (
+        ev.target.nodeName !== 'INPUT' &&
         ev.key &&
         (ev.key.match(/^[^ ]$/) || (this.searchStr.length && ev.key === ' '))
       ) {
@@ -360,6 +430,10 @@ export default Base.extend(
       if (this.$nextFocusableElement) {
         this.removeListener(this.$nextFocusableElement, 'keydown');
         this.$nextFocusableElement = null;
+      }
+
+      if (this.$searchInput) {
+        this.$searchInput.val('').trigger('input');
       }
 
       this.trigger('hide');
@@ -806,6 +880,7 @@ export default Base.extend(
     defaults: {
       position: null,
       windowSpacing: 5,
+      withSearchInput: false,
     },
 
     /**

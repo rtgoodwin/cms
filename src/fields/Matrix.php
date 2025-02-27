@@ -163,9 +163,7 @@ class Matrix extends Field implements
                 $ids = is_string($ids) ? StringHelper::split($ids) : [$ids];
             }
 
-            $ids = array_map(function($id) {
-                return $id instanceof Entry ? $id->id : (int)$id;
-            }, $ids);
+            $ids = array_map(fn($id) => $id instanceof Entry ? $id->id : (int)$id, $ids);
 
             $existsQuery->andWhere(["entries_$ns.id" => $ids]);
         }
@@ -649,7 +647,10 @@ class Matrix extends Field implements
             'field' => $this,
             'defaultTableColumnOptions' => static::defaultTableColumnOptions($this->getEntryTypes()),
             'defaultCreateButtonLabel' => $this->defaultCreateButtonLabel(),
-            'indexViewModes' => Entry::indexViewModes(),
+            'indexViewModes' => array_filter(
+                Entry::indexViewModes(),
+                fn(array $viewMode) => !($viewMode['structuresOnly'] ?? false),
+            ),
             'readOnly' => $readOnly,
         ]);
     }
@@ -754,6 +755,31 @@ class Matrix extends Field implements
                 'enabled' => $entry->enabled,
                 'collapsed' => $entry->collapsed,
                 'fields' => $entry->getSerializedFieldValues(),
+            ];
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
+    {
+        /** @var EntryQuery|ElementCollection $value */
+        $serialized = [];
+        $new = 0;
+
+        foreach ($value->all() as $entry) {
+            /** @var Entry $entry */
+            $entryId = $entry->id ?? sprintf('new%s', ++$new);
+            $serialized[$entryId] = [
+                'title' => $entry->title,
+                'slug' => $entry->slug,
+                'type' => $entry->getType()->handle,
+                'enabled' => $entry->enabled,
+                'collapsed' => $entry->collapsed,
+                'fields' => $entry->getSerializedFieldValuesForDb(),
             ];
         }
 
@@ -1534,13 +1560,17 @@ JS;
                 $forceSave = !empty($entryData);
 
                 // Is this a derivative element, and does the entry primarily belong to the canonical?
+                $request = Craft::$app->getRequest();
                 if (
                     $forceSave &&
                     $element->getIsDerivative() &&
                     $entry->getPrimaryOwnerId() === $element->getCanonicalId() &&
                     // this is so that extra drafts don't get created for matrix in matrix scenario
                     // where both are set to inline-editable blocks view mode
-                    Craft::$app->getRequest()->actionSegments !== ['elements', 'update-field-layout']
+                    (
+                        $request->getIsConsoleRequest() ||
+                        $request->getActionSegments() !== ['elements', 'update-field-layout']
+                    )
                 ) {
                     // Duplicate it as a draft. (We'll drop its draft status from NestedElementManager::saveNestedElements().)
                     $entry = Craft::$app->getDrafts()->createDraft($entry, Craft::$app->getUser()->getId(), null, null, [

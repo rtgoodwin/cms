@@ -465,12 +465,8 @@ class Sites extends Component
      */
     public function getCurrentSite(): Site
     {
-        if (isset($this->_currentSite)) {
-            return $this->_currentSite;
-        }
-
         // Default to the primary site
-        return $this->_currentSite = $this->getPrimarySite();
+        return $this->_currentSite ?? ($this->_currentSite = $this->getPrimarySite());
     }
 
     /**
@@ -862,6 +858,7 @@ class Sites extends Component
                         'siteId' => $oldPrimarySiteId,
                     ],
                     'siteId' => $site->id,
+                    'isNewSite' => true,
                 ]));
             }
         }

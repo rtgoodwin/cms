@@ -637,6 +637,12 @@ return array(
     'terms' => ' block brick mystery prize question super mario ',
     'pro' => true,
   ),
+  'bluesky' =>
+  array(
+    'name' => ' bluesky ',
+    'terms' => ' social network ',
+    'pro' => false,
+  ),
   'bluetooth' =>
   array(
     'name' => ' bluetooth ',
@@ -3223,6 +3229,12 @@ return array(
     'terms' => ' arepa flatbread lavash naan pita ',
     'pro' => true,
   ),
+  'flickr' =>
+  array(
+    'name' => ' flickr ',
+    'terms' => '  ',
+    'pro' => false,
+  ),
   'floppy-disk' =>
   array(
     'name' => ' floppy disk ',
@@ -4699,6 +4711,12 @@ return array(
     'terms' => ' art comedy mask perform performing performing arts theater theatre tragedy ',
     'pro' => false,
   ),
+  'mastodon' =>
+  array(
+    'name' => ' mastodon ',
+    'terms' => '  ',
+    'pro' => false,
+  ),
   'mattress-pillow' =>
   array(
     'name' => ' mattress pillow ',
@@ -4715,6 +4733,12 @@ return array(
   array(
     'name' => ' medal ',
     'terms' => ' award guarantee medal quality ribbon sports medal star trophy warranty ',
+    'pro' => false,
+  ),
+  'medium' =>
+  array(
+    'name' => ' medium ',
+    'terms' => '  ',
     'pro' => false,
   ),
   'megaphone' =>

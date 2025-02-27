@@ -46,6 +46,7 @@ use craft\events\AssetEvent;
 use craft\events\DefineAssetUrlEvent;
 use craft\events\GenerateTransformEvent;
 use craft\fieldlayoutelements\assets\AltField;
+use craft\gql\interfaces\elements\Asset as AssetInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Assets;
 use craft\helpers\Cp;
@@ -72,6 +73,7 @@ use craft\validators\AssetLocationValidator;
 use craft\validators\DateTimeValidator;
 use craft\validators\StringValidator;
 use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use Throwable;
 use Twig\Markup;
@@ -344,6 +346,14 @@ class Asset extends Element
     public static function gqlTypeName(Volume $volume): string
     {
         return sprintf('%s_Asset', $volume->handle);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return AssetInterface::getType();
     }
 
     /**
@@ -753,13 +763,9 @@ class Asset extends Element
                     ->offset($elementQuery->offset)
                     ->limit($elementQuery->limit);
 
-                $folders = array_map(function(array $result) {
-                    return new VolumeFolder($result);
-                }, $folderQuery->all());
+                $folders = array_map(fn(array $result) => new VolumeFolder($result), $folderQuery->all());
 
-                $foldersByPath = ArrayHelper::index($folders, function(VolumeFolder $folder) {
-                    return rtrim($folder->path, '/');
-                });
+                $foldersByPath = ArrayHelper::index($folders, fn(VolumeFolder $folder) => rtrim($folder->path, '/'));
 
                 foreach ($folders as $folder) {
                     $sourcePath = [$baseSourcePathStep];
@@ -2141,7 +2147,7 @@ JS,[
             return null;
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
 
         // Fire a 'beforeDefineUrl' event
         if ($this->hasEventHandlers(self::EVENT_BEFORE_DEFINE_URL)) {
@@ -2412,7 +2418,7 @@ JS,[
      */
     public function getMimeType(mixed $transform = null): ?string
     {
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         $transform = ImageTransforms::normalizeTransform($transform);
 
         if (!Image::canManipulateAsImage($this->getExtension()) || !$transform || !$transform->format) {
@@ -2440,7 +2446,7 @@ JS,[
             return $ext;
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         return ImageTransforms::normalizeTransform($transform)?->format ?? $ext;
     }
 
@@ -3469,7 +3475,7 @@ JS;
             return [null, null];
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
 
         if ($transform === null || !Image::canManipulateAsImage($this->getExtension())) {
             return [$this->_width, $this->_height];
@@ -3544,17 +3550,12 @@ JS;
                 throw new FileException(Craft::t('app', 'Could not open file for streaming at {path}', ['path' => $tempPath]));
             }
 
-            if ($this->folderId) {
-                // Delete the old file
-                $oldVolume->deleteFile($oldPath);
-            }
-
             // Upload the file to the new location
             try {
                 $newVolume->writeFileFromStream($newPath, $stream, [
                     Fs::CONFIG_MIMETYPE => FileHelper::getMimeType($tempPath),
                 ]);
-            } catch (VolumeException $exception) {
+            } catch (VolumeException|FsException $exception) {
                 Craft::$app->getErrorHandler()->logException($exception);
                 throw $exception;
             } finally {
@@ -3562,6 +3563,15 @@ JS;
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
+            }
+
+            // if we got this far without an exception, it's okay to delete the file from the old volume
+            if (
+                $oldFolder &&
+                ($oldFolder->id !== $newFolder->id || $oldPath !== $newPath)
+            ) {
+                // Delete the old file
+                $oldVolume->deleteFile($oldPath);
             }
         }
 
@@ -3645,9 +3655,7 @@ JS;
         // Make sure it's *not* within a system directory though
         $systemDirs = $pathService->getSystemPaths();
         $systemDirs = array_map([$this, '_normalizeTempPath'], $systemDirs);
-        $systemDirs = array_filter($systemDirs, function($value) {
-            return ($value !== false);
-        });
+        $systemDirs = array_filter($systemDirs, fn($value) => $value !== false);
 
         foreach ($systemDirs as $dir) {
             if (str_starts_with($tempFilePath, $dir)) {

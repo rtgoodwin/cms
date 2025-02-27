@@ -549,7 +549,7 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
                 ];
                 $view->registerJsWithVars(fn($id, $params) => <<<JS
 (() => {
-  $('#' + $id).on('click', () => {
+  $('#' + $id).on('activate', () => {
     new Craft.CpScreenSlideout('fields/edit-field', {
       params: $params,
     });
@@ -571,7 +571,7 @@ JS, [
                 ];
                 $view->registerJsWithVars(fn($id, $attribute) => <<<JS
 (() => {
-  $('#' + $id).on('click', () => {
+  $('#' + $id).on('activate', () => {
     Craft.ui.createCopyTextPrompt({
       label: Craft.t('app', 'Field Handle'),
       value: $attribute,
@@ -949,10 +949,23 @@ JS, [
 
         // Only DateTime objects and ISO-8601 strings should automatically be detected as dates
         if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {
-            return Db::prepareDateForDb($value);
+            return DateTimeHelper::toIso8601($value);
         }
 
         return $value;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
+    {
+        // Dates should be stored in UTC w/o the time zone
+        if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {
+            return Db::prepareDateForDb($value);
+        }
+
+        return $this->serializeValue($value, $element);
     }
 
     /**
@@ -1050,6 +1063,7 @@ JS, [
         if ($db->getIsPgsql()) {
             $castType = match (Db::parseColumnType($dbType)) {
                 Schema::TYPE_DECIMAL => 'DECIMAL',
+                Schema::TYPE_INTEGER => 'INTEGER',
                 default => null,
             };
         }

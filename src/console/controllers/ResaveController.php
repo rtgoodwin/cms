@@ -63,18 +63,14 @@ class ResaveController extends Controller
     {
         // empty
         if ($to === ':empty:') {
-            return function() {
-                return '';
-            };
+            return fn() => '';
         }
 
         // object template
         if (str_starts_with($to, '=')) {
             $template = substr($to, 1);
             $view = Craft::$app->getView();
-            return function(ElementInterface $element) use ($template, $view) {
-                return $view->renderObjectTemplate($template, $element);
-            };
+            return fn(ElementInterface $element) => $view->renderObjectTemplate($template, $element);
         }
 
         // PHP arrow function
@@ -83,16 +79,14 @@ class ResaveController extends Controller
             $php = sprintf('return %s;', StringHelper::removeLeft(rtrim($match[2], ';'), 'return '));
             return function(ElementInterface $element) use ($var, $php) {
                 if ($var) {
-                    $$var = $element;
+                    ${$var} = $element;
                 }
                 return eval($php);
             };
         }
 
         // attribute name
-        return static function(ElementInterface $element) use ($to) {
-            return $element->$to;
-        };
+        return static fn(ElementInterface $element) => $element->$to;
     }
 
     /**
