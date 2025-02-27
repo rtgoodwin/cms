@@ -52,10 +52,16 @@ class UsersController extends Controller
     public ?bool $admin = null;
 
     /**
-     * @var bool|null Whether teh user account should be activated.
+     * @var bool|null Whether the user account should be activated.
      * @since 4.1.0
      */
     public ?bool $activate = null;
+
+    /**
+     * @var bool Whether to send an activation email.
+     * @since 4.15.0
+     */
+    public ?bool $sendActivationEmail = false;
 
     /**
      * @var string[] The group handles to assign the created user to.
@@ -230,21 +236,38 @@ class UsersController extends Controller
             return Craft::$app->getUserGroups()->getGroupByHandle($handle)->id ?? null;
         }, $this->groups));
 
-        if (!$groupIds) {
-            return ExitCode::OK;
+        if ($groupIds) {
+            $this->stdout('Assigning user to groups ... ');
+
+            // Most likely an invalid group ID will throw…
+            try {
+                Craft::$app->getUsers()->assignUserToGroups($user->id, $groupIds);
+            } catch (Throwable) {
+                $this->stderr('failed: Couldn’t assign user to specified groups.' . PHP_EOL, Console::FG_RED);
+                return ExitCode::UNSPECIFIED_ERROR;
+            }
+
+            $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
         }
 
-        $this->stdout('Assigning user to groups ... ');
+        if (!$user->active) {
+            if ($this->confirm('Send an activation email now?', $this->sendActivationEmail)) {
+                $this->stdout('Sending activation email ... ');
 
-        // Most likely an invalid group ID will throw…
-        try {
-            Craft::$app->getUsers()->assignUserToGroups($user->id, $groupIds);
-        } catch (Throwable) {
-            $this->stderr('failed: Couldn’t assign user to specified groups.' . PHP_EOL, Console::FG_RED);
-            return ExitCode::UNSPECIFIED_ERROR;
+                if (!Craft::$app->getUsers()->sendActivationEmail($user)) {
+                    $this->stderr('failed: Couldn’t send activation email.' . PHP_EOL, Console::FG_RED);
+                    return ExitCode::UNSPECIFIED_ERROR;
+                }
+
+                $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
+            }
+
+            $url = Craft::$app->getUsers()->getActivationUrl($user);
+
+            $this->stdout("Activation URL for “{$user->username}”: ");
+            $this->stdout($url . PHP_EOL, Console::FG_CYAN, PHP_EOL);
         }
 
-        $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
         return ExitCode::OK;
     }
 
