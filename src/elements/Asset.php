@@ -99,6 +99,7 @@ use yii\validators\RequiredValidator;
  * @property-read Volume $volume the asset’s volume
  * @property-read bool $hasFocalPoint whether a user-defined focal point is set on the asset
  * @property-read string $extension the file extension
+ * @property-read bool $isAnimated whether the asset is an animated image
  * @property-read string $path the asset's path in the volume
  * @property-write string $transformSource
  * @property-read null|string $dimensions
@@ -2353,6 +2354,9 @@ JS,[
             'sizes' => "{$thumbSizes[0][0]}px",
             'srcset' => implode(', ', $srcsets),
             'alt' => $this->thumbAlt(),
+            'data' => [
+                'animated' => $this->getIsAnimated(),
+            ],
         ]);
     }
 
@@ -2407,6 +2411,16 @@ JS,[
     public function getExtension(): string
     {
         return pathinfo($this->_filename, PATHINFO_EXTENSION);
+    }
+
+    /**
+     * Returns whether the file is potentially animated.
+     *
+     * @return boolean
+     */
+    public function getIsAnimated(): bool
+    {
+        return $this->getExtension() === 'gif' || $this->getExtension() === 'webp';
     }
 
     /**

@@ -309,7 +309,7 @@ export class AnimationBlocker {
 
     return this.extensions.some(
       (extension) => src.includes(extension) || srcset.includes(extension)
-    );
+    ) || image.getAttribute('data-animated');
   }
 
   static getAllPotentiallyAnimated(): HTMLImageElement[] {
