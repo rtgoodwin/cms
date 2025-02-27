@@ -850,6 +850,7 @@ class Matrix extends Field implements
                 ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
+                ->eagerly()
                 ->all();
         }
 
