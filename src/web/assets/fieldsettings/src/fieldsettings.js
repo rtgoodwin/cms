@@ -65,7 +65,10 @@
             /__TYPE__/g,
             Craft.formatInputId(this.currentType)
           );
-          data.oldNamespace = this.namespace.replace(/__TYPE__/g, oldType);
+          data.oldNamespace = this.namespace.replace(
+            /__TYPE__/g,
+            Craft.formatInputId(oldType)
+          );
         }
 
         Craft.sendActionRequest('POST', 'fields/render-settings', {
