@@ -13,6 +13,7 @@ use craft\elements\db\ElementQueryInterface;
 use craft\enums\AttributeStatus;
 use craft\events\DefineFieldHtmlEvent;
 use craft\events\DefineFieldKeywordsEvent;
+use craft\events\DefineMenuItemsEvent;
 use craft\events\FieldElementEvent;
 use craft\events\FieldEvent;
 use craft\gql\types\QueryArgument;
@@ -128,6 +129,13 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
      * @since 3.5.0
      */
     public const EVENT_DEFINE_INPUT_HTML = 'defineInputHtml';
+
+    /**
+     * @vevent DefineMenuItemsEvent
+     * @since 5.7.0
+     */
+    public const EVENT_DEFINE_ACTION_MENU_ITEMS = 'defineActionMenuItems';
+
 
     /**
      * @event FieldEvent The event that is triggered after the field has been merged into another.
@@ -532,6 +540,22 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
      * @inheritdoc
      */
     public function getActionMenuItems(): array
+    {
+        $items = $this->actionMenuItems();
+
+        // Fire a 'defineActionMenuItems' event
+        if ($this->hasEventHandlers(self::EVENT_DEFINE_ACTION_MENU_ITEMS)) {
+            $event = new DefineMenuItemsEvent([
+                'items' => $items,
+            ]);
+            $this->trigger(self::EVENT_DEFINE_ACTION_MENU_ITEMS, $event);
+            return $event->items;
+        }
+
+        return $items;
+    }
+
+    protected function actionMenuItems(): array
     {
         $items = [];
         $userSessionService = Craft::$app->getUser();

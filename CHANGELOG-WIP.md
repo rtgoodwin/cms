@@ -33,6 +33,7 @@
 - Editable tables now support `icon` columns.
 - Added `craft\base\ElementInterface::baseGqlType()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
+- Added `craft\base\Field::EVENT_DEFINE_ACTION_MENU_ITEMS`. ([#16779](https://github.com/craftcms/cms/discussions/16779))
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
