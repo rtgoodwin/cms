@@ -1,5 +1,19 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed an error that could occur when generating an image transform URL via a console request. ([#16793](https://github.com/craftcms/cms/issues/16793))
+- Fixed a bug where `_includes/forms/button.twig` was always adding `class="btngroup-btn-first"` to the resulting button HTML.
+
+## 4.14.9 - 2025-02-25
+
+- Added `craft\base\ElementTrait::$isNewSite`.
+- Added `craft\queue\jobs\PropagateElements::$isNewSite`.
+- Fixed an error that could occur when saving elements, if any dependencies defined global functions whose names conflicted with Yii’s built-in validator names, such as `string()`.
+- Fixed an error that could occur when applying field config changes if the field class didn’t exist.
+- Fixed a bug where `ancestors` and `parent` eager-loading wasn’t working on some environments. ([#16381](https://github.com/craftcms/cms/issues/16381), [#16382](https://github.com/craftcms/cms/issues/16382), [#16341](https://github.com/craftcms/cms/issues/16341))
+- Fixed a bug where asset, category, and tag relations weren’t propagating to newly-created sites for global sets. ([#16752](https://github.com/craftcms/cms/issues/16752))
+
 ## 4.14.8.1 - 2025-02-20
 
 - Fixed a bug where newly-created custom fields wouldn’t have their full settings intact for `afterSave()`.
@@ -128,7 +142,7 @@
 
 - Fixed a bug where custom fields could cause validation errors when running the `users/create` command.
 - Fixed a bug where deleting a volume folder wasn’t fully deleting asset data in descendant folders.
-- Fixed a bug where `ancestors`, `children`, `descendants`, and `parent` eager-loading wasn’t working on some environments. ([#16381](https://github.com/craftcms/cms/issues/16381), [#16382](https://github.com/craftcms/cms/issues/16382))
+- Fixed a bug where `children` and `descendants` eager-loading wasn’t working on some environments. ([#16381](https://github.com/craftcms/cms/issues/16381), [#16382](https://github.com/craftcms/cms/issues/16382))
 
 ## 4.13.8 - 2025-01-02
 
@@ -137,7 +151,7 @@
 - Fixed a bug where the password input on the Set Password page wasn’t including the “Show” button.
 - Fixed a SQL error that could occur if an element was saved with a title longer than 255 characters.
 - Fixed a bug where some UI messages began with a lowercase letter in some languages. ([#16354](https://github.com/craftcms/cms/issues/16354))
-- Fixed an RCE vulnerability.
+- Fixed an RCE vulnerability. ([CVE-2025-23209](https://www.cve.org/CVERecord?id=CVE-2025-23209))
 
 ## 4.13.7 - 2024-12-17
 

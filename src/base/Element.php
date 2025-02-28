@@ -1562,7 +1562,7 @@ abstract class Element extends Component implements ElementInterface
         foreach ($elementStructureData as $elementStructureDatum) {
             foreach ($ancestorStructureData as $ancestorStructureDatum) {
                 if (
-                    $ancestorStructureDatum['structureId'] === $elementStructureDatum['structureId'] &&
+                    $ancestorStructureDatum['structureId'] == $elementStructureDatum['structureId'] &&
                     $ancestorStructureDatum['lft'] < $elementStructureDatum['lft'] &&
                     $ancestorStructureDatum['rgt'] > $elementStructureDatum['rgt'] &&
                     (!$parents || $ancestorStructureDatum['level'] == $elementStructureDatum['level'] - 1)
@@ -2323,6 +2323,8 @@ abstract class Element extends Component implements ElementInterface
             $names['propagating'],
             $names['propagateAll'],
             $names['newSiteIds'],
+            $names['isNewForSite'],
+            $names['isNewSite'],
             $names['resaving'],
             $names['duplicateOf'],
             $names['mergingCanonicalChanges'],
@@ -2602,7 +2604,10 @@ abstract class Element extends Component implements ElementInterface
             array_unshift($rule, $attribute);
         }
 
-        if (is_callable($rule[1]) || $field->hasMethod($rule[1])) {
+        if (
+            (!is_string($rule[1]) || !isset(Validator::$builtInValidators[$rule[1]])) &&
+            (is_callable($rule[1]) || $field->hasMethod($rule[1]))
+        ) {
             // InlineValidator assumes that the closure is on the model being validated
             // so it won’t pass a reference to the element
             $rule['params'] = [

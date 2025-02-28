@@ -833,6 +833,7 @@ class Sites extends Component
                         'siteId' => $oldPrimarySiteId,
                     ],
                     'siteId' => $site->id,
+                    'isNewSite' => true,
                 ]));
             }
         }
