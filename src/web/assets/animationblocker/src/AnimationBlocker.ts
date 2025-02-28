@@ -35,6 +35,16 @@ export class AnimationBlocker {
               }
             }
           }
+
+          if (mutation.removedNodes.length > 0) {
+            mutation.removedNodes.forEach((removedNode) => {
+              if (removedNode.nodeName === 'IMG') {
+                if (this.couldBeAnimated(removedNode as HTMLImageElement)) {
+                  this.removeBlockerUI(mutation.target as HTMLElement);
+                }
+              }
+            });
+          }
         }
       }
     };
@@ -170,6 +180,11 @@ export class AnimationBlocker {
   private static removeCover(image: HTMLImageElement) {
     const cover = this.getCover(image);
     cover.parentElement!.removeChild(cover);
+  }
+
+  private static removeBlockerUI(mutationTarget: HTMLElement) {
+    mutationTarget.querySelector('[data-image-cover]')?.remove();
+    mutationTarget.querySelector('[data-animation-toggle]')?.remove();
   }
 
   /**
