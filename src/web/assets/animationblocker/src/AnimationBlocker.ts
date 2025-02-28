@@ -261,7 +261,10 @@ export class AnimationBlocker {
     }
   }
 
-  private static filterImagesByExtension(
+  /**
+   * Filters a NodeList of images to only include those that could be animated
+   */
+  private static filterImages(
     images: NodeListOf<HTMLImageElement>
   ): HTMLImageElement[] {
     return Array.from(images).filter((image) => this.couldBeAnimated(image));
@@ -303,16 +306,16 @@ export class AnimationBlocker {
     const src = image.src;
     const srcset = image.srcset;
 
-    return (
-      this.extensions.some(
-        (extension) => src.includes(extension) || srcset.includes(extension)
-      ) || image.getAttribute('data-animated')
+    const hasExpectedExtension = this.extensions.some(
+      (extension) => src.includes(extension) || srcset.includes(extension)
     );
+
+    return hasExpectedExtension || image.hasAttribute('data-animated');
   }
 
   static getAllPotentiallyAnimated(): HTMLImageElement[] {
     const allImages: NodeListOf<HTMLImageElement> =
       document.querySelectorAll('img');
-    return this.filterImagesByExtension(allImages);
+    return this.filterImages(allImages);
   }
 }

@@ -4181,6 +4181,7 @@ JS, [
                     'sizes' => sprintf('calc(%srem/16)', $size),
                     'srcset' => sprintf('%s %sw, %s %sw', $thumbUrl, $size, $this->thumbUrl($size * 2), $size * 2),
                     'alt' => $this->thumbAlt(),
+                    'animated' => $this->getIsAnimated(),
                 ],
             ]);
         }
@@ -4202,6 +4203,17 @@ JS, [
         }
 
         return null;
+    }
+
+    /**
+     * Returns whether the file is potentially animated.
+     *
+     * @return boolean
+     * @since 5.7.0
+     */
+    public function getIsAnimated(): bool
+    {
+        return false;
     }
 
     /**

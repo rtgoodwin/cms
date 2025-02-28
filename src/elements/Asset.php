@@ -2414,9 +2414,7 @@ JS,[
     }
 
     /**
-     * Returns whether the file is potentially animated.
-     *
-     * @return boolean
+     * @inheritdoc
      */
     public function getIsAnimated(): bool
     {
@@ -3406,6 +3404,7 @@ JS;
                 'kind' => $this->kind,
                 'alt' => $this->alt,
                 'filename' => $this->filename,
+                'animated' => $this->getIsAnimated(),
             ],
         ];
 
