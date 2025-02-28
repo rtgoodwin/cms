@@ -4181,7 +4181,7 @@ JS, [
                     'sizes' => sprintf('calc(%srem/16)', $size),
                     'srcset' => sprintf('%s %sw, %s %sw', $thumbUrl, $size, $this->thumbUrl($size * 2), $size * 2),
                     'alt' => $this->thumbAlt(),
-                    'animated' => $this->getIsAnimated(),
+                    'craft-animated' => $this->getIsAnimated(),
                 ],
             ]);
         }

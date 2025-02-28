@@ -23,7 +23,7 @@ export class AnimationBlocker {
     const config = {attributes: true, childList: true, subtree: true};
 
     // Callback function to execute when mutations are observed
-    const callback = (mutationList: Array<MutationRecord>, observer) => {
+    const callback = (mutationList: Array<MutationRecord>) => {
       for (const mutation of mutationList) {
         if (mutation.type === 'childList') {
           if (mutation.addedNodes) {
@@ -56,9 +56,6 @@ export class AnimationBlocker {
     observer.observe(targetNode, config);
 
     return observer;
-
-    // Later, you can stop observing
-    //observer.disconnect();
   }
 
   /**
@@ -315,7 +312,7 @@ export class AnimationBlocker {
       (extension) => src.includes(extension) || srcset.includes(extension)
     );
 
-    return hasExpectedExtension || image.hasAttribute('data-animated');
+    return hasExpectedExtension || image.hasAttribute('data-craft-animated');
   }
 
   static getAllPotentiallyAnimated(): HTMLImageElement[] {
