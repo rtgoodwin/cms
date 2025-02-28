@@ -2180,6 +2180,12 @@ ul.icons {
 }
 
 /* button groups */
+.btngroup-container {
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+}
+
 .btngroup {
   position: relative;
   z-index: 1;

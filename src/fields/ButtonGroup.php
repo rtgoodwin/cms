@@ -95,13 +95,14 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
 
         $id = $this->getInputId();
 
-        $html = Html::beginTag('section', [
-            'id' => $id,
-            'class' => ['btngroup', 'btngroup--exclusive'],
-            'aria' => [
-                'labelledby' => $this->getLabelId(),
-            ],
-        ]);
+        $html = Html::beginTag('div', ['class' => 'btngroup-container']) .
+            Html::beginTag('section', [
+                'id' => $id,
+                'class' => ['btngroup', 'btngroup--exclusive'],
+                'aria' => [
+                    'labelledby' => $this->getLabelId(),
+                ],
+            ]);
 
         $value = $this->encodeValue($value);
 
@@ -136,7 +137,7 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
                 'disabled' => $static,
                 'attributes' => [
                     'aria' => [
-                        'pressed' => $selected ? 'true' : false,
+                        'pressed' => $selected ? 'true' : 'false',
                     ],
                     'data' => [
                         'value' => $option['value'],
@@ -146,6 +147,7 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
         }
 
         $html .= Html::endTag('section') . // .btngroup
+            Html::endTag('div') . // .btngroup-container
             Html::hiddenInput($this->handle, $value, [
                 'id' => "{$id}-input",
             ]);
