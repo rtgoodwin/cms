@@ -94,19 +94,18 @@ export class AnimationBlocker {
   private static createToggle(image: HTMLImageElement): void {
     if (!this.isToggleEnabled(image) || this.getToggle(image)) return;
 
-    const $image = $(image);
-    const $wrapper = $image.parent();
+    const wrapper = image.parentElement!;
 
-    const $toggle = $('<button/>', {
-      type: 'button',
-      'data-animation-toggle': true,
-      'aria-label': Craft.t('app', 'Play'),
-      class: 'animated-image-toggle btn',
-    }).html(this.playIcon);
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.dataset.animationToggle = 'true';
+    toggle.setAttribute('aria-label', Craft.t('app', 'Play'));
+    toggle.classList.add('animated-image-toggle', 'btn');
+    toggle.innerHTML = this.playIcon;
 
-    $wrapper.append($toggle);
+    wrapper.appendChild(toggle);
 
-    $toggle.on('click', (ev: Event) => {
+    toggle.addEventListener('click', (ev: Event) => {
       this.handleToggleClick(ev);
     });
   }
@@ -118,8 +117,8 @@ export class AnimationBlocker {
    * @private
    */
   private static getToggle(image: HTMLImageElement): HTMLButtonElement {
-    const $parent = $(image).parent();
-    return $parent.find('[data-animation-toggle]')[0] as HTMLButtonElement;
+    const parent = image.parentElement!;
+    return parent.querySelector('[data-animation-toggle]') as HTMLButtonElement;
   }
 
   /**
@@ -130,33 +129,26 @@ export class AnimationBlocker {
   private static createCover(image: HTMLImageElement): void {
     if (this.getCover(image)) return;
 
-    const $image = $(image);
-    const width = $image.width();
-    const height = $image.height();
-    const $parent = $image.parent();
+    const width = image.clientWidth;
+    const height = image.clientHeight;
+    const parent = image.parentElement!;
 
-    const $canvas = $('<canvas></canvas>')
-      .attr({
-        width: width,
-        height: height,
-        'aria-hidden': 'true',
-        role: 'presentation',
-        'data-image-cover': true,
-      })
-      .css({
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-      });
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.setAttribute('role', 'presentation');
+    canvas.setAttribute('data-image-cover', 'true');
+    canvas.style.position = 'absolute';
+    canvas.style.top = '50%';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
 
     // Draw first frame on canvas
-    $canvas[0].getContext('2d').drawImage($image[0], 0, 0, width, height);
-
-    $parent.css({
-      position: 'relative',
-    });
-    $canvas.insertBefore($image);
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    ctx.drawImage(image, 0, 0, width, height);
+    parent.style.position = 'relative';
+    parent.insertBefore(canvas, image);
   }
 
   /**
@@ -165,8 +157,9 @@ export class AnimationBlocker {
    * @private
    */
   private static getCover(image: HTMLImageElement): HTMLCanvasElement {
-    const $image = $(image);
-    return $image.parent().find('[data-image-cover]')[0] as HTMLCanvasElement;
+    return image.parentElement?.querySelector(
+      '[data-image-cover]'
+    ) as HTMLCanvasElement;
   }
 
   /**
@@ -175,8 +168,8 @@ export class AnimationBlocker {
    * @private
    */
   private static removeCover(image: HTMLImageElement) {
-    const $cover = this.getCover(image);
-    $cover.remove();
+    const cover = this.getCover(image);
+    cover.parentElement!.removeChild(cover);
   }
 
   /**
@@ -222,33 +215,30 @@ export class AnimationBlocker {
    */
   private static async hideAnimation(image: HTMLImageElement): Promise<void> {
     // If image already has an animation controller, return
-    if ($(image).data('animationController')) return;
+    if (image.dataset.animationController) return;
 
     // Wait until it's completely loaded
     await this.waitForImage(image);
-    const $image = $(image);
-    const $parent = $image.parent();
-    let $canvas = $parent.find('[data-image-cover]');
-    const width = $image.width();
-    const height = $image.height();
+    const parent = image.parentElement!;
+    let canvas = parent.querySelector('[data-image-cover]');
+    const width = image.clientWidth;
+    const height = image.clientHeight;
 
     // Store state on image
     image.setAttribute('data-animation-state', 'paused');
 
-    if ($canvas.length === 0) {
-      $image.attr({
-        'data-width': width,
-        'data-height': height,
-      });
-      this.createCover($image);
-    } else if ($canvas.length > 0 && this.imageSizeChanged(image)) {
+    if (!canvas) {
+      image.setAttribute('data-width', width.toString());
+      image.setAttribute('data-height', height.toString());
+      this.createCover(image);
+    } else if (canvas && this.imageSizeChanged(image)) {
       // Replace canvas
       this.removeCover(image);
-      this.createCover($image);
+      this.createCover(image);
     }
 
     this.createToggle(image);
-    $(image).data('animationController', this);
+    image.dataset.animationController = JSON.stringify(this);
   }
 
   /**

@@ -8,7 +8,6 @@
 namespace craft\web\assets\animationblocker;
 
 use craft\web\AssetBundle;
-use yii\web\JqueryAsset;
 
 /**
  * Asset bundle for the Animation Blocker class.
@@ -19,13 +18,6 @@ class AnimationBlockerAsset extends AssetBundle
      * @inheritdoc
      */
     public $sourcePath = __DIR__ . '/dist';
-
-    /**
-     * @inheritdoc
-     */
-    public $depends = [
-        JqueryAsset::class,
-    ];
 
     /**
      * @inheritdoc
