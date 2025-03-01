@@ -350,6 +350,7 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
         $names = parent::attributes();
         ArrayHelper::removeValue($names, 'validateHandleUniqueness');
         ArrayHelper::removeValue($names, 'layoutElement');
+        ArrayHelper::removeValue($names, 'static');
         return $names;
     }
 

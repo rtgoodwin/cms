@@ -5476,7 +5476,8 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px dashed var(--medium-hairline-color) !important;
   }
 
-  &.hairline {
+  &.hairline,
+  &:is(fieldset) {
     background-color: transparent !important;
     box-shadow: none;
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
@@ -5515,6 +5516,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
       width: calc(100% + #{24 + 24}px);
       height: 100%;
     }
+  }
+
+  &:is(fieldset) > legend {
+    font-weight: 600;
+    color: var(--light-text-color);
   }
 
   hr {
