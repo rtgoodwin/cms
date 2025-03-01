@@ -7670,7 +7670,8 @@ table.editable {
 .passwordwrapper,
 .border-box,
 .selectize.multiselect .selectize-input,
-.multiselect > select {
+.multiselect > select,
+.CodeMirror {
   @include mixins.input-styles;
 }
 
@@ -7771,6 +7772,22 @@ textarea.text.fullwidth {
   .selectize.multiselect .selectize-input.focus {
     position: relative;
     z-index: 2;
+  }
+}
+
+.CodeMirror {
+  height: auto !important;
+  min-height: 70px;
+
+  &.CodeMirror-focused {
+    @include mixins.input-focused-styles;
+  }
+
+  &.cm-s-readonly {
+    &,
+    * {
+      cursor: not-allowed;
+    }
   }
 }
 
