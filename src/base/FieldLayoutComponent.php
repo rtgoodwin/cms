@@ -200,6 +200,7 @@ abstract class FieldLayoutComponent extends Model
      * @param T|class-string<T>|array|null $condition
      * @phpstan-param T|class-string<T>|array{class:class-string<T>}|null $condition
      * @return T|null
+     * @since 5.7.0
      */
     protected function normalizeCondition(mixed $condition): ?ConditionInterface
     {
