@@ -2171,6 +2171,7 @@ Glückwunsch! Craft konnte erfolgreich eine E-Mail versenden. Hier sind die von 
     '{attribute} must be no later than {max}.' => '{attribute} darf nicht später als {max} sein.',
     '{attribute} must be no less than {min}.' => '{attribute} darf nicht kleiner als {min} sein.',
     '{attribute} must be set to a new password.' => '{attribute} muss für ein neues Passwort festgelegt werden.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} muss „{slug}“ enthalten',
     '{attribute} no longer allows {type} links.' => '{attribute} erlaubt keine Links vom Typ {type} mehr.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} muss mindestens {min, number} {min, plural, one{Adresse} other{Adressen}} enthalten.',
