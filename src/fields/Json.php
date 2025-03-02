@@ -12,6 +12,7 @@ use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\MergeableFieldInterface;
+use craft\fields\data\JsonData;
 use craft\helpers\Html;
 use craft\helpers\Json as JsonHelper;
 use craft\web\assets\codemirror\CodeMirrorAsset;
@@ -61,6 +62,22 @@ class Json extends Field implements MergeableFieldInterface, CrossSiteCopyableFi
     /**
      * @inheritdoc
      */
+    public function normalizeValue(mixed $value, ?ElementInterface $element): mixed
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if ($value instanceof JsonData) {
+            return $value;
+        }
+
+        return new JsonData($value);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function normalizeValueFromRequest(mixed $value, ?ElementInterface $element): mixed
     {
         if ($value === null || $value === '') {
@@ -68,13 +85,15 @@ class Json extends Field implements MergeableFieldInterface, CrossSiteCopyableFi
         }
 
         try {
-            return JsonHelper::decode($value);
+            $value = JsonHelper::decode($value);
         } catch (InvalidArgumentException $e) {
-            return [
+            $value = [
                 '__ERROR__' => $e->getMessage(),
                 '__VALUE__' => $value,
             ];
         }
+
+        return new JsonData($value);
     }
 
     /**
@@ -93,7 +112,7 @@ class Json extends Field implements MergeableFieldInterface, CrossSiteCopyableFi
         return $this->_inputHtml($value, true);
     }
 
-    private function _inputHtml(mixed $value, bool $static): string
+    private function _inputHtml(?JsonData $value, bool $static): string
     {
         $id = $this->getInputId();
 
@@ -123,28 +142,9 @@ JS, [
             $static,
         ]);
 
-        return Html::textarea($this->handle, $this->json($value, true), [
+        return Html::textarea($this->handle, $value?->getJson(true), [
             'id' => $id,
         ]);
-    }
-
-    private function json(mixed $value, bool $pretty = false): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        if (isset($value['__ERROR__'], $value['__VALUE__'])) {
-            return $value['__VALUE__'];
-        }
-
-        $options = JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE;
-        if ($pretty) {
-            $options |= JSON_PRETTY_PRINT;
-        }
-
-        $json = JsonHelper::encode($value, $options);
-        return JsonHelper::reindent($json);
     }
 
     /**
@@ -155,6 +155,7 @@ JS, [
         return [
             [
                 function(ElementInterface $element) {
+                    /** @var JsonData|null $value */
                     $value = $element->getFieldValue($this->handle);
                     if (isset($value['__ERROR__'])) {
                         $element->addError("field:$this->handle", Craft::t('app', '{attribute} must be valid JSON.', [
@@ -171,7 +172,11 @@ JS, [
      */
     public function getPreviewHtml(mixed $value, ElementInterface $element): string
     {
-        return Html::tag('code', $this->json($value));
+        if ($value === null) {
+            return '';
+        }
+        /** @var JsonData $value */
+        return Html::tag('code', $value->getJson());
     }
 
     /**

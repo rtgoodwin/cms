@@ -124,9 +124,7 @@ class Json extends \yii\helpers\Json
                 $indent = $defaultIndent;
             }
 
-            if ($indent !== '    ') {
-                $json = static::reindent($json, $indent);
-            }
+            $json = static::reindent($json, $indent);
         }
 
         FileHelper::writeToFile($path, $json);
@@ -142,6 +140,9 @@ class Json extends \yii\helpers\Json
      */
     public static function reindent(string $json, string $indent = '  '): string
     {
-        return preg_replace_callback('/^ {4,}/m', fn(array $match) => strtr($match[0], ['    ' => $indent]), $json);
+        if ($indent !== '    ') {
+            return preg_replace_callback('/^ {4,}/m', fn(array $match) => strtr($match[0], ['    ' => $indent]), $json);
+        }
+        return $json;
     }
 }
