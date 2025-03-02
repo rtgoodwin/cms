@@ -2171,6 +2171,7 @@ Congratulazioni! Craft ti ha inviato una email con successo. Ecco le impostazion
     '{attribute} must be no later than {max}.' => '{attribute} non deve essere successivo a {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} non deve essere minore di {min}.',
     '{attribute} must be set to a new password.' => '{attribute} deve essere impostato su una nuova password.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} deve contenere“{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} non consente più i collegamenti {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} deve contenere almeno {min, number} {min, plural, one{indirizzo} other{indirizzi}}.',
