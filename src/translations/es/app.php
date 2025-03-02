@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => 'El {attribute} no de ser posterior a {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} no debe ser inferior a {min}.',
     '{attribute} must be set to a new password.' => '{attribute} tiene que configurarse a una nueva contraseña.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} tiene que contener “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} ya no permite enlaces {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} debe contener al menos {min, number} {min, plural, one{dirección} other{direcciones}}.',
