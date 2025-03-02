@@ -15,6 +15,7 @@
 
 ### Administration
 - Added the “Button Group” field type. ([#16782](https://github.com/craftcms/cms/pull/16782))
+- Added the “JSON” field type. ([#16809](https://github.com/craftcms/cms/pull/16809))
 - Added “Icon” and “Color” settings to Checkboxes, Dropdown, Multi-select, and Radio Buttons field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))  
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
@@ -49,12 +50,15 @@
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\BaseOptionsField::$optionIcons`, which can be set to `true` by subclasses to enable the “Icon” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
+- Added `craft\fields\data\JsonData`.
 - Added `craft\fields\linktypes\BaseElementLinkType::elementGqlType()`.
+- Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
+- Added `craft\web\assets\codemirror\CodeMirrorAsset`.
 - Added `Craft.ui.createIconPicker()`.
 - Added `Craft.ui.createIconPickerField()`.
 - `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
