@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} mag niet later dan {max} zijn.',
     '{attribute} must be no less than {min}.' => '{attribute} mag niet kleiner dan {min} zijn.',
     '{attribute} must be set to a new password.' => '{attribute} moet worden ingesteld op een nieuw wachtwoord.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} moet “{slug}” bevatten',
     '{attribute} no longer allows {type} links.' => '{attribute} staat niet langer {type}links toe.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} moet minimaal {min, number} {min, plural, one{adres} other{adressen}} bevatten.',
