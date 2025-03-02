@@ -2171,6 +2171,7 @@ Gratulacje! Craft z powodzeniem może wysyłać e-maile. Zostały użyte poniżs
     '{attribute} must be no later than {max}.' => 'Atrybut {attribute} nie może być późniejszy niż {max}.',
     '{attribute} must be no less than {min}.' => 'Atrybut {attribute} musi być nie mniejszy niż {min}.',
     '{attribute} must be set to a new password.' => 'W atrybucie {attribute} musi zostać ustawione nowe hasło.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} musi zawierać “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} nie zezwala już na linki {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'Atrybut {attribute} powinien zawierać co najmniej {min, number} {min, plural, one{adres} other{adresy}}.',
