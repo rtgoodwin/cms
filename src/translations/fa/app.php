@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} نباید دیرتر از {max} باشد.',
     '{attribute} must be no less than {min}.' => '{attribute} نباید کوچک‌تر از {min} باشد.',
     '{attribute} must be set to a new password.' => '{attribute} باید با یک رمز عبور جدید داشته باشد.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} باید شامل "{slug}" باشد',
     '{attribute} no longer allows {type} links.' => '{attribute} دیگر پیوندهای {type} را مجاز نمی‌داند.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} باید حداقل شامل {min, number} {min, plural, one{address} other{addresss}} باشد.',
