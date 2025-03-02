@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} får inte vara senare än {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} får inte vara mindre än {min}.',
     '{attribute} must be set to a new password.' => '{attribute} måste ställas in till ett nytt lösenord.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} måste innehålla “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} tillåter inte längre {type}länkar.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} ska innehålla minst {min, number} {min, plural, one{adress} other{adresser}}.',
