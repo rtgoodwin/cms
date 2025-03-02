@@ -2171,6 +2171,7 @@ Gratulujeme, Craftu se podařilo odeslat email.Byla pro to použita následujíc
     '{attribute} must be no later than {max}.' => '{attribute} nesmí být později než {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} nesmí být méně než {min}.',
     '{attribute} must be set to a new password.' => '{attribute} je nutno nastavit na nové heslo.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} musí obsahovat "{slug}"',
     '{attribute} no longer allows {type} links.' => '{attribute} již neumožňuje odkazy typu {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'Atribut {attribute} by měl obsahovat alespoň {min, number} {min, plural, one{adresu} few{adresy} other{adres}}.',
