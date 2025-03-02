@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => 'يجب ألا يكون {attribute} بعد {max}.',
     '{attribute} must be no less than {min}.' => 'يجب ألا تقل {attribute} عن {min}.',
     '{attribute} must be set to a new password.' => 'يجب إعداد {attribute} على كلمة مرور جديدة.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} يجب أن تحتوي على ”{slug}“',
     '{attribute} no longer allows {type} links.' => 'لم تعُد السمة {attribute} تسمح بروابط {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'ينبغي أن تحتوي {attribute} على الأقل على {min, number} {min, plural, one{عنوان} other{من العناوين}}.',
