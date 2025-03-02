@@ -2171,6 +2171,7 @@ Tebrikler! Craft eposta göndermeyi başardı.Gerkli ayarlar şu şekilde: {{ se
     '{attribute} must be no later than {max}.' => '{attribute}, {max} değerinden sonra olmamalıdır.',
     '{attribute} must be no less than {min}.' => '{attribute}, {min} değerinden küçük olmamalıdır.',
     '{attribute} must be set to a new password.' => '{attribute} yeni bir parolaya ayarlanmalıdır.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} bir “{slug}” içermelidir',
     '{attribute} no longer allows {type} links.' => '{attribute} için artık {type} bağlantılarına izin verilmiyor.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} en az {min, number} {min, plural, one{adres} other{adres}} içerebilir.',
