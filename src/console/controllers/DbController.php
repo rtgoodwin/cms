@@ -85,7 +85,7 @@ class DbController extends Controller
     /**
      * Repairs all tables in the database.
      *
-     * Note that this can cause table locking, which could interfere SQL being executed.
+     * Note that this can cause table locking, which could interfere with SQL being executed.
      *
      *  Example:
      *  ```
