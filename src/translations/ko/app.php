@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute}은(는) {max} 이후가 아니어야 합니다.',
     '{attribute} must be no less than {min}.' => '{attribute}은(는) {min}보다 작지 않아야 합니다.',
     '{attribute} must be set to a new password.' => '{attribute}을(를) 새 비밀번호로 설정해야 합니다.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute}에는 “{slug}”(이)가 포함되어야 합니다',
     '{attribute} no longer allows {type} links.' => '{attribute}에서는 더 이상 {type} 링크를 허용하지 않습니다.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute}은(는) 최소 {min, number}개 {min, plural, one{주소} other{주소}}를 포함해야 합니다.',
