@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} должен быть не позднее {max}.',
     '{attribute} must be no less than {min}.' => 'Значение «{attribute}» должно быть не менее {min}.',
     '{attribute} must be set to a new password.' => 'Для {attribute} следует настроить новый пароль.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} должен содержать «{slug}»',
     '{attribute} no longer allows {type} links.' => '{attribute} больше не допускает ссылки типа: {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'Атрибут {attribute} должен содержать не менее {min, number} {min, plural, one{адреса} few {адресов} many {адресов} other{адреса}}.',
