@@ -2170,6 +2170,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} จะต้องไม่ช้ากว่า {max}',
     '{attribute} must be no less than {min}.' => '{attribute} ต้องไม่น้อยกว่า {min}',
     '{attribute} must be set to a new password.' => '{attribute} จะต้องได้รับการตั้งค่าเป็นรหัสผ่านใหม่',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} จะต้องมี “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} ไม่อนุญาตให้มีลิงก์ {type} อีกต่อไป',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} ควรมีอย่างน้อย {min, number} {min, plural, other{ที่อยู่}}',
