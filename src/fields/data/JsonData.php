@@ -38,7 +38,11 @@ class JsonData extends BaseObject implements ArrayAccess, IteratorAggregate, Ser
 
     public function getType(): string
     {
-        return gettype($this->value);
+        $type = gettype($this->value);
+        return match ($type) {
+            'double' => 'float',
+            default => $type,
+        };
     }
 
     public function getJson(bool $pretty = false, string $indent = '  '): string
