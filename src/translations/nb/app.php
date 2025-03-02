@@ -2171,6 +2171,7 @@ Gratulerer! Craft var i stand til å sende e-post. Her er innstillingene du beny
     '{attribute} must be no later than {max}.' => '{attribute} kan ikke være senere enn {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} må ikke være mindre enn {min}.',
     '{attribute} must be set to a new password.' => 'Et nytt passord må angis for {attribute}.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} må inneholde «{slug}»',
     '{attribute} no longer allows {type} links.' => '{attribute} tillater ikke lenger lenker av typen {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} skal inneholde minst {min, number} {min, plural, one{adresse} other{adresser}}.',
