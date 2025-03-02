@@ -45,6 +45,11 @@ class JsonData extends BaseObject implements ArrayAccess, IteratorAggregate, Ser
         };
     }
 
+    public function getValue(): mixed
+    {
+        return $this->value;
+    }
+
     public function getJson(bool $pretty = false, string $indent = '  '): string
     {
         if (isset($this->value['__ERROR__'], $this->value['__VALUE__'])) {
