@@ -2173,6 +2173,7 @@ Köszönjük, hogy regsiztráltál, a felhasználói filókod aktiváláshoz kat
     '{attribute} must be no later than {max}.' => '{attribute} nem lehet későbbi, mint {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} nem lehet kisebb, mint {min}.',
     '{attribute} must be set to a new password.' => 'A(z) {attribute} esetében új jelszót kell beállítani.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} tartalmaznia kell “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} már nem engedélyez {type} hivatkozásokat.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'A(z) {attribute} elemnek legalább {min, number} {min, plural, one{címet} other{címet}} kell tartalmaznia.',
