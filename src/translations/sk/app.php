@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} nesmie byť neskôr ako {max}.',
     '{attribute} must be no less than {min}.' => '{attribute} nesmie byť menej ako {min}.',
     '{attribute} must be set to a new password.' => 'Musíte nastaviť nové heslo pre atribút {attribute}.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} musí obsahovať „{slug}“',
     '{attribute} no longer allows {type} links.' => '{attribute} už nepovoľuje odkazy typu {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => 'Atribút {attribute} by mal obsahovať minimálne {min, number} {min, plural, one{adresu} few{adresy} other{adries}}.',
