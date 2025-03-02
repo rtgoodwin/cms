@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute}は{max}より後にできません。',
     '{attribute} must be no less than {min}.' => '{attribute}は{min}より小さくできません。',
     '{attribute} must be set to a new password.' => '{attribute} を新しいパスワードに設定する必要があります。',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} は “{slug}” を含まなければなりません。',
     '{attribute} no longer allows {type} links.' => '{attribute}は{type}のリンクを許可しなくなりました。',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute}は少なくとも{min, number}件の{min, plural, one{住所} other{住所}}を含んでいる必要があります',
