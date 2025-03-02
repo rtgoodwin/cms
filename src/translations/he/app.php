@@ -2169,6 +2169,7 @@ return [
     '{attribute} must be no later than {max}.' => '{attribute} חייב לא להיות מאוחר מ-{max}.',
     '{attribute} must be no less than {min}.' => '{attribute} חייב לא להיות פחות מ-{min}.',
     '{attribute} must be set to a new password.' => '{attribute} חייב להיות מוגדר לסיסמה חדשה.',
+    '{attribute} must be valid JSON.' => '{attribute} must be valid JSON.',
     '{attribute} must contain “{slug}”' => '{attribute} חייבת להכיל “{slug}”',
     '{attribute} no longer allows {type} links.' => '{attribute} לא מאפשר יותר קישורי {type}.',
     '{attribute} should contain at least {min, number} {min, plural, one{address} other{addresses}}.' => '{attribute} צריך להכיל {min, number} {min, plural, one{כתובת} other{כתובות}} לפחות.',
