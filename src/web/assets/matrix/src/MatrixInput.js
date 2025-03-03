@@ -515,6 +515,18 @@
         this.$container.addClass('active');
         const hideActions = [];
 
+        if (this.collapsed) {
+          hideActions.push('collapse');
+        } else {
+          hideActions.push('expand');
+        }
+
+        if (this.$container.hasClass('disabled-entry')) {
+          hideActions.push('disable');
+        } else {
+          hideActions.push('enable');
+        }
+
         if (!this.$container.prev('.matrixblock').length) {
           hideActions.push('moveUp');
         }
@@ -664,17 +676,6 @@
 
       this.$tabContainer.hide();
 
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=collapse]:first')
-          .parent()
-          .addClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=expand]:first')
-          .parent()
-          .removeClass('hidden');
-      }, 200);
-
       // Remember that?
       if (!this.isNew) {
         Craft.MatrixInput.rememberCollapsedEntryId(this.id);
@@ -750,17 +751,6 @@
         }
       );
 
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=collapse]:first')
-          .parent()
-          .removeClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=expand]:first')
-          .parent()
-          .addClass('hidden');
-      }, 200);
-
       // Remember that?
       if (!this.isNew && typeof Storage !== 'undefined') {
         const collapsedEntries = Craft.MatrixInput.getCollapsedEntryIds();
@@ -784,35 +774,12 @@
     disable: function () {
       this.$container.children('input[name$="[enabled]"]:first').val('');
       this.$container.addClass('disabled-entry');
-
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=disable]:first')
-          .parent()
-          .addClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=enable]:first')
-          .parent()
-          .removeClass('hidden');
-      }, 200);
-
       this.collapse(true);
     },
 
     enable: function () {
       this.$container.children('input[name$="[enabled]"]:first').val('1');
       this.$container.removeClass('disabled-entry');
-
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=disable]:first')
-          .parent()
-          .removeClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=enable]:first')
-          .parent()
-          .addClass('hidden');
-      }, 200);
     },
 
     moveUp: function () {
