@@ -1,6 +1,7 @@
 # Release Notes for Craft CMS 5.7 (WIP)
 
 ### Content Management
+- Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
 - Added support for sorting embedded element indexes by element attributes and custom fields. ([#16732](https://github.com/craftcms/cms/pull/16732))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
@@ -64,6 +65,7 @@
 - Added `Craft.ui.createIconPickerField()`.
 - Added `Craft.ui.icon()`.
 - `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- The `elements/duplicate` action no longer creates an unpublished draft by default, or deletes the source element if it’s a provisional draft by default. `asUnpublishDraft` and `deleteProvisionalDraft` params can be passed to it to re-enable those behaviors where needed.
 
 ### System
 - `craft\queue\Queue::release()` and `releaseAll()` now call `release()` and `releaseAll()` on the proxied queue if it implements `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
