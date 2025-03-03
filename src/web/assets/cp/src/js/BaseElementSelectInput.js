@@ -465,14 +465,16 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
 
       if (this.settings.allowRemove) {
-        actions.push({
-          icon: 'arrows-rotate',
-          label: Craft.t('app', 'Replace'),
-          callback: () => {
-            this._$replaceElement = $element;
-            this.showModal();
-          },
-        });
+        if (this.settings.elementType) {
+          actions.push({
+            icon: 'arrows-rotate',
+            label: Craft.t('app', 'Replace'),
+            callback: () => {
+              this._$replaceElement = $element;
+              this.showModal();
+            },
+          });
+        }
 
         actions.push({
           icon: 'remove',
@@ -779,10 +781,10 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
     onModalSelect: async function (elements) {
       // Disable the modal
-      this.modal.disable();
-      this.modal.disableCancelBtn();
-      this.modal.disableSelectBtn();
-      this.modal.showFooterSpinner();
+      this.modal?.disable();
+      this.modal?.disableCancelBtn();
+      this.modal?.disableSelectBtn();
+      this.modal?.showFooterSpinner();
 
       if (this._$replaceElement) {
         this.removeElement(this._$replaceElement);
@@ -848,11 +850,11 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
 
       // Re-enable and hide the modal
-      this.modal.enable();
-      this.modal.enableCancelBtn();
-      this.modal.enableSelectBtn();
-      this.modal.hideFooterSpinner();
-      this.modal.hide();
+      this.modal?.enable();
+      this.modal?.enableCancelBtn();
+      this.modal?.enableSelectBtn();
+      this.modal?.hideFooterSpinner();
+      this.modal?.hide();
 
       await Craft.appendHeadHtml(data.headHtml);
       await Craft.appendBodyHtml(data.bodyHtml);
@@ -1005,7 +1007,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     },
 
     updateDisabledElementsInModal: function () {
-      if (this.modal.elementIndex) {
+      if (this.modal?.elementIndex) {
         this.modal.elementIndex.disableElementsById(
           this.getDisabledElementIds()
         );

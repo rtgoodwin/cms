@@ -8,6 +8,7 @@
 namespace craft\fields;
 
 use Craft;
+use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\InlineEditableFieldInterface;
@@ -30,7 +31,7 @@ use yii\db\Schema;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
-class Number extends Field implements InlineEditableFieldInterface, SortableFieldInterface, MergeableFieldInterface
+class Number extends Field implements InlineEditableFieldInterface, SortableFieldInterface, MergeableFieldInterface, CrossSiteCopyableFieldInterface
 {
     /**
      * @since 3.5.11
@@ -74,8 +75,11 @@ class Number extends Field implements InlineEditableFieldInterface, SortableFiel
      */
     public static function dbType(): string
     {
-        $db = Craft::$app->getDb();
-        return $db->getIsMysql() ? sprintf('%s(65,16)', Schema::TYPE_DECIMAL) : Schema::TYPE_DECIMAL;
+        if (Craft::$app->getDb()->getIsMysql()) {
+            return sprintf('%s(65,16)', Schema::TYPE_DECIMAL);
+        }
+
+        return Schema::TYPE_DECIMAL;
     }
 
     /**
@@ -179,9 +183,7 @@ class Number extends Field implements InlineEditableFieldInterface, SortableFiel
 
         $rules[] = [['previewFormat'], 'in', 'range' => [self::FORMAT_DECIMAL, self::FORMAT_CURRENCY, self::FORMAT_NONE]];
         $rules[] = [
-            ['previewCurrency'], 'required', 'when' => function(): bool {
-                return $this->previewFormat === self::FORMAT_CURRENCY;
-            },
+            ['previewCurrency'], 'required', 'when' => fn(): bool => $this->previewFormat === self::FORMAT_CURRENCY,
         ];
         $rules[] = [['previewCurrency'], 'string', 'min' => 3, 'max' => 3, 'encoding' => '8bit'];
 
@@ -193,8 +195,22 @@ class Number extends Field implements InlineEditableFieldInterface, SortableFiel
      */
     public function getSettingsHtml(): ?string
     {
+        return $this->settingsHtml(false);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getReadOnlySettingsHtml(): ?string
+    {
+        return $this->settingsHtml(true);
+    }
+
+    private function settingsHtml(bool $readOnly): string
+    {
         return Craft::$app->getView()->renderTemplate('_components/fieldtypes/Number/settings.twig', [
             'field' => $this,
+            'readOnly' => $readOnly,
         ]);
     }
 
@@ -215,27 +231,37 @@ class Number extends Field implements InlineEditableFieldInterface, SortableFiel
 
     /**
      * @param mixed $value
-     * @return int|float|string|null
+     * @return int|float|null
      */
-    private function _normalizeNumber(mixed $value): float|int|string|null
+    private function _normalizeNumber(mixed $value): float|int|null
     {
         // Was this submitted with a locale ID?
         if (isset($value['locale'], $value['value'])) {
             $value = Localization::normalizeNumber($value['value'], $value['locale']);
         }
 
-        if ($value === '') {
+        if (is_int($value) || is_float($value) || (is_string($value) && $value !== '')) {
+            $float = (float)$value;
+            $int = (int)$float;
+            return $int == $float ? $int : $float;
+        }
+
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function serializeValue(mixed $value, ?ElementInterface $element): mixed
+    {
+        if ($value === null) {
             return null;
         }
 
-        if (is_numeric($value)) {
-            // ensure we only store the selected number of decimals and that the result is the same as in v4
-            // https://github.com/craftcms/cms/issues/16181
-            $value = round((float)$value, $this->decimals);
-            return $this->decimals === 0 ? (int)$value : $value;
-        }
-
-        return $value;
+        // ensure we only store the selected number of decimals and that the result is the same as in v4
+        // https://github.com/craftcms/cms/issues/16181
+        $value = round((float)$value, $this->decimals);
+        return $this->decimals === 0 ? (int)$value : $value;
     }
 
     /**
@@ -323,6 +349,22 @@ JS;
         }
 
         return NumberFieldConditionRule::class;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function dbTypeForValueSql(): array|string|null
+    {
+        if (!$this->decimals) {
+            return Schema::TYPE_INTEGER;
+        }
+
+        if (Craft::$app->getDb()->getIsMysql()) {
+            return sprintf('%s(65,%s)', Schema::TYPE_DECIMAL, $this->decimals);
+        }
+
+        return Schema::TYPE_DECIMAL;
     }
 
     /**

@@ -13,6 +13,7 @@ use craft\base\ElementAction;
 use craft\base\ElementActionInterface;
 use craft\base\ElementExporterInterface;
 use craft\base\ElementInterface;
+use craft\db\ExcludeDescendantIdsExpression;
 use craft\elements\actions\DeleteActionInterface;
 use craft\elements\actions\Restore;
 use craft\elements\conditions\ElementCondition;
@@ -26,6 +27,7 @@ use craft\helpers\Component;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
 use craft\helpers\StringHelper;
+use craft\models\FieldLayout;
 use craft\services\ElementSources;
 use Throwable;
 use yii\base\InvalidValueException;
@@ -427,6 +429,7 @@ class ElementIndexesController extends BaseElementsController
         $id = $this->request->getRequiredBodyParam('id');
         $conditionConfig = $this->request->getBodyParam('conditionConfig');
         $serialized = $this->request->getBodyParam('serialized');
+        $fieldLayouts = $this->request->getBodyParam('fieldLayouts');
 
         $conditionsService = Craft::$app->getConditions();
 
@@ -441,6 +444,10 @@ class ElementIndexesController extends BaseElementsController
         } else {
             /** @var ElementConditionInterface $condition */
             $condition = $this->elementType()::createCondition();
+        }
+
+        if (!empty($fieldLayouts)) {
+            $condition->setFieldLayouts(array_map(fn(array $config) => FieldLayout::createFromConfig($config), $fieldLayouts));
         }
 
         $condition->mainTag = 'div';
@@ -785,7 +792,8 @@ class ElementIndexesController extends BaseElementsController
                 }
 
                 if (!empty($descendantIds)) {
-                    $query->andWhere(['not', ['elements.id' => $descendantIds]]);
+                    /** @phpstan-ignore-next-line */
+                    $query->andWhere(new ExcludeDescendantIdsExpression($descendantIds));
                     $hasFilters = true;
                 }
             }

@@ -8,6 +8,8 @@
 namespace craft\fieldlayoutelements;
 
 use Craft;
+use craft\base\Actionable;
+use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\base\PreviewableFieldInterface;
@@ -246,10 +248,13 @@ class CustomField extends BaseField
      */
     protected function containerAttributes(?ElementInterface $element = null, bool $static = false): array
     {
+        /** @var FieldInterface $field */
+        $field = $this->_field;
+
         return ArrayHelper::merge(parent::containerAttributes($element, $static), [
             'id' => "{$this->_field->handle}-field",
             'data' => [
-                'type' => get_class($this->_field),
+                'type' => get_class($field),
             ],
         ]);
     }
@@ -351,9 +356,7 @@ class CustomField extends BaseField
             ($element->id ?? false) &&
             !$static
         );
-        $html = $view->namespaceInputs(function() use ($element, $static) {
-            return (string)parent::formHtml($element, $static);
-        }, 'fields');
+        $html = $view->namespaceInputs(fn() => (string)parent::formHtml($element, $static), 'fields');
         $view->setIsDeltaRegistrationActive($isDeltaRegistrationActive);
 
         return $html;
@@ -405,7 +408,7 @@ class CustomField extends BaseField
 
         $this->_field->describedBy = $describedBy;
 
-        return $html;
+        return $html !== '' ? $html : null;
     }
 
     /**
@@ -430,5 +433,27 @@ class CustomField extends BaseField
     protected function translationDescription(?ElementInterface $element = null, bool $static = false): ?string
     {
         return $this->_field->getTranslationDescription($element);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isCrossSiteCopyable(ElementInterface $element): bool
+    {
+        return $this->_field instanceof CrossSiteCopyableFieldInterface && $this->_field->getIsTranslatable($element);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function actionMenuItems(?ElementInterface $element = null, bool $static = false): array
+    {
+        if ($this->_field instanceof Actionable) {
+            $items = $this->_field->getActionMenuItems();
+        } else {
+            $items = [];
+        }
+
+        return $items;
     }
 }

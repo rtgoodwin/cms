@@ -203,6 +203,12 @@ trait ElementTrait
     public bool $isNewForSite = false;
 
     /**
+     * @var bool Whether this is for a newly-created site.
+     * @since 5.6.10
+     */
+    public bool $isNewSite = false;
+
+    /**
      * @var bool Whether the element is being resaved by a ResaveElement job or a `resave` console command.
      * @since 3.1.22
      */
@@ -239,6 +245,12 @@ trait ElementTrait
      * @since 3.2.0
      */
     public bool $previewing = false;
+
+    /**
+     * @var string|null The view mode used to show this element (e.g. `structure`, `table`, `thumbs`, `cards`).
+     * @since 5.6.0
+     */
+    public ?string $viewMode = null;
 
     /**
      * @var bool Whether the element should definitely be saved, if it’s a nested element being considered

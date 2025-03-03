@@ -193,7 +193,12 @@ class NestedElementManager extends Component
                 ->drafts(null)
                 ->savedDraftsOnly()
                 ->status(null)
-                ->limit(null);
+                ->limit(null)
+                ->andWhere([
+                    'or',
+                    ['elements.draftId' => null],
+                    ['elements.canonicalId' => null],
+                ]);
         }
 
         return $query;
@@ -369,9 +374,9 @@ class NestedElementManager extends Component
             self::VIEW_MODE_CARDS,
             function(string $id, array $config, $attribute, &$settings) use ($owner) {
                 $settings += [
-                    'deleteLabel' => Craft::t('app', 'Delete {type}', [
+                    'deleteLabel' => StringHelper::upperCaseFirst(Craft::t('app', 'Delete {type}', [
                         'type' => $this->elementType::lowerDisplayName(),
-                    ]),
+                    ])),
                     'deleteConfirmationMessage' => Craft::t('app', 'Are you sure you want to delete the selected {type}?', [
                         'type' => $this->elementType::lowerDisplayName(),
                     ]),
@@ -458,6 +463,7 @@ class NestedElementManager extends Component
             'allowedViewModes' => null,
             'showHeaderColumn' => true,
             'fieldLayouts' => [],
+            'defaultSort' => null,
             'defaultTableColumns' => null,
             'prevalidate' => false,
             'pageSize' => 50,
@@ -524,6 +530,7 @@ class NestedElementManager extends Component
                     'showSiteMenu' => false,
                     'sources' => false,
                     'fieldLayouts' => $config['fieldLayouts'],
+                    'defaultSort' => $config['defaultSort'],
                     'defaultTableColumns' => $config['defaultTableColumns'],
                     'defaultViewMode' => $config['defaultViewMode'],
                     'registerJs' => false,
@@ -705,7 +712,7 @@ JS, [
         } else {
             $elements = $value->getCachedResult();
             if ($elements !== null) {
-                $saveAll = false;
+                $saveAll = !empty($owner->newSiteIds);
             } else {
                 $elements = $value->all();
                 $saveAll = true;
@@ -891,6 +898,11 @@ JS, [
             ->status(null)
             ->siteId($owner->siteId)
             ->andWhere(['not', ['elements.id' => $except]])
+            ->andWhere([
+                'or',
+                ['elements.draftId' => null],
+                ['elements.canonicalId' => null],
+            ])
             ->all();
 
         $elementsService = Craft::$app->getElements();

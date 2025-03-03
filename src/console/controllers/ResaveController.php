@@ -21,6 +21,7 @@ use craft\elements\Tag;
 use craft\elements\User;
 use craft\errors\InvalidElementException;
 use craft\events\MultiElementActionEvent;
+use craft\helpers\App;
 use craft\helpers\Console;
 use craft\helpers\ElementHelper;
 use craft\helpers\Inflector;
@@ -62,18 +63,14 @@ class ResaveController extends Controller
     {
         // empty
         if ($to === ':empty:') {
-            return function() {
-                return '';
-            };
+            return fn() => '';
         }
 
         // object template
         if (str_starts_with($to, '=')) {
             $template = substr($to, 1);
             $view = Craft::$app->getView();
-            return function(ElementInterface $element) use ($template, $view) {
-                return $view->renderObjectTemplate($template, $element);
-            };
+            return fn(ElementInterface $element) => $view->renderObjectTemplate($template, $element);
         }
 
         // PHP arrow function
@@ -82,16 +79,14 @@ class ResaveController extends Controller
             $php = sprintf('return %s;', StringHelper::removeLeft(rtrim($match[2], ';'), 'return '));
             return function(ElementInterface $element) use ($var, $php) {
                 if ($var) {
-                    $$var = $element;
+                    ${$var} = $element;
                 }
                 return eval($php);
             };
         }
 
         // attribute name
-        return static function(ElementInterface $element) use ($to) {
-            return $element->$to;
-        };
+        return static fn(ElementInterface $element) => $element->$to;
     }
 
     /**
@@ -102,21 +97,24 @@ class ResaveController extends Controller
 
     /**
      * @var bool Whether to resave element drafts.
+     * Set to `null` if all elements should be resaved regardless of whether they’re drafts.
      * @since 3.6.5
      */
-    public bool $drafts = false;
+    public bool|string|null $drafts = null;
 
     /**
      * @var bool Whether to resave provisional element drafts.
+     * Set to `null` if all elements should be resaved regardless of whether they’re provisional drafts.
      * @since 3.7.0
      */
-    public bool $provisionalDrafts = false;
+    public bool|string|null $provisionalDrafts = null;
 
     /**
-     * @var bool Whether to resave element revisions.
+     * @var bool|string Whether to resave element revisions.
+     * Set to `null` if all elements should be resaved regardless of whether they’re revisions.
      * @since 3.7.35
      */
-    public bool $revisions = false;
+    public bool|string|null $revisions = null;
 
     /**
      * @var int|string|null The ID(s) of the elements to resave.
@@ -321,6 +319,16 @@ class ResaveController extends Controller
     {
         if (!parent::beforeAction($action)) {
             return false;
+        }
+
+        // Can't default these properties to false because then yii\console\Controller::runAction() will
+        // typecast their values to booleans
+        foreach (['drafts', 'provisionalDrafts', 'revisions'] as $property) {
+            $this->$property ??= false;
+            if (is_string($this->$property)) {
+                $value = App::normalizeValue($this->$property);
+                $this->$property = $value !== null ? (bool)$value : null;
+            }
         }
 
         if (isset($this->propagateTo)) {
@@ -678,19 +686,14 @@ class ResaveController extends Controller
      */
     private function _baseCriteria(): array
     {
-        $criteria = [];
+        $criteria = [
+            'drafts' => $this->drafts,
+            'provisionalDrafts' => $this->provisionalDrafts,
+            'revisions' => $this->revisions,
+        ];
 
-        if ($this->drafts) {
+        if ($this->provisionalDrafts !== false && $this->drafts == false) {
             $criteria['drafts'] = true;
-        }
-
-        if ($this->provisionalDrafts) {
-            $criteria['drafts'] = true;
-            $criteria['provisionalDrafts'] = true;
-        }
-
-        if ($this->revisions) {
-            $criteria['revisions'] = true;
         }
 
         if ($this->elementId) {
@@ -823,7 +826,7 @@ class ResaveController extends Controller
         } else {
             $elementsService->on(Elements::EVENT_BEFORE_RESAVE_ELEMENT, $beforeCallback);
             $elementsService->on(Elements::EVENT_AFTER_RESAVE_ELEMENT, $afterCallback);
-            $elementsService->resaveElements($query, true, !$this->revisions, $this->updateSearchIndex, $this->touch);
+            $elementsService->resaveElements($query, true, $this->revisions === false, $this->updateSearchIndex, $this->touch);
             $elementsService->off(Elements::EVENT_BEFORE_RESAVE_ELEMENT, $beforeCallback);
             $elementsService->off(Elements::EVENT_AFTER_RESAVE_ELEMENT, $afterCallback);
         }

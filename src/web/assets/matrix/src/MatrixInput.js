@@ -114,7 +114,11 @@
         }
 
         this.addListener(this.$addEntryBtn, 'activate', async function () {
+          if (this.$addEntryBtn.hasClass('loading')) {
+            return;
+          }
           this.$addEntryBtn.addClass('loading');
+          Craft.cp.announce(Craft.t('app', 'Loading'));
           try {
             await this.addEntry(this.$addEntryBtn.data('type'));
           } finally {
@@ -129,6 +133,7 @@
             .$container.find('button')
             .on('activate', async (ev) => {
               this.$addEntryMenuBtn.addClass('loading');
+              Craft.cp.announce(Craft.t('app', 'Loading'));
               try {
                 await this.addEntry($(ev.currentTarget).data('type'));
               } finally {
@@ -154,6 +159,14 @@
 
           this.trigger('afterInit');
         }, 100);
+
+        // If this field is nested within something that's deletable, be ready to handle that
+        this.$container.closest('.js-deletable').on('delete', (ev) => {
+          // Ignore delete events that came from nested elements
+          if (ev.target === ev.currentTarget) {
+            this.destroy();
+          }
+        });
       },
 
       canAddMoreEntries: function () {
@@ -232,7 +245,7 @@
           );
         }
 
-        Craft.queue.push(async () => {
+        await Craft.queue.push(async () => {
           if (this.addingEntry) {
             // only one new entry at a time
             return;
@@ -259,7 +272,7 @@
           const $entry = $(data.blockHtml);
 
           // Pause the element editor
-          this.elementEditor?.pause();
+          await this.elementEditor?.pause();
 
           if ($insertBefore) {
             $entry.insertBefore($insertBefore);
@@ -280,9 +293,11 @@
             'fast',
             async () => {
               $entry.css('margin-bottom', '');
-              Craft.initUiElements($entry.children('.fields'));
+              // Execute the response JS first so any Selectize inputs, etc.,
+              // get instantiated before field toggles
               await Craft.appendHeadHtml(data.headHtml);
               await Craft.appendBodyHtml(data.bodyHtml);
+              Craft.initUiElements($entry.children('.fields'));
               new Craft.MatrixInput.Entry(this, $entry);
               this.entrySort.addItems($entry);
               this.entrySelect.addItems($entry);
@@ -293,7 +308,11 @@
                   // Scroll to the entry
                   Garnish.scrollContainerToElement($entry);
                   // Focus on the first focusable element
-                  $entry.find('.flex-fields :focusable').first().focus();
+                  $entry
+                    .find('.flex-fields :focusable')
+                    .not('.prevent-autofocus')
+                    .first()
+                    .focus();
                 }
 
                 // Resume the element editor
@@ -349,6 +368,19 @@
 
       get maxEntries() {
         return this.settings.maxEntries;
+      },
+
+      destroy: function () {
+        this.entrySort?.destroy();
+        this.entrySelect?.destroy();
+        delete this.entrySort;
+        delete this.entrySelect;
+
+        this.$entriesContainer.children('.matrixblock').each((i, container) => {
+          $(container).data('entry')?.destroy();
+        });
+
+        this.base();
       },
     },
     {
@@ -919,10 +951,12 @@
         }
       }
 
-      this.actionDisclosure.hide();
+      this.actionDisclosure?.hide();
     },
 
     selfDestruct: function () {
+      this.destroy();
+
       // Remove any inputs from the form data
       $('[name]', this.$container).removeAttr('name');
 
@@ -1147,6 +1181,22 @@
 
       // re-grab dismissible tips, re-attach listener, hide on re-load
       this.matrix.elementEditor?.handleDismissibleTips();
+    },
+
+    destroy: function () {
+      this.actionDisclosure?.hide();
+
+      this.tabManager?.destroy();
+      this.actionDisclosure?.destroy();
+      this.formObserver?.destroy();
+      delete this.tabManager;
+      delete this.actionDisclosure;
+      delete this.formObserver;
+
+      // alert any nested inputs that we're getting deleted
+      this.$container.trigger('delete');
+
+      this.base();
     },
   });
 })(jQuery);

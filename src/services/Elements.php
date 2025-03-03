@@ -677,7 +677,7 @@ class Elements extends Component
             return;
         }
 
-        $duration = $expiryDate->getTimestamp() - time();
+        $duration = $expiryDate->getTimestamp() - DateTimeHelper::currentTimeStamp();
 
         if ($duration > 0 && (!$this->_cacheDuration || $duration < $this->_cacheDuration)) {
             $this->_cacheDuration = $duration;
@@ -1583,12 +1583,14 @@ class Elements extends Component
 
                         // Make sure this isn't a revision
                         if ($skipRevisions) {
+                            $label = $element->getUiLabel();
+                            $label = $label !== '' ? "$label ($element->id)" : sprintf('%s %s', $element::lowerDisplayName(), $element->id);
                             try {
                                 if (ElementHelper::isRevision($element)) {
-                                    throw new InvalidElementException($element, "Skipped resaving {$element->getUiLabel()} ($element->id) because it's a revision.");
+                                    throw new InvalidElementException($element, "Skipped resaving $label because it's a revision.");
                                 }
                             } catch (Throwable $rootException) {
-                                throw new InvalidElementException($element, "Skipped resaving {$element->getUiLabel()} ($element->id) due to an error obtaining its root element: " . $rootException->getMessage());
+                                throw new InvalidElementException($element, "Skipped resaving $label due to an error obtaining its root element: " . $rootException->getMessage());
                             }
                         }
                     } catch (InvalidElementException $e) {
@@ -1650,9 +1652,7 @@ class Elements extends Component
 
         if ($siteIds !== null) {
             // Typecast to integers
-            $siteIds = array_map(function($siteId) {
-                return (int)$siteId;
-            }, (array)$siteIds);
+            $siteIds = array_map(fn($siteId) => (int)$siteId, (array)$siteIds);
         }
 
         $this->ensureBulkOp(function() use ($query, $siteIds, $continueOnError) {
@@ -3164,7 +3164,7 @@ class Elements extends Component
      *
      * @param class-string<ElementInterface> $elementType The root element type class
      * @param ElementInterface[] $elements The root element models that should be updated with the eager-loaded elements
-     * @param array|string|EagerLoadPlan[] $with Dot-delimited paths of the elements that should be eager-loaded into the root elements
+     * @param array<string|array>|string|EagerLoadPlan[] $with Dot-delimited paths of the elements that should be eager-loaded into the root elements
      */
     public function eagerLoadElements(string $elementType, array $elements, array|string $with): void
     {
@@ -3233,8 +3233,10 @@ class Elements extends Component
                     $targetElementIdsBySourceIds = [];
 
                     foreach ($map['map'] as $mapping) {
-                        $uniqueTargetElementIds[$mapping['target']] = true;
-                        $targetElementIdsBySourceIds[$mapping['source']][$mapping['target']] = true;
+                        if (!empty($mapping['target'])) {
+                            $uniqueTargetElementIds[$mapping['target']] = true;
+                            $targetElementIdsBySourceIds[$mapping['source']][$mapping['target']] = true;
+                        }
                     }
 
                     // Get the target elements
@@ -3508,7 +3510,7 @@ class Elements extends Component
         }
 
         // Get the sites supported by this element
-        $supportedSites = $supportedSites ?? ArrayHelper::index(ElementHelper::supportedSitesForElement($element), 'siteId');
+        $supportedSites ??= ArrayHelper::index(ElementHelper::supportedSitesForElement($element), 'siteId');
 
         // Make sure the element actually supports the site it's being saved in
         if (!isset($supportedSites[$element->siteId])) {
@@ -3556,8 +3558,14 @@ class Elements extends Component
 
         // Validate
         if ($runValidation) {
-            // If we're propagating, only validate changed custom fields
-            if ($element->propagating) {
+            // If we're propagating, only validate changed custom fields,
+            // unless we're enabling this element
+            if ($element->propagating && !(
+                $element->getIsDerivative() &&
+                $element->getIsDraft() &&
+                $element->getEnabledForSite() &&
+                !$element->getCanonical()->getEnabledForSite())
+            ) {
                 $names = array_map(
                     fn(string $handle) => "field:$handle",
                     array_unique(array_merge($dirtyFields, $element->getModifiedFields()))
@@ -3944,7 +3952,7 @@ class Elements extends Component
             Queue::push(new UpdateSearchIndex([
                 'elementType' => get_class($element),
                 'elementId' => $element->id,
-                'siteId' => $propagate ? '*' : $element->siteId,
+                'siteId' => $element->siteId,
                 'fieldHandles' => $searchableDirtyFields,
             ]), 2048);
         }
@@ -4075,9 +4083,7 @@ class Elements extends Component
         }
 
         // Copy the dirty attributes (except title, slug and uri, which may be translatable)
-        $siteElement->setDirtyAttributes(array_filter($element->getDirtyAttributes(), function(string $attribute): bool {
-            return $attribute !== 'title' && $attribute !== 'slug';
-        }));
+        $siteElement->setDirtyAttributes(array_filter($element->getDirtyAttributes(), fn(string $attribute): bool => $attribute !== 'title' && $attribute !== 'slug'));
 
         if ($saveContent) {
             // Copy any non-translatable field values
@@ -4302,6 +4308,25 @@ SQL;
         }
 
         return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user);
+    }
+
+    /**
+     * Returns whether a user is authorized to save the canonical version of the given element.
+     *
+     * @param ElementInterface $element
+     * @param User|null $user
+     * @return bool
+     * @since 5.6.0
+     */
+    public function canSaveCanonical(ElementInterface $element, ?User $user = null): bool
+    {
+        if ($element->getIsUnpublishedDraft()) {
+            $fakeCanonical = clone $element;
+            $fakeCanonical->draftId = null;
+            return $this->canSave($fakeCanonical, $user);
+        }
+
+        return $this->canSave($element->getCanonical(true), $user);
     }
 
     /**

@@ -26,6 +26,7 @@ use craft\errors\UnsupportedSiteException;
 use craft\events\DefineElementEditorHtmlEvent;
 use craft\events\DraftEvent;
 use craft\fieldlayoutelements\BaseField;
+use craft\fieldlayoutelements\CustomField;
 use craft\fields\Matrix;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Component;
@@ -174,7 +175,13 @@ class ElementsController extends Controller
      */
     public function actionRedirect(?int $elementId = null, ?string $elementUid = null): Response
     {
-        $element = $this->element = $this->_element($elementId, $elementUid);
+        $element = $this->_element($elementId, $elementUid);
+
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        $this->element = $element;
         $url = $element->getCpEditUrl();
 
         if (!$url) {
@@ -210,9 +217,9 @@ class ElementsController extends Controller
         // Save it
         $element->setScenario(Element::SCENARIO_ESSENTIALS);
         if (!Craft::$app->getDrafts()->saveElementAsDraft($element, $user->id, null, null, false)) {
-            return $this->_asFailure($element, Craft::t('app', 'Couldn’t create {type}.', [
+            return $this->_asFailure($element, StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t create {type}.', [
                 'type' => $element::lowerDisplayName(),
-            ]));
+            ])));
         }
 
         // Redirect to its edit page
@@ -311,13 +318,7 @@ class ElementsController extends Controller
 
         // Permissions
         $canSave = $this->_canSave($element, $user);
-
-        if ($isUnpublishedDraft) {
-            $canSaveCanonical = $this->_canApplyUnpublishedDraft($element, $user);
-        } else {
-            $canSaveCanonical = ($isCanonical || $element->isProvisionalDraft) ? $canSave : $elementsService->canSave($canonical, $user);
-        }
-
+        $canSaveCanonical = $elementsService->canSaveCanonical($element, $user);
         $canCreateDrafts = $elementsService->canCreateDrafts($canonical, $user);
         $canDuplicate = !$isRevision && $elementsService->canDuplicateAsDraft($element, $user);
 
@@ -454,9 +455,9 @@ class ElementsController extends Controller
             if ($isUnpublishedDraft) {
                 if ($canSaveCanonical) {
                     $response
-                        ->submitButtonLabel(Craft::t('app', 'Create {type}', [
+                        ->submitButtonLabel(StringHelper::upperCaseFirst(Craft::t('app', 'Create {type}', [
                             'type' => $element::lowerDisplayName(),
-                        ]))
+                        ])))
                         ->action('elements/apply-draft')
                         ->redirectUrl("$redirectUrl#");
                 } else {
@@ -470,9 +471,9 @@ class ElementsController extends Controller
                     ->redirectUrl("$redirectUrl#");
             } elseif ($isDraft) {
                 $response
-                    ->submitButtonLabel(Craft::t('app', 'Save {type}', [
+                    ->submitButtonLabel(StringHelper::upperCaseFirst(Craft::t('app', 'Save {type}', [
                         'type' => Craft::t('app', 'draft'),
-                    ]))
+                    ])))
                     ->action('elements/save-draft')
                     ->redirectUrl("{cpEditUrl}");
             } else {
@@ -483,54 +484,139 @@ class ElementsController extends Controller
 
             $response
                 ->saveShortcutRedirectUrl('{cpEditUrl}')
-                ->addAltAction(
-                    $isUnpublishedDraft && $canSaveCanonical
-                        ? Craft::t('app', 'Create and continue editing')
-                        : Craft::t('app', 'Save and continue editing'),
-                    [
-                        'redirect' => '{cpEditUrl}',
-                        'shortcut' => true,
-                        'retainScroll' => true,
-                        'eventData' => ['autosave' => false],
-                    ]
-                );
-
-            if ($isCurrent) {
-                $newElement = $element->createAnother();
-                if ($newElement && $elementsService->canSave($newElement, $user)) {
-                    $response->addAltAction(
-                        $isUnpublishedDraft && $canSaveCanonical
-                            ? Craft::t('app', 'Create and add another')
-                            : Craft::t('app', 'Save and add another'),
-                        [
-                            'shortcut' => true,
-                            'shift' => true,
-                            'eventData' => ['autosave' => false],
-                            'params' => ['addAnother' => 1],
-                        ]
-                    );
-                }
-
-                if ($canSaveCanonical && $isUnpublishedDraft) {
-                    $response->addAltAction(Craft::t('app', 'Save {type}', [
-                        'type' => Craft::t('app', 'draft'),
-                    ]), [
-                        'action' => 'elements/save-draft',
-                        'redirect' => "$redirectUrl#",
-                        'eventData' => ['autosave' => false],
-                    ]);
-                }
-
-                if ($canDuplicate) {
-                    $response->addAltAction(Craft::t('app', 'Save as a new {type}', compact('type')), [
-                        'action' => 'elements/duplicate',
-                        'redirect' => '{cpEditUrl}',
-                    ]);
-                }
-            }
+                ->altActions($element->getAltActions());
         }
 
         return $response;
+    }
+
+    /**
+     * Displays a standalone Live Preview editor for an element.
+     *
+     * @param int $elementId
+     * @since 5.6.0
+     */
+    public function actionPreview(int $elementId): Response
+    {
+        $this->requireCpRequest();
+
+        /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
+        $element = $this->_element($elementId, checkForProvisionalDraft: true);
+
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $this->element = $element;
+
+        $this->getView()->registerJsWithVars(fn(
+            $elementType,
+            $elementId,
+            $draftId,
+            $revisionId,
+            $siteId,
+        ) => <<<JS
+(() => {
+  const preview = new Craft.Preview({
+    elementType: $elementType,
+    elementId: $elementId,
+    draftId: $draftId,
+    revisionId: $revisionId,
+    siteId: $siteId,
+    standaloneMode: true,
+  });
+  preview.open();
+})();
+JS, [
+            $element::class,
+            $element->isProvisionalDraft ? $element->getCanonicalId() : $element->id,
+            !$element->isProvisionalDraft ? $element->draftId : null,
+            $element->revisionId,
+            $element->siteId,
+        ], View::POS_END);
+
+        [$docTitle, $title] = $this->_editElementTitles($element);
+
+        return $this->renderTemplate('_layouts/base.twig', [
+            'docTitle' => $docTitle,
+            'title' => $title,
+        ]);
+    }
+
+    /**
+     * Copies field/attribute values on an element from one site to another.
+     *
+     * @return Response
+     * @since 5.6.0
+     */
+    public function actionCopyValuesFromSite(): Response
+    {
+        $this->requireCpRequest();
+
+        /** @var Element|Response|null $element */
+        $element = $this->_element(checkForProvisionalDraft: true);
+
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $copyFromSiteId = (int)$this->request->getRequiredBodyParam('fromSiteId');
+        $site = Craft::$app->getSites()->getSiteById($copyFromSiteId);
+        if (!$site) {
+            throw new BadRequestHttpException("Invalid site ID: $copyFromSiteId");
+        }
+        $this->requirePermission("editSite:$site->uid");
+
+        $layoutElementUid = $this->request->getRequiredBodyParam('layoutElementUid');
+        $namespace = $this->request->getBodyParam('namespace');
+
+        $fromElement = $element::find()
+            ->id($element->id)
+            ->structureId($element->structureId)
+            ->siteId($copyFromSiteId)
+            ->drafts(null)
+            ->provisionalDrafts(null)
+            ->one();
+
+        if (!$fromElement) {
+            throw new UnsupportedSiteException($element, $copyFromSiteId, 'Attempting to copy element content from an unsupported site.');
+        }
+
+        $layoutElement = $element->getFieldLayout()->getElementByUid($layoutElementUid);
+        if (!$layoutElement instanceof BaseField || !$layoutElement->isCrossSiteCopyable($element)) {
+            throw new BadRequestHttpException("Invalid layout element UUID: $layoutElementUid");
+        }
+        if ($layoutElement instanceof CustomField) {
+            $layoutElement->getField()->copyCrossSiteValue($fromElement, $element);
+        } else {
+            $attribute = $layoutElement->attribute();
+            $element->$attribute = $fromElement->$attribute;
+        }
+
+        $view = $this->getView();
+        $html = $view->namespaceInputs(fn() => $layoutElement->formHtml($element), $namespace);
+
+        if ($html) {
+            $html = Html::modifyTagAttributes($html, [
+                'data' => [
+                    'layout-element' => $layoutElement->uid,
+                ],
+            ]);
+        }
+
+        return $this->_asSuccess(Craft::t('app', 'Field value copied.'), $element, [
+            'fieldHtml' => $html,
+            'headHtml' => $view->getHeadHtml(),
+            'bodyHtml' => $view->getBodyHtml(),
+        ]);
     }
 
     /**
@@ -1184,10 +1270,10 @@ JS, [
     {
         return
             Html::beginTag('div', [
-                'class' => 'revision-notice',
+                'class' => 'content-notice',
             ]) .
             Html::tag('div', '', [
-                'class' => ['revision-icon'],
+                'class' => ['content-notice-icon'],
                 'aria' => ['hidden' => 'true'],
                 'data' => ['icon' => 'lightbulb'],
             ]) .
@@ -1271,9 +1357,9 @@ JS, [
         }
 
         if (!$success) {
-            return $this->_asFailure($element, Craft::t('app', 'Couldn’t save {type}.', [
+            return $this->_asFailure($element, StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
                 'type' => $element::lowerDisplayName(),
-            ]));
+            ])));
         }
 
         $elementsService->trackActivity($element, ElementActivity::TYPE_SAVE);
@@ -1410,9 +1496,9 @@ JS, [
 
             if (!$success) {
                 $transaction->rollBack();
-                return $this->_asFailure($element, Craft::t('app', 'Couldn’t save {type}.', [
+                return $this->_asFailure($element, StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
                     'type' => $element::lowerDisplayName(),
-                ]));
+                ])));
             }
 
             if ($element->getIsDraft()) {
@@ -1675,9 +1761,9 @@ JS, [
 
             if (!$elementsService->saveElement($element)) {
                 $transaction->rollBack();
-                return $this->_asFailure($element, Craft::t('app', 'Couldn’t save {type}.', [
+                return $this->_asFailure($element, StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
                     'type' => Craft::t('app', 'draft'),
-                ]));
+                ])));
             }
 
             $transaction->commit();
@@ -1818,12 +1904,10 @@ JS, [
 
         $isUnpublishedDraft = $element->getIsUnpublishedDraft();
 
-        if ($isUnpublishedDraft) {
-            if (!$this->_canApplyUnpublishedDraft($element, $user)) {
-                throw new ForbiddenHttpException('User not authorized to create this element.');
-            }
-        } elseif (!$elementsService->canSave($element->getCanonical(true), $user)) {
-            throw new ForbiddenHttpException('User not authorized to save this element.');
+        if (!$elementsService->canSaveCanonical($element, $user)) {
+            throw new ForbiddenHttpException($isUnpublishedDraft
+                ? 'User not authorized to create this element.'
+                : 'User not authorized to save this element.');
         }
 
         // Validate and save the draft
@@ -1895,13 +1979,13 @@ JS, [
     private function _asAppyDraftFailure(ElementInterface $element): ?Response
     {
         if ($element->getIsUnpublishedDraft()) {
-            $message = Craft::t('app', 'Couldn’t create {type}.', [
+            $message = StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t create {type}.', [
                 'type' => $element::lowerDisplayName(),
-            ]);
+            ]));
         } elseif ($element->isProvisionalDraft) {
-            $message = Craft::t('app', 'Couldn’t save {type}.', [
+            $message = StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
                 'type' => $element::lowerDisplayName(),
-            ]);
+            ]));
         } else {
             $message = Craft::t('app', 'Couldn’t apply draft.');
         }
@@ -1921,8 +2005,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || !$element->getIsDraft()) {
             throw new BadRequestHttpException('No draft was identified by the request.');
@@ -2193,8 +2280,8 @@ JS, [
         bool $checkForProvisionalDraft = false,
         bool $strictSite = true,
     ): ElementInterface|Response|null {
-        $elementId = $elementId ?? $this->_elementId;
-        $elementUid = $elementUid ?? $this->_elementUid;
+        $elementId ??= $this->_elementId;
+        $elementUid ??= $this->_elementUid;
 
         $elementsService = Craft::$app->getElements();
         $user = static::currentUser();
@@ -2331,6 +2418,9 @@ JS, [
                 ->siteId($siteId)
                 ->preferSites($preferSites)
                 ->unique()
+                ->drafts(null)
+                ->provisionalDrafts(null)
+                ->revisions(null)
                 ->status(null)
                 ->one();
 
@@ -2351,19 +2441,28 @@ JS, [
         }
 
         if ($elementUid) {
-            $withDrafts = false;
-            if (!Craft::$app->getConfig()->getGeneral()->autosaveDrafts) {
-                $withDrafts = null;
+            $element = $this->_elementQuery($elementType)
+                ->uid($elementUid)
+                ->siteId($siteId)
+                ->preferSites($preferSites)
+                ->unique()
+                ->status(null)
+                ->one();
+
+            if ($element) {
+                return $element;
             }
+
+            // check for an unpublished draft if we got this far
+            // (e.g. newly added matrix "block" or where autosaveDrafts is off)
+            // https://github.com/craftcms/cms/issues/15985
             return $this->_elementQuery($elementType)
                 ->uid($elementUid)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
-                // when autosaveDrafts is off, we need search among drafts too
-                // https://github.com/craftcms/cms/issues/15985
-                ->drafts($withDrafts)
                 ->unique()
                 ->status(null)
+                ->draftOf(false)
                 ->one();
         }
 
@@ -2522,20 +2621,6 @@ JS, [
         }
 
         return Craft::$app->getElements()->canSave($element, $user);
-    }
-
-    /**
-     * Returns whether an unpublished draft can shed its draft status by the given user.
-     *
-     * @param ElementInterface $element
-     * @param User $user
-     * @return bool
-     */
-    private function _canApplyUnpublishedDraft(ElementInterface $element, User $user): bool
-    {
-        $fakeCanonical = clone $element;
-        $fakeCanonical->draftId = null;
-        return Craft::$app->getElements()->canSave($fakeCanonical, $user);
     }
 
     /**

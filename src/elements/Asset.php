@@ -665,45 +665,45 @@ class Asset extends Element
             ],
             'filename' => [
                 'label' => Craft::t('app', 'Filename'),
-                'placeholder' => Craft::t('app', 'placeholder') . '.png',
+                'placeholder' => fn() => Craft::t('app', 'placeholder') . '.png',
             ],
             'size' => [
                 'label' => Craft::t('app', 'File Size'),
-                'placeholder' => '2KB',
+                'placeholder' => fn() => '2KB',
             ],
             'kind' => [
                 'label' => Craft::t('app', 'File Kind'),
-                'placeholder' => Craft::t('app', 'Image'),
+                'placeholder' => fn() => Craft::t('app', 'Image'),
 
             ],
             'imageSize' => [
                 'label' => Craft::t('app', 'Dimensions'),
-                'placeholder' => '700x500',
+                'placeholder' => fn() => '700x500',
             ],
             'width' => [
                 'label' => Craft::t('app', 'Image Width'),
-                'placeholder' => '700px',
+                'placeholder' => fn() => '700px',
             ],
             'height' => [
                 'label' => Craft::t('app', 'Image Height'),
-                'placeholder' => '500px',
+                'placeholder' => fn() => '500px',
             ],
             'location' => [
                 'label' => Craft::t('app', 'Location'),
-                'placeholder' => Craft::t('app', 'Volume'),
+                'placeholder' => fn() => Craft::t('app', 'Volume'),
             ],
             'link' => [
                 'label' => Craft::t('app', 'Link'),
                 'icon' => 'world',
-                'placeholder' => ElementHelper::linkAttributeHtml(null),
+                'placeholder' => fn() => ElementHelper::linkAttributeHtml(null),
             ],
             'dateModified' => [
                 'label' => Craft::t('app', 'File Modified Date'),
-                'placeholder' => (new \DateTime())->sub(new \DateInterval('P14D')),
+                'placeholder' => fn() => (new \DateTime())->sub(new \DateInterval('P14D')),
             ],
             'uploader' => [
                 'label' => Craft::t('app', 'Uploaded By'),
-                'placeholder' => ($uploader = Craft::$app->getUser()->getIdentity()) ? Cp::elementChipHtml($uploader) : '',
+                'placeholder' => fn() => ($uploader = Craft::$app->getUser()->getIdentity()) ? Cp::elementChipHtml($uploader) : '',
             ],
         ]);
 
@@ -753,13 +753,9 @@ class Asset extends Element
                     ->offset($elementQuery->offset)
                     ->limit($elementQuery->limit);
 
-                $folders = array_map(function(array $result) {
-                    return new VolumeFolder($result);
-                }, $folderQuery->all());
+                $folders = array_map(fn(array $result) => new VolumeFolder($result), $folderQuery->all());
 
-                $foldersByPath = ArrayHelper::index($folders, function(VolumeFolder $folder) {
-                    return rtrim($folder->path, '/');
-                });
+                $foldersByPath = ArrayHelper::index($folders, fn(VolumeFolder $folder) => rtrim($folder->path, '/'));
 
                 foreach ($folders as $folder) {
                     $sourcePath = [$baseSourcePathStep];
@@ -1956,16 +1952,9 @@ JS,[
 
             [$value, $unit] = Assets::parseSrcsetSize($size);
 
-            $sizeTransform = $transform ? $transform->toArray([
-                'format',
-                'height',
-                'interlace',
-                'mode',
-                'position',
-                'quality',
-                'width',
-                'fill',
-            ]) : [];
+            $sizeTransform = $transform ? $transform->toArray() : [];
+
+            unset($sizeTransform['name'], $sizeTransform['handle']);
 
             if ($unit === 'w') {
                 $sizeTransform['width'] = (int)$value;
@@ -2148,6 +2137,8 @@ JS,[
             return null;
         }
 
+        $transform ??= $this->_transform;
+
         // Fire a 'beforeDefineUrl' event
         if ($this->hasEventHandlers(self::EVENT_BEFORE_DEFINE_URL)) {
             $event = new DefineAssetUrlEvent([
@@ -2189,7 +2180,6 @@ JS,[
         }
 
         $volume = $this->getVolume();
-        $transform = $transform ?? $this->_transform;
 
         if (
             $transform && (
@@ -2418,7 +2408,7 @@ JS,[
      */
     public function getMimeType(mixed $transform = null): ?string
     {
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         $transform = ImageTransforms::normalizeTransform($transform);
 
         if (!Image::canManipulateAsImage($this->getExtension()) || !$transform || !$transform->format) {
@@ -2446,7 +2436,7 @@ JS,[
             return $ext;
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
         return ImageTransforms::normalizeTransform($transform)?->format ?? $ext;
     }
 
@@ -3475,7 +3465,7 @@ JS;
             return [null, null];
         }
 
-        $transform = $transform ?? $this->_transform;
+        $transform ??= $this->_transform;
 
         if ($transform === null || !Image::canManipulateAsImage($this->getExtension())) {
             return [$this->_width, $this->_height];
@@ -3550,17 +3540,12 @@ JS;
                 throw new FileException(Craft::t('app', 'Could not open file for streaming at {path}', ['path' => $tempPath]));
             }
 
-            if ($this->folderId) {
-                // Delete the old file
-                $oldVolume->deleteFile($oldPath);
-            }
-
             // Upload the file to the new location
             try {
                 $newVolume->writeFileFromStream($newPath, $stream, [
                     Fs::CONFIG_MIMETYPE => FileHelper::getMimeType($tempPath),
                 ]);
-            } catch (VolumeException $exception) {
+            } catch (VolumeException|FsException $exception) {
                 Craft::$app->getErrorHandler()->logException($exception);
                 throw $exception;
             } finally {
@@ -3568,6 +3553,15 @@ JS;
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
+            }
+
+            // if we got this far without an exception, it's okay to delete the file from the old volume
+            if (
+                $oldFolder &&
+                ($oldFolder->id !== $newFolder->id || $oldPath !== $newPath)
+            ) {
+                // Delete the old file
+                $oldVolume->deleteFile($oldPath);
             }
         }
 
@@ -3651,9 +3645,7 @@ JS;
         // Make sure it's *not* within a system directory though
         $systemDirs = $pathService->getSystemPaths();
         $systemDirs = array_map([$this, '_normalizeTempPath'], $systemDirs);
-        $systemDirs = array_filter($systemDirs, function($value) {
-            return ($value !== false);
-        });
+        $systemDirs = array_filter($systemDirs, fn($value) => $value !== false);
 
         foreach ($systemDirs as $dir) {
             if (str_starts_with($tempFilePath, $dir)) {

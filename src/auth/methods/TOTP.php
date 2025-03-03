@@ -12,6 +12,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Craft;
+use craft\helpers\Session as SessionHelper;
 use craft\records\Authenticator as AuthenticatorRecord;
 use craft\web\assets\totp\TotpAsset;
 use craft\web\Session;
@@ -100,7 +101,10 @@ JS, [
             $containerId,
         ]);
 
-        $templateData = array_merge($this->getSetupData(), [
+        return $view->renderTemplate('_components/auth/methods/TOTP/setup.twig', [
+            'secret' => rtrim(chunk_split($secret, 4, ' ')),
+            'user' => $this->user,
+            'qrCode' => $this->generateQrCode($secret),
             'totpFormId' => $totpFormId,
         ]);
 
@@ -167,8 +171,8 @@ JS, [
     }
 
     /**
-     * Gets User's 2FA secret from the database
-     * and returns as a string formatted into a 4 character chunks.
+     * Returns User's 2FA secret from the database
+     * or generates a new one.
      *
      * @return string
      */
@@ -180,13 +184,13 @@ JS, [
         if (empty($secret)) {
             try {
                 $secret = $google2fa->generateSecretKey(32);
-                Craft::$app->getSession()->set($this->secretParam, $secret);
+                SessionHelper::set($this->secretParam, $secret);
             } catch (\Exception $e) {
                 Craft::$app->getErrorHandler()->logException($e);
             }
         }
 
-        return rtrim(chunk_split($secret, 4, ' '));
+        return $secret;
     }
 
     /**

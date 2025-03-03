@@ -327,7 +327,7 @@ class TestSetup
         ini_set('log_errors', '1');
         ini_set('error_log', $storagePath . '/logs/phperrors.log');
 
-        error_reporting(E_ALL);
+        error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
         ini_set('display_errors', '1');
         defined('YII_DEBUG') || define('YII_DEBUG', true);
         defined('CRAFT_ENVIRONMENT') || define('CRAFT_ENVIRONMENT', '');
@@ -491,7 +491,7 @@ class TestSetup
             'site' => $site,
         ]);
 
-        $migration->up();
+        $migration->up(true);
     }
 
     /**
@@ -504,7 +504,7 @@ class TestSetup
      */
     public static function getMockModule(CodeceptionTestCase $test, array $serviceMap = [], ?string $moduleClass = null): Module
     {
-        $moduleClass = $moduleClass ?? self::appClass();
+        $moduleClass ??= self::appClass();
         $serviceMap = $serviceMap ?: self::getCraftServiceMap();
 
         $mockApp = self::getMock($test, $moduleClass);

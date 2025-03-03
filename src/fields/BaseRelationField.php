@@ -9,6 +9,7 @@ namespace craft\fields;
 
 use Craft;
 use craft\base\conditions\ConditionInterface;
+use craft\base\CrossSiteCopyableFieldInterface;
 use craft\base\EagerLoadingFieldInterface;
 use craft\base\Element;
 use craft\base\ElementInterface;
@@ -63,7 +64,8 @@ abstract class BaseRelationField extends Field implements
     EagerLoadingFieldInterface,
     RelationalFieldInterface,
     ThumbableFieldInterface,
-    MergeableFieldInterface
+    MergeableFieldInterface,
+    CrossSiteCopyableFieldInterface
 {
     /**
      * @event ElementCriteriaEvent The event that is triggered when defining the selection criteria for this field.
@@ -650,6 +652,7 @@ JS, [
             $value instanceof ElementQueryInterface &&
             $element?->propagating &&
             $element->isNewForSite &&
+            !$element->isNewSite &&
             !$this->targetSiteId &&
             !$this->showSiteMenu
         ) {
@@ -669,12 +672,9 @@ JS, [
 
         if (is_array($value)) {
             $value = array_values(array_filter($value));
+            $query->andWhere(['elements.id' => $value]);
             if (!empty($value)) {
-                $query
-                    ->andWhere(['elements.id' => $value])
-                    ->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
-            } else {
-                $query->andWhere('0 = 1');
+                $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
             }
         } elseif ($value === null && $element?->id && $this->isFirstInstance($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
@@ -1057,6 +1057,33 @@ JS, [
         ];
     }
 
+    /**
+     * Returns the custom field arguments for the selected source(s).
+     *
+     * @return array
+     * @since 5.6.0
+     */
+    protected function gqlFieldArguments(): array
+    {
+        $elementSourcesService = Craft::$app->getElementSources();
+        $gqlService = Craft::$app->getGql();
+        $fieldLayouts = [];
+        $arguments = [];
+
+        foreach ((array)$this->getInputSources() as $source) {
+            $sourceFieldLayouts = $elementSourcesService->getFieldLayoutsForSource(static::elementType(), $source);
+            foreach ($sourceFieldLayouts as $fieldLayout) {
+                $fieldLayouts[$fieldLayout->uid] = $fieldLayout;
+            }
+        }
+
+        foreach ($fieldLayouts as $fieldLayout) {
+            $arguments += $gqlService->getFieldLayoutArguments($fieldLayout);
+        }
+
+        return $arguments;
+    }
+
     // Events
     // -------------------------------------------------------------------------
 
@@ -1317,7 +1344,7 @@ JS, [
      */
     protected function settingsTemplateVariables(): array
     {
-        $elementType = $this->elementType();
+        $elementType = static::elementType();
 
         $selectionCondition = $this->getSelectionCondition() ?? $this->createSelectionCondition();
         if ($selectionCondition) {
@@ -1332,9 +1359,9 @@ JS, [
                 'label' => Craft::t('app', 'Selectable {type} Condition', [
                     'type' => $elementType::pluralDisplayName(),
                 ]),
-                'instructions' => Craft::t('app', 'Only allow {type} to be selected if they match the following rules:', [
+                'instructions' => StringHelper::upperCaseFirst(Craft::t('app', 'Only allow {type} to be selected if they match the following rules:', [
                     'type' => $elementType::pluralLowerDisplayName(),
-                ]),
+                ])),
             ]);
         }
 

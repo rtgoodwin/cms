@@ -195,7 +195,10 @@ Craft.NestedElementManager = Garnish.Base.extend(
               await this.markAsDirty();
             },
             onDeleteElements: async () => {
-              await this.markAsDirty();
+              if (!(await this.markAsDirty())) {
+                // save the element anyway in case any conditional fields should be shown/hidden
+                this.elementEditor?.checkForm(true);
+              }
             },
             onBeforeUpdateElements: () => {
               if (this.$createBtn) {
@@ -336,7 +339,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
     createElement: async function (attributes) {
       if (this.$createBtn) {
+        if (this.$createBtn.hasClass('loading')) {
+          return;
+        }
+
         this.$createBtn.addClass('loading');
+        Craft.cp.announce(Craft.t('app', 'Loading'));
       }
 
       try {
@@ -400,6 +408,9 @@ Craft.NestedElementManager = Garnish.Base.extend(
           if (this.$createBtn) {
             this.$createBtn.focus();
           }
+
+          // save the element in case any conditional fields should be shown/hidden
+          this.elementEditor?.checkForm(true);
         });
       } catch (e) {
         Craft.cp.displayError(e?.response?.data?.message);
@@ -466,6 +477,11 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
     createElementEditor($element) {
       const slideout = Craft.createElementEditor(this.elementType, $element, {
+        onLoad: () => {
+          slideout.elementEditor.on('update', () => {
+            Craft.Preview.refresh();
+          });
+        },
         onBeforeSubmit: async () => {
           // If the nested element is primarily owned by the same owner element it was queried for,
           // then ensure we're working with a draft and save the nested entry changes to the draft
@@ -539,12 +555,20 @@ Craft.NestedElementManager = Garnish.Base.extend(
         }
       }
 
-      await this.markAsDirty();
+      if (!(await this.markAsDirty())) {
+        // save the element anyway in case any conditional fields should be shown/hidden
+        this.elementEditor?.checkForm(true);
+      }
     },
 
     async addElementCard(element) {
       if (this.$createBtn) {
+        if (this.$createBtn.hasClass('loading')) {
+          return;
+        }
+
         this.$createBtn.addClass('loading');
+        Craft.cp.announce(Craft.t('app', 'Loading'));
       }
 
       let response;

@@ -192,7 +192,7 @@ class UsersController extends Controller
 
         $user = new User($attributesFromArgs);
 
-        if (!$user->validate(array_keys($attributesFromArgs))) {
+        if (!empty($attributesFromArgs) && !$user->validate(array_keys($attributesFromArgs))) {
             $this->stderr('Invalid arguments:' . PHP_EOL . '    - ' . implode(PHP_EOL . '    - ', $user->getErrorSummary(true)) . PHP_EOL, Console::FG_RED);
             return ExitCode::USAGE;
         }
@@ -234,7 +234,7 @@ class UsersController extends Controller
 
         $this->stdout('Saving the user ... ');
 
-        if (!Craft::$app->getElements()->saveElement($user)) {
+        if (!Craft::$app->getElements()->saveElement($user, false)) {
             $this->stderr('failed:' . PHP_EOL . '    - ' . implode(PHP_EOL . '    - ', $user->getErrorSummary(true)) . PHP_EOL, Console::FG_RED);
 
             return ExitCode::USAGE;
@@ -242,9 +242,7 @@ class UsersController extends Controller
 
         $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
 
-        $groupIds = array_merge($this->groupIds, array_map(function($handle) {
-            return Craft::$app->getUserGroups()->getGroupByHandle($handle)->id ?? null;
-        }, $this->groups));
+        $groupIds = array_merge($this->groupIds, array_map(fn($handle) => Craft::$app->getUserGroups()->getGroupByHandle($handle)->id ?? null, $this->groups));
 
         if (!$groupIds) {
             return ExitCode::OK;
@@ -507,7 +505,7 @@ class UsersController extends Controller
      * @return int
      * @since 5.5.0
      */
-    private function remove2fa(string $user): int
+    public function remove2fa(string $user): int
     {
         try {
             $user = $this->_user($user);

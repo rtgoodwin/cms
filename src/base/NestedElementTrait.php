@@ -37,16 +37,24 @@ trait NestedElementTrait
         switch ($handle) {
             case 'owner':
             case 'primaryOwner':
-                /** @var NestedElementInterface[] $sourceElements */
+                /** @var array<NestedElementInterface&self> $sourceElements */
+                $ownerType = $sourceElements[0]->ownerType();
+                if (!$ownerType) {
+                    return false;
+                }
+
                 return [
-                    'elementType' => get_class(reset($sourceElements)),
-                    'map' => array_map(fn(NestedElementInterface $element) => [
-                        'source' => $element->id,
-                        'target' => match ($handle) {
+                    'elementType' => $ownerType,
+                    'map' => array_filter(array_map(function(NestedElementInterface $element) use ($handle) {
+                        $ownerId = match ($handle) {
                             'owner' => $element->getOwnerId(),
                             'primaryOwner' => $element->getPrimaryOwnerId(),
-                        },
-                    ], $sourceElements),
+                        };
+                        return $ownerId ? [
+                            'source' => $element->id,
+                            'target' => $ownerId,
+                        ] : null;
+                    }, $sourceElements)),
                     'criteria' => [
                         'status' => null,
                     ],
@@ -65,6 +73,11 @@ trait NestedElementTrait
      * @var int|null Owner ID
      */
     private ?int $ownerId = null;
+
+    /**
+     * @var class-string<ElementInterface> Owner type
+     */
+    private string $ownerType;
 
     /**
      * @var int|null Field ID
@@ -92,18 +105,26 @@ trait NestedElementTrait
     public bool $updateSearchIndexForOwner = false;
 
     /**
-     * @var ElementInterface|false The primary owner element, or false if [[primaryOwnerId]] is invalid
+     * @var ElementInterface|false|null The primary owner element, or false if [[primaryOwnerId]] is invalid
      * @see getPrimaryOwner()
      * @see setPrimaryOwner()
      */
-    private ElementInterface|false $_primaryOwner;
+    private ElementInterface|false|null $_primaryOwner = null;
 
     /**
-     * @var ElementInterface|false The owner element, or false if [[ownerId]] is invalid
+     * @var ElementInterface|false|null The owner element, or false if [[ownerId]] is invalid
      * @see getOwner()
      * @see setOwner()
      */
-    private ElementInterface|false $_owner;
+    private ElementInterface|false|null $_owner = null;
+
+    public function __clone(): void
+    {
+        parent::__clone();
+
+        $this->_primaryOwner = null;
+        $this->_owner = null;
+    }
 
     /**
      * @inheritdoc
@@ -154,11 +175,36 @@ trait NestedElementTrait
                 return null;
             }
 
-            $this->_primaryOwner = Craft::$app->getElements()->getElementById($primaryOwnerId, null, $this->siteId, [
-                'trashed' => null,
-            ]) ?? false;
-            if (!$this->_primaryOwner) {
-                throw new InvalidConfigException("Invalid owner ID: $primaryOwnerId");
+            $sameSiteElements = isset($this->id, $this->elementQueryResult)
+                ? array_filter($this->elementQueryResult, fn(ElementInterface $element) => $element->siteId === $this->siteId)
+                : [];
+
+            if (!empty($sameSiteElements)) {
+                // Eager-load the primary owner for each of the elements in the result,
+                // as we're probably going to end up needing them too
+                Craft::$app->getElements()->eagerLoadElements($this::class, $sameSiteElements, [
+                    [
+                        'path' => 'primaryOwner',
+                        'criteria' => $this->ownerCriteria(),
+                    ],
+                ]);
+            }
+
+            /** @phpstan-ignore-next-line */
+            if (!isset($this->_primaryOwner) || $this->_primaryOwner === false) {
+                // Either we didn't try, or the primary owner couldn't be eager-loaded for some reason
+                $ownerType = $this->ownerType();
+                if (!$ownerType) {
+                    return null;
+                }
+
+                $query = $ownerType::find()->id($primaryOwnerId);
+                Craft::configure($query, $this->ownerCriteria());
+                $this->_primaryOwner = $query->one() ?? false;
+
+                if (!$this->_primaryOwner) {
+                    throw new InvalidConfigException("Invalid owner ID: $primaryOwnerId");
+                }
             }
         }
 
@@ -206,15 +252,54 @@ trait NestedElementTrait
                 return $this->getPrimaryOwner();
             }
 
-            $this->_owner = Craft::$app->getElements()->getElementById($ownerId, null, $this->siteId, [
-                'trashed' => null,
-            ]) ?? false;
-            if (!$this->_owner) {
-                throw new InvalidConfigException("Invalid owner ID: $ownerId");
+            $sameSiteElements = isset($this->id, $this->elementQueryResult)
+                ? array_filter($this->elementQueryResult, fn(ElementInterface $element) => $element->siteId === $this->siteId)
+                : [];
+
+            if (!empty($sameSiteElements)) {
+                // Eager-load the owner for each of the elements in the result,
+                // as we're probably going to end up needing them too
+                Craft::$app->getElements()->eagerLoadElements($this::class, $sameSiteElements, [
+                    [
+                        'path' => 'owner',
+                        'criteria' => $this->ownerCriteria(),
+                    ],
+                ]);
+            }
+
+            /** @phpstan-ignore-next-line */
+            if (!isset($this->_owner) || $this->_owner === false) {
+                // Either we didn't try, or the owner couldn't be eager-loaded for some reason
+                $ownerType = $this->ownerType();
+                if (!$ownerType) {
+                    return null;
+                }
+
+                $query = $ownerType::find()->id($ownerId);
+                Craft::configure($query, $this->ownerCriteria());
+                $this->_owner = $query->one() ?? false;
+
+                if (!$this->_owner) {
+                    throw new InvalidConfigException("Invalid owner ID: $ownerId");
+                }
             }
         }
 
         return $this->_owner ?: null;
+    }
+
+    private function ownerCriteria(): array
+    {
+        return [
+            'site' => '*',
+            'preferSites' => [$this->siteId],
+            'unique' => true,
+            'status' => null,
+            'drafts' => null,
+            'provisionalDrafts' => null,
+            'revisions' => null,
+            'trashed' => null,
+        ];
     }
 
     /**
@@ -288,14 +373,36 @@ trait NestedElementTrait
     {
         switch ($plan->handle) {
             case 'owner':
-                $this->setOwner(reset($elements));
+                $this->setOwner(reset($elements) ?: null);
                 break;
             case 'primaryOwner':
-                $this->setPrimaryOwner(reset($elements));
+                $this->setPrimaryOwner(reset($elements) ?: null);
                 break;
             default:
                 parent::setEagerLoadedElements($handle, $elements, $plan);
         }
+    }
+
+    /**
+     * Returns the owner element’s type.
+     *
+     * @return class-string<ElementInterface>|null
+     * @since 5.6.0
+     */
+    protected function ownerType(): ?string
+    {
+        if (!isset($this->ownerType)) {
+            $ownerId = $this->getOwnerId();
+            if (!$ownerId) {
+                return null;
+            }
+            $ownerType = Craft::$app->getElements()->getElementTypeById($ownerId);
+            if (!$ownerType) {
+                return null;
+            }
+            $this->ownerType = $ownerType;
+        }
+        return $this->ownerType;
     }
 
     /**

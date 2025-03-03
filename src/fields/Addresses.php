@@ -135,9 +135,7 @@ class Addresses extends Field implements
                 $ids = is_string($ids) ? StringHelper::split($ids) : [$ids];
             }
 
-            $ids = array_map(function($id) {
-                return $id instanceof Address ? $id->id : (int)$id;
-            }, $ids);
+            $ids = array_map(fn($id) => $id instanceof Address ? $id->id : (int)$id, $ids);
 
             $existsQuery->andWhere(["addresses_$ns.id" => $ids]);
         }
@@ -353,8 +351,22 @@ class Addresses extends Field implements
      */
     public function getSettingsHtml(): ?string
     {
+        return $this->settingsHtml(false);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getReadOnlySettingsHtml(): ?string
+    {
+        return $this->settingsHtml(true);
+    }
+
+    private function settingsHtml(bool $readOnly): string
+    {
         return Craft::$app->getView()->renderTemplate('_components/fieldtypes/Addresses/settings.twig', [
             'field' => $this,
+            'readOnly' => $readOnly,
         ]);
     }
 
@@ -388,10 +400,12 @@ class Addresses extends Field implements
             $query->setCachedResult([]);
         } elseif ($value === '*') {
             // preload the nested entries so NestedElementManager::saveNestedElements() doesn't resave them all
-            $query->drafts(null)->status(null)->limit(null);
+            $query->drafts(null)->savedDraftsOnly()->status(null)->limit(null);
             $query->setCachedResult($query->all());
         } elseif ($element && is_array($value)) {
             $query->setCachedResult($this->createAddressesFromSerializedData($value, $element, $fromRequest));
+        } elseif (Craft::$app->getRequest()->getIsPreview()) {
+            $query->withProvisionalDrafts();
         }
 
         return $query;
