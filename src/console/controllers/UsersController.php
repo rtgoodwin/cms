@@ -255,17 +255,16 @@ class UsersController extends Controller
             if ($this->confirm('Send an activation email now?', $this->sendActivationEmail)) {
                 $this->stdout('Sending activation email ... ');
 
-                if (!Craft::$app->getUsers()->sendActivationEmail($user)) {
-                    $this->stderr('failed: Couldn’t send activation email.' . PHP_EOL, Console::FG_RED);
-                    return ExitCode::UNSPECIFIED_ERROR;
+                if (Craft::$app->getUsers()->sendActivationEmail($user)) {
+                    $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
+                    return ExitCode::OK;
                 }
 
-                $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
+                $this->stderr('failed: Couldn’t send activation email.' . PHP_EOL, Console::FG_RED);
             }
 
             $url = Craft::$app->getUsers()->getActivationUrl($user);
-
-            $this->stdout("Activation URL for “{$user->username}”: ");
+            $this->stdout($this->markdownToAnsi("Activation URL for `$user->username`: "));
             $this->stdout($url . PHP_EOL, Console::FG_CYAN, PHP_EOL);
         }
 
