@@ -58,9 +58,11 @@
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
+- Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
 - Added `Craft.ui.createIconPicker()`.
 - Added `Craft.ui.createIconPickerField()`.
+- Added `Craft.ui.icon()`.
 - `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
 
 ### System
