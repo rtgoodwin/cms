@@ -1588,4 +1588,27 @@ Craft.ui = {
 
     return null;
   },
+
+  icon: async function (icon) {
+    if (!Craft.icons) {
+      Craft.icons = {};
+    }
+
+    if (!Craft.icons[icon]) {
+      await Craft.queue.push(async () => {
+        // maybe something else loaded it by now
+        if (Craft.icons[icon]) {
+          return;
+        }
+
+        const {data} = await Craft.sendActionRequest('POST', 'app/icon-svg', {
+          data: {icon},
+        });
+
+        Craft.icons[icon] = data.iconSvg;
+      });
+    }
+
+    return $(Craft.icons[icon])[0];
+  },
 };

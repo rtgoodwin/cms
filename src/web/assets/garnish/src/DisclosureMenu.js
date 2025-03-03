@@ -609,9 +609,29 @@ export default Base.extend(
         el.href = Craft.getUrl(item.url);
       }
       if (item.icon) {
-        el.setAttribute('data-icon', item.icon);
-        if (item.iconColor) {
-          el.classList.add(item.iconColor);
+        if (typeof item.icon === 'string') {
+          el.setAttribute('data-icon', item.icon);
+          if (item.iconColor) {
+            el.classList.add(item.iconColor);
+          }
+        } else {
+          (async () => {
+            let icon;
+            if (item.icon instanceof Element) {
+              icon = item.icon;
+            } else if (typeof item.icon === 'function') {
+              icon = await item.icon();
+            } else {
+              throw 'Unsupported icon type';
+            }
+            const span = document.createElement('span');
+            span.className = 'icon';
+            if (item.iconColor) {
+              span.classList.add(item.iconColor);
+            }
+            span.append(icon);
+            el.prepend(span);
+          })();
         }
       }
       if (item.action) {

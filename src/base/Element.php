@@ -5319,7 +5319,7 @@ JS, [
         do {
             $processedAnyFields = false;
 
-            foreach ($this->fieldLayoutFields(true) as $field) {
+            foreach ($this->fieldLayoutFields(editableOnly: true) as $field) {
                 // Have we already processed this field?
                 if (isset($processedFields[$field->handle])) {
                     continue;
@@ -6627,9 +6627,10 @@ JS,
      * Returns each of this element’s fields.
      *
      * @param bool $visibleOnly Whether to only return fields that are visible for this element
+     * @param bool $editableOnly Whether to only return fields that the current user can edit
      * @return FieldInterface[] This element’s fields
      */
-    protected function fieldLayoutFields(bool $visibleOnly = false): array
+    protected function fieldLayoutFields(bool $visibleOnly = false, bool $editableOnly = false): array
     {
         try {
             $fieldLayout = $this->getFieldLayout();
@@ -6638,7 +6639,13 @@ JS,
         }
 
         if ($fieldLayout) {
-            return $visibleOnly ? $fieldLayout->getVisibleCustomFields($this) : $fieldLayout->getCustomFields();
+            if ($editableOnly) {
+                return $fieldLayout->getEditableCustomFields($this);
+            }
+            if ($visibleOnly) {
+                return $fieldLayout->getVisibleCustomFields($this);
+            }
+            return $fieldLayout->getCustomFields();
         }
 
         return [];

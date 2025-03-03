@@ -310,12 +310,14 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       if (this.settings.sortable) {
         const axis = this.getComponentSortAxis();
         actions.push({
-          icon:
-            axis === 'y'
-              ? 'arrow-up'
-              : Craft.orientation === 'ltr'
-                ? 'arrow-left'
-                : 'arrow-right',
+          icon: async () =>
+            await Craft.ui.icon(
+              axis === 'y'
+                ? 'arrow-up'
+                : Craft.orientation === 'ltr'
+                  ? 'arrow-left'
+                  : 'arrow-right'
+            ),
           label:
             axis === 'y'
               ? Craft.t('app', 'Move up')
@@ -328,12 +330,14 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
           },
         });
         actions.push({
-          icon:
-            axis === 'y'
-              ? 'arrow-down'
-              : Craft.orientation === 'ltr'
-                ? 'arrow-right'
-                : 'arrow-left',
+          icon: async () =>
+            await Craft.ui.icon(
+              axis === 'y'
+                ? 'arrow-down'
+                : Craft.orientation === 'ltr'
+                  ? 'arrow-right'
+                  : 'arrow-left'
+            ),
           label:
             axis === 'y'
               ? Craft.t('app', 'Move down')
@@ -348,7 +352,7 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       }
 
       actions.push({
-        icon: 'remove',
+        icon: async () => await Craft.ui.icon('remove'),
         label: Craft.t('app', 'Remove'),
         callback: () => {
           this.removeComponent($component);

@@ -618,7 +618,10 @@ abstract class BaseOptionsField extends Field implements PreviewableFieldInterfa
      *
      * @return string
      */
-    abstract protected function optionsSettingLabel(): string;
+    protected function optionsSettingLabel(): string
+    {
+        return Craft::t('app', 'Options');
+    }
 
     /**
      * Returns the available options (and optgroups) for the field.

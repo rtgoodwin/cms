@@ -460,7 +460,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
           const ul = disclosureMenu.addGroup();
           disclosureMenu.addItem(
             {
-              icon: 'trash',
+              icon: async () => await Craft.ui.icon('trash'),
               label: this.settings.deleteLabel || Craft.t('app', 'Delete'),
               destructive: true,
               onActivate: () => {

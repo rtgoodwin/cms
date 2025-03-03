@@ -166,6 +166,7 @@ export default Base.extend(
           });
         }
 
+        Garnish.$bod.addClass('no-scroll');
         this.onShow();
       }
     },
@@ -231,6 +232,7 @@ export default Base.extend(
       }
 
       this.visible = false;
+      Garnish.$bod.removeClass('no-scroll');
       Garnish.Modal.visibleModal = null;
       Garnish.uiLayerManager.removeLayer();
       Garnish.resetModalBackgroundLayerVisibility();

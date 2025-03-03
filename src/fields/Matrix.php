@@ -847,13 +847,10 @@ class Matrix extends Field implements
         if ($value instanceof EntryQuery) {
             $value = $value->getCachedResult() ?? (clone $value)
                 ->drafts(null)
+                ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
-                ->andWhere([
-                    'or',
-                    ['elements.draftId' => null],
-                    ['elements.canonicalId' => null],
-                ])
+                ->eagerly()
                 ->all();
         }
 

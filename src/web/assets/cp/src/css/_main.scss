@@ -2180,6 +2180,12 @@ ul.icons {
 }
 
 /* button groups */
+.btngroup-container {
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+}
+
 .btngroup {
   position: relative;
   z-index: 1;
@@ -4285,15 +4291,6 @@ table {
   }
 }
 
-.tableview {
-  .inline-chips {
-    .chip {
-      padding: 0;
-      background-color: transparent;
-    }
-  }
-}
-
 .export-form {
   position: relative;
 
@@ -5479,7 +5476,8 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px dashed var(--medium-hairline-color) !important;
   }
 
-  &.hairline {
+  &.hairline,
+  &:is(fieldset) {
     background-color: transparent !important;
     box-shadow: none;
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
@@ -5518,6 +5516,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
       width: calc(100% + #{24 + 24}px);
       height: 100%;
     }
+  }
+
+  &:is(fieldset) > legend {
+    font-weight: 600;
+    color: var(--light-text-color);
   }
 
   hr {
@@ -7667,7 +7670,8 @@ table.editable {
 .passwordwrapper,
 .border-box,
 .selectize.multiselect .selectize-input,
-.multiselect > select {
+.multiselect > select,
+.CodeMirror {
   @include mixins.input-styles;
 }
 
@@ -7768,6 +7772,22 @@ textarea.text.fullwidth {
   .selectize.multiselect .selectize-input.focus {
     position: relative;
     z-index: 2;
+  }
+}
+
+.CodeMirror {
+  height: auto !important;
+  min-height: 70px;
+
+  &.CodeMirror-focused {
+    @include mixins.input-focused-styles;
+  }
+
+  &.cm-s-readonly {
+    &,
+    * {
+      cursor: not-allowed;
+    }
   }
 }
 

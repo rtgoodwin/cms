@@ -430,7 +430,8 @@ abstract class BaseField extends FieldLayoutElement
             'translatable' => $translatable,
             'translationDescription' => $this->translationDescription($element, $static),
             'actionMenuItems' => $actionMenuItems,
-            'errors' => !$static ? $this->errors($element) : [],
+            // show errors regardless of whether the field is static
+            'errors' => $this->errors($element),
         ]);
     }
 

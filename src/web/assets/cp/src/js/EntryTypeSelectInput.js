@@ -29,7 +29,7 @@ Craft.EntryTypeSelectInput = Craft.ComponentSelectInput.extend(
           $component,
           [
             {
-              icon: 'gear',
+              icon: async () => await Craft.ui.icon('gear'),
               label: Craft.t('app', 'Settings'),
               callback: () => {
                 this.createSettings($component);

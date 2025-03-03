@@ -1152,6 +1152,9 @@ class Cp
                 'showStatus' => $showStatus,
                 'showThumb' => $showThumb,
                 'size' => $size,
+                'attributes' => [
+                    'class' => ['chromeless'],
+                ],
             ]);
 
         if (!empty($elements)) {
@@ -1163,6 +1166,9 @@ class Cp
                     'showStatus' => $showStatus,
                     'showThumb' => $showThumb,
                     'size' => $size,
+                    'attributes' => [
+                        'class' => ['chromeless'],
+                    ],
                 ]);
             }
             $html .= Html::tag('span', '+' . Craft::$app->getFormatter()->asInteger(count($elements)), [
@@ -1699,6 +1705,19 @@ JS, [
             ]) .
             Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
+    }
+
+    /**
+     * Renders a button’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException
+     * @since 5.7.0
+     */
+    public static function buttonHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/button.twig', $config);
     }
 
     /**

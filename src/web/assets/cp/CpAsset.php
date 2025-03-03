@@ -453,6 +453,27 @@ JS;
             '{attribute} should contain at least {min, number} {min, plural, one{character} other{characters}}.',
             '{attribute} should contain at most {max, number} {max, plural, one{character} other{characters}}.',
         ]);
+
+        $view->registerIcons([
+            'arrow-down',
+            'arrow-left',
+            'arrow-right',
+            'arrow-up',
+            'arrows-rotate',
+            'asterisk',
+            'asterisk-slash',
+            'clipboard',
+            'edit',
+            'gear',
+            'image',
+            'image-slash',
+            'pencil',
+            'plus',
+            'remove',
+            'share',
+            'trash',
+            'xmark',
+        ]);
     }
 
     private function _craftData(): array
