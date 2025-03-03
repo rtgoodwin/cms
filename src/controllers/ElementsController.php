@@ -99,6 +99,8 @@ class ElementsController extends Controller
     private ?string $_selectedTab = null;
     private bool $_applyParams;
     private bool $_prevalidate;
+    private bool $_asUnpublishedDraft;
+    private bool $_deleteProvisionalDraft;
 
     /**
      * @inheritdoc
@@ -139,6 +141,8 @@ class ElementsController extends Controller
         $this->_selectedTab = $this->_param('selectedTab');
         $this->_applyParams = $this->_param('applyParams', true) || !$this->request->getIsPost();
         $this->_prevalidate = (bool)$this->_param('prevalidate');
+        $this->_asUnpublishedDraft = (bool)$this->_param('asUnpublishedDraft');
+        $this->_deleteProvisionalDraft = (bool)$this->_param('deleteProvisionalDraft');
 
         unset($this->_attributes['failMessage']);
         unset($this->_attributes['redirect']);
@@ -971,6 +975,7 @@ JS, [
                 Html::actionInput('elements/duplicate') .
                 Html::redirectInput('{cpEditUrl}') .
                 Html::hiddenInput('elementId', (string)$canonical->id) .
+                Html::hiddenInput('asUnpublishedDraft', '1') .
                 Html::button(Craft::t('app', 'Save as a new {type}', ['type' => $element::lowerDisplayName()]), [
                     'class' => ['btn', 'formsubmit'],
                 ]) .
@@ -1571,11 +1576,7 @@ JS, [
         /** @var Element|DraftBehavior|null $element */
         $element = $this->_element();
 
-        if (
-            !$element ||
-            ($element->getIsDraft() && !$element->isProvisionalDraft && !$element->getIsUnpublishedDraft()) ||
-            $element->getIsRevision()
-        ) {
+        if (!$element || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
         }
 
@@ -1585,7 +1586,8 @@ JS, [
         $user = static::currentUser();
 
         // save as a new is now available to people who can create drafts
-        if ($element::hasDrafts()) {
+        $asUnpublishedDraft = $this->_asUnpublishedDraft && $element::hasDrafts();
+        if ($asUnpublishedDraft) {
             $authorized = $elementsService->canDuplicateAsDraft($element, $user);
         } else {
             $authorized = $elementsService->canDuplicate($element, $user);
@@ -1595,14 +1597,24 @@ JS, [
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
+        $newAttributes = [
+            'isProvisionalDraft' => false,
+            'draftId' => null,
+        ];
+
+        if ($element instanceof NestedElementInterface) {
+            $newAttributes += [
+                'primaryOwnerId' => $element->getOwnerId(),
+                'ownerId' => $element->getOwnerId(),
+                'sortOrder' => null,
+            ];
+        }
+
         try {
             $newElement = $elementsService->duplicateElement(
                 $element,
-                [
-                    'isProvisionalDraft' => false,
-                    'draftId' => null,
-                ],
-                asUnpublishedDraft: $element::hasDrafts(),
+                $newAttributes,
+                asUnpublishedDraft: $asUnpublishedDraft,
             );
         } catch (InvalidElementException $e) {
             return $this->_asFailure($e->element, Craft::t('app', 'Couldn’t duplicate {type}.', [
@@ -1614,7 +1626,7 @@ JS, [
 
         // If the original element is a provisional draft,
         // delete the draft as the changes are likely no longer wanted.
-        if ($element->isProvisionalDraft) {
+        if ($this->_deleteProvisionalDraft && $element->isProvisionalDraft) {
             Craft::$app->getElements()->deleteElement($element);
         }
 

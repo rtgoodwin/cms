@@ -180,37 +180,9 @@
         if (this.canAddMoreEntries()) {
           this.$addEntryBtn.removeClass('disabled').removeAttr('aria-disabled');
           this.$addEntryMenuBtn.removeClass('disabled');
-
-          for (let i = 0; i < this.entrySelect.$items.length; i++) {
-            const entry = this.entrySelect.$items.eq(i).data('entry');
-
-            if (entry) {
-              entry.$actionMenu
-                .find('button[data-action=add]')
-                .parent()
-                .removeClass('disabled');
-              entry.$actionMenu
-                .find('button[data-action=add]')
-                .removeAttr('aria-disabled');
-            }
-          }
         } else {
           this.$addEntryBtn.addClass('disabled').attr('aria-disabled', 'true');
           this.$addEntryMenuBtn.addClass('disabled');
-
-          for (let i = 0; i < this.entrySelect.$items.length; i++) {
-            const entry = this.entrySelect.$items.eq(i).data('entry');
-
-            if (entry) {
-              entry.$actionMenu
-                .find('button[data-action=add]')
-                .parent()
-                .addClass('disabled');
-              entry.$actionMenu
-                .find('button[data-action=add]')
-                .attr('aria-disabled', 'true');
-            }
-          }
         }
       },
 
@@ -230,7 +202,7 @@
         }, 250);
       },
 
-      async addEntry(type, $insertBefore, autofocus) {
+      async addEntry(type, $insertBefore, autofocus = true, params = {}) {
         if (!this.canAddMoreEntries()) {
           this.updateStatusMessage();
           return;
@@ -257,15 +229,18 @@
             'POST',
             'matrix/create-entry',
             {
-              data: {
-                fieldId: this.settings.fieldId,
-                entryTypeId: this.entryTypesByHandle[type].id,
-                ownerId: this.settings.ownerId,
-                ownerElementType: this.settings.ownerElementType,
-                siteId: this.settings.siteId,
-                namespace: this.settings.namespace,
-                staticEntries: this.settings.staticEntries,
-              },
+              data: Object.assign(
+                {
+                  fieldId: this.settings.fieldId,
+                  entryTypeId: this.entryTypesByHandle[type].id,
+                  ownerId: this.settings.ownerId,
+                  ownerElementType: this.settings.ownerElementType,
+                  siteId: this.settings.siteId,
+                  namespace: this.settings.namespace,
+                  staticEntries: this.settings.staticEntries,
+                },
+                params
+              ),
             }
           );
 
@@ -274,7 +249,7 @@
           // Pause the element editor
           await this.elementEditor?.pause();
 
-          if ($insertBefore) {
+          if ($insertBefore?.length) {
             $entry.insertBefore($insertBefore);
           } else {
             $entry.appendTo(this.$entriesContainer);
@@ -304,7 +279,7 @@
               this.updateAddEntryBtn();
 
               Garnish.requestAnimationFrame(() => {
-                if (typeof autofocus === 'undefined' || autofocus) {
+                if (autofocus) {
                   // Scroll to the entry
                   Garnish.scrollContainerToElement($entry);
                   // Focus on the first focusable element
@@ -530,7 +505,7 @@
 
       const $actionMenuBtn = this.$container.find('> .actions .action-btn');
       const actionDisclosure =
-        $actionMenuBtn.data('trigger') ||
+        $actionMenuBtn.data('disclosureMenu') ||
         new Garnish.DisclosureMenu($actionMenuBtn);
 
       this.$actionMenu = actionDisclosure.$container;
@@ -538,28 +513,46 @@
 
       actionDisclosure.on('show', () => {
         this.$container.addClass('active');
-        if (this.$container.prev('.matrixblock').length) {
-          this.$actionMenu
-            .find('button[data-action=moveUp]:first')
-            .parent()
-            .removeClass('hidden');
+        const hideActions = [];
+
+        if (this.collapsed) {
+          hideActions.push('collapse');
         } else {
-          this.$actionMenu
-            .find('button[data-action=moveUp]:first')
-            .parent()
-            .addClass('hidden');
+          hideActions.push('expand');
         }
-        if (this.$container.next('.matrixblock').length) {
-          this.$actionMenu
-            .find('button[data-action=moveDown]:first')
-            .parent()
-            .removeClass('hidden');
+
+        if (this.$container.hasClass('disabled-entry')) {
+          hideActions.push('disable');
         } else {
-          this.$actionMenu
-            .find('button[data-action=moveDown]:first')
-            .parent()
-            .addClass('hidden');
+          hideActions.push('enable');
         }
+
+        if (!this.$container.prev('.matrixblock').length) {
+          hideActions.push('moveUp');
+        }
+
+        if (!this.$container.next('.matrixblock').length) {
+          hideActions.push('moveDown');
+        }
+
+        if (!this.matrix.canAddMoreEntries()) {
+          hideActions.push('add');
+        }
+
+        const $buttons = this.$actionMenu.find('button[data-action]');
+        const $hideButtons = hideActions.length
+          ? $buttons.filter(
+              hideActions.map((a) => `[data-action=${a}]`).join(',')
+            )
+          : $();
+
+        const disclosureMenu = this.$actionMenu.data('disclosureMenu');
+        $hideButtons.each((i, button) => {
+          disclosureMenu.hideItem(button);
+        });
+        $buttons.not($hideButtons).each((i, button) => {
+          disclosureMenu.showItem(button);
+        });
       });
 
       actionDisclosure.on('hide', () => {
@@ -683,17 +676,6 @@
 
       this.$tabContainer.hide();
 
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=collapse]:first')
-          .parent()
-          .addClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=expand]:first')
-          .parent()
-          .removeClass('hidden');
-      }, 200);
-
       // Remember that?
       if (!this.isNew) {
         Craft.MatrixInput.rememberCollapsedEntryId(this.id);
@@ -769,17 +751,6 @@
         }
       );
 
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=collapse]:first')
-          .parent()
-          .removeClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=expand]:first')
-          .parent()
-          .addClass('hidden');
-      }, 200);
-
       // Remember that?
       if (!this.isNew && typeof Storage !== 'undefined') {
         const collapsedEntries = Craft.MatrixInput.getCollapsedEntryIds();
@@ -803,35 +774,12 @@
     disable: function () {
       this.$container.children('input[name$="[enabled]"]:first').val('');
       this.$container.addClass('disabled-entry');
-
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=disable]:first')
-          .parent()
-          .addClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=enable]:first')
-          .parent()
-          .removeClass('hidden');
-      }, 200);
-
       this.collapse(true);
     },
 
     enable: function () {
       this.$container.children('input[name$="[enabled]"]:first').val('1');
       this.$container.removeClass('disabled-entry');
-
-      setTimeout(() => {
-        this.$actionMenu
-          .find('button[data-action=disable]:first')
-          .parent()
-          .removeClass('hidden');
-        this.$actionMenu
-          .find('button[data-action=enable]:first')
-          .parent()
-          .addClass('hidden');
-      }, 200);
     },
 
     moveUp: function () {
@@ -928,6 +876,20 @@
         case 'add': {
           const type = $option.data('type');
           this.matrix.addEntry(type, this.$container);
+          break;
+        }
+
+        case 'duplicate': {
+          const type = this.$container.data('type');
+          const elementEditor = this.matrix.elementEditor;
+          this.matrix.addEntry(
+            type,
+            this.$container.next('.matrixblock'),
+            true,
+            {
+              duplicate: elementEditor?.getDraftElementId(this.id) || this.id,
+            }
+          );
           break;
         }
 

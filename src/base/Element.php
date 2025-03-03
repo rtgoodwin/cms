@@ -3851,6 +3851,10 @@ abstract class Element extends Component implements ElementInterface
                     ]),
                     'action' => 'elements/duplicate',
                     'redirect' => '{cpEditUrl}',
+                    'params' => [
+                        'asUnpublishedDraft' => true,
+                        'deleteProvisionalDraft' => true,
+                    ],
                 ];
             }
         }
