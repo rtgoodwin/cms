@@ -2354,7 +2354,7 @@ JS,[
             'srcset' => implode(', ', $srcsets),
             'alt' => $this->thumbAlt(),
             'data' => [
-                'craft-animated' => $this->getIsAnimated(),
+                'animated' => $this->getIsAnimated(),
             ],
         ]);
     }
@@ -3403,7 +3403,7 @@ JS;
                 'kind' => $this->kind,
                 'alt' => $this->alt,
                 'filename' => $this->filename,
-                'craft-animated' => $this->getIsAnimated(),
+                'animated' => $this->getIsAnimated(),
             ],
         ];
 

@@ -312,7 +312,7 @@ export class AnimationBlocker {
       (extension) => src.includes(extension) || srcset.includes(extension)
     );
 
-    return hasExpectedExtension || image.hasAttribute('data-craft-animated');
+    return hasExpectedExtension || image.hasAttribute('data-animated');
   }
 
   static getAllPotentiallyAnimated(): HTMLImageElement[] {

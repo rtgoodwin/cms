@@ -150,7 +150,7 @@ Craft.ElementThumbLoader.Worker = Garnish.Base.extend({
       sizes: $container.attr('data-sizes'),
       srcset: $container.attr('data-srcset'),
       alt: $container.attr('data-alt') || '',
-      'data-craft-animated': $container.attr('data-craft-animated'),
+      'data-animated': $container.attr('data-animated'),
     });
     this.addListener($img, 'load,abort,error', 'loadNext');
     $img.appendTo($container);
