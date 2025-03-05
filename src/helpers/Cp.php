@@ -715,9 +715,8 @@ class Cp
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
-                ],
+                'role' => 'none',
+                'tabindex' => '-1',
             ]) : '') .
             Html::endTag('div') . // .card-actions
             Html::endTag('div'); // .card-actions-container
