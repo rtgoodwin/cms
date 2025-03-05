@@ -20,6 +20,8 @@
 - Added “Icon” and “Color” settings to Checkboxes, Dropdown, Multi-select, and Radio Buttons field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))  
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
+- Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
+- Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
 - Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
