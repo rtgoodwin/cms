@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.11 - 2025-03-04
 
 - Added `craft\base\conditions\BaseTextConditionRule::isEmpty()`.
 - Added `craft\htmlpurifier\RelAttrLinkTypeDef`.
@@ -19,7 +19,9 @@
 - Fixed a bug where two entries could be created simultaneously when creating a new entry via the “New entry” menu on the Entries index page. ([#16487](https://github.com/craftcms/cms/issues/16487))
 - Fixed an error that could occur if a field was removed from a field layout, if another field had been conditional based on it. ([#16801](https://github.com/craftcms/cms/issues/16801))
 - Fixed an error that occurred when attempting to save a nested entry via a slideout, which had been duplicated from another entry and wasn’t yet fully saved. ([#16807](https://github.com/craftcms/cms/issues/16807))
-- Fixed a styling issue. ([#16791](https://github.com/craftcms/cms/issues/16791))
+- Fixed a bug where field values could be lost after switching entry types. ([#16797](https://github.com/craftcms/cms/issues/16797))
+- Fixed a bug where focus wasn’t returned to the action menu trigger after closing a field layout element’s settings slideout. ([#16824](https://github.com/craftcms/cms/pull/16824))
+- Fixed styling issues. ([#16791](https://github.com/craftcms/cms/issues/16791), [#16823](https://github.com/craftcms/cms/issues/16823))
 
 ## 5.6.10.2 - 2025-02-26
 
