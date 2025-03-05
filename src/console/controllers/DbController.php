@@ -87,12 +87,7 @@ class DbController extends Controller
      *
      * Note that this can cause table locking, which could interfere with SQL being executed.
      *
-     *  Example:
-     *  ```
-     *  php craft db/repair
-     *  ```
-     *
-     * @since 4.15
+     * @since 4.15.0
      * @see https://dev.mysql.com/doc/refman/8.4/en/optimize-table.html
      * @see https://www.postgresql.org/docs/current/sql-analyze.html
      */
@@ -192,21 +187,16 @@ class DbController extends Controller
 
         $this->stdout('Repairing all database tables ... ' . PHP_EOL);
 
+        if ($db->getIsMysql()) {
+            $sql = 'OPTIMIZE TABLE [[%s]]';
+        } else {
+            $sql = 'ANALYZE VERBOSE [[%s]]';
+        }
+
         foreach ($tableNames as $tableName) {
-            $this->stdout('    - Repairing ');
-            $this->stdout($tableName, Console::FG_CYAN);
-            $this->stdout(' ... ');
-
-            if ($db->getDriverName() === Connection::DRIVER_MYSQL) {
-                $sql = 'OPTIMIZE TABLE ' . $db->quoteTableName($tableName) . ';';
-            } elseif ($db->getDriverName() === Connection::DRIVER_PGSQL) {
-                $sql = 'ANALYZE VERBOSE ' . $db->quoteTableName($tableName) . ';';
-            } else {
-                throw new NotSupportedException('Unknown database driver.');
-            }
-
-            Craft::$app->getDb()->createCommand($sql)->execute();
-            $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
+            $this->do("Repairing `$tableName`", function() use ($db, $sql, $tableName) {
+                $db->createCommand(sprintf($sql, $tableName))->execute();
+            });
         }
 
         $this->stdout('Finished repairing all database tables.' . PHP_EOL . PHP_EOL, Console::FG_GREEN);
