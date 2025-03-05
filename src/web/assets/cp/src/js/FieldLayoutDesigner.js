@@ -380,7 +380,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       readOnly: false,
     },
 
-    async createSlideout(data, js) {
+    async createSlideout(data, js, settings = {}) {
       const $body = $('<div/>', {class: 'fld-element-settings-body'});
       $('<div/>', {class: 'fields', html: data.settingsHtml}).appendTo($body);
       const $footer = $('<div/>', {class: 'fld-element-settings-footer'});
@@ -400,15 +400,21 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
         .appendTo($footer);
       const $contents = $body.add($footer);
 
-      const slideout = new Craft.Slideout($contents, {
-        containerElement: 'form',
-        containerAttributes: {
-          action: '',
-          method: 'post',
-          novalidate: '',
-          class: 'fld-element-settings',
-        },
-      });
+      const slideout = new Craft.Slideout(
+        $contents,
+        Object.assign(
+          {
+            containerElement: 'form',
+            containerAttributes: {
+              action: '',
+              method: 'post',
+              novalidate: '',
+              class: 'fld-element-settings',
+            },
+          },
+          settings
+        )
+      );
       slideout.on('open', () => {
         // Hold off a sec until it's positioned...
         Garnish.requestAnimationFrame(() => {
@@ -522,7 +528,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
     disclosureMenu.addItem(
       {
         label: Craft.t('app', 'Settings'),
-        icon: 'gear',
+        icon: async () => await Craft.ui.icon('gear'),
         onActivate: () => {
           this.createSettings();
         },
@@ -537,7 +543,10 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
           Craft.orientation === 'ltr'
             ? Craft.t('app', 'Move to the left')
             : Craft.t('app', 'Move to the right'),
-        icon: Craft.orientation === 'ltr' ? 'arrow-left' : 'arrow-right',
+        icon: async () =>
+          await Craft.ui.icon(
+            Craft.orientation === 'ltr' ? 'arrow-left' : 'arrow-right'
+          ),
         onActivate: () => {
           this.moveLeft();
         },
@@ -551,7 +560,10 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
           Craft.orientation === 'ltr'
             ? Craft.t('app', 'Move to the right')
             : Craft.t('app', 'Move to the left'),
-        icon: Craft.orientation === 'ltr' ? 'arrow-right' : 'arrow-left',
+        icon: async () =>
+          await Craft.ui.icon(
+            Craft.orientation === 'ltr' ? 'arrow-right' : 'arrow-left'
+          ),
         onActivate: () => {
           this.moveRight();
         },
@@ -562,7 +574,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
     disclosureMenu.addItem(
       {
         label: Craft.t('app', 'Remove'),
-        icon: 'xmark',
+        icon: async () => await Craft.ui.icon('xmark'),
         destructive: true,
         onActivate: () => {
           this.destroy();
@@ -604,7 +616,9 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
     }
 
     this.settingsNamespace = data.namespace;
-    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data);
+    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data, null, {
+      triggerElement: this.$actionBtn,
+    });
 
     this.slideout.$container.on('submit', (ev) => {
       ev.preventDefault();
@@ -795,6 +809,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
 Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
   tab: null,
   $container: null,
+  $actionBtn: null,
 
   uid: null,
   isMandatory: false,
@@ -891,7 +906,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
 
     // create the action menu
     const menuId = `actionmenu${Math.floor(Math.random() * 1000000)}`;
-    const $actionBtn = $('<button/>', {
+    this.$actionBtn = $('<button/>', {
       type: 'button',
       class: 'btn action-btn',
       'data-disclosure-trigger': 'true',
@@ -906,7 +921,9 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
       class: 'menu menu--disclosure',
       'data-disclosure-menu': 'true',
     }).appendTo(this.$container);
-    const disclosureMenu = $actionBtn.disclosureMenu().data('disclosureMenu');
+    const disclosureMenu = this.$actionBtn
+      .disclosureMenu()
+      .data('disclosureMenu');
 
     let makeRequiredBtn, dropRequiredBtn, makeThumbnailBtn, dropThumbnailBtn;
 
@@ -915,7 +932,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     if (this.hasSettings && !this.tab.designer.settings.readOnly) {
       disclosureMenu.addItem({
         label: Craft.t('app', 'Settings'),
-        icon: 'gear',
+        icon: async () => await Craft.ui.icon('gear'),
         onActivate: () => {
           this.createSettings();
         },
@@ -933,7 +950,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
         makeRequiredBtn = disclosureMenu.addItem(
           {
             label: Craft.t('app', 'Make required'),
-            icon: 'asterisk',
+            icon: async () => await Craft.ui.icon('asterisk'),
             iconColor: 'rose',
             onActivate: () => {
               this.makeRequired();
@@ -945,7 +962,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
         dropRequiredBtn = disclosureMenu.addItem(
           {
             label: Craft.t('app', 'Make optional'),
-            icon: 'asterisk-slash',
+            icon: async () => await Craft.ui.icon('asterisk-slash'),
             iconColor: 'gray',
             onActivate: () => {
               this.dropRequired();
@@ -959,7 +976,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
         makeThumbnailBtn = disclosureMenu.addItem(
           {
             label: Craft.t('app', 'Use for element thumbnails'),
-            icon: 'image',
+            icon: async () => await Craft.ui.icon('image'),
             iconColor: 'violet',
             onActivate: () => {
               this.makeThumbnail();
@@ -970,7 +987,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
         dropThumbnailBtn = disclosureMenu.addItem(
           {
             label: Craft.t('app', 'Don’t use for element thumbnails'),
-            icon: 'image-slash',
+            icon: async () => await Craft.ui.icon('image-slash'),
             iconColor: 'gray',
             onActivate: () => {
               this.dropThumbnail();
@@ -985,7 +1002,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     const moveUpBtn = disclosureMenu.addItem(
       {
         label: Craft.t('app', 'Move up'),
-        icon: 'arrow-up',
+        icon: async () => await Craft.ui.icon('arrow-up'),
         onActivate: () => {
           this.moveUp();
         },
@@ -995,7 +1012,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     const moveDownBtn = disclosureMenu.addItem(
       {
         label: Craft.t('app', 'Move down'),
-        icon: 'arrow-down',
+        icon: async () => await Craft.ui.icon('arrow-down'),
         onActivate: () => {
           this.moveDown();
         },
@@ -1007,7 +1024,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
       disclosureMenu.addItem(
         {
           label: Craft.t('app', 'Remove'),
-          icon: 'xmark',
+          icon: async () => await Craft.ui.icon('xmark'),
           destructive: true,
           onActivate: () => {
             this.destroy();
@@ -1063,7 +1080,9 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     }
 
     this.settingsNamespace = data.namespace;
-    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data);
+    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data, null, {
+      triggerElement: this.$actionBtn,
+    });
 
     this.slideout.$container.on('submit', (ev) => {
       ev.preventDefault();

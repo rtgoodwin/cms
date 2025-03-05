@@ -715,9 +715,8 @@ class Cp
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
-                ],
+                'role' => 'none',
+                'tabindex' => '-1',
             ]) : '') .
             Html::endTag('div') . // .card-actions
             Html::endTag('div'); // .card-actions-container
@@ -933,6 +932,7 @@ class Cp
                     'owner-id' => $element instanceof NestedElementInterface ? $element->getOwnerId() : null,
                     'owner-is-canonical' => self::elementOwnerIsCanonical($element),
                     'site-id' => $element->siteId,
+                    'is-unpublished-draft' => $element->getIsUnpublishedDraft(),
                     'status' => $element->getStatus(),
                     'label' => (string)$element,
                     'url' => $element->getUrl(),
@@ -1267,6 +1267,7 @@ class Cp
             ])
             ->values()
             ->all();
+        $sortOptionsKey = 'baseSortOptions';
 
         $tableColumns = Craft::$app->getElementSources()->getAvailableTableAttributes($elementType);
 
@@ -1354,6 +1355,9 @@ class Cp
                         'defaultDir' => $option['defaultDir'],
                     ], $elementSourcesService->getSortOptionsForFieldLayouts($config['fieldLayouts'])),
                 );
+                // Don't let sources.twig merge sortOptions with anything else!
+                $sortOptionsKey = 'sortOptions';
+
                 $tableColumns = array_merge(
                     $tableColumns,
                     $elementSourcesService->getTableAttributesForFieldLayouts($config['fieldLayouts']),
@@ -1414,7 +1418,7 @@ JS, [
             Html::tag('nav', $view->renderTemplate('_elements/sources', [
                 'elementType' => $elementType,
                 'sources' => $sources,
-                'baseSortOptions' => $sortOptions,
+                $sortOptionsKey => $sortOptions,
                 'tableColumns' => $tableColumns,
                 'defaultTableColumns' => $config['defaultTableColumns'],
             ], View::TEMPLATE_MODE_CP)) .
@@ -1701,6 +1705,19 @@ JS, [
             ]) .
             Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
+    }
+
+    /**
+     * Renders a button’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException
+     * @since 5.7.0
+     */
+    public static function buttonHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/button.twig', $config);
     }
 
     /**

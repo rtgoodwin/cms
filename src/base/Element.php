@@ -66,13 +66,13 @@ use craft\events\SetEagerLoadedElementsEvent;
 use craft\events\SetElementRouteEvent;
 use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\CustomField;
+use craft\gql\interfaces\Element as ElementGqlType;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
-use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\helpers\Template;
 use craft\helpers\UrlHelper;
@@ -85,6 +85,8 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -2131,6 +2133,14 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return ElementGqlType::getType();
+    }
+
+    /**
+     * @inheritdoc
      * @since 3.3.0
      */
     public static function gqlScopesByContext(mixed $context): array
@@ -3840,6 +3850,10 @@ abstract class Element extends Component implements ElementInterface
                     ]),
                     'action' => 'elements/duplicate',
                     'redirect' => '{cpEditUrl}',
+                    'params' => [
+                        'asUnpublishedDraft' => true,
+                        'deleteProvisionalDraft' => true,
+                    ],
                 ];
             }
         }
@@ -5009,6 +5023,23 @@ JS, [
     /**
      * @inheritdoc
      */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function setFieldValues(array $values): void
     {
         foreach ($values as $fieldHandle => $value) {
@@ -5279,7 +5310,7 @@ JS, [
         do {
             $processedAnyFields = false;
 
-            foreach ($this->fieldLayoutFields(true) as $field) {
+            foreach ($this->fieldLayoutFields(editableOnly: true) as $field) {
                 // Have we already processed this field?
                 if (isset($processedFields[$field->handle])) {
                     continue;
@@ -5919,27 +5950,6 @@ JS, [
     protected function slugFieldHtml(bool $static): string
     {
         $slug = isset($this->slug) && !ElementHelper::isTempSlug($this->slug) ? $this->slug : null;
-
-        if (!$slug && !$static) {
-            $view = Craft::$app->getView();
-            $site = $this->getSite();
-            $charMapJs = Json::encode($site->language !== Craft::$app->language
-                ? StringHelper::asciiCharMap(true, $site->language)
-                : null
-            );
-
-            Craft::$app->getView()->registerJsWithVars(
-                fn($titleSelector, $slugSelector) => <<<JS
-new Craft.SlugGenerator($titleSelector, $slugSelector, {
-    charMap: $charMapJs,
-})
-JS,
-                [
-                    sprintf('#%s', $view->namespaceInputId('title')),
-                    sprintf('#%s', $view->namespaceInputId('slug')),
-                ]
-            );
-        }
 
         return Cp::textFieldHtml([
             'status' => $this->getAttributeStatus('slug'),
@@ -6587,9 +6597,10 @@ JS,
      * Returns each of this element’s fields.
      *
      * @param bool $visibleOnly Whether to only return fields that are visible for this element
+     * @param bool $editableOnly Whether to only return fields that the current user can edit
      * @return FieldInterface[] This element’s fields
      */
-    protected function fieldLayoutFields(bool $visibleOnly = false): array
+    protected function fieldLayoutFields(bool $visibleOnly = false, bool $editableOnly = false): array
     {
         try {
             $fieldLayout = $this->getFieldLayout();
@@ -6598,7 +6609,13 @@ JS,
         }
 
         if ($fieldLayout) {
-            return $visibleOnly ? $fieldLayout->getVisibleCustomFields($this) : $fieldLayout->getCustomFields();
+            if ($editableOnly) {
+                return $fieldLayout->getEditableCustomFields($this);
+            }
+            if ($visibleOnly) {
+                return $fieldLayout->getVisibleCustomFields($this);
+            }
+            return $fieldLayout->getCustomFields();
         }
 
         return [];

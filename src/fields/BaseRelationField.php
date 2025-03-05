@@ -535,7 +535,7 @@ JS, [
             $value = $element->getFieldValue($this->handle);
 
             if ($value instanceof ElementQueryInterface) {
-                $value = $this->_all($value, $element);
+                $value = $this->_all($value, $element)->eagerly();
             }
 
             $arrayValidator = new NumberValidator([
@@ -577,7 +577,8 @@ JS, [
             $value
                 ->site('*')
                 ->unique()
-                ->preferSites([$this->targetSiteId($element)]);
+                ->preferSites([$this->targetSiteId($element)])
+                ->eagerly();
         }
 
         $errorCount = 0;
@@ -1096,7 +1097,7 @@ JS, [
      */
     public function afterSave(bool $isNew): void
     {
-        // If the propagation method just changed, resave all the Matrix blocks
+        // If the propagation method just changed, resave all the elements
         if (isset($this->oldSettings)) {
             $oldLocalizeRelations = (bool)($this->oldSettings['localizeRelations'] ?? false);
             if ($this->localizeRelations !== $oldLocalizeRelations) {
@@ -1387,7 +1388,7 @@ JS, [
     protected function inputTemplateVariables(array|ElementQueryInterface $value = null, ?ElementInterface $element = null): array
     {
         if ($value instanceof ElementQueryInterface) {
-            $value = $value->all();
+            $value = $value->eagerly()->all();
             ElementHelper::swapInProvisionalDrafts($value);
         } elseif (!is_array($value)) {
             $value = [];

@@ -953,7 +953,7 @@ Craft.ElementEditor = Garnish.Base.extend(
       const button = menu.addItem(
         {
           type: 'button',
-          icon: 'edit',
+          icon: async () => await Craft.ui.icon('edit'),
           label: Craft.t('app', 'Edit draft settings'),
         },
         group

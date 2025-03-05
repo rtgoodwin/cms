@@ -7,10 +7,10 @@ import 'graphiql/graphiql.css';
 import {CraftGraphiQL} from './components/CraftGraphiQL.jsx';
 
 function initGraphiQl(domTarget) {
-  let attributes = domTarget.attributes;
-  let schemas = JSON.parse(attributes.schemas.nodeValue);
-  let selectedSchema = JSON.parse(attributes.selectedSchema.nodeValue);
-  let endpoint = attributes.endpoint.nodeValue;
+  const attributes = domTarget.attributes;
+  const schemas = JSON.parse(attributes.schemas.nodeValue);
+  const selectedSchema = JSON.parse(attributes.selectedSchema.nodeValue);
+  const endpoint = attributes.endpoint.nodeValue;
 
   const root = createRoot(document.getElementById('graphiql'));
   root.render(

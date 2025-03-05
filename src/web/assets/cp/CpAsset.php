@@ -137,6 +137,7 @@ JS;
             'Are you sure you want to transfer your license to this domain?',
             'Ascending',
             'Assets',
+            'Attributes',
             'Breadcrumbs',
             'Buy {name}',
             'Cancel',
@@ -148,6 +149,7 @@ JS;
             'Choose which sites this source should be visible for.',
             'Choose which table columns should be visible for this source by default.',
             'Choose which user groups should have access to this source.',
+            'Choose',
             'Clear search',
             'Clear',
             'Close Preview',
@@ -169,6 +171,7 @@ JS;
             'Couldn’t save new order.',
             'Create {type}',
             'Create',
+            'Custom',
             'Customize sources',
             'Default Sort',
             'Default Table Columns',
@@ -194,6 +197,7 @@ JS;
             'Don’t show in element cards',
             'Don’t use for element thumbnails',
             'Draft Name',
+            'Duplicate',
             'Edit draft settings',
             'Edit {type}',
             'Edit',
@@ -286,6 +290,7 @@ JS;
             'No limit',
             'Notes',
             'Notice',
+            'Number of columns',
             'OK',
             'Open in a new tab',
             'Options',
@@ -444,6 +449,28 @@ JS;
         $view->registerTranslations('yii', [
             '{attribute} should contain at least {min, number} {min, plural, one{character} other{characters}}.',
             '{attribute} should contain at most {max, number} {max, plural, one{character} other{characters}}.',
+        ]);
+
+        $view->registerIcons([
+            'arrow-down',
+            'arrow-left',
+            'arrow-right',
+            'arrow-up',
+            'arrows-rotate',
+            'asterisk',
+            'asterisk-slash',
+            'clipboard',
+            'copy',
+            'edit',
+            'gear',
+            'image',
+            'image-slash',
+            'pencil',
+            'plus',
+            'remove',
+            'share',
+            'trash',
+            'xmark',
         ]);
     }
 
