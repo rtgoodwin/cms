@@ -20,6 +20,10 @@ body,
     color: var(--text-color) !important;
     background-color: transparentize($inputColor, 0.75);
   }
+
+  .CodeMirror {
+    border-color: transparent;
+  }
 }
 
 .graphiql-container {
@@ -57,4 +61,8 @@ body,
 
 button.graphiql-execute-button:hover {
   background-color: hsl(0deg 72.41% 45.49%);
+}
+
+.graphiql-dialog-close > svg {
+  padding: 0;
 }
