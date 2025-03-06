@@ -110,6 +110,8 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
             'id' => Schema::TYPE_STRING,
             'rel' => Schema::TYPE_STRING,
             'ariaLabel' => Schema::TYPE_STRING,
+            'download' => Schema::TYPE_BOOLEAN,
+            'filename' => Schema::TYPE_STRING,
         ];
     }
 
@@ -157,7 +159,7 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
 
     /**
      * @var string[] Attribute fields to show.
-     * @phpstan-var array<'urlSuffix'|'target'|'title'|'class'|'id'|'rel'|'ariaLabel'>
+     * @phpstan-var array<'urlSuffix'|'target'|'title'|'class'|'id'|'rel'|'ariaLabel'|'download'>
      * @since 5.6.0
      */
     public array $advancedFields = [];
@@ -446,6 +448,7 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
                     ['label' => Craft::t('app', 'ID'), 'value' => 'id'],
                     ['label' => Template::raw(Craft::t('app', 'Relation ({ex})', ['ex' => '<code>rel</code>'])), 'value' => 'rel'],
                     ['label' => Craft::t('app', 'ARIA Label'), 'value' => 'ariaLabel'],
+                    ['label' => Craft::t('app', 'Download'), 'value' => 'download'],
                 ],
                 'values' => $this->advancedFields,
                 'sortable' => true,
@@ -545,6 +548,8 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
                     ? (implode(' ', array_map(fn(string $rel) => Html::id($rel), explode(' ', $value['rel']))))
                     : null,
                 'ariaLabel' => (!empty($value['ariaLabel']) && in_array('ariaLabel', $this->advancedFields)) ? $value['ariaLabel'] : null,
+                'download' => (!empty($value['download']) && in_array('download', $this->advancedFields)) ? (bool)$value['download'] : null,
+                'filename' => (!empty($value['filename']) && in_array('download', $this->advancedFields)) ? $value['filename'] : null,
             ]);
 
             $value = $value['value'] ?? $value[$typeId]['value'] ?? '';
@@ -783,6 +788,21 @@ JS;
                         'name' => "$this->handle[ariaLabel]",
                         'value' => $value?->ariaLabel,
                     ]),
+                    'download' =>
+                        Cp::lightswitchFieldHtml([
+                            'label' => Craft::t('app', 'Download'),
+                            'id' => "$id-download",
+                            'name' => "$this->handle[download]",
+                            'on' => $value?->download,
+                            'toggle' => "$id-filename-field",
+                        ]) .
+                        Cp::textFieldHtml([
+                            'label' => Craft::t('app', 'Filename'),
+                            'id' => "$id-filename",
+                            'name' => "$this->handle[filename]",
+                            'value' => $value?->filename,
+                            'fieldClass' => !$value?->download ? 'hidden' : null,
+                        ]),
                 };
             }
 

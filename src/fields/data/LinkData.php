@@ -74,6 +74,18 @@ class LinkData extends BaseObject implements Serializable
      */
     public ?string $ariaLabel = null;
 
+    /**
+     * @var bool Whether the link should have a `download` attribute.
+     * @since 5.7.0
+     */
+    public bool $download = false;
+
+    /**
+     * @var string|null The link’s `filename` attribute.
+     * @since 5.7.0
+     */
+    public ?string $filename = null;
+
     private string $renderedValue;
     private ?string $label = null;
 
@@ -168,6 +180,7 @@ class LinkData extends BaseObject implements Serializable
                 'aria' => [
                     'label' => $this->ariaLabel,
                 ],
+                'download' => $this->download ? ($this->filename ?? true) : false,
             ]);
         }
 
@@ -214,6 +227,8 @@ class LinkData extends BaseObject implements Serializable
             'id' => $this->id,
             'rel' => $this->rel,
             'ariaLabel' => $this->ariaLabel,
+            'download' => $this->download,
+            'filename' => $this->filename,
         ]);
     }
 }
