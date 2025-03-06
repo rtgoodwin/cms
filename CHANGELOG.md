@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Improved chip styling within tables. ([#16771](https://github.com/craftcms/cms/issues/16771))
-- Fixed a bug where relational fields with “Maintain hierarchy” selected weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
+- Fixed a bug where relational fields with “Maintain hierarchy” enabled weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
 - Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
 - Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
