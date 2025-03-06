@@ -3233,6 +3233,10 @@ table {
             th,
             td {
               background-color: var(--hover-bg-color);
+
+              .chip:not(.chromeless) {
+                background-color: var(--gray-100);
+              }
             }
           }
 
@@ -3261,6 +3265,10 @@ table {
             td {
               color: var(--white);
               background-color: var(--selected-bg-color);
+
+              .chip:not(.chromeless) {
+                background-color: var(--gray-600);
+              }
             }
 
             .icon,
@@ -3677,7 +3685,7 @@ table {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  gap: var(--s);
+  gap: var(--xs);
 
   .chip {
     margin: 0 !important;
@@ -4238,10 +4246,6 @@ table {
       .enabled-label {
         margin-inline-start: var(--xs);
       }
-    }
-
-    .chip {
-      background-color: transparent;
     }
 
     tr.disabled {

@@ -1153,9 +1153,6 @@ class Cp
                 'showStatus' => $showStatus,
                 'showThumb' => $showThumb,
                 'size' => $size,
-                'attributes' => [
-                    'class' => ['chromeless'],
-                ],
             ]);
 
         if (!empty($elements)) {
@@ -1167,9 +1164,6 @@ class Cp
                     'showStatus' => $showStatus,
                     'showThumb' => $showThumb,
                     'size' => $size,
-                    'attributes' => [
-                        'class' => ['chromeless'],
-                    ],
                 ]);
             }
             $html .= Html::tag('span', '+' . Craft::$app->getFormatter()->asInteger(count($elements)), [
