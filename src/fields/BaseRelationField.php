@@ -611,6 +611,8 @@ JS, [
                 ->id(array_values(array_filter($value)))
                 ->fixedOrder();
         } elseif ($value !== '' && $element && $element->id) {
+            $originalQuery = clone $query;
+
             $query->innerJoin(
                 ['relations' => DbTable::RELATIONS],
                 [
@@ -645,7 +647,7 @@ JS, [
                 $structuresService = Craft::$app->getStructures();
 
                 /** @var ElementInterface[] $structureElements */
-                $structureElements = (clone($query))
+                $structureElements = (clone $query)
                     ->status(null)
                     ->all();
 
@@ -657,7 +659,8 @@ JS, [
                     $structuresService->applyBranchLimitToElements($structureElements, $this->branchLimit);
                 }
 
-                $query->id(array_map(fn(ElementInterface $element) => $element->id, $structureElements));
+                $query = (clone $originalQuery)
+                    ->id(array_map(fn(ElementInterface $element) => $element->id, $structureElements));
             }
         } else {
             $query->id(false);
