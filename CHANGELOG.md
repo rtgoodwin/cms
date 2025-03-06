@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Fixed a bug where relational fields with “Maintain hierarchy” selected weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
+- Fixed a bug where relational fields with “Maintain hierarchy” enabled weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
 
 ## 4.14.10 - 2025-03-04
 
