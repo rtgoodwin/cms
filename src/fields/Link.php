@@ -797,11 +797,15 @@ JS;
                             'toggle' => "$id-filename-field",
                         ]) .
                         Cp::textFieldHtml([
+                            'fieldClass' => !$value?->download ? 'hidden' : null,
+                            'fieldAttributes' => [
+                                'data' => ['filename-field' => true],
+                            ],
                             'label' => Craft::t('app', 'Filename'),
                             'id' => "$id-filename",
                             'name' => "$this->handle[filename]",
-                            'value' => $value?->filename,
-                            'fieldClass' => !$value?->download ? 'hidden' : null,
+                            'value' => $value?->getFilename(),
+                            'placeholder' => $value?->getFilename(false),
                         ]),
                 };
             }
