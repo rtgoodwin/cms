@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Improved chip styling within tables. ([#16771](https://github.com/craftcms/cms/issues/16771))
+- Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
+
 ## 5.6.11 - 2025-03-04
 
 - Added `craft\base\conditions\BaseTextConditionRule::isEmpty()`.
