@@ -1,4 +1,3 @@
-// import {init} from './CraftGraphiQL.js';
 import 'graphiql/graphiql.css';
 import './graphiql.scss';
 import React from 'react';
@@ -6,13 +5,13 @@ import {createRoot} from 'react-dom/client';
 import 'graphiql/graphiql.css';
 import {CraftGraphiQL} from './components/CraftGraphiQL.jsx';
 
-function initGraphiQl(domTarget) {
+export function init(domTarget) {
   const attributes = domTarget.attributes;
   const schemas = JSON.parse(attributes.schemas.nodeValue);
   const selectedSchema = JSON.parse(attributes.selectedSchema.nodeValue);
   const endpoint = attributes.endpoint.nodeValue;
 
-  const root = createRoot(document.getElementById('graphiql'));
+  const root = createRoot(domTarget);
   root.render(
     <CraftGraphiQL
       endpoint={endpoint}
@@ -21,7 +20,3 @@ function initGraphiQl(domTarget) {
     />
   );
 }
-
-document.addEventListener('DOMContentLoaded', function () {
-  initGraphiQl(document.getElementById('graphiql'));
-});

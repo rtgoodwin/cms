@@ -9,11 +9,7 @@ export const SchemaSelector = ({items = [], value = ''}) => {
         </div>
         <div className="input ltr">
           <div className="select">
-            <select
-              name="schemaUid"
-              className="select"
-              defaultValue={value}
-            >
+            <select name="schemaUid" className="select" defaultValue={value}>
               {Object.keys(items).map((key, index) => {
                 return (
                   <option key={key} value={items[key]} data-uid={key}>

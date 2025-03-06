@@ -6,7 +6,7 @@ const {getConfig} = require('@craftcms/webpack');
 const config = getConfig({
   context: __dirname,
   config: {
-    entry: {graphiql: './graphiql.js'},
+    entry: {graphiql: './graphiql-init.js'},
     module: {
       rules: [
         {
