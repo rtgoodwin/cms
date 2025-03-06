@@ -160,10 +160,6 @@ class Entries extends BaseRelationField
 
         $mockup->sectionId = $section->id;
 
-        return Cp::chipHtml($mockup, [
-            'attributes' => [
-                'class' => ['chromeless'],
-            ],
-        ]);
+        return Cp::chipHtml($mockup);
     }
 }

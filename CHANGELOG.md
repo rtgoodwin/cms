@@ -1,5 +1,12 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Improved table styling. ([#16771](https://github.com/craftcms/cms/issues/16771), [#16829](https://github.com/craftcms/cms/issues/16829))
+- Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
+- Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
+- Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
+
 ## 5.6.11 - 2025-03-04
 
 - Added `craft\base\conditions\BaseTextConditionRule::isEmpty()`.

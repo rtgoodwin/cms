@@ -75,9 +75,9 @@ trait NestedElementTrait
     private ?int $ownerId = null;
 
     /**
-     * @var class-string<ElementInterface> Owner type
+     * @var class-string<ElementInterface>|null Owner type
      */
-    private string $ownerType;
+    private ?string $ownerType = null;
 
     /**
      * @var int|null Field ID
@@ -124,6 +124,7 @@ trait NestedElementTrait
 
         $this->_primaryOwner = null;
         $this->_owner = null;
+        $this->ownerType = null;
     }
 
     /**
@@ -162,6 +163,10 @@ trait NestedElementTrait
     public function setPrimaryOwnerId(?int $id): void
     {
         $this->primaryOwnerId = $id;
+
+        if (!$id || $this->_primaryOwner === false || $this->_primaryOwner?->id !== $id) {
+            $this->_primaryOwner = null;
+        }
     }
 
     /**
@@ -234,6 +239,10 @@ trait NestedElementTrait
     public function setOwnerId(?int $id): void
     {
         $this->ownerId = $id;
+
+        if (!$id || $this->_owner === false || $this->_owner?->id !== $id) {
+            $this->_owner = null;
+        }
     }
 
     /**
