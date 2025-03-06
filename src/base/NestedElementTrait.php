@@ -75,9 +75,9 @@ trait NestedElementTrait
     private ?int $ownerId = null;
 
     /**
-     * @var class-string<ElementInterface> Owner type
+     * @var class-string<ElementInterface>|null Owner type
      */
-    private string $ownerType;
+    private ?string $ownerType = null;
 
     /**
      * @var int|null Field ID
@@ -124,6 +124,7 @@ trait NestedElementTrait
 
         $this->_primaryOwner = null;
         $this->_owner = null;
+        $this->ownerType = null;
     }
 
     /**
