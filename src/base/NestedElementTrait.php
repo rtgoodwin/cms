@@ -162,6 +162,10 @@ trait NestedElementTrait
     public function setPrimaryOwnerId(?int $id): void
     {
         $this->primaryOwnerId = $id;
+
+        if (!$id || $this->_primaryOwner === false || $this->_primaryOwner?->id !== $id) {
+            $this->_primaryOwner = null;
+        }
     }
 
     /**
@@ -234,6 +238,10 @@ trait NestedElementTrait
     public function setOwnerId(?int $id): void
     {
         $this->ownerId = $id;
+
+        if (!$id || $this->_owner === false || $this->_owner?->id !== $id) {
+            $this->_owner = null;
+        }
     }
 
     /**

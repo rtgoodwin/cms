@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Improved chip styling within tables. ([#16771](https://github.com/craftcms/cms/issues/16771))
+- Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
 
 ## 5.6.11 - 2025-03-04
