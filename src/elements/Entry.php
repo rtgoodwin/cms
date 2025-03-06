@@ -2068,7 +2068,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 try {
                     $config = [
                         'attributes' => [
-                            'class' => 'chromeless',
+                            'class' => ['chromeless'],
                         ],
                     ];
                     if ($this->viewMode === 'cards') {
