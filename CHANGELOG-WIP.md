@@ -10,6 +10,7 @@
 ### Accessibility
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
 - Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
+- Animated assets no longer have animated thumbnails. ([#16497](https://github.com/craftcms/cms/pull/16497))
 
 ### Content Management
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
@@ -47,6 +48,7 @@
 ### Extensibility
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Editable tables now support `icon` columns.
+- Added `craft\base\Element::couldHaveAnimatedThumb()`.
 - Added `craft\base\ElementInterface::baseGqlType()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\Field::EVENT_DEFINE_ACTION_MENU_ITEMS`. ([#16779](https://github.com/craftcms/cms/discussions/16779))
