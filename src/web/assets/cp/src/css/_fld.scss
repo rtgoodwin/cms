@@ -358,6 +358,10 @@ $gridColor: var(--gray-100);
   padding-inline: var(--padding);
   overflow: hidden auto;
   position: relative;
+
+  hr {
+    margin-inline: -24px;
+  }
 }
 
 .fld-element-settings-footer {

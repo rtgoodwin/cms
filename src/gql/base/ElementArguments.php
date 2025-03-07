@@ -231,6 +231,11 @@ abstract class ElementArguments extends Arguments
                 'type' => Type::boolean(),
                 'description' => 'Whether provisional drafts should be returned.',
             ],
+            'withProvisionalDrafts' => [
+                'name' => 'withProvisionalDrafts',
+                'type' => Type::boolean(),
+                'description' => 'Whether canonical elements should be replaced with provisional drafts if those exist.',
+            ],
         ];
     }
 

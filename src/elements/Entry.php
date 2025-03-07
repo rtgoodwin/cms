@@ -44,6 +44,7 @@ use craft\enums\PropagationMethod;
 use craft\events\DefineEntryTypesEvent;
 use craft\events\ElementCriteriaEvent;
 use craft\fieldlayoutelements\entries\EntryTitleField;
+use craft\gql\interfaces\elements\Entry as EntryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
@@ -63,6 +64,7 @@ use craft\validators\ArrayValidator;
 use craft\validators\DateCompareValidator;
 use craft\validators\DateTimeValidator;
 use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Throwable;
@@ -744,6 +746,14 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         $entryType = $entryType->original ?? $entryType;
 
         return sprintf('%s_Entry', $entryType->handle);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return EntryInterface::getType();
     }
 
     /**
@@ -2068,7 +2078,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 try {
                     $config = [
                         'attributes' => [
-                            'class' => 'chromeless',
+                            'class' => ['chromeless'],
                         ],
                     ];
                     if ($this->viewMode === 'cards') {
