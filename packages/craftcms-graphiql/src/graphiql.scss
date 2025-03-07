@@ -19,6 +19,16 @@ body,
 
   .CodeMirror {
     border-color: transparent;
+    height: 100% !important;
+  }
+
+  .CodeMirror-hints {
+    background-color: #fff;
+  }
+
+  .CodeMirror.CodeMirror-focused {
+    box-shadow: none;
+    outline: none;
   }
 }
 
