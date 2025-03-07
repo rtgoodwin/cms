@@ -104,10 +104,10 @@ class Cp
     public const CHIP_SIZE_LARGE = 'large';
 
     /**
-     * @var Site|false
+     * @var Site|false|null
      * @see requestedSite()
      */
-    private static Site|false $_requestedSite;
+    private static Site|false|null $_requestedSite;
 
     /**
      * Renders a control panel template.
@@ -3543,5 +3543,15 @@ JS;
                 'Changes to these settings aren’t permitted in this environment.',
             )) .
             Html::endTag('div');
+    }
+
+    /**
+     * Resets [[requestedSite()]].
+     *
+     * @since 5.7.0
+     */
+    public static function reset(): void
+    {
+        self::$_requestedSite = null;
     }
 }
