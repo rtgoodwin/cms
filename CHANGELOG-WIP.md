@@ -81,6 +81,7 @@
 - Added `craft\services\Search::queueIndexElement()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
+- Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
 - Added `Craft.ui.createIconPicker()`.
 - Added `Craft.ui.createIconPickerField()`.
 - Added `Craft.ui.icon()`.
