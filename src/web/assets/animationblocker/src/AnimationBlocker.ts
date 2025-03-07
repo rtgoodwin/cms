@@ -1,7 +1,5 @@
 export class AnimationBlocker {
   static extensions: string[] = ['.gif', '.webp'];
-  private static minToggleableHeight: number = 100;
-  private static minToggleableWidth: number = 100;
   #imageAddedObserver = AnimationBlocker.createImageAddedObserver();
 
   constructor() {
