@@ -1,14 +1,15 @@
 # Release Notes for Craft CMS 5.7 (WIP)
 
 ### Content Management
+- Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
 - Added support for sorting embedded element indexes by element attributes and custom fields. ([#16732](https://github.com/craftcms/cms/pull/16732))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
 
 ### Accessibility
-- When a modal or slideout is triggered from a disclosure menu, focus is now set to the menu button when the modal/slideout is closed. ([#16587](https://github.com/craftcms/cms/pull/16587))
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
+- Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
 
 ### Content Management
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
@@ -17,16 +18,28 @@
 - Added the “Button Group” field type. ([#16782](https://github.com/craftcms/cms/pull/16782))
 - Added the “JSON” field type. ([#16809](https://github.com/craftcms/cms/pull/16809))
 - Added “Icon” and “Color” settings to Checkboxes, Dropdown, Multi-select, and Radio Buttons field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
+- Added an optional “Download” advanced field to Link fields. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))  
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
+- Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
+- Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
+- Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
+- Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
+- The `users/create` command now prompts to send an activation email, or outputs an activation URL. ([#16794](https://github.com/craftcms/cms/pull/16794))
 - Dragging headings within the Customize Sources modal now also drags any subsequent sources. ([#16737](https://github.com/craftcms/cms/issues/16737))
 - When switching field types, any field settings which are defined by the same base class are now preserved. ([#16783](https://github.com/craftcms/cms/pull/16783))
+- `classHandle`, `content`, `rawContent`, and `value` are no longer globally-reserved handles.
+- `searchKeywords` is no longer a globally-reserved handle, except for custom fields.
+- `section` and `type` are no longer globally-reserved handles, except for custom fields within entry type field layouts.
+- `postDate` is no longer a reserved custom field handle, except within entry type field layouts.
+- `username` is no longer a reserved custom field handle, except within the user field layout.
 - Added several new icons.
 
 ### Development
 - Added the `canonicalsOnly` element query param.
 - Added the `defaultLabel` nested field to Link fields’ GraphQL data. ([#16637](https://github.com/craftcms/cms/issues/16637))
+- Added the `download` and `filename` nested fields to Link fields’ GraphQL data. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added `element`, `asset`, `entry`, etc., nested fields to Link fields’ GraphQL data. ([#16698](https://github.com/craftcms/cms/pull/16698))
 - Added the `withProvisionalDrafts` GraphQL element query argument. ([#16720](https://github.com/craftcms/cms/pull/16720))
 - It’s now possible to reference custom field handles in advanced element query `orderBy` expressions. ([#16729](https://github.com/craftcms/cms/pull/16729))
@@ -51,7 +64,11 @@
 - Added `craft\fields\BaseOptionsField::$optionIcons`, which can be set to `true` by subclasses to enable the “Icon” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 - Added `craft\fields\data\JsonData`.
+- Added `craft\fields\data\LinkData::$download`.
+- Added `craft\fields\data\LinkData::getFilename()`.
+- Added `craft\fields\data\LinkData::setFilename()`.
 - Added `craft\fields\linktypes\BaseElementLinkType::elementGqlType()`.
+- Added `craft\fields\linktypes\BaseLinkType::filename()`.
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
@@ -64,6 +81,7 @@
 - Added `Craft.ui.createIconPickerField()`.
 - Added `Craft.ui.icon()`.
 - `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- The `elements/duplicate` action no longer creates an unpublished draft by default, or deletes the source element if it’s a provisional draft by default. `asUnpublishDraft` and `deleteProvisionalDraft` params can be passed to it to re-enable those behaviors where needed.
 
 ### System
 - `craft\queue\Queue::release()` and `releaseAll()` now call `release()` and `releaseAll()` on the proxied queue if it implements `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))

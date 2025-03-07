@@ -715,9 +715,8 @@ class Cp
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
-                ],
+                'role' => 'none',
+                'tabindex' => '-1',
             ]) : '') .
             Html::endTag('div') . // .card-actions
             Html::endTag('div'); // .card-actions-container
@@ -933,6 +932,7 @@ class Cp
                     'owner-id' => $element instanceof NestedElementInterface ? $element->getOwnerId() : null,
                     'owner-is-canonical' => self::elementOwnerIsCanonical($element),
                     'site-id' => $element->siteId,
+                    'is-unpublished-draft' => $element->getIsUnpublishedDraft(),
                     'status' => $element->getStatus(),
                     'label' => (string)$element,
                     'url' => $element->getUrl(),
@@ -1152,9 +1152,6 @@ class Cp
                 'showStatus' => $showStatus,
                 'showThumb' => $showThumb,
                 'size' => $size,
-                'attributes' => [
-                    'class' => ['chromeless'],
-                ],
             ]);
 
         if (!empty($elements)) {
@@ -1166,9 +1163,6 @@ class Cp
                     'showStatus' => $showStatus,
                     'showThumb' => $showThumb,
                     'size' => $size,
-                    'attributes' => [
-                        'class' => ['chromeless'],
-                    ],
                 ]);
             }
             $html .= Html::tag('span', '+' . Craft::$app->getFormatter()->asInteger(count($elements)), [

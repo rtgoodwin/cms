@@ -791,6 +791,8 @@ export default Base.extend(
         }
       }
 
+      this.updateHrVisibility();
+
       return ul;
     },
 
@@ -812,16 +814,9 @@ export default Base.extend(
       const ul = li.parentNode;
       if (ul.classList.contains('hidden')) {
         ul.classList.remove('hidden');
-        if (
-          ul.previousElementSibling &&
-          ul.previousElementSibling.nodeName === 'HR'
-        ) {
-          ul.previousElementSibling.classList.remove('hidden');
-        }
-        if (ul.nextElementSibling && ul.nextElementSibling.nodeName === 'HR') {
-          ul.nextElementSibling.classList.remove('hidden');
-        }
       }
+
+      this.updateHrVisibility();
 
       if (this.isExpanded()) {
         this.setContainerPosition();
@@ -834,22 +829,30 @@ export default Base.extend(
       const ul = li.parentNode;
       if (ul.querySelectorAll(':scope > li:not(.hidden)').length === 0) {
         ul.classList.add('hidden');
-        if (
-          ul.previousElementSibling &&
-          ul.previousElementSibling.nodeName === 'HR'
-        ) {
-          ul.previousElementSibling.classList.add('hidden');
-        } else if (
-          ul.nextElementSibling &&
-          ul.nextElementSibling.nodeName === 'HR'
-        ) {
-          ul.nextElementSibling.classList.add('hidden');
-        }
       }
+
+      this.updateHrVisibility();
 
       if (this.isExpanded()) {
         this.setContainerPosition();
       }
+    },
+
+    updateHrVisibility() {
+      const $children = this.$container.children();
+      let foundVisibleGroup = false;
+      $children.each((i, child) => {
+        if (child.nodeName === 'HR') {
+          if (foundVisibleGroup) {
+            child.classList.remove('hidden');
+            foundVisibleGroup = false;
+          } else {
+            child.classList.add('hidden');
+          }
+        } else if (!child.classList.contains('hidden')) {
+          foundVisibleGroup = true;
+        }
+      });
     },
 
     /**
