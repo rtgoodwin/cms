@@ -3235,7 +3235,7 @@ table {
               background-color: var(--hover-bg-color);
 
               .chip:not(.chromeless) {
-                background-color: var(--gray-100);
+                background-color: var(--custom-bg-color, var(--gray-100));
               }
             }
           }
@@ -3266,8 +3266,15 @@ table {
               color: var(--white);
               background-color: var(--selected-bg-color);
 
-              .chip:not(.chromeless) {
-                background-color: var(--gray-600);
+              .chip {
+                color: var(--white);
+
+                &:not(.chromeless) {
+                  background-color: var(
+                    --custom-sel-bg-color,
+                    var(--gray-600)
+                  ) !important;
+                }
               }
             }
 
@@ -4214,6 +4221,11 @@ table {
 
   // table views
   .tableview {
+    th,
+    td {
+      height: 34px;
+    }
+
     th {
       .move,
       .toggle {

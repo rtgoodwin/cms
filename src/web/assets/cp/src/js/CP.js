@@ -1126,7 +1126,7 @@ Craft.CP = Garnish.Base.extend(
               'Error'
             )}"></span> ${content}`;
           }
-          $(`<li>${content}</li>`).appendTo(this.$alerts);
+          $(`<li><div>${content}</div></li>`).appendTo(this.$alerts);
         }
 
         if (animate) {
