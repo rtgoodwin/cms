@@ -104,10 +104,10 @@ class Cp
     public const CHIP_SIZE_LARGE = 'large';
 
     /**
-     * @var Site|false
+     * @var Site|false|null
      * @see requestedSite()
      */
-    private static Site|null|false $_requestedSite;
+    private static Site|false|null $_requestedSite;
 
     /**
      * Renders a control panel template.
@@ -3472,7 +3472,7 @@ JS;
      */
     public static function requestedSite(): ?Site
     {
-        if (is_null(self::$_requestedSite)) {
+        if (!isset(self::$_requestedSite)) {
             $sitesService = Craft::$app->getSites();
             $editableSiteIds = $sitesService->getEditableSiteIds();
 
@@ -3529,7 +3529,12 @@ JS;
             Html::endTag('div');
     }
 
-    public static function clearRequestedSite()
+    /**
+     * Resets [[requestedSite()]].
+     *
+     * @since 5.7.0
+     */
+    public static function reset(): void
     {
         self::$_requestedSite = null;
     }
