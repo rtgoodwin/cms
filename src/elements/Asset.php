@@ -2353,6 +2353,9 @@ JS,[
             'sizes' => "{$thumbSizes[0][0]}px",
             'srcset' => implode(', ', $srcsets),
             'alt' => $this->thumbAlt(),
+            'data' => [
+                'animated' => $this->couldHaveAnimatedThumb(),
+            ],
         ]);
     }
 
@@ -2407,6 +2410,14 @@ JS,[
     public function getExtension(): string
     {
         return pathinfo($this->_filename, PATHINFO_EXTENSION);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function couldHaveAnimatedThumb(): bool
+    {
+        return $this->getExtension() === 'gif' || $this->getExtension() === 'webp';
     }
 
     /**
@@ -3392,6 +3403,7 @@ JS;
                 'kind' => $this->kind,
                 'alt' => $this->alt,
                 'filename' => $this->filename,
+                'animated' => $this->couldHaveAnimatedThumb(),
             ],
         ];
 

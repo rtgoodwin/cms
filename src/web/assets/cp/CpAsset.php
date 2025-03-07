@@ -26,6 +26,7 @@ use craft\services\Sites;
 use craft\utilities\QueueManager;
 use craft\validators\UserPasswordValidator;
 use craft\web\AssetBundle;
+use craft\web\assets\animationblocker\AnimationBlockerAsset;
 use craft\web\assets\axios\AxiosAsset;
 use craft\web\assets\d3\D3Asset;
 use craft\web\assets\datepickeri18n\DatepickerI18nAsset;
@@ -60,6 +61,7 @@ class CpAsset extends AssetBundle
      */
     public $depends = [
         TailwindResetAsset::class,
+        AnimationBlockerAsset::class,
         AxiosAsset::class,
         D3Asset::class,
         GarnishAsset::class,
@@ -297,9 +299,11 @@ JS;
             'Password',
             'Past year',
             'Past {num} days',
+            'Pause',
             'Pay {price}',
             'Pending',
             'Phone',
+            'Play',
             'Portrait',
             'Preview file',
             'Preview',

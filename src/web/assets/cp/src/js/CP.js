@@ -9,6 +9,7 @@
 Craft.CP = Garnish.Base.extend(
   {
     elementThumbLoader: null,
+    animationBlocker: null,
     authManager: null,
     announcerTimeout: null,
     modalLayers: [],
@@ -141,6 +142,9 @@ Craft.CP = Garnish.Base.extend(
       if (this.$alerts.length) {
         this.initAlerts();
       }
+
+      // Global Animation Blocker
+      this.animationBlocker = new Craft.AnimationBlocker();
 
       // Toggles
       this.addListener(this.$navToggle, 'click', 'toggleNav');
