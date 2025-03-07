@@ -2,21 +2,42 @@ import 'graphiql/graphiql.css';
 import './graphiql.scss';
 import React from 'react';
 import {createRoot} from 'react-dom/client';
-import 'graphiql/graphiql.css';
-import {CraftGraphiQL} from './components/CraftGraphiQL.jsx';
+import GraphiQL from 'graphiql';
+
+const CraftGraphiQL = ({endpoint, selectedSchema}) => {
+  function graphQLFetcher(graphQLParams) {
+    return fetch(endpoint, {
+      method: 'post',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        'X-Craft-Gql-Schema': selectedSchema.schema,
+      },
+      body: JSON.stringify(graphQLParams),
+      credentials: 'include',
+    })
+      .then(function (response) {
+        return response.text();
+      })
+      .then(function (responseBody) {
+        try {
+          return JSON.parse(responseBody);
+        } catch (error) {
+          return responseBody;
+        }
+      });
+  }
+
+  return <GraphiQL fetcher={graphQLFetcher} />;
+};
 
 export function init(domTarget) {
-  const attributes = domTarget.attributes;
-  const schemas = JSON.parse(attributes.schemas.nodeValue);
-  const selectedSchema = JSON.parse(attributes.selectedSchema.nodeValue);
-  const endpoint = attributes.endpoint.nodeValue;
+  const data = domTarget.dataset;
+  const selectedSchema = JSON.parse(data.selectedSchema);
+  const endpoint = data.endpoint;
 
   const root = createRoot(domTarget);
   root.render(
-    <CraftGraphiQL
-      endpoint={endpoint}
-      selectedSchema={selectedSchema}
-      schemas={schemas}
-    />
+    <CraftGraphiQL endpoint={endpoint} selectedSchema={selectedSchema} />
   );
 }
