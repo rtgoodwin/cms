@@ -2855,6 +2855,45 @@ $.extend(Craft, {
   useMobileStyles: function () {
     return Garnish.isMobileBrowser() || document.body.clientWidth < 600;
   },
+
+  animate: async function (element, css) {
+    await this.animateAll([[element, css]]);
+  },
+
+  animateAll: function (animations) {
+    return new Promise((resolve, reject) => {
+      for (let i = 0; i < animations.length; i++) {
+        if ((!animations[i][0]) instanceof jQuery) {
+          animations[i][0] = $(animations[i][0]);
+        }
+      }
+
+      if (!document.startViewTransition) {
+        for (let i = 0; i < animations.length; i++) {
+          const [$element, css] = animations[i];
+          $element.velocity(
+            css,
+            Craft.BaseElementSelectInput.REMOVE_FX_DURATION,
+            i === animations.length - 1 ? resolve : null
+          );
+        }
+        return;
+      }
+
+      for (const [$element] of animations) {
+        $element.css(
+          'view-transition-name',
+          `vt-${Math.floor(Math.random() * 100000)}`
+        );
+      }
+      const transition = document.startViewTransition(() => {
+        for (const [$element, css] of animations) {
+          $element.css(css);
+        }
+      });
+      transition.finished.then(resolve).catch(reject);
+    });
+  },
 });
 
 // -------------------------------------------

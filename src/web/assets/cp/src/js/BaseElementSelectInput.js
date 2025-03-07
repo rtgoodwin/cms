@@ -678,7 +678,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
     },
 
-    animateElementAway: function ($element, callback) {
+    animateElementAway: async function ($element, callback) {
       const offset = $element.offset();
       const width = $element.width();
 
@@ -690,21 +690,15 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
         maxWidth: width + 'px',
       });
 
-      const animateCss = {
+      await Craft.animate($element, {
         opacity: -1,
         left: offset.left + 100 * (Craft.orientation === 'ltr' ? -1 : 1),
-      };
+      });
 
-      $element.velocity(
-        animateCss,
-        Craft.BaseElementSelectInput.REMOVE_FX_DURATION,
-        () => {
-          $element.remove();
-          if (callback) {
-            callback();
-          }
-        }
-      );
+      $element.remove();
+      if (callback) {
+        callback();
+      }
     },
 
     showModal: function () {
@@ -887,22 +881,26 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     },
 
     selectElements: async function (elements) {
+      const animateElements = [];
+
       for (let i = 0; i < elements.length; i++) {
-        let elementInfo = elements[i],
-          $element = this.createNewElement(elementInfo);
+        const elementInfo = elements[i];
+        const $inputElement = this.createNewElement(elementInfo);
 
-        this.appendElement($element);
-        this.addElements($element);
-
-        const $modalElement = elementInfo.$modalElement || elementInfo.$element;
-        if ($modalElement && $modalElement.parent().length) {
-          this.animateElementIntoPlace($modalElement, $element);
-        }
+        this.appendElement($inputElement);
+        this.addElements($inputElement);
 
         // Override the element reference with the new one
-        elementInfo.$element = $element;
+        elementInfo.$element = $inputElement;
+
+        const $modalElement = elementInfo.$modalElement || elementInfo.$element;
+
+        if ($modalElement && $modalElement.parent().length) {
+          animateElements.push({$modalElement, $inputElement});
+        }
       }
 
+      this.animateElementsIntoPlace(animateElements);
       this.onSelectElements(elements);
     },
 
@@ -938,17 +936,22 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       this.resetElements();
 
       const filteredElements = [];
+      const animateElements = [];
 
       for (let i = 0; i < elements.length; i++) {
         const element = elements[i];
-        const $element = this.getElementById(element.id);
+        const $inputElement = this.getElementById(element.id);
 
-        if ($element) {
-          this.animateElementIntoPlace(element.$element, $element);
+        if ($inputElement) {
           filteredElements.push(element);
+          animateElements.push({
+            $modalElement: element.$element,
+            $inputElement,
+          });
         }
       }
 
+      this.animateElementsIntoPlace(animateElements);
       this.updateDisabledElementsInModal();
       this.onSelectElements(filteredElements);
     },
@@ -978,36 +981,50 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       $('<li/>').append($element).appendTo(this.$elementsContainer);
     },
 
-    animateElementIntoPlace: function ($modalElement, $inputElement) {
-      var origOffset = $modalElement.offset(),
-        destOffset = $inputElement.offset(),
-        $helper = $inputElement
+    animateElementIntoPlace: async function ($modalElement, $inputElement) {
+      await this.animateElementsIntoPlace([{$modalElement, $inputElement}]);
+    },
+
+    animateElementsIntoPlace: async function (elements) {
+      const animations = [];
+
+      for (const element of elements) {
+        const {$modalElement, $inputElement} = element;
+        const oldOffset = $modalElement.offset();
+        const newOffset = $inputElement.offset();
+
+        const $helper = $inputElement
           .clone()
           .appendTo(Garnish.$bod)
           .width($inputElement.width());
 
-      $inputElement.css('visibility', 'hidden');
+        $inputElement.css('visibility', 'hidden');
 
-      $helper.css({
-        position: 'absolute',
-        zIndex: 10000,
-        top: origOffset.top,
-        left: origOffset.left,
-      });
+        $helper.css({
+          position: 'absolute',
+          zIndex: 10000,
+          top: oldOffset.top,
+          left: oldOffset.left,
+        });
 
-      var animateCss = {
-        top: destOffset.top,
-        left: destOffset.left,
-      };
+        animations.push([
+          $helper,
+          {
+            top: newOffset.top,
+            left: newOffset.left,
+          },
+        ]);
+      }
 
-      $helper.velocity(
-        animateCss,
-        Craft.BaseElementSelectInput.ADD_FX_DURATION,
-        function () {
-          $helper.remove();
-          $inputElement.css('visibility', 'visible');
-        }
-      );
+      await Craft.animateAll(animations);
+
+      for (const [$helper] of animations) {
+        $helper.remove();
+      }
+
+      for (const {$inputElement} of elements) {
+        $inputElement.css('visibility', 'visible');
+      }
     },
 
     updateDisabledElementsInModal: function () {
