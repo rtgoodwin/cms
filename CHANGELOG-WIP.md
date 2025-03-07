@@ -96,5 +96,6 @@
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
 - Updated Yii to 2.0.52.
+- Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))
 - Fixed a bug where indicator icons within field layout element chips didn’t have alternative text. ([#16297](https://github.com/craftcms/cms/discussions/16297))
 - Fixed a bug where slide pickers within selected field layout elements didn’t have a label. ([#16696](https://github.com/craftcms/cms/pull/16696))
