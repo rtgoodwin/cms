@@ -73,6 +73,7 @@
 - Added `craft\fields\data\LinkData::setFilename()`.
 - Added `craft\fields\linktypes\BaseElementLinkType::elementGqlType()`.
 - Added `craft\fields\linktypes\BaseLinkType::filename()`.
+- Added `craft\helpers\Cp::reset()`. ([#16848](https://github.com/craftcms/cms/pull/16848))
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
