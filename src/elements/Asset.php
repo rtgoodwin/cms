@@ -2354,7 +2354,7 @@ JS,[
             'srcset' => implode(', ', $srcsets),
             'alt' => $this->thumbAlt(),
             'data' => [
-                'animated' => $this->getIsAnimated(),
+                'animated' => $this->couldHaveAnimatedThumb(),
             ],
         ]);
     }
@@ -2415,7 +2415,7 @@ JS,[
     /**
      * @inheritdoc
      */
-    public function getIsAnimated(): bool
+    protected function couldHaveAnimatedThumb(): bool
     {
         return $this->getExtension() === 'gif' || $this->getExtension() === 'webp';
     }
@@ -3403,7 +3403,7 @@ JS;
                 'kind' => $this->kind,
                 'alt' => $this->alt,
                 'filename' => $this->filename,
-                'animated' => $this->getIsAnimated(),
+                'animated' => $this->couldHaveAnimatedThumb(),
             ],
         ];
 
