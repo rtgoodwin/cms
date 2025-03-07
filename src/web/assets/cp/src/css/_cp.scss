@@ -632,37 +632,6 @@ li.breadcrumb-toggle-wrapper {
   }
 }
 
-.animated-image-toggle {
-  display: flex;
-  position: absolute;
-  align-items: center;
-  justify-content: center;
-  height: 44px;
-  width: 44px;
-  border-radius: 50%;
-  inset-block-end: 1em;
-  inset-inline-end: 1em;
-  border: 1px solid var(--white) !important;
-  background-color: var(--gray-600);
-  fill: var(--white);
-  box-shadow: 0 0 10px rgb(0 0 0 / 70%);
-
-  &:hover {
-    background-color: var(--gray-700);
-  }
-
-  // Adjust the alignment of play a bit
-  &[aria-label='Play'] svg {
-    position: relative;
-    inset-inline-start: 1px;
-  }
-
-  svg {
-    width: 18px;
-    height: 18px;
-  }
-}
-
 #account-menu {
   ul {
     li {

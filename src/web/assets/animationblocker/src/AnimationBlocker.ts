@@ -1,12 +1,6 @@
 export class AnimationBlocker {
   static extensions: string[] = ['.gif', '.webp'];
-  private static minToggleableHeight: number = 100;
-  private static minToggleableWidth: number = 100;
   #imageAddedObserver = AnimationBlocker.createImageAddedObserver();
-  private static playIcon: string =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>';
-  private static pauseIcon: string =
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Pro 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2024 Fonticons, Inc. --><path d="M48 64C21.5 64 0 85.5 0 112V400c0 26.5 21.5 48 48 48H80c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H48zm192 0c-26.5 0-48 21.5-48 48V400c0 26.5 21.5 48 48 48h32c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48H240z"/></svg>';
 
   constructor() {
     AnimationBlocker.hideAllAnimations();
@@ -94,41 +88,6 @@ export class AnimationBlocker {
   }
 
   /**
-   * Creates a toggle button on top of the image
-   * @param image
-   * @private
-   */
-  private static createToggle(image: HTMLImageElement): void {
-    if (!this.isToggleEnabled(image) || this.getToggle(image)) return;
-
-    const wrapper = image.parentElement!;
-
-    const toggle = document.createElement('button');
-    toggle.type = 'button';
-    toggle.dataset.animationToggle = 'true';
-    toggle.setAttribute('aria-label', Craft.t('app', 'Play'));
-    toggle.classList.add('animated-image-toggle', 'btn');
-    toggle.innerHTML = this.playIcon;
-
-    wrapper.appendChild(toggle);
-
-    toggle.addEventListener('click', (ev: Event) => {
-      this.handleToggleClick(ev);
-    });
-  }
-
-  /**
-   * Gets the toggle button associated with an image
-   * @param image
-   * @returns {HTMLButtonElement}
-   * @private
-   */
-  private static getToggle(image: HTMLImageElement): HTMLButtonElement {
-    const parent = image.parentElement!;
-    return parent.querySelector('[data-animation-toggle]') as HTMLButtonElement;
-  }
-
-  /**
    * Creates a canvas to cover the image
    * @param image
    * @private
@@ -181,44 +140,6 @@ export class AnimationBlocker {
 
   private static removeBlockerUI(mutationTarget: HTMLElement) {
     mutationTarget.querySelector('[data-image-cover]')?.remove();
-    mutationTarget.querySelector('[data-animation-toggle]')?.remove();
-  }
-
-  /**
-   * Toggles the animation of an image
-   * @param event
-   * @private
-   */
-  private static handleToggleClick(event: Event): void {
-    const target = event.target as HTMLElement;
-    const toggle = target!.closest('button') as HTMLButtonElement;
-    const parent = toggle.parentElement!;
-    const image = parent.querySelector('img')!;
-
-    if (!image) return;
-
-    const isPaused = image.getAttribute('data-animation-state') === 'paused';
-
-    if (isPaused) {
-      this.play(image);
-    } else {
-      this.pause(image);
-    }
-  }
-
-  /**
-   * If the image meets requirements for showing a toggle
-   * @param image
-   * @private
-   */
-  private static isToggleEnabled(image: HTMLImageElement): boolean {
-    const imageWidth: number = image.clientWidth;
-    const imageHeight: number = image.clientHeight;
-
-    return (
-      imageWidth >= this.minToggleableWidth &&
-      imageHeight >= this.minToggleableHeight
-    );
   }
 
   /**
@@ -249,7 +170,6 @@ export class AnimationBlocker {
       this.createCover(image);
     }
 
-    this.createToggle(image);
     image.dataset.animationController = JSON.stringify(this);
   }
 
@@ -270,34 +190,6 @@ export class AnimationBlocker {
     images: NodeListOf<HTMLImageElement>
   ): HTMLImageElement[] {
     return Array.from(images).filter((image) => this.couldBeAnimated(image));
-  }
-
-  private static play(image: HTMLImageElement): void {
-    const cover = this.getCover(image);
-    const toggleBtn = this.getToggle(image);
-
-    if (!cover || !toggleBtn) return;
-
-    image.setAttribute('data-animation-state', 'playing');
-    cover.classList.add('hidden');
-    toggleBtn.setAttribute('aria-label', Craft.t('app', 'Pause'));
-    toggleBtn.innerHTML = this.pauseIcon;
-  }
-
-  /**
-   * Pauses an image by toggling the canvas visibility and button state
-   * @param image
-   */
-  private static pause(image: HTMLImageElement) {
-    const cover = this.getCover(image);
-    const toggleBtn = this.getToggle(image);
-
-    if (!cover || !toggleBtn) return;
-
-    image.setAttribute('data-animation-state', 'paused');
-    cover.classList.remove('hidden');
-    toggleBtn.setAttribute('aria-label', Craft.t('app', 'Play'));
-    toggleBtn.innerHTML = this.playIcon;
   }
 
   /**
