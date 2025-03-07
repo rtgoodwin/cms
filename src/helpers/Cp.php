@@ -107,7 +107,7 @@ class Cp
      * @var Site|false
      * @see requestedSite()
      */
-    private static Site|false $_requestedSite;
+    private static Site|null|false $_requestedSite;
 
     /**
      * Renders a control panel template.
@@ -3472,7 +3472,7 @@ JS;
      */
     public static function requestedSite(): ?Site
     {
-        if (!isset(self::$_requestedSite)) {
+        if (is_null(self::$_requestedSite)) {
             $sitesService = Craft::$app->getSites();
             $editableSiteIds = $sitesService->getEditableSiteIds();
 
@@ -3527,5 +3527,10 @@ JS;
                 'Changes to these settings aren’t permitted in this environment.',
             )) .
             Html::endTag('div');
+    }
+
+    public static function clearRequestedSite()
+    {
+        self::$_requestedSite = null;
     }
 }
