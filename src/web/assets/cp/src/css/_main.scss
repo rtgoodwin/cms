@@ -2843,6 +2843,9 @@ div.btn.submit input {
 }
 
 .lightswitch {
+  --enabled-color: var(
+    --teal-600
+  ); // Ensures contrast with pane background is over 3:1
   display: block;
   position: relative;
   border: none !important;
