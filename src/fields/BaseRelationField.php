@@ -946,11 +946,7 @@ JS, [
         $mockup = new (static::elementType());
         $mockup->title = Craft::t('app', 'Related {type} Title', ['type' => $mockup->displayName()]);
 
-        return Cp::chipHtml($mockup, [
-            'attributes' => [
-                'class' => ['chromeless'],
-            ],
-        ]);
+        return Cp::chipHtml($mockup);
     }
 
     /**
