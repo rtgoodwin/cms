@@ -20,7 +20,8 @@
 - Added the “JSON” field type. ([#16809](https://github.com/craftcms/cms/pull/16809))
 - Added “Icon” and “Color” settings to Checkboxes, Dropdown, Multi-select, and Radio Buttons field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added an optional “Download” advanced field to Link fields. ([#16844](https://github.com/craftcms/cms/pull/16844))
-- Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))  
+- Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))
+- “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
@@ -55,6 +56,7 @@
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
 - Added `craft\base\FieldLayoutComponent::conditionalSettingsHtml()`.
 - Added `craft\base\FieldLayoutComponent::normalizeCondition()`.
+- Added `craft\base\FieldLayoutElement::alwaysRefresh()`.
 - Added `craft\base\FieldTrait::$static`.
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
