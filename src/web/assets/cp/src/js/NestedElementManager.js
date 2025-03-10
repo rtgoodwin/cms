@@ -499,7 +499,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
             // Duplicate
             const duplicateButton = actionDisclosure.addItem(
               {
-                icon: async () => await Craft.ui.icon('copy'),
+                icon: async () => await Craft.ui.icon('clone'),
                 label: Craft.t('app', 'Duplicate'),
                 onActivate: () => {
                   this.duplicateElement($element);

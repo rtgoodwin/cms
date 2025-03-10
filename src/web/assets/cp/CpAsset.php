@@ -462,7 +462,7 @@ JS;
             'asterisk',
             'asterisk-slash',
             'clipboard',
-            'copy',
+            'clone',
             'edit',
             'gear',
             'image',
