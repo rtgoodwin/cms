@@ -72,7 +72,6 @@ use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
-use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\helpers\Template;
 use craft\helpers\UrlHelper;
@@ -1220,7 +1219,7 @@ abstract class Element extends Component implements ElementInterface
             'inlineEditing' => $viewState['inlineEditing'] ?? false,
             'nestedInputNamespace' => $viewState['nestedInputNamespace'] ?? null,
             'tableName' => static::pluralDisplayName(),
-            'elementQuery' => self::elemnetQueryWithAllDescendants($elementQuery),
+            'elementQuery' => self::elementQueryWithAllDescendants($elementQuery),
         ];
 
         $db = Craft::$app->getDb();
@@ -1324,7 +1323,7 @@ abstract class Element extends Component implements ElementInterface
         return Craft::$app->getView()->renderTemplate($template, $variables);
     }
 
-    private static function elemnetQueryWithAllDescendants(ElementQueryInterface $elementQuery): ElementQueryInterface
+    private static function elementQueryWithAllDescendants(ElementQueryInterface $elementQuery): ElementQueryInterface
     {
         if (is_array($elementQuery->where)) {
             foreach ($elementQuery->where as $key => $condition) {
@@ -1881,7 +1880,7 @@ abstract class Element extends Component implements ElementInterface
         foreach ($elementStructureData as $elementStructureDatum) {
             foreach ($ancestorStructureData as $ancestorStructureDatum) {
                 if (
-                    $ancestorStructureDatum['structureId'] === $elementStructureDatum['structureId'] &&
+                    $ancestorStructureDatum['structureId'] == $elementStructureDatum['structureId'] &&
                     $ancestorStructureDatum['lft'] < $elementStructureDatum['lft'] &&
                     $ancestorStructureDatum['rgt'] > $elementStructureDatum['rgt'] &&
                     (!$parents || $ancestorStructureDatum['level'] == $elementStructureDatum['level'] - 1)
@@ -2653,6 +2652,8 @@ abstract class Element extends Component implements ElementInterface
             $names['hardDelete'],
             $names['mergingCanonicalChanges'],
             $names['newSiteIds'],
+            $names['isNewForSite'],
+            $names['isNewSite'],
             $names['previewing'],
             $names['propagateAll'],
             $names['propagating'],
@@ -2971,7 +2972,10 @@ abstract class Element extends Component implements ElementInterface
             array_unshift($rule, $attribute);
         }
 
-        if (is_callable($rule[1]) || $field->hasMethod($rule[1])) {
+        if (
+            (!is_string($rule[1]) || !isset(Validator::$builtInValidators[$rule[1]])) &&
+            (is_callable($rule[1]) || $field->hasMethod($rule[1]))
+        ) {
             // InlineValidator assumes that the closure is on the model being validated
             // so it won’t pass a reference to the element
             $rule['params'] = [
@@ -4548,11 +4552,21 @@ JS, [
             return $ancestors->filter(fn(ElementInterface $element) => $element->level >= $this->level - $dist);
         }
 
+        return $this->ancestors()->ancestorDist($dist);
+    }
+
+    /**
+     * Returns an element query for fetching the element’s ancestors.
+     *
+     * @return ElementQueryInterface
+     * @since 5.6.8
+     */
+    protected function ancestors(): ElementQueryInterface
+    {
         return static::find()
             ->structureId($this->structureId)
             ->ancestorOf($this)
-            ->siteId($this->siteId)
-            ->ancestorDist($dist);
+            ->siteId($this->siteId);
     }
 
     /**
@@ -4568,11 +4582,21 @@ JS, [
             return $descendants->filter(fn(ElementInterface $element) => $element->level <= $this->level + $dist);
         }
 
+        return $this->descendants()->descendantDist($dist);
+    }
+
+    /**
+     * Returns an element query for fetching the element’s descendants.
+     *
+     * @return ElementQueryInterface
+     * @since 5.6.8
+     */
+    protected function descendants(): ElementQueryInterface
+    {
         return static::find()
             ->structureId($this->structureId)
             ->descendantOf($this)
-            ->siteId($this->siteId)
-            ->descendantDist($dist);
+            ->siteId($this->siteId);
     }
 
     /**
@@ -5894,27 +5918,6 @@ JS, [
     protected function slugFieldHtml(bool $static): string
     {
         $slug = isset($this->slug) && !ElementHelper::isTempSlug($this->slug) ? $this->slug : null;
-
-        if (!$slug && !$static) {
-            $view = Craft::$app->getView();
-            $site = $this->getSite();
-            $charMapJs = Json::encode($site->language !== Craft::$app->language
-                ? StringHelper::asciiCharMap(true, $site->language)
-                : null
-            );
-
-            Craft::$app->getView()->registerJsWithVars(
-                fn($titleSelector, $slugSelector) => <<<JS
-new Craft.SlugGenerator($titleSelector, $slugSelector, {
-    charMap: $charMapJs,
-})
-JS,
-                [
-                    sprintf('#%s', $view->namespaceInputId('title')),
-                    sprintf('#%s', $view->namespaceInputId('slug')),
-                ]
-            );
-        }
 
         return Cp::textFieldHtml([
             'status' => $this->getAttributeStatus('slug'),
