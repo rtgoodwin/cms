@@ -64,49 +64,51 @@ test.describe('Sorting', () => {
   ];
 
   test('Check sort asc', async ({page, baseURL}) => {
-
-    const viewBtn = await page.waitForSelector(viewBtnSelector);
-    await page.click(viewBtnSelector);
-
-    let menuId = await viewBtn.getAttribute('aria-controls');
-    menuId = menuId.replace('.', '\\.');
-
-    const sortDropdownSelector = '#' + menuId + ' .sort-field select';
-    const sortAscendingSelector = '#' + menuId + ' section button[data-dir="asc"]';
-    const sortDescendingSelector = '#' + menuId + ' section button[data-dir="desc"]';
-    const closeSelector = '#' + menuId + ' button:has-text("Close")';
-
     // test sort ascending
     for (let i = 0; i < cols.length; i++) {
+      const viewBtn = await page.waitForSelector(viewBtnSelector);
+      await page.click(viewBtnSelector);
+
+      let menuId = await viewBtn.getAttribute('aria-controls');
+      menuId = menuId.replace('.', '\\.');
+
+      const sortDropdownSelector = '#' + menuId + ' .sort-field select';
+      const sortAscendingSelector = '#' + menuId + ' section button[data-dir="asc"]';
+      const sortDescendingSelector = '#' + menuId + ' section button[data-dir="desc"]';
+      const closeSelector = '#' + menuId + ' button:has-text("Close")';
+
       await page.locator(sortDropdownSelector).selectOption({'label': cols[i].field});
       await page.click(sortAscendingSelector);
       await page.click(closeSelector);
 
       await expect(page.locator('.elements table.data tbody tr').nth(0).locator('th[data-title="Entry"] .label-link')).toContainText(cols[i]['firstTitle']);
+
+      await page.reload();
     }
   });
 
   test('Check sort desc', async ({page, baseURL}) => {
-
-    const viewBtn = await page.waitForSelector(viewBtnSelector);
-    await page.click(viewBtnSelector);
-
-    let menuId = await viewBtn.getAttribute('aria-controls');
-    menuId = menuId.replace('.', '\\.');
-
-    const sortDropdownSelector = '#' + menuId + ' .sort-field select';
-    const sortAscendingSelector = '#' + menuId + ' section button[data-dir="asc"]';
-    const sortDescendingSelector = '#' + menuId + ' section button[data-dir="desc"]';
-    const closeSelector = '#' + menuId + ' button:has-text("Close")';
-
     // test sort descending
     for (let i = 0; i < cols.length; i++) {
+      const viewBtn = await page.waitForSelector(viewBtnSelector);
+      await page.click(viewBtnSelector);
+
+      let menuId = await viewBtn.getAttribute('aria-controls');
+      menuId = menuId.replace('.', '\\.');
+
+      const sortDropdownSelector = '#' + menuId + ' .sort-field select';
+      const sortAscendingSelector = '#' + menuId + ' section button[data-dir="asc"]';
+      const sortDescendingSelector = '#' + menuId + ' section button[data-dir="desc"]';
+      const closeSelector = '#' + menuId + ' button:has-text("Close")';
+
       await page.locator(sortDropdownSelector).selectOption({'label': cols[i].field});
       await page.click(sortAscendingSelector);
       await page.click(sortDescendingSelector);
       await page.click(closeSelector);
 
       await expect(page.locator('.elements table.data tbody tr').nth(0).locator('th[data-title="Entry"] .label-link')).toContainText(cols[i]['lastTitle']);
+
+      await page.reload();
     }
   });
 });
