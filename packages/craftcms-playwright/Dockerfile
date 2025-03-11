@@ -1,4 +1,7 @@
-FROM ghcr.io/craftcms/image:8.2 AS craft
+ARG PHP_VERSION=8.2
+ARG PROJECT_TYPE=fpm
+
+FROM php:${PHP_VERSION}-${PROJECT_TYPE}-alpine
 
 USER root
 
