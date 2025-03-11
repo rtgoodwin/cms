@@ -2377,7 +2377,7 @@ JS, [
                         ],
                     ]);
                 }
-
+                
                 // no break
             case 'isCredentialed':
                 $value = $this->getIsCredentialed();
