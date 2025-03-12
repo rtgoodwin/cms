@@ -77,8 +77,8 @@ class CraftTooltip extends HTMLElement {
       ['mouseleave', this.handleMouseLeave],
       ['keyup', this.handleKeyUp],
       ['click', this.handleClick],
-      ['focus', this.handleFocus],
-      ['blur', this.handleBlur],
+      ['focusin', this.handleFocusIn],
+      ['focusout', this.handleFocusOut],
     ];
 
     if (!this.triggerElement) {
@@ -195,7 +195,7 @@ class CraftTooltip extends HTMLElement {
     this.hide();
   };
 
-  handleFocus = () => {
+  handleFocusIn = () => {
     const currentTime = Date.now();
     this.lastShow = currentTime;
 
@@ -216,7 +216,7 @@ class CraftTooltip extends HTMLElement {
     this.show();
   };
 
-  handleBlur = () => {
+  handleFocusOut = () => {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
     }
