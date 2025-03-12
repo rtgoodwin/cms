@@ -16,4 +16,14 @@ return [
         'uid' => 'section-1000---------------------uid',
         'entryTypes' => ['1000'],
     ],
+    [
+        'id' => '1001',
+        'name' => 'Test Matrix',
+        'handle' => 'testMatrix',
+        'type' => 'channel',
+        'enableVersioning' => false,
+        'propagationMethod' => 'all',
+        'uid' => 'section-1001---------------------uid',
+        'entryTypes' => ['1001', '1002', '1003'],
+    ],
 ];

@@ -8,6 +8,7 @@
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\fields\Matrix;
 use craft\fields\Number;
 use craft\fields\PlainText;
 
@@ -66,7 +67,7 @@ return [
                         'name' => 'Plain Text Field',
                         'handle' => 'plainTextField',
                         'type' => PlainText::class,
-                        'required' => true,
+                        'required' => false,
                     ],
 
                     // NUMBER FIELD
@@ -75,7 +76,82 @@ return [
                         'name' => 'Number Field',
                         'handle' => 'numberField',
                         'type' => Number::class,
-                        'required' => true,
+                        'required' => false,
+                    ],
+                ],
+            ],
+        ],
+    ],
+    [
+        'uid' => 'field-layout-1003----------------uid',
+        'type' => Entry::class,
+        'tabs' => [
+            [
+                'name' => 'Tab 1',
+                'fields' => [
+                    // MATRIX FIELD IN CARDS MODE
+                    [
+                        'uid' => 'field-1003-----------------------uid',
+                        'name' => 'Matrix Cards Field',
+                        'handle' => 'matrixCardsField',
+                        'type' => Matrix::class,
+                        'required' => false,
+                        'viewMode' => Matrix::VIEW_MODE_CARDS,
+                        'entryTypes' => [
+                            [
+                                'uid' => 'entry-type-1000------------------uid',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+    [
+        'uid' => 'field-layout-1004----------------uid',
+        'type' => Entry::class,
+        'tabs' => [
+            [
+                'name' => 'Tab 1',
+                'fields' => [
+                    // MATRIX FIELD IN ELEMENT INDEX MODE
+                    [
+                        'uid' => 'field-1004-----------------------uid',
+                        'name' => 'Matrix Element Index Field',
+                        'handle' => 'matrixElementIndexField',
+                        'type' => Matrix::class,
+                        'required' => false,
+                        'viewMode' => Matrix::VIEW_MODE_INDEX,
+                        'entryTypes' => [
+                            [
+                                'uid' => 'entry-type-1000------------------uid',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+    [
+        'uid' => 'field-layout-1005----------------uid',
+        'type' => Entry::class,
+        'tabs' => [
+            [
+                'name' => 'Tab 1',
+                'fields' => [
+                    // MATRIX FIELD IN BLOCKS MODE
+                    [
+                        'uid' => 'field-1005-----------------------uid',
+                        'name' => 'Matrix Blocks Field',
+                        'handle' => 'matrixBlocksField',
+                        'type' => Matrix::class,
+                        'required' => false,
+                        'viewMode' => Matrix::VIEW_MODE_BLOCKS,
+                        'entryTypes' => [
+                            [
+                                'uid' => 'entry-type-1000------------------uid',
+                            ],
+                        ],
                     ],
                 ],
             ],
