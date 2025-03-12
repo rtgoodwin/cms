@@ -89,8 +89,8 @@ class CraftTooltip extends HTMLElement {
     // Make sure the trigger accepts pointer events
     this.triggerElement.style.pointerEvents = 'auto';
 
-    this.listeners.forEach(([event, handler, delay]) => {
-      this.triggerElement.addEventListener(event, () => handler(delay), {
+    this.listeners.forEach(([event, handler]) => {
+      this.triggerElement.addEventListener(event, (e) => handler(e), {
         signal: this.abortController.signal,
       });
     });
@@ -169,7 +169,6 @@ class CraftTooltip extends HTMLElement {
 
   handleMouseEnter = () => {
     this.isHovering = true;
-    console.log(this);
 
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
@@ -203,8 +202,6 @@ class CraftTooltip extends HTMLElement {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
     }
-
-    console.log(this.triggerElement);
 
     // Only show the tooltip if it's not already open
     if (!this.showing) {
