@@ -169,6 +169,7 @@ class CraftTooltip extends HTMLElement {
 
   handleMouseEnter = () => {
     this.isHovering = true;
+    console.log(this);
 
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
@@ -202,6 +203,8 @@ class CraftTooltip extends HTMLElement {
     if (this.delayTimeout) {
       clearTimeout(this.delayTimeout);
     }
+
+    console.log(this.triggerElement);
 
     // Only show the tooltip if it's not already open
     if (!this.showing) {
