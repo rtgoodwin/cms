@@ -3668,6 +3668,14 @@ abstract class Element extends Component implements ElementInterface
     /**
      * @inheritdoc
      */
+    public function canCopy(User $user): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function canDelete(User $user): bool
     {
         if ($this instanceof NestedElementInterface) {
@@ -3975,7 +3983,7 @@ JS, [
         }
 
         // Copy
-        if ($elementsService->canDuplicate($this)) {
+        if ($elementsService->canCopy($this)) {
             $copyId = sprintf('action-copy-%s', mt_rand());
             $items[] = [
                 'id' => $copyId,

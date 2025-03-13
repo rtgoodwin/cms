@@ -1946,6 +1946,14 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     /**
      * @inheritdoc
      */
+    public function canCopy(User $user): bool
+    {
+        return Craft::$app->getElements()->canDuplicate($this, $user);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function canDelete(User $user): bool
     {
         if (parent::canDelete($user)) {

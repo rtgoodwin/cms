@@ -940,9 +940,10 @@ class Cp
                     'level' => $element->level,
                     'trashed' => $element->trashed,
                     'editable' => $editable,
-                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element),
-                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element),
-                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element),
+                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element, $user),
+                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
+                    'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
+                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
                 ]),
             ],
         );

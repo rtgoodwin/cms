@@ -46,19 +46,19 @@ class Copy extends ElementAction
      */
     public function getTriggerHtml(): ?string
     {
-        // Only enable for duplicatable elements, per canDuplicate()
+        // Only enable for copyable elements, per canCopy()
         Craft::$app->getView()->registerJsWithVars(fn($type) => <<<JS
 (() => {
   new Craft.ElementActionTrigger({
     type: $type,
     validateSelection: (selectedItems, elementIndex) => {
       for (let i = 0; i < selectedItems.length; i++) {
-        if (!Garnish.hasAttr(selectedItems.eq(i).find('.element'), 'data-duplicatable')) {
+        if (!Garnish.hasAttr(selectedItems.eq(i).find('.element'), 'data-copyable')) {
           return false;
         }
       }
 
-      return elementIndex.settings.canDuplicateElements(selectedItems);
+      return true;
     },
     activate: (selectedItems, elementIndex) => {
       let elements = $();

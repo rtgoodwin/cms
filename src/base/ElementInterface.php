@@ -943,6 +943,15 @@ interface ElementInterface extends
     public function canDuplicateAsDraft(User $user): bool;
 
     /**
+     * Returns whether the given user is authorized to copy this element, to be duplicated elsewhere.
+     *
+     * @param User $user
+     * @return bool
+     * @since 5.7.0
+     */
+    public function canCopy(User $user): bool;
+
+    /**
      * Returns whether the given user is authorized to delete this element.
      *
      * This will only be called if the element can be [[canView()|viewed]] and/or [[canSave()|saved]].

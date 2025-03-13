@@ -590,48 +590,54 @@ Craft.NestedElementManager = Garnish.Base.extend(
           }
 
           const duplicatable = Garnish.hasAttr($element, 'data-duplicatable');
-          if (duplicatable) {
+          const copyable = Garnish.hasAttr($element, 'data-copyable');
+
+          if (duplicatable || copyable) {
             const destructiveGroup =
               actionDisclosure.getFirstDestructiveGroup();
             const ul = actionDisclosure.addGroup(null, true, destructiveGroup);
 
-            // Duplicate
-            const duplicateButton = actionDisclosure.addItem(
-              {
-                icon: async () => await Craft.ui.icon('clone'),
-                label: Craft.t('app', 'Duplicate'),
-                onActivate: () => {
-                  this.duplicateElement($element);
+            if (duplicatable) {
+              // Duplicate
+              const duplicateButton = actionDisclosure.addItem(
+                {
+                  icon: async () => await Craft.ui.icon('clone'),
+                  label: Craft.t('app', 'Duplicate'),
+                  onActivate: () => {
+                    this.duplicateElement($element);
+                  },
                 },
-              },
-              ul
-            );
+                ul
+              );
 
-            actionDisclosure.on('show', () => {
-              if (this.canCreate()) {
-                actionDisclosure.showItem(duplicateButton);
-              } else {
-                actionDisclosure.hideItem(duplicateButton);
-              }
-            });
-
-            // Copy
-            const $oldCopyBtn = $actionMenu.find('[data-copy-action]');
-            if ($oldCopyBtn.length) {
-              actionDisclosure.removeItem($oldCopyBtn[0]);
+              actionDisclosure.on('show', () => {
+                if (this.canCreate()) {
+                  actionDisclosure.showItem(duplicateButton);
+                } else {
+                  actionDisclosure.hideItem(duplicateButton);
+                }
+              });
             }
 
-            actionDisclosure.addItem(
-              {
-                icon: async () => await Craft.ui.icon('clone-dashed'),
-                iconColor: 'fuchsia',
-                label: Craft.t('app', 'Copy'),
-                onActivate: () => {
-                  Craft.cp.copyElements($element);
+            if (copyable) {
+              // Copy
+              const $oldCopyBtn = $actionMenu.find('[data-copy-action]');
+              if ($oldCopyBtn.length) {
+                actionDisclosure.removeItem($oldCopyBtn[0]);
+              }
+
+              actionDisclosure.addItem(
+                {
+                  icon: async () => await Craft.ui.icon('clone-dashed'),
+                  iconColor: 'fuchsia',
+                  label: Craft.t('app', 'Copy'),
+                  onActivate: () => {
+                    Craft.cp.copyElements($element);
+                  },
                 },
-              },
-              ul
-            );
+                ul
+              );
+            }
           }
         }
       }, 1);
