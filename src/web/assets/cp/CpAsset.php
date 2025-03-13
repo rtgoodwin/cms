@@ -444,8 +444,10 @@ JS;
             '{pct} width',
             '{total, number} {total, plural, =1{error} other{errors}} found in {num, number} {num, plural, =1{tab} other{tabs}}.',
             '{total, number} {total, plural, =1{{item}} other{{items}}}',
+            '{total, number} {type} copied.',
             '{totalItems, plural, =1{Item} other{Items}} moved.',
             '{type} Criteria',
+            '{type} copied.',
             '{type} saved.',
             '“{name}” deleted.',
         ]);
