@@ -12,6 +12,7 @@ use craft\base\NameTrait;
 use craft\base\NestedElementInterface;
 use craft\base\NestedElementTrait;
 use craft\db\Table;
+use craft\elements\actions\Copy;
 use craft\elements\conditions\addresses\AddressCondition;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\AddressQuery;
@@ -102,6 +103,16 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
     public static function createCondition(): ElementConditionInterface
     {
         return Craft::createObject(AddressCondition::class, [static::class]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected static function defineActions(string $source): array
+    {
+        return [
+            Copy::class,
+        ];
     }
 
     /**

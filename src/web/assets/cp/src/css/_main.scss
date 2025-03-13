@@ -2098,6 +2098,7 @@ ul.icons {
   &.loading {
     &::before,
     &::after,
+    .cp-icon,
     .label {
       visibility: hidden;
     }

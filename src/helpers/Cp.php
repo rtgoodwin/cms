@@ -1040,7 +1040,8 @@ class Cp
                 foreach ($actionMenuItems as &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
                         $item['attributes']['data']['edit-action'] = true;
-                        break;
+                    } elseif (str_starts_with($item['id'] ?? '', 'action-copy-')) {
+                        $item['attributes']['data']['copy-action'] = true;
                     }
                 }
 

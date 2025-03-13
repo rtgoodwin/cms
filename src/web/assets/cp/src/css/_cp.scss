@@ -796,36 +796,35 @@ li.breadcrumb-toggle-wrapper {
   }
 
   .notification {
-    display: flex;
     position: relative;
     @include mixins.pane;
-    padding-block: 10px;
-    padding-inline: 14px;
     border-radius: var(--large-border-radius);
     box-shadow:
       0 0 0 1px color.adjust(mixins.$grey1000, $alpha: -0.85),
       0 2px 12px color.adjust(mixins.$grey1000, $alpha: -0.85);
 
-    --color: var(--notice-color);
+    --icon-color: var(--notice-color);
 
     &[data-type='success'] {
-      --color: var(--success-color);
+      --icon-color: var(--success-color);
     }
 
     &[data-type='error'] {
-      --color: var(--error-color);
+      --icon-color: var(--error-color);
     }
 
     & + .notification {
       margin-block-start: 12px;
     }
 
+    .notification-inner {
+      display: flex;
+      padding-block: 10px;
+      padding-inline: 14px;
+    }
+
     .notification-icon {
-      width: 18px;
-      margin-block-start: -2px;
-      margin-inline-end: 10px;
-      font-size: 18px;
-      color: var(--color);
+      margin-block-start: 2px;
     }
 
     .notification-main {
@@ -858,6 +857,76 @@ li.breadcrumb-toggle-wrapper {
       inset-block-start: -2px;
       margin-inline-start: 10px;
     }
+  }
+
+  .copied-elements-notification {
+    padding: 2px;
+    background: linear-gradient(
+      135deg,
+      var(--fuchsia-600),
+      var(--violet-600),
+      var(--indigo-600)
+    );
+
+    --icon-color: var(--fuchsia-500);
+
+    .notification-inner {
+      border-radius: var(--small-border-radius);
+      background: var(--white);
+    }
+
+    .notification-main {
+      overflow: visible;
+    }
+
+    .copied-elements {
+      overflow: hidden;
+      margin-block: -5px -10px;
+      margin-inline: -5px;
+      padding-block: 5px 10px;
+      padding-inline: 5px;
+      position: relative;
+      pointer-events: none;
+
+      .chip:first-child {
+        box-shadow: 0 2px 4px hsl(from var(--gray-200) h s l / 50%);
+      }
+
+      .chip:not(:first-child) {
+        position: absolute;
+
+        &::after {
+          content: '';
+          position: absolute;
+          display: block;
+          inset: -1px;
+          background: rgb(255 255 255 / var(--overlay-opacity));
+        }
+      }
+    }
+  }
+}
+
+.paste-btn {
+  background: linear-gradient(
+    135deg,
+    var(--fuchsia-600),
+    var(--violet-600),
+    var(--indigo-600)
+  );
+  color: var(--white);
+  text-shadow: 0 1px 2px rgb(0 0 0 / 25%);
+
+  --focus-ring: var(--focus-ring-outset);
+
+  &:hover,
+  &.loading {
+    background: linear-gradient(
+      135deg,
+      var(--fuchsia-700),
+      var(--violet-700),
+      var(--indigo-700)
+    );
   }
 }
 

@@ -81,6 +81,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     $countContainer: null,
     $actionsContainer: null,
     $actionMenuBtn: null,
+    $pasteBtn: null,
     page: 1,
     prevPage: null,
     resultSet: null,
@@ -519,6 +520,15 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       // Set visible source name on small/zoomed screens
       this.updateMainHeading();
+
+      if (this.settings.context === 'index') {
+        Craft.cp.onCopyElements((elementInfo, buttonLabel) => {
+          this.updatePasteButton(elementInfo);
+          if (this.$pasteBtn && buttonLabel) {
+            this.$pasteBtn.find('.label').text(buttonLabel);
+          }
+        });
+      }
     },
 
     afterInit: function () {
@@ -1817,7 +1827,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         this._$triggers.appendTo(this.$actionsContainer);
       }
 
+      this.$actionsContainer.removeClass('hidden');
       this.showingActionTriggers = true;
+      this.updatePasteButton();
     },
 
     submitAction: async function (action, actionParams, beforeCallback) {
@@ -1929,7 +1941,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       this._$triggers.detach();
 
+      this.$actionsContainer.addClass('hidden');
       this.showingActionTriggers = false;
+      this.updatePasteButton();
     },
 
     updateSelectAllCheckbox: function () {
@@ -1964,6 +1978,62 @@ Craft.BaseElementIndex = Garnish.Base.extend(
           this.hideActionTriggers();
         }
       }
+    },
+
+    updatePasteButton(elementInfo = null) {
+      elementInfo = elementInfo || Craft.cp.getCopiedElements();
+      if (this.canPasteInternal(elementInfo)) {
+        if (!this.$pasteBtn) {
+          this.$pasteBtn = Craft.ui
+            .createPasteButton()
+            .insertAfter(this.$actionsContainer);
+          this.addListener(this.$pasteBtn, 'activate', 'pasteElements');
+        } else {
+          this.$pasteBtn.removeClass('hidden');
+        }
+      } else {
+        this.$pasteBtn?.addClass('hidden');
+      }
+    },
+
+    canPasteInternal(elementInfo) {
+      if (!elementInfo.length || !this.$source || this.showingActionTriggers) {
+        return false;
+      }
+
+      for (const e of elementInfo) {
+        if (e.type !== this.elementType) {
+          return false;
+        }
+      }
+
+      return this.canPaste(elementInfo);
+    },
+
+    canPaste: function (elementInfo) {
+      return false;
+    },
+
+    pasteAttributes: function () {
+      return {};
+    },
+
+    async pasteElements() {
+      Craft.cp.announce(Craft.t('app', 'Loading'));
+      this.$pasteBtn.addClass('loading');
+
+      try {
+        const newElementInfo = await Craft.cp.pasteElements(
+          this.pasteAttributes()
+        );
+        if (!newElementInfo.length) {
+          return;
+        }
+      } finally {
+        this.$pasteBtn.removeClass('loading');
+      }
+
+      await this.updateElements();
     },
 
     getSelectedElements: function () {
@@ -2341,6 +2411,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         urlParams.source = this.sourceKey;
         Craft.setUrl(Craft.getUrl(Craft.path, urlParams));
       }
+
+      this.updatePasteButton();
 
       return true;
     },

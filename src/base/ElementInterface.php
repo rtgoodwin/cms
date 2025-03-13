@@ -408,6 +408,14 @@ interface ElementInterface extends
     public static function searchableAttributes(): array;
 
     /**
+     * Returns the base attributes that should be applied when bulk-duplicating elements of this type.
+     *
+     * @return array
+     * @since 5.7.0
+     */
+    public static function baseBulkDuplicateAttributes(): array;
+
+    /**
      * Returns the element index HTML.
      *
      * @param ElementQueryInterface $elementQuery

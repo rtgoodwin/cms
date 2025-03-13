@@ -1193,6 +1193,31 @@ abstract class Element extends Component implements ElementInterface
         return [];
     }
 
+    /**
+     * @inheritdoc
+     */
+    public static function baseBulkDuplicateAttributes(): array
+    {
+        $attributes = [
+            'structureId' => null,
+            'root' => null,
+            'lft' => null,
+            'rgt' => null,
+            'level' => null,
+        ];
+
+        if (is_subclass_of(static::class, NestedElementInterface::class)) {
+            $attributes += [
+                'fieldId' => null,
+                'ownerId' => null,
+                'primaryOwnerId' => null,
+                'sortOrder' => null,
+            ];
+        }
+
+        return $attributes;
+    }
+
     // Element index methods
     // -------------------------------------------------------------------------
 
@@ -3903,6 +3928,7 @@ abstract class Element extends Component implements ElementInterface
     protected function safeActionMenuItems(): array
     {
         $items = [];
+        $elementsService = Craft::$app->getElements();
 
         // View
         $url = $this->getUrl();
@@ -3920,7 +3946,7 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Edit
-        if (Craft::$app->getElements()->canView($this)) {
+        if ($elementsService->canView($this)) {
             $editId = sprintf('action-edit-%s', mt_rand());
             $items[] = [
                 'id' => $editId,
@@ -3944,6 +3970,39 @@ JS, [
                     'revisionId' => $this->revisionId,
                     'siteId' => $this->siteId,
                     'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                ],
+            ]);
+        }
+
+        // Copy
+        if ($elementsService->canDuplicate($this)) {
+            $copyId = sprintf('action-copy-%s', mt_rand());
+            $items[] = [
+                'id' => $copyId,
+                'color' => Color::Fuchsia,
+                'icon' => 'clone-dashed',
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
+                    'type' => static::lowerDisplayName(),
+                ])),
+            ];
+
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
+(() => {
+  $('#' + $id).on('activate', () => {
+    Craft.cp.copyElements([$elementInfo]);
+  });
+})();
+JS, [
+                $view->namespaceInputId($copyId),
+                [
+                    'type' => static::class,
+                    'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
+                    'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
+                    'revisionId' => $this->revisionId,
+                    'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
+                    'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                    'siteId' => $this->siteId,
                 ],
             ]);
         }

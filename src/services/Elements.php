@@ -83,6 +83,7 @@ use yii\base\InvalidCallException;
 use yii\base\InvalidConfigException;
 use yii\caching\TagDependency;
 use yii\di\Instance;
+use yii\web\ForbiddenHttpException;
 
 /**
  * The Elements service provides APIs for managing elements.
@@ -1750,9 +1751,12 @@ class Elements extends Component
      * @param bool $placeInStructure whether to position the cloned element after the original one in its structure.
      * (This will only happen if the duplicated element is canonical.)
      * @param bool $asUnpublishedDraft whether the duplicate should be created as unpublished draft
+     * @param bool $checkAuthorization whether to ensure the current user is authorized to save the new element,
+     * once its new attributes have been applied to it
      * @return T the duplicated element
      * @throws UnsupportedSiteException if the element is being duplicated into a site it doesn’t support
      * @throws InvalidElementException if saveElement() returns false for any of the sites
+     * @throws ForbiddenHttpException if the user isn't authorized to save the duplicated element
      * @throws Throwable if reasons
      */
     public function duplicateElement(
@@ -1760,6 +1764,7 @@ class Elements extends Component
         array $newAttributes = [],
         bool $placeInStructure = true,
         bool $asUnpublishedDraft = false,
+        bool $checkAuthorization = false,
     ): ElementInterface {
         // Make sure the element exists
         if (!$element->id) {
@@ -1820,6 +1825,11 @@ class Elements extends Component
             }
         }
         $mainClone->setDirtyFields($dirtyFields, false);
+
+        // Check authorization?
+        if ($checkAuthorization && !$this->canSave($mainClone)) {
+            throw new ForbiddenHttpException('User not authorized to duplicate this element.');
+        }
 
         // If we are duplicating a draft as another draft, create a new draft row
         if ($mainClone->draftId && $mainClone->draftId === $element->draftId) {
