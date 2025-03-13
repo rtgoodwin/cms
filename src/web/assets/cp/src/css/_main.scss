@@ -3236,6 +3236,10 @@ table {
             th,
             td {
               background-color: var(--hover-bg-color);
+
+              .chip:not(.chromeless) {
+                background-color: var(--custom-bg-color, var(--gray-100));
+              }
             }
           }
 
@@ -3264,6 +3268,17 @@ table {
             td {
               color: var(--white);
               background-color: var(--selected-bg-color);
+
+              .chip {
+                color: var(--white);
+
+                &:not(.chromeless) {
+                  background-color: var(
+                    --custom-sel-bg-color,
+                    var(--gray-600)
+                  ) !important;
+                }
+              }
             }
 
             .icon,
@@ -3680,14 +3695,14 @@ table {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  gap: var(--s);
+  gap: var(--xs);
 
   .chip {
     margin: 0 !important;
   }
 }
 
-.elements.inline-chips {
+.elements.inline-chips.chips-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
@@ -4209,6 +4224,11 @@ table {
 
   // table views
   .tableview {
+    th,
+    td {
+      height: 34px;
+    }
+
     th {
       .move,
       .toggle {
@@ -4241,10 +4261,6 @@ table {
       .enabled-label {
         margin-inline-start: var(--xs);
       }
-    }
-
-    .chip {
-      background-color: transparent;
     }
 
     tr.disabled {
@@ -6087,9 +6103,13 @@ $min2ColWidth: 400px;
       & > ul.errors {
         margin: 0;
         padding-block: 0 6px;
-        padding-inline: 0;
+        padding-inline: 10px;
         width: 100%;
         list-style-type: none;
+
+        @media screen and (min-width: $min2ColWidth) {
+          padding-inline: var(--m);
+        }
       }
 
       & > .clear-btn {

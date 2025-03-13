@@ -672,9 +672,15 @@ JS, [
 
         if (is_array($value)) {
             $value = array_values(array_filter($value));
-            $query->andWhere(['elements.id' => $value]);
             if (!empty($value)) {
-                $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
+                if ($this->maintainHierarchy) {
+                    $value = $this->fillGapsInStructure((clone $query)->andWhere(['elements.id' => $value]));
+                }
+                $query
+                    ->andWhere(['elements.id' => $value])
+                    ->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
+            } else {
+                $query->andWhere(['elements.id' => []]);
             }
         } elseif ($value === null && $element?->id && $this->isFirstInstance($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
@@ -692,28 +698,15 @@ JS, [
             // Make our query customizations via EVENT_BEFORE_PREPARE/EVENT_AFTER_PREPARE,
             // so they get applied for cloned queries as well
 
-            $query->attachBehavior(sprintf('%s-once', self::class), new EventBehavior([
-                ElementQuery::EVENT_BEFORE_PREPARE => function(CancelableEvent  $event, ElementQuery $query) {
-                    if ($this->maintainHierarchy && $query->id === null) {
-                        $structuresService = Craft::$app->getStructures();
-
-                        $structureElements = (clone($query))
-                            ->select(['**' => '**'])
-                            ->status(null)
-                            ->all();
-
-                        // Fill in any gaps
-                        $structuresService->fillGapsInElements($structureElements);
-
-                        // Enforce the branch limit
-                        if ($this->branchLimit) {
-                            $structuresService->applyBranchLimitToElements($structureElements, $this->branchLimit);
+            if ($this->maintainHierarchy) {
+                $query->attachBehavior(sprintf('%s-once', self::class), new EventBehavior([
+                    ElementQuery::EVENT_BEFORE_PREPARE => function(CancelableEvent  $event, ElementQuery $query) {
+                        if ($query->id === null) {
+                            $query->id($this->fillGapsInStructure($query));
                         }
-
-                        $query->id(array_map(fn(ElementInterface $element) => $element->id, $structureElements));
-                    }
-                },
-            ], true));
+                    },
+                ], true));
+            }
 
             $relationsAlias = sprintf('relations_%s', StringHelper::randomString(10));
 
@@ -722,35 +715,37 @@ JS, [
                     CancelableEvent $event,
                     ElementQuery $query,
                 ) use ($element, $relationsAlias) {
-                    // Make these changes directly on the prepared queries, so `sortOrder` doesn't ever make it into
-                    // the criteria. Otherwise, if the query ends up A) getting executed normally, then B) getting
-                    // eager-loaded with eagerly(), the `orderBy` value referencing the join table will get applied
-                    // to the eager-loading query and cause a SQL error.
-                    foreach ([$query->query, $query->subQuery] as $q) {
-                        $q->innerJoin(
-                            [$relationsAlias => DbTable::RELATIONS],
-                            [
-                                'and',
-                                "[[$relationsAlias.targetId]] = [[elements.id]]",
+                    if ($query->id === null) {
+                        // Make these changes directly on the prepared queries, so `sortOrder` doesn't ever make it into
+                        // the criteria. Otherwise, if the query ends up A) getting executed normally, then B) getting
+                        // eager-loaded with eagerly(), the `orderBy` value referencing the join table will get applied
+                        // to the eager-loading query and cause a SQL error.
+                        foreach ([$query->query, $query->subQuery] as $q) {
+                            $q->innerJoin(
+                                [$relationsAlias => DbTable::RELATIONS],
                                 [
-                                    "$relationsAlias.sourceId" => $element->id,
-                                    "$relationsAlias.fieldId" => $this->id,
-                                ],
-                                [
-                                    'or',
-                                    ["$relationsAlias.sourceSiteId" => null],
-                                    ["$relationsAlias.sourceSiteId" => $element->siteId],
-                                ],
-                            ]
-                        );
+                                    'and',
+                                    "[[$relationsAlias.targetId]] = [[elements.id]]",
+                                    [
+                                        "$relationsAlias.sourceId" => $element->id,
+                                        "$relationsAlias.fieldId" => $this->id,
+                                    ],
+                                    [
+                                        'or',
+                                        ["$relationsAlias.sourceSiteId" => null],
+                                        ["$relationsAlias.sourceSiteId" => $element->siteId],
+                                    ],
+                                ]
+                            );
 
-                        if (
-                            $this->sortable &&
-                            !$this->maintainHierarchy &&
-                            count($query->orderBy ?? []) === 1 &&
-                            ($query->orderBy[0] ?? null) instanceof OrderByPlaceholderExpression
-                        ) {
-                            $q->orderBy(["$relationsAlias.sortOrder" => SORT_ASC]);
+                            if (
+                                $this->sortable &&
+                                !$this->maintainHierarchy &&
+                                count($query->orderBy ?? []) === 1 &&
+                                ($query->orderBy[0] ?? null) instanceof OrderByPlaceholderExpression
+                            ) {
+                                $q->orderBy(["$relationsAlias.sortOrder" => SORT_ASC]);
+                            }
                         }
                     }
                 },
@@ -767,6 +762,31 @@ JS, [
         }
 
         return $query;
+    }
+
+    /**
+     * @param ElementQueryInterface $query
+     * @return int[]
+     */
+    private function fillGapsInStructure(ElementQueryInterface $query): array
+    {
+        $structuresService = Craft::$app->getStructures();
+
+        /** @phpstan-ignore-next-line */
+        $elements = (clone($query))
+            ->select(['**' => '**'])
+            ->status(null)
+            ->all();
+
+        // Fill in any gaps
+        $structuresService->fillGapsInElements($elements);
+
+        // Enforce the branch limit
+        if ($this->branchLimit) {
+            $structuresService->applyBranchLimitToElements($elements, $this->branchLimit);
+        }
+
+        return array_map(fn(ElementInterface $element) => $element->id, $elements);
     }
 
     private function isFirstInstance(?Elementinterface $element): bool
@@ -945,11 +965,7 @@ JS, [
         $mockup = new (static::elementType());
         $mockup->title = Craft::t('app', 'Related {type} Title', ['type' => $mockup->displayName()]);
 
-        return Cp::chipHtml($mockup, [
-            'attributes' => [
-                'class' => ['chromeless'],
-            ],
-        ]);
+        return Cp::chipHtml($mockup);
     }
 
     /**
