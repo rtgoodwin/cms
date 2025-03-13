@@ -440,7 +440,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
             data: {
               elementType: this.elementType,
               ownerId: this.settings.ownerId,
-              siteId: this.settings.siteId,
+              siteId: this.settings.ownerSiteId,
               elementId:
                 this.elementEditor?.getDraftElementId(elementId) || elementId,
             },
