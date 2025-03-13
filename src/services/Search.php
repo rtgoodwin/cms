@@ -327,7 +327,7 @@ class Search extends Component
                     ->status(null)
                     ->one();
 
-                if ($elementId) {
+                if ($element) {
                     $this->indexElementAttributes($element, $fieldHandles);
                 }
             }
