@@ -2843,12 +2843,12 @@ div.btn.submit input {
 }
 
 .lightswitch {
-  --enabled-color: var(
+  --border-color: var(
     --teal-600
   ); // Ensures contrast with pane background is over 3:1
   display: block;
   position: relative;
-  border: none !important;
+  border: 1px solid transparent !important;
   overflow: hidden;
   cursor: pointer;
   user-select: none;
@@ -2861,14 +2861,31 @@ div.btn.submit input {
       var(--enabled-color),
       var(--enabled-color)
     );
+    border: 1px solid var(--border-color);
+
+    .lightswitch-container {
+      .handle {
+        border: 1px solid var(--border-color);
+      }
+    }
   }
 
   &.indeterminate {
-    background-image: linear-gradient(
+    border: none !important;
+    inset-inline-start: 1px;
+    background: linear-gradient(
       to right,
-      var(--enabled-color),
-      var(--gray-300)
+      var(--fuchsia-600),
+      var(--violet-600),
+      var(--indigo-600)
     );
+
+    .lightswitch-container {
+      .handle {
+        inset-block-start: 1px;
+        inset-inline-start: calc(50% - 10px) !important;
+      }
+    }
   }
 
   .lightswitch-container {
@@ -2877,7 +2894,6 @@ div.btn.submit input {
 
     .handle {
       position: absolute;
-      inset-block-start: 1px;
       background-color: var(--white);
     }
   }
@@ -2896,7 +2912,7 @@ div.btn.submit input {
         border-radius: 10px;
         width: 20px;
         height: 20px;
-        inset-inline-start: calc(50% - 10px);
+        inset-inline-start: calc(50% - 11px);
       }
     }
   }
