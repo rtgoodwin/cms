@@ -107,7 +107,7 @@ class Cp
      * @var Site|false|null
      * @see requestedSite()
      */
-    private static Site|false|null $_requestedSite;
+    private static Site|false|null $_requestedSite = null;
 
     /**
      * Renders a control panel template.
