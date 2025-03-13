@@ -4482,6 +4482,12 @@ table {
     clear: both;
   }
 
+  .btn {
+    text-wrap: auto;
+    min-height: var(--input-height);
+    height: auto;
+  }
+
   .structure {
     .chip {
       margin-block-start: var(--xs);
