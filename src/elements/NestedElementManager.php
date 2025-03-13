@@ -596,6 +596,7 @@ class NestedElementManager extends Component
                 'maxElements' => $config['maxElements'],
                 'createButtonLabel' => $config['createButtonLabel'],
                 'ownerIdParam' => $this->ownerIdParam,
+                'fieldId' => $this->field?->id,
                 'fieldHandle' => $this->field?->handle,
                 'baseInputName' => $view->getNamespace(),
                 'prevalidate' => $config['prevalidate'] ?? false,

@@ -358,6 +358,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
           {
             elementType: this.elementType,
             ownerId: this.settings.ownerId,
+            fieldId: this.settings.fieldId,
             siteId: this.settings.ownerSiteId,
           },
           attributes
@@ -716,6 +717,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
       createButtonLabel: Craft.t('app', 'Create'),
       ownerIdParam: null,
       createAttributes: null,
+      fieldId: null,
       fieldHandle: null,
       baseInputName: null,
       deleteLabel: null,
