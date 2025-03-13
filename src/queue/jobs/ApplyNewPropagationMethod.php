@@ -56,8 +56,19 @@ class ApplyNewPropagationMethod extends BaseBatchedElementJob
             ->unique()
             ->status(null)
             ->drafts(null)
-            ->provisionalDrafts(null)
-            ->orderBy(['elements.id' => SORT_ASC]);
+            ->provisionalDrafts(null);
+
+        if (!empty($this->criteria) && isset($this->criteria['fieldId'])) {
+            // when element belongs to a field, we want to orderBy elements_owners.sortOrder
+            // https://github.com/craftcms/cms/issues/16872
+            $query->leftJoin(
+                ['eo' => Table::ELEMENTS_OWNERS],
+                '[[eo.elementId]] = COALESCE([[elements.canonicalId]], [[elements.id]])'
+                )
+                ->orderBy(['eo.sortOrder' => SORT_ASC]);
+        } else {
+            $query->orderBy(['elements.id' => SORT_ASC]);
+        }
 
         if (!empty($this->criteria)) {
             Craft::configure($query, $this->criteria);
