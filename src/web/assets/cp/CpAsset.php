@@ -26,6 +26,7 @@ use craft\services\Sites;
 use craft\utilities\QueueManager;
 use craft\validators\UserPasswordValidator;
 use craft\web\AssetBundle;
+use craft\web\assets\animationblocker\AnimationBlockerAsset;
 use craft\web\assets\axios\AxiosAsset;
 use craft\web\assets\d3\D3Asset;
 use craft\web\assets\datepickeri18n\DatepickerI18nAsset;
@@ -60,6 +61,7 @@ class CpAsset extends AssetBundle
      */
     public $depends = [
         TailwindResetAsset::class,
+        AnimationBlockerAsset::class,
         AxiosAsset::class,
         D3Asset::class,
         GarnishAsset::class,
@@ -137,6 +139,7 @@ JS;
             'Are you sure you want to transfer your license to this domain?',
             'Ascending',
             'Assets',
+            'Attributes',
             'Breadcrumbs',
             'Buy {name}',
             'Cancel',
@@ -148,6 +151,7 @@ JS;
             'Choose which sites this source should be visible for.',
             'Choose which table columns should be visible for this source by default.',
             'Choose which user groups should have access to this source.',
+            'Choose',
             'Clear search',
             'Clear',
             'Close Preview',
@@ -169,6 +173,7 @@ JS;
             'Couldn’t save new order.',
             'Create {type}',
             'Create',
+            'Custom',
             'Customize sources',
             'Default Sort',
             'Default Table Columns',
@@ -194,6 +199,7 @@ JS;
             'Don’t show in element cards',
             'Don’t use for element thumbnails',
             'Draft Name',
+            'Duplicate',
             'Edit draft settings',
             'Edit {type}',
             'Edit',
@@ -286,6 +292,7 @@ JS;
             'No limit',
             'Notes',
             'Notice',
+            'Number of columns',
             'OK',
             'Open in a new tab',
             'Options',
@@ -444,6 +451,28 @@ JS;
         $view->registerTranslations('yii', [
             '{attribute} should contain at least {min, number} {min, plural, one{character} other{characters}}.',
             '{attribute} should contain at most {max, number} {max, plural, one{character} other{characters}}.',
+        ]);
+
+        $view->registerIcons([
+            'arrow-down',
+            'arrow-left',
+            'arrow-right',
+            'arrow-up',
+            'arrows-rotate',
+            'asterisk',
+            'asterisk-slash',
+            'clipboard',
+            'clone',
+            'edit',
+            'gear',
+            'image',
+            'image-slash',
+            'pencil',
+            'plus',
+            'remove',
+            'share',
+            'trash',
+            'xmark',
         ]);
     }
 

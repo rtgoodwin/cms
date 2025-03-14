@@ -66,6 +66,7 @@ use craft\events\SetEagerLoadedElementsEvent;
 use craft\events\SetElementRouteEvent;
 use craft\fieldlayoutelements\BaseField;
 use craft\fieldlayoutelements\CustomField;
+use craft\gql\interfaces\Element as ElementGqlType;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -84,6 +85,8 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -2130,6 +2133,14 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     */
+    public static function baseGqlType(): Type
+    {
+        return ElementGqlType::getType();
+    }
+
+    /**
+     * @inheritdoc
      * @since 3.3.0
      */
     public static function gqlScopesByContext(mixed $context): array
@@ -3839,6 +3850,10 @@ abstract class Element extends Component implements ElementInterface
                     ]),
                     'action' => 'elements/duplicate',
                     'redirect' => '{cpEditUrl}',
+                    'params' => [
+                        'asUnpublishedDraft' => true,
+                        'deleteProvisionalDraft' => true,
+                    ],
                 ];
             }
         }
@@ -4169,6 +4184,7 @@ JS, [
                     'sizes' => sprintf('calc(%srem/16)', $size),
                     'srcset' => sprintf('%s %sw, %s %sw', $thumbUrl, $size, $this->thumbUrl($size * 2), $size * 2),
                     'alt' => $this->thumbAlt(),
+                    'animated' => $this->couldHaveAnimatedThumb(),
                 ],
             ]);
         }
@@ -4245,6 +4261,17 @@ JS, [
      * @since 5.0.0
      */
     protected function hasRoundedThumb(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Returns whether the element’s thumbnail is potentially animated.
+     *
+     * @return boolean
+     * @since 5.7.0
+     */
+    protected function couldHaveAnimatedThumb(): bool
     {
         return false;
     }
@@ -5008,6 +5035,23 @@ JS, [
     /**
      * @inheritdoc
      */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function setFieldValues(array $values): void
     {
         foreach ($values as $fieldHandle => $value) {
@@ -5278,7 +5322,7 @@ JS, [
         do {
             $processedAnyFields = false;
 
-            foreach ($this->fieldLayoutFields(true) as $field) {
+            foreach ($this->fieldLayoutFields(editableOnly: true) as $field) {
                 // Have we already processed this field?
                 if (isset($processedFields[$field->handle])) {
                     continue;
@@ -6565,9 +6609,10 @@ JS, [
      * Returns each of this element’s fields.
      *
      * @param bool $visibleOnly Whether to only return fields that are visible for this element
+     * @param bool $editableOnly Whether to only return fields that the current user can edit
      * @return FieldInterface[] This element’s fields
      */
-    protected function fieldLayoutFields(bool $visibleOnly = false): array
+    protected function fieldLayoutFields(bool $visibleOnly = false, bool $editableOnly = false): array
     {
         try {
             $fieldLayout = $this->getFieldLayout();
@@ -6576,7 +6621,13 @@ JS, [
         }
 
         if ($fieldLayout) {
-            return $visibleOnly ? $fieldLayout->getVisibleCustomFields($this) : $fieldLayout->getCustomFields();
+            if ($editableOnly) {
+                return $fieldLayout->getEditableCustomFields($this);
+            }
+            if ($visibleOnly) {
+                return $fieldLayout->getVisibleCustomFields($this);
+            }
+            return $fieldLayout->getCustomFields();
         }
 
         return [];

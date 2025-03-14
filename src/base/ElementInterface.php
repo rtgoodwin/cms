@@ -18,6 +18,7 @@ use craft\enums\AttributeStatus;
 use craft\errors\InvalidFieldException;
 use craft\models\FieldLayout;
 use craft\models\Site;
+use GraphQL\Type\Definition\Type;
 use Twig\Markup;
 use yii\web\Response;
 
@@ -613,6 +614,14 @@ interface ElementInterface extends
      * should be ignored
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false;
+
+    /**
+     * Returns the base GraphQL type name that represents elements of this type.
+     *
+     * @return Type
+     * @since 5.7.0
+     */
+    public static function baseGqlType(): Type;
 
     /**
      * Returns the GraphQL scopes required by element’s context.
@@ -1414,6 +1423,18 @@ interface ElementInterface extends
      * @return array
      */
     public function getSerializedFieldValues(?array $fieldHandles = null): array;
+
+    /**
+     * Returns an array of the element’s serialized custom field values, indexed by their handles,
+     * for database storage.
+     *
+     * @param string[]|null $fieldHandles The list of field handles whose values
+     * need to be returned. Defaults to null, meaning all fields’ values will be
+     * returned. If it is an array, only the fields in the array will be returned.
+     * @return array
+     * @since 5.7.0
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array;
 
     /**
      * Sets the element’s custom field values.
