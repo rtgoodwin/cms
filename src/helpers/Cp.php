@@ -711,7 +711,7 @@ class Cp
             Html::beginTag('div', ['class' => 'card-actions-container']) .
             Html::beginTag('div', ['class' => 'card-actions']) .
             ($config['selectable'] ? self::componentCheckboxHtml(sprintf('%s-label', $config['id'])) : '') .
-            ($config['showActionMenu'] ? self::componentActionMenu($element) : '') .
+            ($config['showActionMenu'] ? self::componentActionMenu($element, $config) : '') .
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
@@ -1025,10 +1025,10 @@ class Cp
         ]);
     }
 
-    private static function componentActionMenu(Actionable $component): string
+    private static function componentActionMenu(Actionable $component, array $config = []): string
     {
         return Craft::$app->getView()->namespaceInputs(
-            function() use ($component): string {
+            function() use ($component, $config): string {
                 $actionMenuItems = array_filter(
                     $component->getActionMenuItems(),
                     fn(array $item) => $item['showInChips'] ?? !($item['destructive'] ?? false)
@@ -1043,6 +1043,41 @@ class Cp
                         $item['attributes']['data']['edit-action'] = true;
                         break;
                     }
+                }
+
+                if ($config['sortable'] ?? false) {
+                    $moveUpId = sprintf('action-move-up-%s', mt_rand());
+                    $label = $config['showInGrid'] ? Craft::t('app', 'Move backward') : Craft::t('app', 'Move up');
+                    $icon = 'arrow-up';
+                    if ($config['showInGrid']) {
+                        $icon = Craft::$app->getLocale()->getOrientation() === 'ltr' ? 'arrow-left' : 'arrow-right';
+                    }
+                    $actionMenuItems[] = [
+                        'id' => $moveUpId,
+                        'label' => $label,
+                        'icon' => $icon,
+                        'destructive' => false,
+                        'attributes' => [
+                            'class' => ['move'],
+                            'data' => ['move-action' => 'up'],
+                        ],
+                    ];
+                    $moveDownId = sprintf('action-move-down-%s', mt_rand());
+                    $label = $config['showInGrid'] ? Craft::t('app', 'Move forward') : Craft::t('app', 'Move down');
+                    $icon = 'arrow-down';
+                    if ($config['showInGrid']) {
+                        $icon = Craft::$app->getLocale()->getOrientation() === 'ltr' ? 'arrow-right' : 'arrow-left';
+                    }
+                    $actionMenuItems[] = [
+                        'id' => $moveDownId,
+                        'label' => $label,
+                        'icon' => $icon,
+                        'destructive' => false,
+                        'attributes' => [
+                            'class' => ['move'],
+                            'data' => ['move-action' => 'down'],
+                        ],
+                    ];
                 }
 
                 return static::disclosureMenu($actionMenuItems, [

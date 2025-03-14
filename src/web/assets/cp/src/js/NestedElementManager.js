@@ -455,6 +455,65 @@ Craft.NestedElementManager = Garnish.Base.extend(
         const disclosureMenu = $actionMenuBtn
           .disclosureMenu()
           .data('disclosureMenu');
+        const $actionMenu = disclosureMenu.$container;
+
+        if (this.settings.sortable) {
+          const $container = $element.parents('.elements');
+          const $parent = $element.parent();
+
+          // show/hide move up/down buttons
+          disclosureMenu.on('show', () => {
+            if ($parent.prev('li').length) {
+              $actionMenu
+                .find('button[data-move-action=up]:first')
+                .parent()
+                .removeClass('hidden');
+            } else {
+              $actionMenu
+                .find('button[data-move-action=up]:first')
+                .parent()
+                .addClass('hidden');
+            }
+            if ($parent.next('li').length) {
+              $actionMenu
+                .find('button[data-move-action=down]:first')
+                .parent()
+                .removeClass('hidden');
+            } else {
+              $actionMenu
+                .find('button[data-move-action=down]:first')
+                .parent()
+                .addClass('hidden');
+            }
+          });
+
+          const $moveUpBtn = $element
+            .find('.action-btn')
+            .data('disclosureMenu')
+            ?.$container.find('[data-move-action="up"]');
+          if ($moveUpBtn?.length) {
+            this.addListener($moveUpBtn, 'activate', () => {
+              let $prev = $parent.prev('li');
+              if ($prev.length) {
+                $parent.insertBefore($prev);
+                this.onSortChange($parent);
+              }
+            });
+          }
+          const $moveDownBtn = $element
+            .find('.action-btn')
+            .data('disclosureMenu')
+            ?.$container.find('[data-move-action="down"]');
+          if ($moveDownBtn?.length) {
+            this.addListener($moveDownBtn, 'activate', () => {
+              let $next = $parent.next('li');
+              if ($next.length) {
+                $parent.insertAfter($next);
+                this.onSortChange($parent);
+              }
+            });
+          }
+        }
 
         if (Garnish.hasAttr($element, 'data-deletable')) {
           const ul = disclosureMenu.addGroup();
