@@ -85,26 +85,42 @@ class ChangeSortOrder extends ElementAction
         }
 
         button.addClass('loading');
-        const data = Object.assign($params, {
-          elementIds: elementIndex.getSelectedElementIds(),
-          offset: (page - 1) * elementIndex.settings.batchSize,
-        });
-        Craft.sendActionRequest('POST', 'nested-elements/reorder', {data})
-          .then(({data}) => {
-            Craft.cp.displayNotice(data.message);
-            elementIndex.setPage(page);
-            elementIndex.updateElements(true, true)
-          })
-          .catch(({response}) => {
-            Craft.cp.displayError(response.data && response.data.error);
-          })
-          .finally(() => {
-            button.removeClass('loading');
-            hud.hide();
+        const elementEditor = elementIndex.\$container.parents('[data-element-editor]').data('elementEditor');
+        if (typeof elementEditor === 'undefined') {
+         moveToPage(elementIndex, page, button, hud);
+        } else {
+          elementEditor.ensureIsDraftOrRevision().then(() => {
+            moveToPage(elementIndex, page, button, hud, elementEditor.settings.elementId);
           });
+        }
       });
     },
   });
+  
+  function moveToPage(elementIndex, page, button, hud, ownerId = null) {
+    const data = Object.assign($params, {
+      elementIds: elementIndex.getSelectedElementIds(),
+      offset: (page - 1) * elementIndex.settings.batchSize,
+    });
+    
+    if (ownerId !== null) {
+      data.ownerId = ownerId;
+    }
+    
+    Craft.sendActionRequest('POST', 'nested-elements/reorder', {data})
+      .then(({data}) => {
+        Craft.cp.displayNotice(data.message);
+        elementIndex.setPage(page);
+        elementIndex.updateElements(true, true)
+      })
+      .catch(({response}) => {
+        Craft.cp.displayError(response.data && response.data.error);
+      })
+      .finally(() => {
+        button.removeClass('loading');
+        hud.hide();
+      });
+  }
 })();
 JS,
             [
