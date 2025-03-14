@@ -3831,6 +3831,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       waitForDoubleClicks: false,
       canSelectElement: null,
       canDuplicateElements: (selectedItems) => true,
+      onBeforeMoveElementsToPage: async (selectedItems, page) => {},
+      onMoveElementsToPage: async (selectedItems, page) => {},
       onBeforeDuplicateElements: async (selectedItems) => {},
       onDuplicateElements: async (selectedItems) => {},
       canDeleteElements: (selectedItems) => true,

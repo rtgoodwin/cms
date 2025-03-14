@@ -185,6 +185,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             canDeleteElements: ($selectedItems) => {
               return this.canDelete($selectedItems.length);
             },
+            onBeforeMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
+            onMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();
             },
