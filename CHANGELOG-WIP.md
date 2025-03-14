@@ -7,6 +7,7 @@
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
+- User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
 
 ### Accessibility
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
