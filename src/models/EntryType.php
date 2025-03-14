@@ -349,6 +349,7 @@ JS, [
             'section',
             'sectionId',
             'type',
+            'postDate',
         ];
 
         if (!$fieldLayout->validate()) {

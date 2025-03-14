@@ -1483,14 +1483,6 @@ Craft.BaseElementIndex = Garnish.Base.extend(
           this.activeViewMenu.hideTrigger();
         }
         if (!this.viewMenus[this.sourceKey]) {
-          if (
-            !this.getViewModesForSource().find(
-              (mode) => mode.mode === 'table'
-            ) &&
-            this.settings.sortable
-          ) {
-            return;
-          }
           this.viewMenus[this.sourceKey] = new ViewMenu(this, this.$source);
         }
         this.activeViewMenu = this.viewMenus[this.sourceKey];
@@ -1562,6 +1554,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         viewState.tableColumns = [];
       }
 
+      const [sortAttribute, sortDirection] =
+        this.getSortAttributeAndDirection();
+
       const params = {
         context: this.settings.context,
         elementType: this.elementType,
@@ -1576,7 +1571,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         viewState,
         paginated: this.paginated,
         selectable: this.selectable,
-        sortable: this.sortable,
+        sortable: this.sortable && sortAttribute === 'sortOrder',
         prevalidate: this.settings.prevalidate,
       };
 
@@ -1597,10 +1592,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
           this.instanceState.collapsedElementIds = [];
         }
         params.collapsedElementIds = this.instanceState.collapsedElementIds;
-      } else if (!this.sortable && !this.inlineEditing) {
+      } else if (!this.inlineEditing) {
         // Possible that the order/sort isn't entirely accurate if we're sorting by Score
-        const [sortAttribute, sortDirection] =
-          this.getSortAttributeAndDirection();
         params.viewState.order = sortAttribute;
         params.viewState.sort = sortDirection;
       }
@@ -2063,7 +2056,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         return;
       }
 
-      if (!dir) {
+      if (attr === 'sortOrder') {
+        dir = 'asc';
+      } else if (!dir) {
         dir = sortOption.defaultDir;
       }
 
@@ -2126,7 +2121,16 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         return ['score', 'desc'];
       }
 
-      return [this.getSelectedSortAttribute(), this.getSelectedSortDirection()];
+      const attr = this.getSelectedSortAttribute();
+      let dir;
+
+      if (attr === 'sortOrder') {
+        dir = 'asc';
+      } else {
+        dir = this.getSelectedSortDirection();
+      }
+
+      return [attr, dir];
     },
 
     getSortLabel: function (attr) {
@@ -2393,6 +2397,17 @@ Craft.BaseElementIndex = Garnish.Base.extend(
      * @returns {?Object}
      */
     getSortOption: function (attribute, $source) {
+      if (attribute === 'sortOrder') {
+        if (!this.settings.sortable) {
+          return null;
+        }
+        return {
+          label: Craft.t('app', 'Custom'),
+          attribute: 'sortOrder',
+          defaultDir: 'asc',
+        };
+      }
+
       return (
         this.getSortOptions($source).find((o) => o.attr === attribute) || null
       );
@@ -2420,6 +2435,10 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
           return defaultSort;
         }
+      }
+
+      if (this.settings.sortable) {
+        return ['sortOrder', 'asc'];
       }
 
       // Default to the first sort option
@@ -3812,6 +3831,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       waitForDoubleClicks: false,
       canSelectElement: null,
       canDuplicateElements: (selectedItems) => true,
+      onBeforeMoveElementsToPage: async (selectedItems, page) => {},
+      onMoveElementsToPage: async (selectedItems, page) => {},
       onBeforeDuplicateElements: async (selectedItems) => {},
       onDuplicateElements: async (selectedItems) => {},
       canDeleteElements: (selectedItems) => true,
@@ -4129,10 +4150,6 @@ const ViewMenu = Garnish.Base.extend({
   },
 
   updateSortField: function () {
-    if (this.elementIndex.settings.sortable) {
-      return;
-    }
-
     if (this.$sortField) {
       if (this.elementIndex.viewMode === 'structure') {
         this.$sortField.addClass('hidden');
@@ -4172,7 +4189,7 @@ const ViewMenu = Garnish.Base.extend({
     this.$sortAttributeSelect.val(attribute);
     this.sortDirectionListbox.select(direction === 'asc' ? 0 : 1);
 
-    if (attribute === 'score') {
+    if (['score', 'sortOrder'].includes(attribute)) {
       this.sortDirectionListbox.disable();
       this.$sortDirectionPicker.addClass('disabled');
     } else {
@@ -4267,10 +4284,7 @@ const ViewMenu = Garnish.Base.extend({
 
   _buildMenu: function () {
     const $metaContainer = $('<div class="meta"/>').appendTo(this.$container);
-
-    if (!this.elementIndex.settings.sortable) {
-      this.$sortField = this._createSortField().appendTo($metaContainer);
-    }
+    this.$sortField = this._createSortField().appendTo($metaContainer);
 
     if (!Garnish.isMobileBrowser(true)) {
       this.$tableColumnsField =
@@ -4328,32 +4342,37 @@ const ViewMenu = Garnish.Base.extend({
       .getSortOptions(this.$source)
       .sort((a, b) => {
         return a.label === b.label ? 0 : a.label < b.label ? -1 : 1;
-      });
-    const groups = options.reduce(
-      (groups, o) => {
-        const index = o.attr.startsWith('field:') ? 1 : 0;
-        groups[index].push(o);
-        return groups;
-      },
-      [[], []]
-    );
-    if (groups[1].length) {
-      groups[1].unshift({
-        optgroup: Craft.t('app', 'Fields'),
+      })
+      .reduce(
+        (groups, option) => {
+          const index = option.attr.startsWith('field:') ? 1 : 0;
+          groups[index].options.push(option);
+          return groups;
+        },
+        [
+          {label: Craft.t('app', 'Attributes'), options: []},
+          {label: Craft.t('app', 'Fields'), options: []},
+        ]
+      )
+      .filter((group) => group.options.length)
+      .map((group) => [
+        {optgroup: group.label},
+        ...group.options.map((option) => ({
+          label: Craft.escapeHtml(option.label),
+          value: option.attr,
+        })),
+      ])
+      .flat();
+
+    if (this.elementIndex.settings.sortable) {
+      options.unshift({
+        label: Craft.t('app', 'Custom'),
+        value: 'sortOrder',
       });
     }
 
     const $sortAttributeSelectContainer = Craft.ui
-      .createSelect({
-        options: groups.flat().map((o) => {
-          return o.optgroup
-            ? o
-            : {
-                label: Craft.escapeHtml(o.label),
-                value: o.attr,
-              };
-        }),
-      })
+      .createSelect({options})
       .addClass('fullwidth')
       .appendTo($('<div class="flex-grow"/>').appendTo($container));
 
@@ -4422,6 +4441,7 @@ const ViewMenu = Garnish.Base.extend({
       this.elementIndex.selectViewMode(this.elementIndex.viewMode);
 
       this.elementIndex.updateElements();
+      this.updateSortField();
       this._createRevertBtn();
     });
 

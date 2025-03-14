@@ -9,6 +9,7 @@
 Craft.CP = Garnish.Base.extend(
   {
     elementThumbLoader: null,
+    animationBlocker: null,
     authManager: null,
     announcerTimeout: null,
     modalLayers: [],
@@ -141,6 +142,9 @@ Craft.CP = Garnish.Base.extend(
       if (this.$alerts.length) {
         this.initAlerts();
       }
+
+      // Global Animation Blocker
+      this.animationBlocker = new Craft.AnimationBlocker();
 
       // Toggles
       this.addListener(this.$navToggle, 'click', 'toggleNav');
@@ -1106,7 +1110,7 @@ Craft.CP = Garnish.Base.extend(
       );
     },
 
-    displayAlerts: function (alerts, animate = true) {
+    displayAlerts: async function (alerts, animate = true) {
       this.$alerts.remove();
 
       if (Array.isArray(alerts) && alerts.length) {
@@ -1131,9 +1135,10 @@ Craft.CP = Garnish.Base.extend(
 
         if (animate) {
           const height = this.$alerts.outerHeight();
-          this.$alerts
-            .css('margin-top', -height)
-            .velocity({'margin-top': 0}, 'fast');
+          this.$alerts.css('margin-top', -height);
+          await Craft.animate(this.$alerts, {
+            'margin-top': 0,
+          });
         }
 
         this.initAlerts();
@@ -1843,12 +1848,15 @@ Craft.CP.Notification = Garnish.Base.extend({
       }
     }
 
-    this.$container
-      .css({
-        opacity: 0,
-        'margin-bottom': this._negMargin(),
-      })
-      .velocity({opacity: 1, 'margin-bottom': 0}, {duration: 'fast'});
+    this.$container.css({
+      opacity: 0,
+      'margin-bottom': this._negMargin(),
+    });
+
+    Craft.animate(this.$container, {
+      opacity: 1,
+      'margin-bottom': 0,
+    });
 
     Craft.initUiElements(this.$container);
 
@@ -1890,7 +1898,7 @@ Craft.CP.Notification = Garnish.Base.extend({
     return `-${this.$container.outerHeight() + 12}px`;
   },
 
-  close: function () {
+  close: async function () {
     if (this.closing) {
       return;
     }
@@ -1911,16 +1919,13 @@ Craft.CP.Notification = Garnish.Base.extend({
       $(this.originalActiveElement).focus();
     }
 
-    this.$container.velocity(
-      {opacity: 0, 'margin-bottom': this._negMargin()},
-      {
-        duration: 'fast',
-        complete: () => {
-          this.destroy();
-          Craft.cp.trigger('notificationClose');
-        },
-      }
-    );
+    await Craft.animate(this.$container, {
+      opacity: 0,
+      'margin-bottom': this._negMargin(),
+    });
+
+    this.destroy();
+    Craft.cp.trigger('notificationClose');
   },
 
   delayedClose: function () {
