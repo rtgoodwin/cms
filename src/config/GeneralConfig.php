@@ -2996,7 +2996,7 @@ class GeneralConfig extends BaseConfig
      *
      * | Symbol | Example | Category |
      * | `$` | `$Date Field$` | Site |
-     * | `@` | `$Entry Type$` | Application |
+     * | `@` | `@Entry Type@` | Application |
      * | `%` | `%Object Template% | Other (plugin or custom source) |
      *
      * Translations _may_ be nested or surrounded by multiple symbols.
@@ -6581,7 +6581,7 @@ class GeneralConfig extends BaseConfig
      *
      * | Symbol | Example | Category |
      * | `$` | `$Date Field$` | Site |
-     * | `@` | `$Entry Type$` | Application |
+     * | `@` | `@Entry Type@` | Application |
      * | `%` | `%Object Template% | Other (plugin or custom source) |
      *
      * Translations _may_ be nested or surrounded by multiple symbols.
