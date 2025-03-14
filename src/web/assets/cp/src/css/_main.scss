@@ -1978,7 +1978,6 @@ ul.icons {
   &.link-btn {
     border: none;
     background: transparent;
-    box-shadow: none;
 
     &:focus-visible {
       box-shadow: var(--focus-ring);
@@ -2181,6 +2180,12 @@ ul.icons {
 }
 
 /* button groups */
+.btngroup-container {
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+}
+
 .btngroup {
   position: relative;
   z-index: 1;
@@ -2460,8 +2465,7 @@ craft-copy-attribute {
 
     &:not(.disabled, .inactive, .loading) {
       &:hover,
-      &.hover,
-      &:focus {
+      &.hover {
         border: var(--primary-button-border--hover) !important;
         background: var(--primary-button-bg--hover) !important;
       }
@@ -2544,13 +2548,9 @@ div.btn.submit input {
     margin-inline-end: -1px;
   }
 
-  &:focus {
+  &:focus-visible {
     background-color: color.adjust(mixins.$grey200, $alpha: -0.9);
     border-color: transparent;
-
-    .reduce-focus-visibility &:not(:focus-visible) {
-      border: 1px dashed var(--medium-hairline-color);
-    }
   }
 
   &:not(.disabled) {
@@ -2596,7 +2596,7 @@ div.btn.submit input {
       @include mixins.light-focus-ring;
     }
 
-    &:focus {
+    &:focus-visible {
       z-index: 1;
       box-shadow: none;
 
@@ -2604,14 +2604,6 @@ div.btn.submit input {
         z-index: 1;
         box-shadow: var(--focus-ring);
       }
-
-      .reduce-focus-visibility &:not(:focus-visible) .label {
-        box-shadow: none;
-      }
-    }
-
-    .reduce-focus-visibility &:focus-visible .label {
-      box-shadow: var(--focus-ring);
     }
 
     &:not(.has-action-menu) {
@@ -3004,7 +2996,7 @@ div.btn.submit input {
         }
       }
 
-      @include mixins.focus-styles {
+      &:focus-visible {
         box-shadow:
           inset 0 0 0 1px var(--hairline-color),
           var(--focus-ring);
@@ -4690,6 +4682,10 @@ table.editable {
           }
         }
 
+        &.icon-cell {
+          padding-block: 6px;
+        }
+
         &.error {
           box-shadow: inset 0 0 0 1px var(--error-color);
         }
@@ -5515,7 +5511,8 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px dashed var(--medium-hairline-color) !important;
   }
 
-  &.hairline {
+  &.hairline,
+  &:is(fieldset) {
     background-color: transparent !important;
     box-shadow: none;
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
@@ -5554,6 +5551,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
       width: calc(100% + #{24 + 24}px);
       height: 100%;
     }
+  }
+
+  &:is(fieldset) > legend {
+    font-weight: 600;
+    color: var(--light-text-color);
   }
 
   hr {
@@ -5647,9 +5649,7 @@ table.data tbody tr:not(.disabled).active-drop-target {
         text-decoration: none;
       }
 
-      @include mixins.focus-styles {
-        box-shadow: none;
-
+      &:focus-visible {
         .tab-label {
           box-shadow: var(--inner-focus-ring);
         }
@@ -7314,8 +7314,7 @@ $min2ColWidth: 400px;
   font-size: 1rem;
   position: relative;
 
-  @include mixins.focus-styles {
-    // Unset default
+  &:focus-visible {
     box-shadow: none;
     color: var(--white);
     background-color: var(--gray-800);
@@ -7569,14 +7568,26 @@ $min2ColWidth: 400px;
   }
 }
 
-.menu--disclosure ul li {
-  & > a:not(.crumb-link),
-  & > .menu-item,
-  & > .menu-option {
-    --focus-ring: var(--inner-focus-ring);
+.menu--disclosure {
+  & > .search-container {
+    margin-inline: calc(var(--m) * -1);
+    padding: var(--m);
+    border-block-end: 1px solid var(--hairline-color);
+  }
 
-    &:hover {
-      @include mixins.disclosure-link-hover-styles;
+  ul li {
+    &.filtered {
+      display: none;
+    }
+
+    & > a:not(.crumb-link),
+    & > .menu-item,
+    & > .menu-option {
+      --focus-ring: var(--inner-focus-ring);
+
+      &:hover {
+        @include mixins.disclosure-link-hover-styles;
+      }
     }
   }
 }
@@ -7594,7 +7605,7 @@ $min2ColWidth: 400px;
     margin-inline-end: 7px;
   }
 
-  .add {
+  .tagselect__input-wrapper {
     position: relative;
     z-index: 1;
     margin-inline: 0 7px;
@@ -7698,7 +7709,8 @@ table.editable {
 .passwordwrapper,
 .border-box,
 .selectize.multiselect .selectize-input,
-.multiselect > select {
+.multiselect > select,
+.CodeMirror {
   @include mixins.input-styles;
 }
 
@@ -7710,7 +7722,7 @@ table.editable {
     @include mixins.input-focused-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 }
@@ -7799,6 +7811,22 @@ textarea.text.fullwidth {
   .selectize.multiselect .selectize-input.focus {
     position: relative;
     z-index: 2;
+  }
+}
+
+.CodeMirror {
+  height: auto !important;
+  min-height: 70px;
+
+  &.CodeMirror-focused {
+    @include mixins.input-focused-styles;
+  }
+
+  &.cm-s-readonly {
+    &,
+    * {
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -8182,18 +8210,9 @@ div.checkbox.indeterminate::before {
   text-align: center;
 }
 
-body:not(.reduce-focus-visibility) {
-  input.checkbox:focus + label::before,
-  :focus div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.checkbox:focus-visible + label::before,
-  :focus-visible div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
+input.checkbox:focus-visible + label::before,
+:focus-visible div.checkbox::before {
+  @include mixins.input-focused-styles;
 }
 
 .checkbox-icon {
@@ -8217,7 +8236,7 @@ body.reduce-focus-visibility {
 }
 
 .monaco-mouse-cursor-text {
-  @include mixins.focus-styles {
+  &:focus-visible {
     box-shadow: none !important;
   }
 }
@@ -8316,18 +8335,9 @@ div.radio.checked::after,
   background: var(--gray-900);
 }
 
-body:not(.reduce-focus-visibility) {
-  input.radio:focus + label::before,
-  :focus div.radio::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.radio:focus-visible + label::before,
-  :focus-visible div.radio::before {
-    @include mixins.input-focused-styles;
-  }
+input.radio:focus-visible + label::before,
+:focus-visible div.radio::before {
+  @include mixins.input-focused-styles;
 }
 
 /* multiselect */
@@ -8336,7 +8346,7 @@ body.reduce-focus-visibility {
   font-size: 14px;
   appearance: none;
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 
@@ -8399,6 +8409,7 @@ td.errors .text,
   border: 1px solid var(--error-color) !important;
 }
 
+.tagselect__input-wrapper,
 .texticon {
   position: relative;
   cursor: text;
@@ -8406,10 +8417,14 @@ td.errors .text,
 
   &.icon {
     &::before {
+      color: var(--ui-control-color);
+    }
+
+    svg,
+    &::before {
       position: absolute;
       inset-block-start: calc(50% - 7rem / 16);
       inset-inline-start: 9px;
-      color: var(--ui-control-color);
     }
   }
 
@@ -8484,6 +8499,18 @@ td.errors .text,
     .clear-btn {
       inset-inline-end: 30px;
     }
+  }
+}
+
+.tagselect__input-wrapper {
+  &.icon.add::before {
+    content: none;
+  }
+
+  svg {
+    width: calc(14rem / 16);
+    height: calc(14rem / 16);
+    fill: var(--ui-control-color);
   }
 }
 
@@ -8694,10 +8721,10 @@ tr.indexingSession td.progress div.progressContainer div.progressInfo {
 
 .select:not(.selectize) select {
   &:hover:not(:disabled) {
-    @include mixins.select-input-focused-styles;
+    @include mixins.select-input-hovered-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.select-input-focused-styles;
   }
 }
@@ -9115,6 +9142,16 @@ body {
     width: calc(20rem / 16);
     height: calc(20rem / 16);
     @include mixins.svg-mask(var(--ui-control-color));
+  }
+
+  &.small {
+    width: calc(22rem / 16);
+    height: calc(22rem / 16);
+
+    svg {
+      width: calc(14rem / 16);
+      height: calc(14rem / 16);
+    }
   }
 }
 

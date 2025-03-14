@@ -191,14 +191,10 @@ class NestedElementManager extends Component
         if ($fetchAll && $query->getCachedResult() === null) {
             $query
                 ->drafts(null)
+                ->canonicalsOnly()
                 ->savedDraftsOnly()
                 ->status(null)
-                ->limit(null)
-                ->andWhere([
-                    'or',
-                    ['elements.draftId' => null],
-                    ['elements.canonicalId' => null],
-                ]);
+                ->limit(null);
         }
 
         return $query;
@@ -398,6 +394,7 @@ class NestedElementManager extends Component
                     $elements = $value->getCachedResult() ?? $value
                         ->status(null)
                         ->limit(null)
+                        ->eagerly()
                         ->all();
                 }
 
@@ -599,6 +596,7 @@ class NestedElementManager extends Component
                 'maxElements' => $config['maxElements'],
                 'createButtonLabel' => $config['createButtonLabel'],
                 'ownerIdParam' => $this->ownerIdParam,
+                'fieldId' => $this->field?->id,
                 'fieldHandle' => $this->field?->handle,
                 'baseInputName' => $view->getNamespace(),
                 'prevalidate' => $config['prevalidate'] ?? false,
@@ -894,15 +892,11 @@ JS, [
         /** @var NestedElementInterface[] $elements */
         $elements = $this->nestedElementQuery($owner)
             ->drafts(null)
+            ->canonicalsOnly()
             ->savedDraftsOnly(false)
             ->status(null)
             ->siteId($owner->siteId)
             ->andWhere(['not', ['elements.id' => $except]])
-            ->andWhere([
-                'or',
-                ['elements.draftId' => null],
-                ['elements.canonicalId' => null],
-            ])
             ->all();
 
         $elementsService = Craft::$app->getElements();

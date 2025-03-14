@@ -99,6 +99,8 @@ class ElementsController extends Controller
     private ?string $_selectedTab = null;
     private bool $_applyParams;
     private bool $_prevalidate;
+    private bool $_asUnpublishedDraft;
+    private bool $_deleteProvisionalDraft;
 
     /**
      * @inheritdoc
@@ -139,6 +141,8 @@ class ElementsController extends Controller
         $this->_selectedTab = $this->_param('selectedTab');
         $this->_applyParams = $this->_param('applyParams', true) || !$this->request->getIsPost();
         $this->_prevalidate = (bool)$this->_param('prevalidate');
+        $this->_asUnpublishedDraft = (bool)$this->_param('asUnpublishedDraft');
+        $this->_deleteProvisionalDraft = (bool)$this->_param('deleteProvisionalDraft');
 
         unset($this->_attributes['failMessage']);
         unset($this->_attributes['redirect']);
@@ -402,10 +406,7 @@ class ElementsController extends Controller
                 $isUnpublishedDraft,
                 $isDraft
             ))
-            ->actionMenuItems(fn() => $element->id ? array_filter(
-                $element->getActionMenuItems(),
-                fn(array $item) => !str_starts_with($item['id'] ?? '', 'action-edit-'),
-            ) : [])
+            ->actionMenuItems(fn() => $this->_actionMenuItems($element, $previewTargets))
             ->noticeHtml($notice)
             ->errorSummary(fn() => $this->_errorSummary($element))
             ->prepareScreen(
@@ -974,6 +975,7 @@ JS, [
                 Html::actionInput('elements/duplicate') .
                 Html::redirectInput('{cpEditUrl}') .
                 Html::hiddenInput('elementId', (string)$canonical->id) .
+                Html::hiddenInput('asUnpublishedDraft', '1') .
                 Html::button(Craft::t('app', 'Save as a new {type}', ['type' => $element::lowerDisplayName()]), [
                     'class' => ['btn', 'formsubmit'],
                 ]) .
@@ -1069,8 +1071,7 @@ JS, [
 
         $settings = $jsSettingsFn($form);
 
-        $isSlideout = Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id');
-        if ($isSlideout) {
+        if ($this->_isSlideout()) {
             $this->view->registerJsWithVars(fn($settings) => <<<JS
 $('#$containerId').data('elementEditorSettings', $settings);
 JS, [
@@ -1083,8 +1084,6 @@ JS, [
                 $settings,
             ]);
         }
-
-
 
         // Give the element a chance to do things here too
         $element->prepareEditScreen($response, $containerId);
@@ -1246,6 +1245,51 @@ JS, [
         }
 
         return trim(implode("\n", $components));
+    }
+
+    /**
+     * Returns an array of action menu items for the element.
+     *
+     * @param ElementInterface $element
+     * @param array $previewTargets
+     * @return array
+     */
+    private function _actionMenuItems(ElementInterface $element, array $previewTargets): array
+    {
+        if (!$element->id) {
+            return [];
+        }
+
+        $hideViewAction = !empty($previewTargets) && !$this->_isSlideout();
+
+        return array_filter(
+            $element->getActionMenuItems(),
+            function(array $item) use ($hideViewAction) {
+                // filter out "Edit" item - no point showing edit action on the edit page,
+                if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
+                    return false;
+                }
+
+                // and "View in a new tab" item, if we have at least one preview target, and it's not a slideout
+                // as that action is already covered by the "View" button;
+                // (https://github.com/craftcms/cms/issues/16556)
+                if ($hideViewAction && str_starts_with($item['id'] ?? '', 'action-view-')) {
+                    return false;
+                }
+
+                return true;
+            },
+        );
+    }
+
+    /**
+     * Returns whether this is for a slideout.
+     *
+     * @return bool
+     */
+    private function _isSlideout(): bool
+    {
+        return $this->request->getHeaders()->has('X-Craft-Container-Id');
     }
 
     private function _draftNotice(): string
@@ -1532,11 +1576,7 @@ JS, [
         /** @var Element|DraftBehavior|null $element */
         $element = $this->_element();
 
-        if (
-            !$element ||
-            ($element->getIsDraft() && !$element->isProvisionalDraft && !$element->getIsUnpublishedDraft()) ||
-            $element->getIsRevision()
-        ) {
+        if (!$element || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
         }
 
@@ -1546,7 +1586,8 @@ JS, [
         $user = static::currentUser();
 
         // save as a new is now available to people who can create drafts
-        if ($element::hasDrafts()) {
+        $asUnpublishedDraft = $this->_asUnpublishedDraft && $element::hasDrafts();
+        if ($asUnpublishedDraft) {
             $authorized = $elementsService->canDuplicateAsDraft($element, $user);
         } else {
             $authorized = $elementsService->canDuplicate($element, $user);
@@ -1556,14 +1597,24 @@ JS, [
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
+        $newAttributes = [
+            'isProvisionalDraft' => false,
+            'draftId' => null,
+        ];
+
+        if ($element instanceof NestedElementInterface) {
+            $newAttributes += [
+                'primaryOwnerId' => $element->getOwnerId(),
+                'ownerId' => $element->getOwnerId(),
+                'sortOrder' => null,
+            ];
+        }
+
         try {
             $newElement = $elementsService->duplicateElement(
                 $element,
-                [
-                    'isProvisionalDraft' => false,
-                    'draftId' => null,
-                ],
-                asUnpublishedDraft: $element::hasDrafts(),
+                $newAttributes,
+                asUnpublishedDraft: $asUnpublishedDraft,
             );
         } catch (InvalidElementException $e) {
             return $this->_asFailure($e->element, Craft::t('app', 'Couldn’t duplicate {type}.', [
@@ -1575,7 +1626,7 @@ JS, [
 
         // If the original element is a provisional draft,
         // delete the draft as the changes are likely no longer wanted.
-        if ($element->isProvisionalDraft) {
+        if ($this->_deleteProvisionalDraft && $element->isProvisionalDraft) {
             Craft::$app->getElements()->deleteElement($element);
         }
 

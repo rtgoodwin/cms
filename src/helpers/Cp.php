@@ -104,10 +104,10 @@ class Cp
     public const CHIP_SIZE_LARGE = 'large';
 
     /**
-     * @var Site|false
+     * @var Site|false|null
      * @see requestedSite()
      */
-    private static Site|false $_requestedSite;
+    private static Site|false|null $_requestedSite = null;
 
     /**
      * Renders a control panel template.
@@ -715,9 +715,8 @@ class Cp
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
-                ],
+                'role' => 'none',
+                'tabindex' => '-1',
             ]) : '') .
             Html::endTag('div') . // .card-actions
             Html::endTag('div'); // .card-actions-container
@@ -1262,6 +1261,7 @@ class Cp
             ])
             ->values()
             ->all();
+        $sortOptionsKey = 'baseSortOptions';
 
         $tableColumns = Craft::$app->getElementSources()->getAvailableTableAttributes($elementType);
 
@@ -1349,6 +1349,9 @@ class Cp
                         'defaultDir' => $option['defaultDir'],
                     ], $elementSourcesService->getSortOptionsForFieldLayouts($config['fieldLayouts'])),
                 );
+                // Don't let sources.twig merge sortOptions with anything else!
+                $sortOptionsKey = 'sortOptions';
+
                 $tableColumns = array_merge(
                     $tableColumns,
                     $elementSourcesService->getTableAttributesForFieldLayouts($config['fieldLayouts']),
@@ -1409,7 +1412,7 @@ JS, [
             Html::tag('nav', $view->renderTemplate('_elements/sources', [
                 'elementType' => $elementType,
                 'sources' => $sources,
-                'baseSortOptions' => $sortOptions,
+                $sortOptionsKey => $sortOptions,
                 'tableColumns' => $tableColumns,
                 'defaultTableColumns' => $config['defaultTableColumns'],
             ], View::TEMPLATE_MODE_CP)) .
@@ -1696,6 +1699,19 @@ JS, [
             ]) .
             Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
+    }
+
+    /**
+     * Renders a button’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException
+     * @since 5.7.0
+     */
+    public static function buttonHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/button.twig', $config);
     }
 
     /**
@@ -3527,5 +3543,15 @@ JS;
                 'Changes to these settings aren’t permitted in this environment.',
             )) .
             Html::endTag('div');
+    }
+
+    /**
+     * Resets [[requestedSite()]].
+     *
+     * @since 5.7.0
+     */
+    public static function reset(): void
+    {
+        self::$_requestedSite = null;
     }
 }
