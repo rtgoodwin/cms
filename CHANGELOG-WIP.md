@@ -19,6 +19,11 @@
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
+- Added `craft\db\mysql\QueryBuilder::jsonContains()`.
+- Added `craft\db\mysql\QueryBuilder::jsonExtract()`.
+- Added `craft\db\pgsql\QueryBuilder::jsonContains()`.
+- Added `craft\db\pgsql\QueryBuilder::jsonExtract()`.
+- Added `craft\db\Connection::getIsMaria()`.
 
 ### System
 - `craft\queue\Queue::release()` and `releaseAll()` now call `release()` and `releaseAll()` on the proxied queue if it implements `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
