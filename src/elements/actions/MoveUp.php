@@ -60,22 +60,37 @@ class MoveUp extends ElementAction
     },
     activate: (selectedItems, elementIndex) => {
       const selectedItemIndex = Object.values(elementIndex.view.getAllElements()).indexOf(selectedItems[0]);
+      const elementEditor = elementIndex.\$container.parents('[data-element-editor]').data('elementEditor');
       
-      const data = Object.assign($params, {
-          elementIds: elementIndex.getSelectedElementIds(),
-          offset: selectedItemIndex - 1,
+      if (typeof elementEditor === 'undefined') {
+        moveUp(elementIndex, selectedItemIndex);
+      } else {
+        elementEditor.ensureIsDraftOrRevision().then(() => {
+          moveUp(elementIndex, selectedItemIndex, elementEditor.settings.elementId);
         });
-      
-      Craft.sendActionRequest('POST', 'nested-elements/reorder', {data})
+      }
+    },
+  });
+  
+  function moveUp(elementIndex, selectedItemIndex, ownerId = null) {
+    const data = Object.assign($params, {
+      elementIds: elementIndex.getSelectedElementIds(),
+      offset: selectedItemIndex - 1,
+    });
+    
+    if (ownerId !== null) {
+      data.ownerId = ownerId;
+    }
+  
+    Craft.sendActionRequest('POST', 'nested-elements/reorder', {data})
       .then(({data}) => {
         Craft.cp.displayNotice(data.message);
-        elementIndex.updateElements(true, true)
+        elementIndex.updateElements(true, true);
       })
       .catch(({response}) => {
         Craft.cp.displayError(response.data && response.data.error);
       });
-    },
-  });
+  }
 })();
 JS,
             [
