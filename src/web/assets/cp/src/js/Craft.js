@@ -2869,6 +2869,7 @@ $.extend(Craft, {
       }
 
       if (!document.startViewTransition) {
+        // fallback to Velocity
         for (let i = 0; i < animations.length; i++) {
           const [$element, css] = animations[i];
           $element.velocity(
@@ -2881,16 +2882,20 @@ $.extend(Craft, {
       }
 
       for (const [$element] of animations) {
-        $element.css(
-          'view-transition-name',
-          `vt-${Math.floor(Math.random() * 100000)}`
-        );
+        if ($element.css('view-transition-name') === 'none') {
+          $element.css(
+            'view-transition-name',
+            `vt-${Math.floor(Math.random() * 100000)}`
+          );
+        }
       }
+
       const transition = document.startViewTransition(() => {
         for (const [$element, css] of animations) {
           $element.css(css);
         }
       });
+
       transition.finished.then(resolve).catch(reject);
     });
   },

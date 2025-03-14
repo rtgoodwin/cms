@@ -185,6 +185,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             canDeleteElements: ($selectedItems) => {
               return this.canDelete($selectedItems.length);
             },
+            onBeforeMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
+            onMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();
             },
@@ -358,6 +364,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
           {
             elementType: this.elementType,
             ownerId: this.settings.ownerId,
+            fieldId: this.settings.fieldId,
             siteId: this.settings.ownerSiteId,
           },
           attributes
@@ -439,7 +446,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
             data: {
               elementType: this.elementType,
               ownerId: this.settings.ownerId,
-              siteId: this.settings.siteId,
+              siteId: this.settings.ownerSiteId,
               elementId:
                 this.elementEditor?.getDraftElementId(elementId) || elementId,
             },
@@ -499,7 +506,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
             // Duplicate
             const duplicateButton = actionDisclosure.addItem(
               {
-                icon: async () => await Craft.ui.icon('copy'),
+                icon: async () => await Craft.ui.icon('clone'),
                 label: Craft.t('app', 'Duplicate'),
                 onActivate: () => {
                   this.duplicateElement($element);
@@ -716,6 +723,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
       createButtonLabel: Craft.t('app', 'Create'),
       ownerIdParam: null,
       createAttributes: null,
+      fieldId: null,
       fieldHandle: null,
       baseInputName: null,
       deleteLabel: null,

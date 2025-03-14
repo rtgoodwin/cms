@@ -314,6 +314,10 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
 
         // add it to the active tab
         this.addLibraryElementToActiveTab($selector);
+
+        Garnish.requestAnimationFrame(() => {
+          this.getActiveHud()?.hide();
+        });
       });
     },
 

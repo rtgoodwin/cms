@@ -662,9 +662,6 @@ class Addresses extends Field implements
             $config += [
                 'sortable' => true,
                 'canCreate' => true,
-                'createAttributes' => [
-                    'fieldId' => $this->id,
-                ],
                 'minElements' => $this->minAddresses,
                 'maxElements' => $this->maxAddresses,
             ];

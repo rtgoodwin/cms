@@ -402,7 +402,7 @@ export default Base.extend(
         this.resizeDragger.destroy();
       }
 
-      Garnish.Modal.instances = Craft.Preview.instances.filter(
+      Garnish.Modal.instances = Garnish.Modal.instances.filter(
         (o) => o !== this
       );
 

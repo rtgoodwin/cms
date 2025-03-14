@@ -959,7 +959,6 @@ JS;
                     'color' => $entryType->color,
                     'label' => Craft::t('site', $entryType->name),
                     'attributes' => [
-                        'fieldId' => $this->id,
                         'typeId' => $entryType->id,
                     ],
                 ], $entryTypes),

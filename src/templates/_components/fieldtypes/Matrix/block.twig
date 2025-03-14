@@ -89,15 +89,14 @@
       },
     },
     {hr: true},
-  ]) %}
-
-  {% set actionMenuItems = actionMenuItems|push({
-    icon: 'copy',
-    label: 'Duplicate'|t('app'),
-    attributes: {
-      data: {action: 'duplicate'},
+    {
+      icon: 'clone',
+      label: 'Duplicate'|t('app'),
+      attributes: {
+        data: {action: 'duplicate'},
+      },
     },
-  }) %}
+  ]) %}
 
   {% for entryType in entryTypes %}
     {% set actionMenuItems = actionMenuItems|push({
