@@ -8,6 +8,7 @@
 - Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
 - Fixed an error that could occur during passkey setup in Firefox. ([#16847](https://github.com/craftcms/cms/pull/16847))
 - Fixed a bug where the “Move to page…” element index action wasn’t ensuring the owner element was a draft first. ([#16894](https://github.com/craftcms/cms/pull/16894))
+- Fixed a bug where HUDs attached to slideouts could be positioned incorrectly after a nested slideout was closed. ([#16856](https://github.com/craftcms/cms/issues/16856))
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
 
 ## 5.6.11 - 2025-03-04
