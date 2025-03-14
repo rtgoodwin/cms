@@ -127,7 +127,6 @@ class AddressField extends BaseField
                         Object.fromEntries(fieldNames.map(name => [name, fields[name].val()])),
                         Object.fromEntries(hotFieldNames.map(name => [name, hotValues[name] || null]))
                     );
-                    const activeElementId = document.activeElement ? document.activeElement.id : null;
                     const \$addressFields = $(
                         Object.entries(fields)
                             .filter(([name]) => name !== 'countryCode')
@@ -138,9 +137,6 @@ class AddressField extends BaseField
                     Craft.appendHeadHtml(response.data.headHtml);
                     Craft.appendBodyHtml(response.data.bodyHtml);
                     initFields(values);
-                    if (activeElementId) {
-                        $('#' + activeElementId).focus();                        
-                    }
                 }).catch(e => {
                     Craft.cp.displayError();
                     throw e;
