@@ -16,6 +16,8 @@ use craft\base\NestedElementInterface;
 use craft\behaviors\DraftBehavior;
 use craft\db\Table;
 use craft\elements\actions\ChangeSortOrder;
+use craft\elements\actions\MoveDown;
+use craft\elements\actions\MoveUp;
 use craft\elements\db\ElementQueryInterface;
 use craft\enums\Color;
 use craft\enums\PropagationMethod;
@@ -521,6 +523,16 @@ class NestedElementManager extends Component
                 if (!$config['static'] && $config['sortable']) {
                     $view->startJsBuffer();
                     $actionConfig = ElementHelper::actionConfig(new ChangeSortOrder($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveUp($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveDown($owner, $attribute));
                     $actionConfig['bodyHtml'] = $view->clearJsBuffer();
                     $settings['indexSettings']['actions'][] = $actionConfig;
                 }
