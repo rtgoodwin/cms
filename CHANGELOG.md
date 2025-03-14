@@ -5,6 +5,7 @@
 - Improved table styling. ([#16771](https://github.com/craftcms/cms/issues/16771), [#16829](https://github.com/craftcms/cms/issues/16829))
 - Field layout designers now close the element library HUD automatically after creating a new field. ([#16521](https://github.com/craftcms/cms/discussions/16521))
 - Fixed a bug where relational fields with “Maintain hierarchy” enabled weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
+- Fixed a bug where letterbox transforms were getting transparent fills if the source image was grayscale. ([#16857](https://github.com/craftcms/cms/issues/16857))
 - Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
 - Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
 - Fixed an error that could occur during passkey setup in Firefox. ([#16847](https://github.com/craftcms/cms/pull/16847))
