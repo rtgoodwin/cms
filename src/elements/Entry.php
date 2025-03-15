@@ -1693,7 +1693,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public function getAuthors(): array
     {
         if (!isset($this->_authors)) {
-            if (isset($this->_authorIds)) {
+            if (!isset($this->sectionId)) {
+                $authors = [];
+            } elseif (isset($this->_authorIds)) {
                 $authors = User::find()
                     ->id($this->_authorIds)
                     ->fixedOrder()
@@ -2664,7 +2666,7 @@ JS;
             $record->save(false);
 
             // save authors
-            if (isset($this->_authorIds)) {
+            if (isset($this->sectionId) && isset($this->_authorIds)) {
                 // save & add to dirty attributes
                 $this->_saveAuthors();
 
