@@ -9,15 +9,13 @@
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
 - User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
 - Element index filters are now shown in a modal window on smaller screens. ([#16869](https://github.com/craftcms/cms/pull/16869))
+- Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Accessibility
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
 - Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
 - Animated assets no longer have animated thumbnails. ([#16497](https://github.com/craftcms/cms/pull/16497))
 - Improved the contrast of lightswitch inputs. ([#16853](https://github.com/craftcms/cms/pull/16853))
-
-### Content Management
-- Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Administration
 - Added the “Button Group” field type. ([#16782](https://github.com/craftcms/cms/pull/16782))
