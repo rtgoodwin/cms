@@ -923,7 +923,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         return array_merge(parent::attributeLabels(), [
             'authorIds' => Craft::t('app', '{max, plural, =1{Author} other {Authors}}', [
-                'max' => $this->getSection()?->maxAuthors ?? 1,
+                'max' => $this->getSection()?->maxAuthors ?? PHP_INT_MAX,
             ]),
             'postDate' => Craft::t('app', 'Post Date'),
             'expiryDate' => Craft::t('app', 'Expiry Date'),
@@ -973,16 +973,18 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         ];
 
         $section = $this->getSection();
-        if ($section && $section->type !== Section::TYPE_SINGLE) {
+        if ($section && $section->type !== Section::TYPE_SINGLE && $section->maxAuthors !== 0) {
             $rules[] = [['authorIds'], 'required', 'on' => self::SCENARIO_LIVE];
-            $rules[] = [
-                ['authorIds'],
-                ArrayValidator::class,
-                'max' => $section->maxAuthors,
-                'tooMany' => Craft::t('app', '{num, plural, =1{Only one author is} other{Up to {num, number} authors are}} allowed.', [
-                    'num' => $section->maxAuthors,
-                ]),
-            ];
+            if (isset($section->maxAuthors)) {
+                $rules[] = [
+                    ['authorIds'],
+                    ArrayValidator::class,
+                    'max' => $section->maxAuthors,
+                    'tooMany' => Craft::t('app', '{num, plural, =1{Only one author is} other{Up to {num, number} authors are}} allowed.', [
+                        'num' => $section->maxAuthors,
+                    ]),
+                ];
+            }
         }
 
         return $rules;
@@ -2122,7 +2124,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 return Cp::elementSelectHtml([
                     'status' => $this->getAttributeStatus('authorIds'),
                     'label' => Craft::t('app', '{max, plural, =1{Author} other {Authors}}', [
-                        'max' => $section->maxAuthors,
+                        'max' => $section->maxAuthors ?? PHP_INT_MAX,
                     ]),
                     'id' => 'authorIds',
                     'name' => 'authorIds',
@@ -2308,13 +2310,17 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
 
         if ($section && $section->type !== Section::TYPE_SINGLE) {
             // Author
-            if (Craft::$app->edition !== CmsEdition::Solo && $user->can("viewPeerEntries:$section->uid")) {
+            if (
+                $section->maxAuthors !== 0 &&
+                Craft::$app->edition !== CmsEdition::Solo &&
+                $user->can("viewPeerEntries:$section->uid")
+            ) {
                 $fields[] = (function() use ($static, $section) {
                     $authors = $this->getAuthors();
                     $html = Cp::elementSelectFieldHtml([
                         'status' => $this->getAttributeStatus('authorIds'),
                         'label' => Craft::t('app', '{max, plural, =1{Author} other {Authors}}', [
-                            'max' => $section->maxAuthors,
+                            'max' => $section->maxAuthors ?? PHP_INT_MAX,
                         ]),
                         'id' => 'authorIds',
                         'name' => 'authorIds',
