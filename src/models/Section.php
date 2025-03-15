@@ -87,10 +87,10 @@ class Section extends Model implements Chippable, CpEditable, Iconic
     public ?string $type = null;
 
     /**
-     * @var int Max authors
+     * @var int|null Max authors
      * @since 5.0.0
      */
-    public int $maxAuthors = 1;
+    public int|null $maxAuthors = 1;
 
     /**
      * @var int|null Max levels
@@ -201,7 +201,7 @@ class Section extends Model implements Chippable, CpEditable, Iconic
     {
         $rules = parent::defineRules();
         $rules[] = [['id', 'structureId', 'maxLevels'], 'number', 'integerOnly' => true];
-        $rules[] = [['maxAuthors'], 'number', 'integerOnly' => true, 'min' => 1];
+        $rules[] = [['maxAuthors'], 'number', 'integerOnly' => true, 'min' => 0];
         $rules[] = [['handle'], HandleValidator::class, 'reservedWords' => ['id', 'dateCreated', 'dateUpdated', 'uid', 'title']];
         $rules[] = [
             ['type'], 'in', 'range' => [
