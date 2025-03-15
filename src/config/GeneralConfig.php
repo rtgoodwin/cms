@@ -2992,6 +2992,15 @@ class GeneralConfig extends BaseConfig
      * ```
      * :::
      *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
+     *
      * @group System
      */
     public bool $translationDebugOutput = false;
@@ -6567,6 +6576,15 @@ class GeneralConfig extends BaseConfig
      * ```php
      * ->translationDebugOutput(true)
      * ```
+     *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
      *
      * @group System
      * @param bool $value

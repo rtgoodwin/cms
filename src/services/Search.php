@@ -38,7 +38,7 @@ use yii\db\Schema;
 /**
  * Search service.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getSearch()|`Craft::$app->search`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getSearch()|`Craft::$app->getSearch()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
