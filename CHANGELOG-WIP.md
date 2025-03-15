@@ -26,6 +26,8 @@
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
 - Added the “SMS” link type for Link fields. ([#16850](https://github.com/craftcms/cms/discussions/16850))
 - Added the “Allow custom URL schemes” setting for Link fields with the “URL” link type enabled. ([#16850](https://github.com/craftcms/cms/discussions/16850))
+- Sections’ “Max Authors” settings are now optional, allowing unlimited authors when blank. ([#16898](https://github.com/craftcms/cms/pull/16898))
+- Sections’ “Max Authors” settings can now be set to `0`, preving the “Author” field from being displayed on Edit Entry screens. ([#16898](https://github.com/craftcms/cms/pull/16898))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
