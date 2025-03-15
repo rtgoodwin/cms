@@ -764,9 +764,8 @@ export default Base.extend(
     destroy: function () {
       this.$trigger.removeData('trigger');
 
-      Garnish.DisclosureMenu.instances = Craft.Preview.instances.filter(
-        (o) => o !== this
-      );
+      Garnish.DisclosureMenu.instances =
+        Garnish.DisclosureMenu.instances.filter((o) => o !== this);
 
       this.base();
     },
