@@ -28,6 +28,7 @@ use craft\fields\linktypes\Category;
 use craft\fields\linktypes\Email as EmailType;
 use craft\fields\linktypes\Entry;
 use craft\fields\linktypes\Phone;
+use craft\fields\linktypes\Sms;
 use craft\fields\linktypes\Url as UrlType;
 use craft\gql\GqlEntityRegistry;
 use craft\gql\types\generators\LinkDataType;
@@ -128,6 +129,7 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
                 EmailType::class,
                 Entry::class,
                 Phone::class,
+                Sms::class,
             ];
 
             // Fire a registerLinkTypes event
