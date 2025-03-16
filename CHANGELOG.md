@@ -20,6 +20,7 @@
 - Fixed a bug where accessible names were not available for global sidebar links when the sidebar was collapsed. ([#16879](https://github.com/craftcms/cms/pull/16879))
 - Fixed a bug where some buttons with customizable labels weren’t wrapping. ([#16871](https://github.com/craftcms/cms/issues/16871))
 - Fixed a SQL error that could occur when setting a section’s “Max Authors” setting to a very large number. ([#16874](https://github.com/craftcms/cms/issues/16874))
+- Fixed a bug where nested elements that were created via “Applying new propagation method to elements” queue jobs weren’t retaining the original element’s sort position. ([#16872](https://github.com/craftcms/cms/issues/16872))
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
 
 ## 5.6.11 - 2025-03-04
