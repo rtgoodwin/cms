@@ -1754,7 +1754,8 @@ abstract class Element extends Component implements ElementInterface
             }
         }
 
-        return false;
+        // return null so eager-loading is ignored for this handle
+        return null;
     }
 
     /**
