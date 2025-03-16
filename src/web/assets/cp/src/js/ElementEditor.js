@@ -151,7 +151,7 @@ Craft.ElementEditor = Garnish.Base.extend(
         );
 
         // Use event delegation so we don't have to reinitialize when markup is replaced
-        Garnish.$bod.on('click', '[data-cross-site-copy]', (ev) => {
+        Garnish.$bod.on('activate', '[data-cross-site-copy]', (ev) => {
           // Make sure the action menu is within this element editor container
           const $target = $(ev.currentTarget);
           const $field = $target
