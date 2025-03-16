@@ -16,6 +16,7 @@
 - Fixed a bug where tooltips weren’t always being shown when truncated links were focused. ([#16881](https://github.com/craftcms/cms/pull/16881))
 - Fixed a bug where tooltips weren’t closing when <kbd>Esc</kbd> was pressed. ([#16881](https://github.com/craftcms/cms/pull/16881))
 - Fixed a bug where tooltips weren’t closing if the target element was focused and blurred in rapid succession.
+- Fixed a bug where the “Copy value from site…” field action couldn’t be activated via the keyboard. ([#16868](https://github.com/craftcms/cms/pull/16868))
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
 
 ## 5.6.11 - 2025-03-04
