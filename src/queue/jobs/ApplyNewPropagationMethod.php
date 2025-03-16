@@ -56,19 +56,8 @@ class ApplyNewPropagationMethod extends BaseBatchedElementJob
             ->unique()
             ->status(null)
             ->drafts(null)
-            ->provisionalDrafts(null);
-
-        if (!empty($this->criteria) && isset($this->criteria['fieldId'])) {
-            // when element belongs to a field, we want to orderBy elements_owners.sortOrder
-            // https://github.com/craftcms/cms/issues/16872
-            $query->leftJoin(
-                ['eo' => Table::ELEMENTS_OWNERS],
-                '[[eo.elementId]] = COALESCE([[elements.canonicalId]], [[elements.id]])'
-                )
-                ->orderBy(['eo.sortOrder' => SORT_ASC]);
-        } else {
-            $query->orderBy(['elements.id' => SORT_ASC]);
-        }
+            ->provisionalDrafts(null)
+            ->orderBy(['elements.id' => SORT_ASC]);
 
         if (!empty($this->criteria)) {
             Craft::configure($query, $this->criteria);
@@ -110,7 +99,7 @@ class ApplyNewPropagationMethod extends BaseBatchedElementJob
         }
 
         // Load the element in any sites that it's about to be deleted for
-        $otherSiteElements = $item::find()
+        $query = $item::find()
             ->id($item->id)
             ->siteId($otherSiteIds)
             ->structureId($item->structureId)
@@ -118,8 +107,13 @@ class ApplyNewPropagationMethod extends BaseBatchedElementJob
             ->drafts(null)
             ->provisionalDrafts(null)
             ->orderBy([])
-            ->indexBy('siteId')
-            ->all();
+            ->indexBy('siteId');
+
+        if (!empty($this->criteria)) {
+            Craft::configure($query, $this->criteria);
+        }
+
+        $otherSiteElements = $query->all();
 
         if (empty($otherSiteElements)) {
             return;
