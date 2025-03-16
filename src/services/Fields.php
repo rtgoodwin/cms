@@ -76,7 +76,7 @@ use yii\web\BadRequestHttpException;
 /**
  * Fields service.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getFields()|`Craft::$app->fields`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getFields()|`Craft::$app->getFields()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0

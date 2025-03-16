@@ -300,4 +300,13 @@ import $ from 'jquery';
       },
     }
   );
+
+  Garnish.on(Craft.Slideout, ['open', 'close'], () => {
+    for (const hud of Garnish.HUD.instances) {
+      if (hud.showing) {
+        console.log('update');
+        hud.updateSizeAndPosition(true);
+      }
+    }
+  });
 })(jQuery);
