@@ -206,7 +206,7 @@ class CraftTooltip extends HTMLElement {
     // Only show the tooltip if it's not already open
     if (!this.showing) {
       // Check that no click event occurred shortly after
-      setTimeout(() => {
+      this.delayTimeout = setTimeout(() => {
         if (currentTime === this.lastShow) {
           this.show();
         }
