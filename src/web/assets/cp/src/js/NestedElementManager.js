@@ -54,7 +54,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
         if (this.settings.mode === 'cards') {
           const $btnContainer = $('<div/>').appendTo(this.$container);
-          this.$createBtn.addClass('dashed').appendTo($btnContainer);
+          this.$createBtn.addClass('dashed wrap').appendTo($btnContainer);
           this.updateCreateBtn();
         } else {
           this.$createBtn.appendTo(this.elementIndex.$toolbar);
