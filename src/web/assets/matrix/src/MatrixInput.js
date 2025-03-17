@@ -273,6 +273,7 @@
           this.entrySort.addItems($newEntries);
           this.entrySelect.addItems($newEntries);
           this.updateAddEntryBtn();
+          Garnish.firstFocusableElement($newEntries).focus();
         } finally {
           this.$pasteBtn.removeClass('loading');
         }

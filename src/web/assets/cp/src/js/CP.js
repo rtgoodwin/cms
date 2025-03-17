@@ -1167,9 +1167,13 @@ Craft.CP = Garnish.Base.extend(
       );
       this.displayNotification(this.elementCopyNotification);
       this.elementCopyNotification.on('show', () => {
-        this._invokeElementCopyCallbacks(
-          this.elementCopyNotification.elementInfo
-        );
+        // make sure the notification is still there
+        // (it could have been removed if none of the copied elements still exist)
+        if (this.elementCopyNotification) {
+          this._invokeElementCopyCallbacks(
+            this.elementCopyNotification.elementInfo
+          );
+        }
       });
     },
 
@@ -2003,12 +2007,7 @@ Craft.CP.Notification = Garnish.Base.extend(
       }).appendTo(this.$main);
 
       const $closeBtnContainer = $('<div/>').appendTo(this.$innerContainer);
-      this.$closeBtn = $('<button/>', {
-        type: 'button',
-        class: 'notification-close-btn',
-        'aria-label': Craft.t('app', 'Close'),
-        'data-icon': 'remove',
-      }).appendTo($closeBtnContainer);
+      this.$closeBtn = this.createCloseButton().appendTo($closeBtnContainer);
 
       const details = await this.getDetails();
       if (details) {
@@ -2051,6 +2050,15 @@ Craft.CP.Notification = Garnish.Base.extend(
       }
 
       this.trigger('show');
+    },
+
+    createCloseButton() {
+      return $('<button/>', {
+        type: 'button',
+        class: 'notification-close-btn',
+        'aria-label': Craft.t('app', 'Close'),
+        'data-icon': 'remove',
+      });
     },
 
     updateMessage(message) {
@@ -2204,6 +2212,14 @@ Craft.CP.ElementCopyNotification = Craft.CP.Notification.extend({
     );
   },
 
+  createCloseButton() {
+    return Craft.ui.createButton({
+      icon: 'xmark',
+      label: Craft.t('app', 'Cancel'),
+      class: 'chromeless notification-close-btn',
+    });
+  },
+
   getMessage() {
     return this.elementInfo.length === 1
       ? Craft.t('app', '{type} copied.', {
@@ -2271,8 +2287,8 @@ Craft.CP.ElementCopyNotification = Craft.CP.Notification.extend({
         // overlay opacities: 0, .4, .55, .7, .85
         if (i !== 0) {
           $chip.css({
-            'inset-block-start': 5 + i * gap,
-            'inset-inline-start': 5 + i * gap,
+            'inset-block-start': i * gap,
+            'inset-inline-start': i * gap,
             '--overlay-opacity': Math.min(0.25 + 0.15 * i, 1),
           });
         }

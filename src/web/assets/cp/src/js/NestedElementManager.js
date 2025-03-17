@@ -549,8 +549,9 @@ Craft.NestedElementManager = Garnish.Base.extend(
         }
 
         if (this.settings.mode === 'cards') {
-          await this.addElementCards(newElementInfo, false);
+          const $cards = await this.addElementCards(newElementInfo, false);
           await this.updateSortOrder(newElementInfo[0].id);
+          Garnish.firstFocusableElement($cards).focus();
         } else {
           this.elementIndex.clearSearch();
           await this.elementIndex.updateElements();

@@ -20,7 +20,9 @@ Craft.ui = {
     }
     let $iconContainer;
     if (config.icon || config.label || config.html) {
-      const $labelContainer = $('<div class="inline-flex"/>').appendTo($btn);
+      const $labelContainer = $('<div class="inline-flex gap-xs"/>').appendTo(
+        $btn
+      );
       if (config.icon) {
         $iconContainer = $('<div class="cp-icon"/>').prependTo($labelContainer);
       }

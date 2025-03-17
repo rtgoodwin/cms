@@ -876,21 +876,14 @@ li.breadcrumb-toggle-wrapper {
     }
 
     .notification-main {
-      overflow: visible;
+      margin-block-end: -10px;
     }
 
     .copied-elements {
       overflow: hidden;
-      margin-block: -5px -10px;
-      margin-inline: -5px;
-      padding-block: 5px 10px;
-      padding-inline: 5px;
+      padding-block-end: 10px;
       position: relative;
       pointer-events: none;
-
-      .chip:first-child {
-        box-shadow: 0 2px 4px hsl(from var(--gray-200) h s l / 50%);
-      }
 
       .chip:not(:first-child) {
         position: absolute;
