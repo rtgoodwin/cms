@@ -4,6 +4,45 @@
  * Asset mover class
  */
 Craft.AssetMover = Garnish.Base.extend({
+  // the number of selected items (assets and folders) that can be moved before we ask for confirmation
+  countLimit: 50,
+
+  // the total weight/size of all the selected assets (standalone and in selected folders)
+  // that can be moved before we ask for confirmation
+  sizeLimit: 50000000, // 50MB
+
+  shouldPerformMove: async function (folderIds, assetIds) {
+    let performMove = true;
+    let response;
+
+    try {
+      // get total size of elements that should be moved
+      response = await Craft.sendActionRequest(
+        'POST',
+        'assets/get-total-move-size',
+        {
+          data: {
+            folderIds: folderIds,
+            assetIds: assetIds,
+          },
+        }
+      );
+    } catch (e) {
+      Craft.cp.displayError(e?.response?.data?.message);
+    }
+
+    if (
+      folderIds.length + assetIds.length > this.countLimit ||
+      parseInt(response.data.totalSize) > this.sizeLimit
+    ) {
+      performMove = confirm(
+        Craft.t('app', 'Are you sure you want to move the selected items?')
+      );
+    }
+
+    return performMove;
+  },
+
   moveAssets: function (assetIds, targetFolderId) {
     const requests = assetIds.map((assetId) => {
       return {

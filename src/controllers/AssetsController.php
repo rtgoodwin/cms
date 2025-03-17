@@ -11,6 +11,7 @@ use Craft;
 use craft\assetpreviews\Image as ImagePreview;
 use craft\base\Element;
 use craft\base\LocalFsInterface;
+use craft\db\Query;
 use craft\elements\Asset;
 use craft\elements\conditions\ElementCondition;
 use craft\errors\AssetException;
@@ -1347,5 +1348,31 @@ class AssetsController extends Controller
             ->sendFile($path, $responseFilename, [
                 'inline' => true,
             ]);
+    }
+
+    /**
+     * Get total size of the assets based on provided folderIds and assetIds.
+     *
+     * @return Response
+     * @throws BadRequestHttpException
+     * @since 4.15.0
+     */
+    public function actionGetTotalMoveSize()
+    {
+        $this->requireCpRequest();
+
+        $folderIds = Craft::$app->getRequest()->getBodyParam('folderIds', []);
+        $assetIds = Craft::$app->getRequest()->getBodyParam('assetIds', []);
+
+        $totalSize = (new Query())
+            ->select('SUM(size) as totalSize')
+            ->from('{{%assets}}')
+            ->where(['folderId' => $folderIds])
+            ->orWhere(['id' => $assetIds])
+            ->scalar();
+
+        return $this->asJson([
+            'totalSize' => $totalSize,
+        ]);
     }
 }

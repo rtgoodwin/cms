@@ -89,7 +89,7 @@ Craft.AssetIndex = Craft.BaseElementIndex.extend(
             Garnish.$bod.addClass('dragging');
             this.itemDrag.$draggee.closest('tr,li').addClass('draggee');
           },
-          onDragStop: () => {
+          onDragStop: async () => {
             Garnish.$bod.removeClass('dragging');
 
             const $draggee = this.itemDrag.$draggee;
@@ -115,6 +115,11 @@ Craft.AssetIndex = Craft.BaseElementIndex.extend(
             });
 
             const mover = new Craft.AssetMover();
+
+            if (!(await mover.shouldPerformMove(folderIds, assetIds))) {
+              return;
+            }
+
             mover
               .moveFolders(folderIds, targetFolderId)
               .then((totalFoldersMoved) => {

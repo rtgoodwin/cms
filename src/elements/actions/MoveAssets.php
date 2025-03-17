@@ -83,8 +83,13 @@ class MoveAssets extends ElementAction
           defaultSource: Craft.elementIndex.sourceKey,
           defaultSourcePath: Craft.elementIndex.sourcePath,
         },
-        onSelect: ([targetFolder]) => {
+        onSelect: async ([targetFolder]) => {
           const mover = new Craft.AssetMover();
+          
+          if (!await mover.shouldPerformMove(selectedFolderIds, selectedAssetIds)) {
+            return;
+          }
+          
           mover.moveFolders(selectedFolderIds, targetFolder.folderId).then((totalFoldersMoved) => {
             mover.moveAssets(selectedAssetIds, targetFolder.folderId).then((totalAssetsMoved) => {
               const totalItemsMoved = totalFoldersMoved + totalAssetsMoved;
