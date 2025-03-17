@@ -132,12 +132,7 @@ history.replaceState(undefined, undefined, window.location.href.match(/^[^#]*/)[
 {% endjs %}
 
 {% block body %}
-    {{ tag ('a', {
-        id: 'global-skip-link',
-        text: 'Skip to content'|t('app'),
-        href: '#main',
-        class: 'skip-link btn',
-    }) }}
+    {% include '_layouts/components/skip-links' %}
 
     <div id="global-container">
         {% include '_layouts/components/global-sidebar' %}
