@@ -551,6 +551,7 @@ class NestedElementManager extends Component
         $config += [
             'sortable' => false,
             'canCreate' => false,
+            'canPaste' => false,
             'createButtonLabel' => null,
             'createAttributes' => null,
             'minElements' => null,
@@ -592,6 +593,7 @@ class NestedElementManager extends Component
                 'attribute' => $attribute,
                 'sortable' => $config['sortable'],
                 'canCreate' => $config['canCreate'],
+                'canPaste' => $config['canPaste'],
                 'minElements' => $config['minElements'],
                 'maxElements' => $config['maxElements'],
                 'createButtonLabel' => $config['createButtonLabel'],

@@ -1136,9 +1136,10 @@ class UsersController extends Controller
         $response = $this->asEditUserScreen($user, self::SCREEN_ADDRESSES);
 
         $response->contentHtml(function() use ($user) {
+            $canEditUsers = Craft::$app->getUser()->checkPermission('editUsers');
             $config = [
                 'showInGrid' => true,
-                'canCreate' => Craft::$app->getUser()->checkPermission('editUsers'),
+                'canCreate' => $canEditUsers,
             ];
 
             // Use an element index view if there's more than 50 addresses

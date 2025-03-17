@@ -408,6 +408,14 @@ interface ElementInterface extends
     public static function searchableAttributes(): array;
 
     /**
+     * Returns the base attributes that should be applied when bulk-duplicating elements of this type.
+     *
+     * @return array
+     * @since 5.7.0
+     */
+    public static function baseBulkDuplicateAttributes(): array;
+
+    /**
      * Returns the element index HTML.
      *
      * @param ElementQueryInterface $elementQuery
@@ -933,6 +941,15 @@ interface ElementInterface extends
      * @since 5.0.0
      */
     public function canDuplicateAsDraft(User $user): bool;
+
+    /**
+     * Returns whether the given user is authorized to copy this element, to be duplicated elsewhere.
+     *
+     * @param User $user
+     * @return bool
+     * @since 5.7.0
+     */
+    public function canCopy(User $user): bool;
 
     /**
      * Returns whether the given user is authorized to delete this element.

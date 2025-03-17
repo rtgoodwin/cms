@@ -22,6 +22,7 @@ use craft\controllers\ElementIndexesController;
 use craft\db\Connection;
 use craft\db\FixedOrderExpression;
 use craft\db\Table;
+use craft\elements\actions\Copy;
 use craft\elements\actions\Delete;
 use craft\elements\actions\DeleteForSite;
 use craft\elements\actions\Duplicate;
@@ -303,6 +304,8 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                         'data' => [
                             'type' => $type,
                             'handle' => $section->handle,
+                            'section-id' => $section->id,
+                            'entry-type-ids' => array_map(fn(EntryType $entryType) => $entryType->id, $section->getEntryTypes()),
                         ],
                         'criteria' => [
                             'sectionId' => $section->id,
@@ -457,11 +460,11 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 }
             }
 
-            // Duplicate
             if (
                 $user->can("createEntries:$section->uid") &&
                 $user->can("saveEntries:$section->uid")
             ) {
+                // Duplicate
                 $actions[] = Duplicate::class;
 
                 if ($section->type === Section::TYPE_STRUCTURE && $section->maxLevels != 1) {
@@ -471,6 +474,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     ];
                 }
 
+                // Copy
+                $actions[] = Copy::class;
+
+                // Move to section
                 $actions[] = MoveToSection::class;
             }
 
@@ -507,6 +514,17 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     protected static function includeSetStatusAction(): bool
     {
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function baseBulkDuplicateAttributes(): array
+    {
+        return [
+            ...parent::baseBulkDuplicateAttributes(),
+            'sectionId' => null,
+        ];
     }
 
     /**
@@ -843,6 +861,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public bool $deletedWithSection = false;
 
     /**
+     * @var bool Whether to force-place the entry within its structure.
+     * @since 5.7.0
+     */
+    public bool $placeInStructure = false;
+
+    /**
      * @var int[] Entry author IDs
      * @see getAuthorIds()
      * @see setAuthorIds()
@@ -938,6 +962,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         $rules = parent::defineRules();
         $rules[] = [['sectionId', 'fieldId', 'ownerId', 'primaryOwnerId', 'typeId', 'sortOrder'], 'number', 'integerOnly' => true];
         $rules[] = [['authorIds'], 'each', 'rule' => ['number', 'integerOnly' => true]];
+        $rules[] = [['placeInStructure'], 'safe'];
         $rules[] = [
             ['sectionId'],
             'required',
@@ -1925,6 +1950,14 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     /**
      * @inheritdoc
      */
+    public function canCopy(User $user): bool
+    {
+        return Craft::$app->getElements()->canDuplicate($this, $user);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function canDelete(User $user): bool
     {
         if (parent::canDelete($user)) {
@@ -2151,6 +2184,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         return [
             'data' => [
+                'entry-type-id' => $this->getType()->id,
                 'movable' => $this->_canMove(),
             ],
         ];
@@ -2685,9 +2719,13 @@ JS;
 
             $this->saveOwnership($isNew, Table::ENTRIES);
 
-            if (!$this->duplicateOf && isset($this->sectionId) && $section->type == Section::TYPE_STRUCTURE) {
+            if (
+                (!$this->duplicateOf || $this->placeInStructure) &&
+                isset($this->sectionId) &&
+                $section->type == Section::TYPE_STRUCTURE
+            ) {
                 // Has the parent changed?
-                if ($this->hasNewParent()) {
+                if ($this->placeInStructure || $this->hasNewParent()) {
                     $this->_placeInStructure($isNew, $section);
                 }
 
