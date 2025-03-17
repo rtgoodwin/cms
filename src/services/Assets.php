@@ -53,7 +53,7 @@ use yii\db\Expression;
 /**
  * Assets service.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getAssets()|`Craft::$app->assets`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getAssets()|`Craft::$app->getAssets()`]].
  *
  * @property-read VolumeFolder $currentUserTemporaryUploadFolder
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>

@@ -3903,6 +3903,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       waitForDoubleClicks: false,
       canSelectElement: null,
       canDuplicateElements: (selectedItems) => true,
+      onBeforeMoveElementsToPage: async (selectedItems, page) => {},
+      onMoveElementsToPage: async (selectedItems, page) => {},
       onBeforeDuplicateElements: async (selectedItems) => {},
       onDuplicateElements: async (selectedItems) => {},
       canDeleteElements: (selectedItems) => true,
@@ -4806,13 +4808,39 @@ const FilterHud = Garnish.HUD.extend({
       hudHeight = windowHeight - searchOffset.bottom - 10;
     }
 
-    this.$hud.css({
-      width: this.elementIndex.$searchContainer.outerWidth() - 2,
-      top: searchOffset.top + this.elementIndex.$searchContainer.outerHeight(),
-      left: searchOffset.left + 1,
-      height: hudHeight ? `${hudHeight}px` : 'unset',
-      overflowY: hudHeight ? 'scroll' : 'unset',
-    });
+    const containerWidth = this.elementIndex.$searchContainer.outerWidth() - 2;
+    if (containerWidth >= 450) {
+      this.$hud.css({
+        maxWidth: 'none',
+        width: containerWidth,
+        top:
+          searchOffset.top + this.elementIndex.$searchContainer.outerHeight(),
+        left: searchOffset.left + 1,
+        height: hudHeight ? `${hudHeight}px` : 'unset',
+        overflowY: hudHeight ? 'scroll' : 'unset',
+        transform: 'none',
+      });
+
+      // Add an overlay for the shade
+      this.$shade.css({
+        backgroundColor: 'transparent',
+      });
+    } else {
+      this.$hud.css({
+        maxWidth: '680px',
+        width: '90%',
+        top: '50%',
+        left: '50%',
+        height: hudHeight ? `${hudHeight}px` : 'unset',
+        overflowY: hudHeight ? 'scroll' : 'unset',
+        transform: 'translateY(-50%) translateX(-50%)',
+      });
+
+      // Add an overlay for the shade
+      this.$shade.css({
+        backgroundColor: 'var(--shade-bg)',
+      });
+    }
   },
 
   onShow: function () {

@@ -56,7 +56,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
           .addClass('icon disabled');
 
         if (this.settings.mode === 'cards') {
-          this.$createBtn.addClass('dashed');
+          this.$createBtn.addClass('dashed wrap');
           this.updateCreateBtn();
         }
 
@@ -207,6 +207,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             },
             canDeleteElements: ($selectedItems) => {
               return this.canDelete($selectedItems.length);
+            },
+            onBeforeMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
+            onMoveElementsToPage: async () => {
+              await this.markAsDirty();
             },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();

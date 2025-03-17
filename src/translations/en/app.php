@@ -99,6 +99,7 @@ return [
     'All' => 'All',
     'Allow Upscaling' => 'Allow Upscaling',
     'Allow anchors' => 'Allow anchors',
+    'Allow custom URL schemes' => 'Allow custom URL schemes',
     'Allow custom colors' => 'Allow custom colors',
     'Allow custom options' => 'Allow custom options',
     'Allow line breaks' => 'Allow line breaks',
