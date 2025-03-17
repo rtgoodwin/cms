@@ -99,7 +99,7 @@ return [
     'All' => 'Allt',
     'Allow Upscaling' => 'Leyfa uppskala',
     'Allow anchors' => 'Leyfa akkeri',
-    'Allow custom URL schemes' => 'Allow custom URL schemes',
+    'Allow custom URL schemes' => 'Leyfa sérsniðnar vefslóðir',
     'Allow custom colors' => 'Leyfa sérsniðna liti',
     'Allow custom options' => 'Leyfa sérsniðna valkosti',
     'Allow line breaks' => 'Leyfa línuskil',
