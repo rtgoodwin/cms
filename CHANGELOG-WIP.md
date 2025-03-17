@@ -6,14 +6,16 @@
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
+- Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
+- User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
+- Element index filters are now shown in a modal window on smaller screens. ([#16869](https://github.com/craftcms/cms/pull/16869))
+- Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Accessibility
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
 - Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
 - Animated assets no longer have animated thumbnails. ([#16497](https://github.com/craftcms/cms/pull/16497))
-
-### Content Management
-- Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
+- Improved the contrast of lightswitch inputs. ([#16853](https://github.com/craftcms/cms/pull/16853))
 
 ### Administration
 - Added the “Button Group” field type. ([#16782](https://github.com/craftcms/cms/pull/16782))
@@ -22,6 +24,10 @@
 - Added an optional “Download” advanced field to Link fields. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
+- Added the “SMS” link type for Link fields. ([#16850](https://github.com/craftcms/cms/discussions/16850))
+- Added the “Allow custom URL schemes” setting for Link fields with the “URL” link type enabled. ([#16850](https://github.com/craftcms/cms/discussions/16850))
+- Sections’ “Max Authors” settings are now optional, allowing unlimited authors when blank. ([#16898](https://github.com/craftcms/cms/pull/16898))
+- Sections’ “Max Authors” settings can now be set to `0`, preving the “Author” field from being displayed on Edit Entry screens. ([#16898](https://github.com/craftcms/cms/pull/16898))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
@@ -97,6 +103,7 @@
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
 - Updated Yii to 2.0.52.
+- Updated yii2-debug to 2.1.26.
 - Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))
 - Fixed a bug where indicator icons within field layout element chips didn’t have alternative text. ([#16297](https://github.com/craftcms/cms/discussions/16297))
 - Fixed a bug where slide pickers within selected field layout elements didn’t have a label. ([#16696](https://github.com/craftcms/cms/pull/16696))
