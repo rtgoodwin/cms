@@ -940,9 +940,10 @@ class Cp
                     'level' => $element->level,
                     'trashed' => $element->trashed,
                     'editable' => $editable,
-                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element),
-                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element),
-                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element),
+                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element, $user),
+                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
+                    'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
+                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
                 ]),
             ],
         );
@@ -1040,7 +1041,8 @@ class Cp
                 foreach ($actionMenuItems as &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
                         $item['attributes']['data']['edit-action'] = true;
-                        break;
+                    } elseif (str_starts_with($item['id'] ?? '', 'action-copy-')) {
+                        $item['attributes']['data']['copy-action'] = true;
                     }
                 }
 
