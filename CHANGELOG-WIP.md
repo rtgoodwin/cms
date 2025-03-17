@@ -2,6 +2,7 @@
 
 ### Content Management
 - Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
+- Added a “Copy” action to element indexes, nested element cards, and inline-editable Matrix blocks, for entries and addresses. ([#16888](https://github.com/craftcms/cms/pull/16888))
 - Added support for sorting embedded element indexes by element attributes and custom fields. ([#16732](https://github.com/craftcms/cms/pull/16732))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
@@ -56,7 +57,9 @@
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Editable tables now support `icon` columns.
 - Added `craft\base\Element::couldHaveAnimatedThumb()`.
+- Added `craft\base\ElementInterface::baseBulkDuplicateAttributes()`.
 - Added `craft\base\ElementInterface::baseGqlType()`.
+- Added `craft\base\ElementInterface::canCopy()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\Field::EVENT_DEFINE_ACTION_MENU_ITEMS`. ([#16779](https://github.com/craftcms/cms/discussions/16779))
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
@@ -67,6 +70,8 @@
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
+- Added `craft\elements\Entry::$placeInStructure`.
+- Added `craft\elements\actions\Copy`.
 - Added `craft\events\BulkOpEvent::defer()`. ([#16655](https://github.com/craftcms/cms/pull/16655))
 - Added `craft\fieldlayoutelements\CustomField::getEditCondition()`.
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
@@ -83,16 +88,27 @@
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
+- Added `craft\services\Elements::EVENT_AUTHORIZE_COPY`.
+- Added `craft\services\Elements::canCopy()`.
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
+- `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
+- `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
+- Added `Craft.cp.clearCopiedElements()`.
+- Added `Craft.cp.getCopiedElements()`.
+- Added `Craft.cp.onCopyElements()`.
 - Added `Craft.ui.createIconPicker()`.
 - Added `Craft.ui.createIconPickerField()`.
+- Added `Craft.ui.createPasteButton()`.
 - Added `Craft.ui.icon()`.
-- `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- `Craft.ui.createButton()` now supports passing an `icon` config option.
+- The `_includes/forms/button.twig` control panel template now supports passing an `icon` variable.
+- Added the `elements/bulk-duplicate` action.
 - The `elements/duplicate` action no longer creates an unpublished draft by default, or deletes the source element if it’s a provisional draft by default. `asUnpublishDraft` and `deleteProvisionalDraft` params can be passed to it to re-enable those behaviors where needed.
 
 ### System
