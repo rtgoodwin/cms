@@ -1140,7 +1140,6 @@ class UsersController extends Controller
             $config = [
                 'showInGrid' => true,
                 'canCreate' => $canEditUsers,
-                'canPaste' => $canEditUsers,
             ];
 
             // Use an element index view if there's more than 50 addresses
