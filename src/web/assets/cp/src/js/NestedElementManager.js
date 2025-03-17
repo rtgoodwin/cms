@@ -191,6 +191,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             onMoveElementsToPage: async () => {
               await this.markAsDirty();
             },
+            onBeforeReorderElements: async () => {
+              await this.markAsDirty();
+            },
+            onReorderElements: async () => {
+              await this.markAsDirty();
+            },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();
             },

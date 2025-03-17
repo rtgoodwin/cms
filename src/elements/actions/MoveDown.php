@@ -58,40 +58,35 @@ class MoveDown extends ElementAction
         selectedItems.parent().children().last().data('id') !== selectedItems.data('id')
       );
     },
-    activate: (selectedItems, elementIndex) => {
+    activate: async (selectedItems, elementIndex) => {
       const selectedItemIndex = Object.values(elementIndex.view.getAllElements()).indexOf(selectedItems[0]);
-      const elementEditor = elementIndex.\$container.parents('[data-element-editor]').data('elementEditor');
+      const offset = selectedItemIndex + 1;
+      await elementIndex.settings.onBeforeReorderElements(selectedItems, offset);
       
-      if (typeof elementEditor === 'undefined') {
-        moveDown(elementIndex, selectedItemIndex);
-      } else {
-        elementEditor.ensureIsDraftOrRevision().then(() => {
-          moveDown(elementIndex, selectedItemIndex, elementEditor.settings.elementId);
-        });
+      const data = Object.assign($params, {
+        elementIds: elementIndex.getSelectedElementIds(),
+        offset: offset,
+      });
+        
+      // swap out the ownerId with the new draft ownerId
+      const elementEditor = elementIndex.\$container.closest('form').data('elementEditor');
+      if (elementEditor) {
+        data.ownerId = elementEditor.getDraftElementId(data.ownerId);
       }
+         
+      let response;
+      try {
+        response = await Craft.sendActionRequest('POST', 'nested-elements/reorder', {data});
+      } catch (e) {
+        Craft.cp.displayError(response.data && response.data.error);
+        return;
+      }
+      
+      Craft.cp.displayNotice(response.data.message);
+      await elementIndex.settings.onReorderElements(selectedItems, offset);
+      elementIndex.updateElements(true, true);
     },
   });
-      
-  function moveDown(elementIndex, selectedItemIndex, ownerId = null) {
-    const data = Object.assign($params, {
-      elementIds: elementIndex.getSelectedElementIds(),
-      offset: selectedItemIndex + 1,
-    });
-    
-    if (ownerId !== null) {
-      data.ownerId = ownerId;
-    }
-      
-    Craft.sendActionRequest('POST', 'nested-elements/reorder', {data})
-      .then(({data}) => {
-        Craft.cp.displayNotice(data.message);
-        elementIndex.updateElements(true, true);
-      })
-      .catch(({response}) => {
-        Craft.cp.displayError(response.data && response.data.error);
-      });
-  }
-  
 })();
 JS,
             [
