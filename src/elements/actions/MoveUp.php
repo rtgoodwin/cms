@@ -38,7 +38,7 @@ class MoveUp extends ElementAction
      */
     public function getTriggerLabel(): string
     {
-        return Craft::t('app', 'Move backward'); //up
+        return Craft::t('app', 'Move forward'); //up
     }
 
     /**

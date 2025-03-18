@@ -38,7 +38,7 @@ class MoveDown extends ElementAction
      */
     public function getTriggerLabel(): string
     {
-        return Craft::t('app', 'Move forward'); //down
+        return Craft::t('app', 'Move backward'); //down
     }
 
     /**
