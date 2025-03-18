@@ -64,7 +64,9 @@ class CraftCopyAttribute extends HTMLElement {
   }
 
   connectedCallback() {
-    this.value = this.getAttribute('value').trim() || this.innerText.trim();
+    this.value =
+      (this.getAttribute('value') || this.innerText).trim() ||
+      this.innerText.trim();
     this.innerHTML = '';
 
     this.renderButton();

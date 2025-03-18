@@ -8,6 +8,7 @@
 - Fixed a bug where letterbox transforms were getting transparent fills if the source image was grayscale. ([#16857](https://github.com/craftcms/cms/issues/16857))
 - Fixed a bug where elements could be missing data for attributes that shared a name with an eager-loadable attribute from another element type. ([#16862](https://github.com/craftcms/cms/issues/16862))
 - Fixed a bug where Selectize inputs would re-expand themselves after a selection was made. ([#16865](https://github.com/craftcms/cms/pull/16865))
+- Fixed a bug where entry revisions’ `revisionNotes` GraphQL fields were returning the entry’s current revision’s notes. ([#16909](https://github.com/craftcms/cms/issues/16909))
 - Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
 - Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
 - Fixed an error that could occur during passkey setup in Firefox. ([#16847](https://github.com/craftcms/cms/pull/16847))
@@ -22,7 +23,8 @@
 - Fixed a SQL error that could occur when setting a section’s “Max Authors” setting to a very large number. ([#16874](https://github.com/craftcms/cms/issues/16874))
 - Fixed a bug where nested elements that were created via “Applying new propagation method to elements” queue jobs weren’t retaining the original element’s sort position. ([#16872](https://github.com/craftcms/cms/issues/16872))
 - Fixed a bug where field handle button labels could get “Copy to clipboard” text appended to them. ([#16896](https://github.com/craftcms/cms/pull/16896))
-- Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
+- Fixed a bug where front-end verification forms weren’t respecting `redirect` params passed by login forms. ([#16905](https://github.com/craftcms/cms/issues/16905))
+- Fixed styling issues. ([#16830](https://github.com/craftcms/cms/issues/16830), [#16903](https://github.com/craftcms/cms/pull/16903))
 
 ## 5.6.11 - 2025-03-04
 
