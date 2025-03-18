@@ -13,6 +13,7 @@
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Accessibility
+- Entries and addresses within Matrix/Addresses fields now have “Move up/forward” and “Move down/backward” action items. ([#16893](https://github.com/craftcms/cms/pull/16893))
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
 - Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
 - Animated assets no longer have animated thumbnails. ([#16497](https://github.com/craftcms/cms/pull/16497))
