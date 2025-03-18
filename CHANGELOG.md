@@ -24,6 +24,7 @@
 - Fixed a bug where nested elements that were created via “Applying new propagation method to elements” queue jobs weren’t retaining the original element’s sort position. ([#16872](https://github.com/craftcms/cms/issues/16872))
 - Fixed a bug where field handle button labels could get “Copy to clipboard” text appended to them. ([#16896](https://github.com/craftcms/cms/pull/16896))
 - Fixed a bug where front-end verification forms weren’t respecting `redirect` params passed by login forms. ([#16905](https://github.com/craftcms/cms/issues/16905))
+- Fixed an error that could occur when saving a nested element. ([#16778](https://github.com/craftcms/cms/issues/16778))
 - Fixed styling issues. ([#16830](https://github.com/craftcms/cms/issues/16830), [#16903](https://github.com/craftcms/cms/pull/16903))
 
 ## 5.6.11 - 2025-03-04
