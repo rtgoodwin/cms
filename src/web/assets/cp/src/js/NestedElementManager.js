@@ -481,25 +481,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
       }
     },
 
-    getElementOwnerId($element) {
-      let ownerId = null;
-      let elementEditor = this.elementEditor;
-      if (typeof elementEditor == 'undefined') {
-        elementEditor = $element.closest('form').data('elementEditor');
-      }
-      if (
-        elementEditor &&
-        $element.data('owner-id') !== elementEditor.settings.elementId
-      ) {
-        ownerId = elementEditor.settings.elementId;
-      }
-
-      return ownerId;
-    },
-
     createElementEditor($element) {
+      const elementOwnerId = $element.data('owner-id');
       const slideout = Craft.createElementEditor(this.elementType, $element, {
-        ownerId: this.getElementOwnerId($element),
+        ownerId:
+          this.elementEditor?.getDraftElementId(elementOwnerId) ||
+          elementOwnerId,
         onLoad: () => {
           slideout.elementEditor.on('update', () => {
             Craft.Preview.refresh();
