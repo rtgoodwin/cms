@@ -73,6 +73,8 @@
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
 - Added `craft\elements\Entry::$placeInStructure`.
 - Added `craft\elements\actions\Copy`.
+- Added `craft\elements\actions\MoveDown`.
+- Added `craft\elements\actions\MoveUp`.
 - Added `craft\events\BulkOpEvent::defer()`. ([#16655](https://github.com/craftcms/cms/pull/16655))
 - Added `craft\fieldlayoutelements\CustomField::getEditCondition()`.
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
