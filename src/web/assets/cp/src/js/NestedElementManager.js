@@ -487,7 +487,10 @@ Craft.NestedElementManager = Garnish.Base.extend(
       if (typeof elementEditor == 'undefined') {
         elementEditor = $element.closest('form').data('elementEditor');
       }
-      if (elementEditor && $element.data('owner-id') !== elementEditor.settings.elementId) {
+      if (
+        elementEditor &&
+        $element.data('owner-id') !== elementEditor.settings.elementId
+      ) {
         ownerId = elementEditor.settings.elementId;
       }
 
