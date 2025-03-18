@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.12 - 2025-03-18
 
 - Improved table styling. ([#16771](https://github.com/craftcms/cms/issues/16771), [#16829](https://github.com/craftcms/cms/issues/16829))
 - Field layout designers now close the element library HUD automatically after creating a new field. ([#16521](https://github.com/craftcms/cms/discussions/16521))
