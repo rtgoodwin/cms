@@ -98,7 +98,7 @@
 - Added `craft\services\Search::queueIndexElement()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
-- `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
 - `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
