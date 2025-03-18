@@ -1249,8 +1249,14 @@ JS, [
             if ($hardDelete) {
                 $query->trashed(null);
             }
-            $query->{$this->ownerIdParam} = null;
-            $query->{$this->primaryOwnerIdParam} = $owner->id;
+            if ($owner->isProvisionalDraft) {
+                $query->provisionalDrafts();
+                $query->{$this->ownerIdParam} = $owner->id;
+            } else {
+                $query->{$this->ownerIdParam} = null;
+                $query->{$this->primaryOwnerIdParam} = $owner->id;
+            }
+
             /** @var NestedElementInterface[] $elements */
             $elements = $query->all();
 
