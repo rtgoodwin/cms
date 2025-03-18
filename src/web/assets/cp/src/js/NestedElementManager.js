@@ -214,6 +214,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             onMoveElementsToPage: async () => {
               await this.markAsDirty();
             },
+            onBeforeReorderElements: async () => {
+              await this.markAsDirty();
+            },
+            onReorderElements: async () => {
+              await this.markAsDirty();
+            },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();
             },
@@ -596,17 +602,78 @@ Craft.NestedElementManager = Garnish.Base.extend(
             }
           }
 
+          const destructiveGroup = actionDisclosure.getFirstDestructiveGroup();
+          let moveUpButton, moveDownButton, duplicateButton;
+
+          const $li = $element.parent();
+          const getPrev = () => $li.prev('li');
+          const getNext = () => $li.next('li');
+
+          if (this.settings.sortable) {
+            this.elementSort.addItems($li);
+
+            const ul = actionDisclosure.addGroup(null, true, destructiveGroup);
+
+            // Move up/forward
+            moveUpButton = actionDisclosure.addItem(
+              {
+                icon: async () =>
+                  await Craft.ui.icon(
+                    this.settings.showInGrid
+                      ? Craft.orientation === 'ltr'
+                        ? 'arrow-left'
+                        : 'arrow-right'
+                      : 'arrow-up'
+                  ),
+                label: this.settings.showInGrid
+                  ? Craft.t('app', 'Move forward')
+                  : Craft.t('app', 'Move up'),
+                onActivate: () => {
+                  const $prev = getPrev();
+                  if ($prev.length) {
+                    $li.insertBefore($prev);
+                    this.onSortChange($li);
+                  }
+                },
+              },
+              ul
+            );
+
+            // Move down/backward
+            moveDownButton = actionDisclosure.addItem(
+              {
+                icon: async () =>
+                  await Craft.ui.icon(
+                    this.settings.showInGrid
+                      ? Craft.orientation === 'ltr'
+                        ? 'arrow-right'
+                        : 'arrow-left'
+                      : 'arrow-down'
+                  ),
+                label: this.settings.showInGrid
+                  ? Craft.t('app', 'Move backward')
+                  : Craft.t('app', 'Move down'),
+                onActivate: () => {
+                  const $next = getNext();
+                  if ($next.length) {
+                    $li.insertAfter($next);
+                    this.onSortChange($li);
+                  }
+                },
+              },
+              ul
+            );
+          }
+
           const duplicatable = Garnish.hasAttr($element, 'data-duplicatable');
           const copyable = Garnish.hasAttr($element, 'data-copyable');
 
           if (duplicatable || copyable) {
-            const destructiveGroup =
-              actionDisclosure.getFirstDestructiveGroup();
             const ul = actionDisclosure.addGroup(null, true, destructiveGroup);
 
             if (duplicatable) {
               // Duplicate
-              const duplicateButton = actionDisclosure.addItem(
+              duplicateButton = actionDisclosure.addItem(
                 {
                   icon: async () => await Craft.ui.icon('clone'),
                   label: Craft.t('app', 'Duplicate'),
@@ -616,14 +683,6 @@ Craft.NestedElementManager = Garnish.Base.extend(
                 },
                 ul
               );
-
-              actionDisclosure.on('show', () => {
-                if (this.canCreate()) {
-                  actionDisclosure.showItem(duplicateButton);
-                } else {
-                  actionDisclosure.hideItem(duplicateButton);
-                }
-              });
             }
 
             if (copyable) {
@@ -646,36 +705,39 @@ Craft.NestedElementManager = Garnish.Base.extend(
               );
             }
           }
+
+          if (Garnish.hasAttr($element, 'data-deletable')) {
+            const ul = actionDisclosure.addGroup();
+            actionDisclosure.addItem(
+              {
+                icon: async () => await Craft.ui.icon('trash'),
+                label: this.settings.deleteLabel || Craft.t('app', 'Delete'),
+                destructive: true,
+                onActivate: () => {
+                  if (confirm(this.settings.deleteConfirmationMessage)) {
+                    this.deleteElement($element);
+                  }
+                },
+              },
+              ul
+            );
+          }
+
+          actionDisclosure.on('show', () => {
+            if (moveUpButton) {
+              actionDisclosure.toggleItem(moveUpButton, getPrev().length);
+            }
+
+            if (moveDownButton) {
+              actionDisclosure.toggleItem(moveDownButton, getNext().length);
+            }
+
+            if (duplicateButton) {
+              actionDisclosure.toggleItem(duplicateButton, this.canCreate());
+            }
+          });
         }
       }, 1);
-
-      if (this.settings.sortable) {
-        this.elementSort.addItems($element.parent());
-      }
-
-      const $actionMenuBtn = $element.find('.action-btn');
-      if ($actionMenuBtn.length > 0) {
-        const disclosureMenu = $actionMenuBtn
-          .disclosureMenu()
-          .data('disclosureMenu');
-
-        if (Garnish.hasAttr($element, 'data-deletable')) {
-          const ul = disclosureMenu.addGroup();
-          disclosureMenu.addItem(
-            {
-              icon: async () => await Craft.ui.icon('trash'),
-              label: this.settings.deleteLabel || Craft.t('app', 'Delete'),
-              destructive: true,
-              onActivate: () => {
-                if (confirm(this.settings.deleteConfirmationMessage)) {
-                  this.deleteElement($element);
-                }
-              },
-            },
-            ul
-          );
-        }
-      }
     },
 
     createElementEditor($element) {
