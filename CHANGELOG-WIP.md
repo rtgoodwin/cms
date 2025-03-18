@@ -101,6 +101,7 @@
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
 - `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
+- `craft\services\Fields::getLayoutByType()` now has a `create` argument.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
 - Added `Craft.cp.clearCopiedElements()`.
 - Added `Craft.cp.getCopiedElements()`.
@@ -121,6 +122,8 @@
 - Date values for custom fields are now represented as ISO-8601 date strings (with time zones) within element exports. ([#16629](https://github.com/craftcms/cms/pull/16629))
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
+- Field layout elements no longer get new `dateAdded` values each time the project config is rebuilt, for field layouts that haven’t been explicitly saved since updating to Craft 5.3.0+. ([#16899](https://github.com/craftcms/cms/discussions/16899))
+- The user and address field layouts are no longer stored in the project config if they haven’t been explicitly saved yet.
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))

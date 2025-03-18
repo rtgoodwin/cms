@@ -1040,12 +1040,16 @@ class Fields extends Component
      * Returns a field layout by its associated element type.
      *
      * @param class-string<ElementInterface> $type The associated element type
-     * @return FieldLayout The field layout
+     * @param bool $create Whether to create a field layout if one doesn’t exist
+     * @return FieldLayout|null The field layout
      */
-    public function getLayoutByType(string $type): FieldLayout
+    public function getLayoutByType(string $type, bool $create = true): ?FieldLayout
     {
-        return $this->_layouts()->firstWhere('type', $type)
-            ?? new FieldLayout(['type' => $type]);
+        $layout = $this->_layouts()->firstWhere('type', $type);
+        if (!$layout && $create) {
+            return new FieldLayout(['type' => $type]);
+        }
+        return $layout;
     }
 
     /**
