@@ -482,11 +482,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
     },
 
     createElementEditor($element) {
-      const elementOwnerId = $element.data('owner-id');
       const slideout = Craft.createElementEditor(this.elementType, $element, {
-        ownerId:
-          this.elementEditor?.getDraftElementId(elementOwnerId) ||
-          elementOwnerId,
         onLoad: () => {
           slideout.elementEditor.on('update', () => {
             Craft.Preview.refresh();
