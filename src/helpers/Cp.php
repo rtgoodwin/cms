@@ -1048,7 +1048,7 @@ class Cp
 
                 if ($config['sortable'] ?? false) {
                     $moveUpId = sprintf('action-move-up-%s', mt_rand());
-                    $label = (isset($config['showInGrid']) && $config['showInGrid']) ? Craft::t('app', 'Move backward') : Craft::t('app', 'Move up');
+                    $label = (isset($config['showInGrid']) && $config['showInGrid']) ? Craft::t('app', 'Move forward') : Craft::t('app', 'Move up');
                     $icon = 'arrow-up';
                     if ($config['showInGrid']) {
                         $icon = Craft::$app->getLocale()->getOrientation() === 'ltr' ? 'arrow-left' : 'arrow-right';
@@ -1064,7 +1064,7 @@ class Cp
                         ],
                     ];
                     $moveDownId = sprintf('action-move-down-%s', mt_rand());
-                    $label = (isset($config['showInGrid']) && $config['showInGrid']) ? Craft::t('app', 'Move forward') : Craft::t('app', 'Move down');
+                    $label = (isset($config['showInGrid']) && $config['showInGrid']) ? Craft::t('app', 'Move backward') : Craft::t('app', 'Move down');
                     $icon = 'arrow-down';
                     if ($config['showInGrid']) {
                         $icon = Craft::$app->getLocale()->getOrientation() === 'ltr' ? 'arrow-right' : 'arrow-left';
