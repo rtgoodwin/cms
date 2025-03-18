@@ -86,17 +86,25 @@ class MoveAssets extends ElementAction
         onSelect: async ([targetFolder]) => {
           const mover = new Craft.AssetMover();
           
-          if (!await mover.shouldPerformMove(selectedFolderIds, selectedAssetIds)) {
+          const moveParams = await mover.getMoveParams(selectedFolderIds, selectedAssetIds);
+          if (!(moveParams.proceed)) {
             return;
           }
           
-          mover.moveFolders(selectedFolderIds, targetFolder.folderId).then((totalFoldersMoved) => {
-            mover.moveAssets(selectedAssetIds, targetFolder.folderId).then((totalAssetsMoved) => {
+          mover.moveFolders(selectedFolderIds, targetFolder.folderId, Craft.elementIndex.currentFolderId).then((totalFoldersMoved) => {
+            mover.moveAssets(selectedAssetIds, targetFolder.folderId, Craft.elementIndex.currentFolderId).then((totalAssetsMoved) => {
               const totalItemsMoved = totalFoldersMoved + totalAssetsMoved;
               if (totalItemsMoved) {
-                Craft.cp.displayNotice(Craft.t('app', '{totalItems, plural, =1{Item} other{Items}} moved.', {
-                  totalItems: totalItemsMoved,
-                }));
+                mover.successNotice(
+                  moveParams,
+                  Craft.t(
+                    'app',
+                    '{totalItems, plural, =1{Item} other{Items}} moved.',
+                    {
+                      totalItems: totalItemsMoved,
+                    }
+                  )
+                );
                 Craft.elementIndex.updateElements(true);
               }
             });

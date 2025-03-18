@@ -11,8 +11,23 @@ Craft.AssetMover = Garnish.Base.extend({
   // that can be moved before we ask for confirmation
   sizeLimit: 50000000, // 50MB
 
-  shouldPerformMove: async function (folderIds, assetIds) {
+  undoMovedAssets: null,
+  undoMovedFolders: null,
+
+  init: function () {
+    this.undoMovedAssets = {
+      assetIds: [],
+      targetFolderId: null,
+    };
+    this.undoMovedFolders = {
+      folderIds: [],
+      targetFolderId: null,
+    };
+  },
+
+  getMoveParams: async function (folderIds, assetIds) {
     let performMove = true;
+    let moveConfirmed = false;
     let response;
 
     try {
@@ -35,15 +50,78 @@ Craft.AssetMover = Garnish.Base.extend({
       folderIds.length + assetIds.length > this.countLimit ||
       parseInt(response.data.totalSize) > this.sizeLimit
     ) {
+      moveConfirmed = true;
       performMove = confirm(
         Craft.t('app', 'Are you sure you want to move the selected items?')
       );
     }
 
-    return performMove;
+    return {
+      proceed: performMove,
+      confirmed: moveConfirmed,
+    };
   },
 
-  moveAssets: function (assetIds, targetFolderId) {
+  successNotice: function (moveParams, message, allowUndo = true) {
+    let details = null;
+    let $undoBtn = null;
+
+    if (allowUndo) {
+      $undoBtn = Craft.ui.createButton({
+        label: Craft.t('app', 'Undo'),
+        spinner: true,
+      });
+    }
+
+    // if we didn't reach the limit, so the move was not confirmed, we want to give the option to undo
+    if (!moveParams.confirmed && allowUndo) {
+      details = {
+        details: $undoBtn,
+      };
+    }
+
+    let notice = Craft.cp.displayNotice(message, details);
+
+    if (allowUndo) {
+      $undoBtn?.on('activate', () => {
+        // ask to confirm if they want to undo
+        if (
+          confirm(Craft.t('app', 'Are you sure you want to undo the move?'))
+        ) {
+          // if yes, undo
+          this.moveFolders(
+            this.undoMovedFolders.folderIds,
+            this.undoMovedFolders.targetFolderId
+          ).then((totalFoldersMoved) => {
+            this.moveAssets(
+              this.undoMovedAssets.assetIds,
+              this.undoMovedAssets.targetFolderId
+            ).then((totalAssetsMoved) => {
+              const totalItemsMoved = totalFoldersMoved + totalAssetsMoved;
+              if (totalItemsMoved) {
+                this.successNotice(
+                  moveParams,
+                  Craft.t(
+                    'app',
+                    'Reverted {totalItems, plural, =1{item} other{items}} move.',
+                    {
+                      totalItems: totalItemsMoved,
+                    }
+                  ),
+                  false
+                );
+                Craft.elementIndex.updateElements(true);
+              }
+            });
+          });
+        }
+        // if no, just close the notice;
+        notice.$closeBtn.trigger('click');
+      });
+    }
+  },
+
+  moveAssets: function (assetIds, targetFolderId, currentFolderId) {
     const requests = assetIds.map((assetId) => {
       return {
         for: 'asset',
@@ -51,6 +129,7 @@ Craft.AssetMover = Garnish.Base.extend({
         params: {
           assetId,
           folderId: targetFolderId,
+          initialFolderId: currentFolderId,
         },
       };
     });
@@ -69,6 +148,7 @@ Craft.AssetMover = Garnish.Base.extend({
         const params = {
           folderId: prompt.request.params.folderId,
           assetId: prompt.assetId,
+          initialFolderId: prompt.request.params.initialFolderId,
         };
         switch (prompt.choice) {
           case 'replace':
@@ -86,7 +166,7 @@ Craft.AssetMover = Garnish.Base.extend({
     });
   },
 
-  moveFolders: function (folderIds, targetFolderId) {
+  moveFolders: function (folderIds, targetFolderId, currentFolderId) {
     return new Promise((resolve, reject) => {
       const transferList = [];
       let folderIdsToDelete = [];
@@ -99,6 +179,7 @@ Craft.AssetMover = Garnish.Base.extend({
           params: {
             folderId,
             parentId: targetFolderId,
+            initialParentId: currentFolderId,
           },
           onSuccess: (response) => {
             if (response.transferList.length) {
@@ -133,6 +214,7 @@ Craft.AssetMover = Garnish.Base.extend({
           const params = {
             folderId: prompt.folderId,
             parentId: prompt.parentId,
+            initialParentId: prompt.request.params.initialParentId,
           };
           switch (prompt.choice) {
             case 'replace':
@@ -211,6 +293,21 @@ Craft.AssetMover = Garnish.Base.extend({
         // Loop through all the responses
         for (const response of responses) {
           if (response.success) {
+            if (response.newFolderId) {
+              this.undoMovedFolders.folderIds.push(response.newFolderId);
+              if (this.undoMovedFolders.targetFolderId === null) {
+                this.undoMovedFolders.targetFolderId =
+                  response.request.params.initialParentId;
+              }
+            } else {
+              this.undoMovedAssets.assetIds.push(
+                response.request.params.assetId
+              );
+              if (this.undoMovedAssets.targetFolderId === null) {
+                this.undoMovedAssets.targetFolderId =
+                  response.request.params.initialFolderId;
+              }
+            }
             totalMoved++;
           }
 

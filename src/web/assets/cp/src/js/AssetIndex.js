@@ -116,20 +116,22 @@ Craft.AssetIndex = Craft.BaseElementIndex.extend(
 
             const mover = new Craft.AssetMover();
 
-            if (!(await mover.shouldPerformMove(folderIds, assetIds))) {
+            const moveParams = await mover.getMoveParams(folderIds, assetIds);
+            if (!moveParams.proceed) {
               return;
             }
 
             mover
-              .moveFolders(folderIds, targetFolderId)
+              .moveFolders(folderIds, targetFolderId, this.currentFolderId)
               .then((totalFoldersMoved) => {
                 mover
-                  .moveAssets(assetIds, targetFolderId)
+                  .moveAssets(assetIds, targetFolderId, this.currentFolderId)
                   .then((totalAssetsMoved) => {
                     const totalItemsMoved =
                       totalFoldersMoved + totalAssetsMoved;
                     if (totalItemsMoved) {
-                      Craft.cp.displayNotice(
+                      mover.successNotice(
+                        moveParams,
                         Craft.t(
                           'app',
                           '{totalItems, plural, =1{Item} other{Items}} moved.',
