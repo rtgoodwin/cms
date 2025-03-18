@@ -17,6 +17,7 @@ Craft.CP = Garnish.Base.extend(
     $nav: null,
     $navToggle: null,
     $globalLiveRegion: null,
+    $globalSkipLinkList: null,
     $activeLiveRegion: null,
     $globalSidebar: null,
     $globalContainer: null,
@@ -83,6 +84,7 @@ Craft.CP = Garnish.Base.extend(
       this.$nav = $('#nav');
       this.$navToggle = $('#primary-nav-toggle');
       this.$globalLiveRegion = $('#global-live-region');
+      this.$globalSkipLinkList = $('#global-skip-links');
       this.$activeLiveRegion = this.$globalLiveRegion;
       this.$globalSidebar = $('#global-sidebar');
       this.$globalContainer = $('#global-container');
@@ -708,6 +710,23 @@ Craft.CP = Garnish.Base.extend(
       }
     },
 
+    handleSkipLinkVisibility: function () {
+      if (!this.$globalSkipLinkList.length) return;
+
+      const $links = this.$globalSkipLinkList.find('a');
+
+      $links.each((i, link) => {
+        const $link = $(link);
+        const $target = $($link.attr('href'));
+
+        if ($target.length) {
+          $link.removeClass('hidden');
+        } else {
+          $link.addClass('hidden');
+        }
+      });
+    },
+
     handleBreadcrumbVisibility: function () {
       if (!this.$crumbItems.length) {
         return;
@@ -784,6 +803,7 @@ Craft.CP = Garnish.Base.extend(
     handleWindowResize: function () {
       this.updateResponsiveTables();
       this.handleBreadcrumbVisibility();
+      this.handleSkipLinkVisibility();
     },
 
     handleLayerUpdates: function () {

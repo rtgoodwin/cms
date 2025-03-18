@@ -242,18 +242,18 @@ history.replaceState(undefined, undefined, window.location.href.match(/^[^#]*/)[
                         <div id="main-content" class="{{ mainContentClasses|join(' ') }}">
                             {# sidebar #}
                             {% if sidebar %}
-                                <div id="sidebar-toggle-container">
-                                    <button
-                                        type="button"
-                                        id="sidebar-toggle"
-                                        class="btn menubtn chromeless"
-                                        aria-controls="sidebar-container"
-                                        aria-expanded="false"
-                                    >
-                                        {{ 'Show sidebar'|t('app') }}
-                                    </button>
-                                </div>
                                 <div id="sidebar-container">
+                                    <div id="sidebar-toggle-container">
+                                        <button
+                                                type="button"
+                                                id="sidebar-toggle"
+                                                class="btn menubtn chromeless"
+                                                aria-controls="sidebar-container"
+                                                aria-expanded="false"
+                                        >
+                                            {{ 'Show sidebar'|t('app') }}
+                                        </button>
+                                    </div>
                                     <div id="sidebar" class="sidebar">
                                         {{ sidebar|raw }}
                                     </div>

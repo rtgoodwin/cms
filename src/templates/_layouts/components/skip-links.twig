@@ -1,22 +1,30 @@
 {% set links = [
   {
-    label: 'Skip to main'|t('app'),
+    label: 'Skip to {title}'|t('app', {title: 'Main'|t('app')|lower}),
     url: '#main',
   },
   {
-    label: 'Skip to sidebar'|t('app'),
+    label: 'Skip to {title}'|t('app', {title: 'Sidebar'|t('app')|lower}),
     url: '#sidebar-container',
   },
   {
-    label: 'Skip to content'|t('app'),
+    label: 'Skip to {title}'|t('app', {title: 'Content container'|t('app')|lower}),
     url: '#content-container',
+  },
+  {
+    label: 'Skip to {title}'|t('app', {title: 'Details'|t('app')|lower}),
+    url: '#details-container',
   },
 ] %}
 
-{% for link in links %}
-  {{ tag ('a', {
-    text: link.label,
-    href: link.url,
-    class: 'skip-link skip-link--global btn',
-  }) }}
-{% endfor %}
+<ul id="global-skip-links">
+  {% for link in links %}
+    <li>
+      {{ tag ('a', {
+        text: link.label,
+        href: link.url,
+        class: 'skip-link skip-link--global btn',
+      }) }}
+    </li>
+  {% endfor %}
+</ul>
