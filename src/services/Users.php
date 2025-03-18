@@ -49,7 +49,7 @@ use yii\base\UserException;
 /**
  * The Users service provides APIs for managing users.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getUsers()|`Craft::$app->users`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getUsers()|`Craft::$app->getUsers()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0

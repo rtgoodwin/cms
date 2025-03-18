@@ -24,6 +24,7 @@ use craft\helpers\UrlHelper;
 use craft\records\Section as SectionRecord;
 use craft\validators\HandleValidator;
 use craft\validators\UniqueValidator;
+use yii\db\Schema;
 
 /**
  * Section model class.
@@ -201,7 +202,13 @@ class Section extends Model implements Chippable, CpEditable, Iconic
     {
         $rules = parent::defineRules();
         $rules[] = [['id', 'structureId', 'maxLevels'], 'number', 'integerOnly' => true];
-        $rules[] = [['maxAuthors'], 'number', 'integerOnly' => true, 'min' => 0];
+        $rules[] = [
+            ['maxAuthors'],
+            'number',
+            'integerOnly' => true,
+            'min' => 0,
+            'max' => Db::getMaxAllowedValueForNumericColumn(Schema::TYPE_SMALLINT),
+        ];
         $rules[] = [['handle'], HandleValidator::class, 'reservedWords' => ['id', 'dateCreated', 'dateUpdated', 'uid', 'title']];
         $rules[] = [
             ['type'], 'in', 'range' => [

@@ -13,6 +13,15 @@
 - Fixed an error that could occur during passkey setup in Firefox. ([#16847](https://github.com/craftcms/cms/pull/16847))
 - Fixed a bug where the “Move to page…” element index action wasn’t ensuring the owner element was a draft first. ([#16894](https://github.com/craftcms/cms/pull/16894))
 - Fixed a bug where HUDs attached to slideouts could be positioned incorrectly after a nested slideout was closed. ([#16856](https://github.com/craftcms/cms/issues/16856))
+- Fixed a bug where tooltips weren’t always being shown when truncated links were focused. ([#16881](https://github.com/craftcms/cms/pull/16881))
+- Fixed a bug where tooltips weren’t closing when <kbd>Esc</kbd> was pressed. ([#16881](https://github.com/craftcms/cms/pull/16881))
+- Fixed a bug where tooltips weren’t closing if the target element was focused and blurred in rapid succession.
+- Fixed a bug where the “Copy value from site…” field action couldn’t be activated via the keyboard. ([#16868](https://github.com/craftcms/cms/pull/16868))
+- Fixed a bug where accessible names were not available for global sidebar links when the sidebar was collapsed. ([#16879](https://github.com/craftcms/cms/pull/16879))
+- Fixed a bug where some buttons with customizable labels weren’t wrapping. ([#16871](https://github.com/craftcms/cms/issues/16871))
+- Fixed a SQL error that could occur when setting a section’s “Max Authors” setting to a very large number. ([#16874](https://github.com/craftcms/cms/issues/16874))
+- Fixed a bug where nested elements that were created via “Applying new propagation method to elements” queue jobs weren’t retaining the original element’s sort position. ([#16872](https://github.com/craftcms/cms/issues/16872))
+- Fixed a bug where field handle button labels could get “Copy to clipboard” text appended to them. ([#16896](https://github.com/craftcms/cms/pull/16896))
 - Fixed a styling issue. ([#16830](https://github.com/craftcms/cms/issues/16830))
 
 ## 5.6.11 - 2025-03-04

@@ -838,6 +838,24 @@ export default Base.extend(
       }
     },
 
+    removeItem(el) {
+      const li = el.parentNode;
+      const ul = li.parentNode;
+      li.remove();
+      if (ul.querySelectorAll(':scope > li').length === 0) {
+        ul.remove();
+      }
+      if (ul.querySelectorAll(':scope > li:not(.hidden)').length === 0) {
+        ul.classList.add('hidden');
+      }
+
+      this.updateHrVisibility();
+
+      if (this.isExpanded()) {
+        this.setContainerPosition();
+      }
+    },
+
     updateHrVisibility() {
       const $children = this.$container.children();
       let foundVisibleGroup = false;
