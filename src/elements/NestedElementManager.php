@@ -1260,6 +1260,7 @@ JS, [
             }
             $query->{$this->ownerIdParam} = null;
             $query->{$this->primaryOwnerIdParam} = $owner->id;
+
             /** @var NestedElementInterface[] $elements */
             $elements = $query->all();
 
