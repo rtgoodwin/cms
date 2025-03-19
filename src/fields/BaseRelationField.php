@@ -19,6 +19,7 @@ use craft\base\MergeableFieldInterface;
 use craft\base\NestedElementInterface;
 use craft\base\RelationalFieldInterface;
 use craft\base\ThumbableFieldInterface;
+use craft\behaviors\CustomFieldBehavior;
 use craft\behaviors\EventBehavior;
 use craft\db\FixedOrderExpression;
 use craft\db\Query;
@@ -676,7 +677,7 @@ JS, [
             if (!empty($value)) {
                 $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
             }
-        } elseif ($value === null && $element?->id && $this->isFirstInstance($element) && $this->areAllOtherInstancesEmpty($element)) {
+        } elseif ($value === null && $element?->id && $this->fetchRelationsFromDbTable($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
             // or since the field was added to the field layout,
             // or the value was added to not first instance of the field.
@@ -748,54 +749,39 @@ JS, [
         return $query;
     }
 
-    private function isFirstInstance(?Elementinterface $element): bool
+    private function fetchRelationsFromDbTable(?Elementinterface $element): bool
     {
         if ($this->layoutElement?->uid === null) {
             return false;
         }
 
-        /** @var CustomField|null $first */
-        $first = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
-            ->filter(fn(CustomField $layoutElement) => $layoutElement->getField()->id === $this->id)
-            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded)
-            ->first();
-
-        // Compare handles here rather than UUIDs, since the UUID will change
-        //if we're hot-swapping field layouts (e.g. changing an entry's type).
-        return $this->handle === $first?->getField()->handle;
-    }
-
-    /**
-     * If there is more than one instance of this field in the element's layout,
-     * check if all of them, except the first one, are empty.
-     *
-     * @param ElementInterface|null $element
-     * @return bool
-     * @throws \craft\errors\InvalidFieldException
-     */
-    private function areAllOtherInstancesEmpty(?ElementInterface $element): bool
-    {
-        // This check will only look at the elements_sites.content,
-        // as the relations table should only be factored in for the first instance,
-        // if we don't have a value for it in the elements_sites.content
+        // Get all the instances of this field
+        /** @var Collection<CustomField> $fieldInstances */
         $fieldInstances = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
             ->filter(fn(CustomField $layoutElement) => $layoutElement->getField()->id === $this->id)
-            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded)
-            ->all();
+            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded);
 
-        array_shift($fieldInstances);
+        // Only fetch DB relations if this is the first instance
+        // (Compare handles here rather than UUIDs, since the UUID will change
+        // if we're hot-swapping field layouts, e.g. changing an entry's type)
+        /** @var CustomField|null $first */
+        $first = $fieldInstances->shift();
+        if ($this->handle !== $first?->getField()->handle) {
+            return false;
+        }
 
-        $empty = true;
-        if (!empty($fieldInstances)) {
-            foreach ($fieldInstances as $fieldInstance) {
-                if (!($this->isValueEmpty($element->getFieldValue($fieldInstance->handle ?? $fieldInstance->getOriginalHandle()), $element))) {
-                    $empty = false;
-                    break;
-                }
+        // Make sure none of the other instances have values
+        /** @var CustomFieldBehavior $behavior */
+        $behavior = $element->getBehavior('customFields');
+        foreach ($fieldInstances as $fieldInstance) {
+            /** @var self $field */
+            $field = $fieldInstance->getField();
+            if (isset($behavior->{$field->handle})) {
+                return false;
             }
         }
 
-        return $empty;
+        return true;
     }
 
     /**
@@ -1014,7 +1000,7 @@ JS, [
                 foreach ($rawValue as $targetElementId) {
                     $map[] = ['source' => $sourceElement->id, 'target' => $targetElementId];
                 }
-            } elseif ($this->isFirstInstance($sourceElement) && $this->areAllOtherInstancesEmpty($sourceElement)) {
+            } elseif ($this->fetchRelationsFromDbTable($sourceElement)) {
                 // The relation IDs aren't hardcoded yet and this is the first
                 // instance of this field in the field layout, so fetch the relations
                 // via the DB table
