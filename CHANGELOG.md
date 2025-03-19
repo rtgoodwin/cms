@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed a performance degradation bug that occurred when working with Categories or Entries fields with “Maintain hierarchy” enabled. ([#16920](https://github.com/craftcms/cms/issues/16920))
 - Fixed a bug where Plain Text and Table fields were converting posted shortcode-looking strings to emoji. ([#12935](https://github.com/craftcms/cms/issues/12935), [#16917](https://github.com/craftcms/cms/issues/16917))
 
 ## 5.6.12 - 2025-03-18
