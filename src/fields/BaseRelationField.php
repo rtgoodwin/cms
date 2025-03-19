@@ -19,6 +19,7 @@ use craft\base\MergeableFieldInterface;
 use craft\base\NestedElementInterface;
 use craft\base\RelationalFieldInterface;
 use craft\base\ThumbableFieldInterface;
+use craft\behaviors\CustomFieldBehavior;
 use craft\behaviors\EventBehavior;
 use craft\db\FixedOrderExpression;
 use craft\db\Query;
@@ -676,10 +677,13 @@ JS, [
             if (!empty($value)) {
                 $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
             }
-        } elseif ($value === null && $element?->id && $this->isFirstInstance($element)) {
+        } elseif ($value === null && $element?->id && $this->fetchRelationsFromDbTable($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
-            // or since the field was added to the field layout. So only actually look at the `relations` table
-            // if this is the first instance of the field that was ever added to the field layout.
+            // or since the field was added to the field layout,
+            // or the value was added to not first instance of the field.
+            // So only actually look at the `relations` table
+            // if this is the first instance of the field that was ever added to the field layout
+            // and none of the other instances (which would have been added later on) have a value.
             if (!$this->allowMultipleSources && $this->source) {
                 $source = ElementHelper::findSource($class, $this->source, ElementSources::CONTEXT_FIELD);
 
@@ -745,21 +749,39 @@ JS, [
         return $query;
     }
 
-    private function isFirstInstance(?Elementinterface $element): bool
+    private function fetchRelationsFromDbTable(?Elementinterface $element): bool
     {
         if ($this->layoutElement?->uid === null) {
             return false;
         }
 
-        /** @var CustomField|null $first */
-        $first = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
+        // Get all the instances of this field
+        /** @var Collection<CustomField> $fieldInstances */
+        $fieldInstances = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
             ->filter(fn(CustomField $layoutElement) => $layoutElement->getField()->id === $this->id)
-            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded)
-            ->first();
+            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded);
 
-        // Compare handles here rather than UUIDs, since the UUID will change
-        //if we're hot-swapping field layouts (e.g. changing an entry's type).
-        return $this->handle === $first?->getField()->handle;
+        // Only fetch DB relations if this is the first instance
+        // (Compare handles here rather than UUIDs, since the UUID will change
+        // if we're hot-swapping field layouts, e.g. changing an entry's type)
+        /** @var CustomField|null $first */
+        $first = $fieldInstances->shift();
+        if ($this->handle !== $first?->getField()->handle) {
+            return false;
+        }
+
+        // Make sure none of the other instances have values
+        /** @var CustomFieldBehavior $behavior */
+        $behavior = $element->getBehavior('customFields');
+        foreach ($fieldInstances as $fieldInstance) {
+            /** @var self $field */
+            $field = $fieldInstance->getField();
+            if (isset($behavior->{$field->handle})) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -978,7 +1000,7 @@ JS, [
                 foreach ($rawValue as $targetElementId) {
                     $map[] = ['source' => $sourceElement->id, 'target' => $targetElementId];
                 }
-            } elseif ($this->isFirstInstance($sourceElement)) {
+            } elseif ($this->fetchRelationsFromDbTable($sourceElement)) {
                 // The relation IDs aren't hardcoded yet and this is the first
                 // instance of this field in the field layout, so fetch the relations
                 // via the DB table
