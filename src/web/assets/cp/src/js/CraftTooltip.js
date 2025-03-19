@@ -168,6 +168,7 @@ class CraftTooltip extends HTMLElement {
   };
 
   handleMouseEnter = () => {
+    console.log('mouseenter');
     this.isHovering = true;
 
     if (this.delayTimeout) {
@@ -186,6 +187,7 @@ class CraftTooltip extends HTMLElement {
   };
 
   handleMouseLeave = () => {
+    console.log('mouseleave');
     this.isHovering = false;
 
     if (this.delayTimeout) {
@@ -250,6 +252,7 @@ class CraftTooltip extends HTMLElement {
   };
 
   show = () => {
+    autoUpdate(this.triggerElement, this.tooltip, this.update);
     Object.assign(this.tooltip.style, {
       opacity: 1,
       transform: ['left', 'right'].includes(this.getStaticSide())
@@ -259,8 +262,6 @@ class CraftTooltip extends HTMLElement {
       pointerEvents: 'auto',
       zIndex: 101,
     });
-
-    autoUpdate(this.triggerElement, this.tooltip, this.update);
     this.showing = true;
   };
 
