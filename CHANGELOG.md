@@ -1,11 +1,16 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.14.11.1 - 2025-03-19
+
+- Fixed a performance degradation bug that occurred when working with Categories or Entries fields with “Maintain hierarchy” enabled. ([#16920](https://github.com/craftcms/cms/issues/16920))
+
+## 4.14.11 - 2025-03-18
 
 - Fixed a bug where relational fields with “Maintain hierarchy” enabled weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
 - Fixed a bug where letterbox transforms were getting transparent fills if the source image was grayscale. ([#16857](https://github.com/craftcms/cms/issues/16857))
 - Fixed a bug where elements could be missing data for attributes that shared a name with an eager-loadable attribute from another element type. ([#16862](https://github.com/craftcms/cms/issues/16862))
 - Fixed a bug where Selectize inputs would re-expand themselves after a selection was made. ([#16865](https://github.com/craftcms/cms/pull/16865))
+- Fixed a bug where entry revisions’ `revisionNotes` GraphQL fields were returning the entry’s current revision’s notes. ([#16909](https://github.com/craftcms/cms/issues/16909))
 
 ## 4.14.10 - 2025-03-04
 
