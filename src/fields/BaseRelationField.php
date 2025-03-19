@@ -1049,7 +1049,7 @@ JS, [
                 foreach ($rawValue as $targetElementId) {
                     $map[] = ['source' => $sourceElement->id, 'target' => $targetElementId];
                 }
-            } elseif ($this->isFirstInstance($sourceElement)) {
+            } elseif ($this->isFirstInstance($sourceElement) && $this->areAllOtherInstancesEmpty($sourceElement)) {
                 // The relation IDs aren't hardcoded yet and this is the first
                 // instance of this field in the field layout, so fetch the relations
                 // via the DB table
