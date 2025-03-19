@@ -682,10 +682,13 @@ JS, [
             } else {
                 $query->andWhere(['elements.id' => []]);
             }
-        } elseif ($value === null && $element?->id && $this->isFirstInstance($element)) {
+        } elseif ($value === null && $element?->id && $this->isFirstInstance($element) && $this->areAllOtherInstancesEmpty($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
-            // or since the field was added to the field layout. So only actually look at the `relations` table
-            // if this is the first instance of the field that was ever added to the field layout.
+            // or since the field was added to the field layout,
+            // or the value was added to not first instance of the field.
+            // So only actually look at the `relations` table
+            // if this is the first instance of the field that was ever added to the field layout
+            // and none of the other instances (which would have been added later on) have a value.
             if (!$this->allowMultipleSources && $this->source) {
                 $source = ElementHelper::findSource($class, $this->source, ElementSources::CONTEXT_FIELD);
 
@@ -804,6 +807,39 @@ JS, [
         // Compare handles here rather than UUIDs, since the UUID will change
         //if we're hot-swapping field layouts (e.g. changing an entry's type).
         return $this->handle === $first?->getField()->handle;
+    }
+
+    /**
+     * If there is more than one instance of this field in the element's layout,
+     * check if all of them, except the first one, are empty.
+     *
+     * @param ElementInterface|null $element
+     * @return bool
+     * @throws \craft\errors\InvalidFieldException
+     */
+    private function areAllOtherInstancesEmpty(?ElementInterface $element): bool
+    {
+        // This check will only look at the elements_sites.content,
+        // as the relations table should only be factored in for the first instance,
+        // if we don't have a value for it in the elements_sites.content
+        $fieldInstances = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
+            ->filter(fn(CustomField $layoutElement) => $layoutElement->getField()->id === $this->id)
+            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded)
+            ->all();
+
+        array_shift($fieldInstances);
+
+        $empty = true;
+        if (!empty($fieldInstances)) {
+            foreach ($fieldInstances as $fieldInstance) {
+                if (!($this->isValueEmpty($element->getFieldValue($fieldInstance->handle ?? $fieldInstance->getOriginalHandle()), $element))) {
+                    $empty = false;
+                    break;
+                }
+            }
+        }
+
+        return $empty;
     }
 
     /**
