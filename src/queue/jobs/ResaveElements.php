@@ -74,6 +74,12 @@ class ResaveElements extends BaseBatchedJob
     public bool $touch = false;
 
     /**
+     * @var bool Whether this is for a newly-added site.
+     * @since 4.14.12
+     */
+    public bool $isNewSite = false;
+
+    /**
      * @inheritdoc
      */
     protected function loadData(): Batchable
