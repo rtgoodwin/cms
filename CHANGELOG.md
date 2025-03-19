@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.13 - 2025-03-19
 
 - Fixed a performance degradation bug that occurred when working with Categories or Entries fields with “Maintain hierarchy” enabled. ([#16920](https://github.com/craftcms/cms/issues/16920))
 - Fixed a bug where Categories and Entries fields with “Maintain hierarchy” enabled were getting all relatable entries/categories selected by default. ([#16925](https://github.com/craftcms/cms/issues/16925))
