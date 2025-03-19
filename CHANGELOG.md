@@ -6,6 +6,7 @@
 - Fixed a bug where Categories and Entries fields with “Maintain hierarchy” enabled were getting all relatable entries/categories selected by default. ([#16925](https://github.com/craftcms/cms/issues/16925))
 - Fixed a bug where Plain Text and Table fields were converting posted shortcode-looking strings to emoji. ([#12935](https://github.com/craftcms/cms/issues/12935), [#16917](https://github.com/craftcms/cms/issues/16917))
 - Fixed a bug where relation fields could show relations from another instance of the same field. ([#16912](https://github.com/craftcms/cms/issues/16912))
+- Fixed a bug where tooltips could show and hide repeatedly. ([#16922](https://github.com/craftcms/cms/issues/16922))
 
 ## 5.6.12 - 2025-03-18
 

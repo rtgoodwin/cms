@@ -250,6 +250,7 @@ class CraftTooltip extends HTMLElement {
   };
 
   show = () => {
+    autoUpdate(this.triggerElement, this.tooltip, this.update);
     Object.assign(this.tooltip.style, {
       opacity: 1,
       transform: ['left', 'right'].includes(this.getStaticSide())
@@ -259,8 +260,6 @@ class CraftTooltip extends HTMLElement {
       pointerEvents: 'auto',
       zIndex: 101,
     });
-
-    autoUpdate(this.triggerElement, this.tooltip, this.update);
     this.showing = true;
   };
 
