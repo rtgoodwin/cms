@@ -672,15 +672,9 @@ JS, [
 
         if (is_array($value)) {
             $value = array_values(array_filter($value));
+            $query->andWhere(['elements.id' => $value]);
             if (!empty($value)) {
-                if ($this->maintainHierarchy) {
-                    $value = $this->fillGapsInStructure((clone $query)->andWhere(['elements.id' => $value]));
-                }
-                $query
-                    ->andWhere(['elements.id' => $value])
-                    ->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
-            } else {
-                $query->andWhere(['elements.id' => []]);
+                $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
             }
         } elseif ($value === null && $element?->id && $this->isFirstInstance($element) && $this->areAllOtherInstancesEmpty($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
@@ -696,19 +690,6 @@ JS, [
                 if (isset($source['criteria'])) {
                     Craft::configure($query, $source['criteria']);
                 }
-            }
-
-            // Make our query customizations via EVENT_BEFORE_PREPARE/EVENT_AFTER_PREPARE,
-            // so they get applied for cloned queries as well
-
-            if ($this->maintainHierarchy) {
-                $query->attachBehavior(sprintf('%s-once', self::class), new EventBehavior([
-                    ElementQuery::EVENT_BEFORE_PREPARE => function(CancelableEvent  $event, ElementQuery $query) {
-                        if ($query->id === null) {
-                            $query->id($this->fillGapsInStructure($query));
-                        }
-                    },
-                ], true));
             }
 
             $relationsAlias = sprintf('relations_%s', StringHelper::randomString(10));
@@ -765,31 +746,6 @@ JS, [
         }
 
         return $query;
-    }
-
-    /**
-     * @param ElementQueryInterface $query
-     * @return int[]
-     */
-    private function fillGapsInStructure(ElementQueryInterface $query): array
-    {
-        $structuresService = Craft::$app->getStructures();
-
-        /** @phpstan-ignore-next-line */
-        $elements = (clone($query))
-            ->select(['**' => '**'])
-            ->status(null)
-            ->all();
-
-        // Fill in any gaps
-        $structuresService->fillGapsInElements($elements);
-
-        // Enforce the branch limit
-        if ($this->branchLimit) {
-            $structuresService->applyBranchLimitToElements($elements, $this->branchLimit);
-        }
-
-        return array_map(fn(ElementInterface $element) => $element->id, $elements);
     }
 
     private function isFirstInstance(?Elementinterface $element): bool
@@ -901,11 +857,20 @@ JS, [
         if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         } else {
-            /** @var ElementQueryInterface $value */
-            $value = $this->_all($value, $element);
+            $value = $this->_all($value, $element)->all();
         }
 
-        /** @var ElementQuery|array $value */
+        if ($this->maintainHierarchy) {
+            $structuresService = Craft::$app->getStructures();
+            // Fill in any gaps
+            $structuresService->fillGapsInElements($value);
+            // Enforce the branch limit
+            if ($this->branchLimit) {
+                $structuresService->applyBranchLimitToElements($value, $this->branchLimit);
+            }
+        }
+
+        /** @var ElementInterface[] $value */
         $variables = $this->inputTemplateVariables($value, $element);
         $variables['inline'] = $inline || $variables['viewMode'] === 'large';
 
@@ -1432,7 +1397,7 @@ JS, [
     /**
      * Returns an array of variables that should be passed to the input template.
      *
-     * @param array|ElementQueryInterface|null $value
+     * @param ElementInterface[]|ElementQueryInterface|null $value
      * @param ElementInterface|null $element
      * @return array
      */
