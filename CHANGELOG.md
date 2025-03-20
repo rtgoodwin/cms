@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
+
 ## 4.14.11.1 - 2025-03-19
 
 - Fixed a performance degradation bug that occurred when working with Categories or Entries fields with “Maintain hierarchy” enabled. ([#16920](https://github.com/craftcms/cms/issues/16920))
