@@ -86,7 +86,7 @@ body {
   }
 }
 
-#global-skip-link {
+.skip-link--global {
   @media only screen and (min-width: $minFullUiWidth) {
     @include mixins.two-color-focus-ring;
   }
