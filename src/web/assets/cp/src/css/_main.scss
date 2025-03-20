@@ -6430,6 +6430,11 @@ $min2ColWidth: 400px;
     box-shadow: var(--slideout-footer-shadow);
     z-index: 3;
 
+    & > .so-notice {
+      display: flex;
+      align-items: center;
+    }
+
     & > .so-extra {
       flex: 0 0 100%;
       margin-block: 0;

@@ -4,6 +4,7 @@
 - Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
 - Added a “Copy” action to element indexes, nested element cards, and inline-editable Matrix blocks, for entries and addresses. ([#16888](https://github.com/craftcms/cms/pull/16888))
 - Added support for sorting embedded element indexes by element attributes and custom fields. ([#16732](https://github.com/craftcms/cms/pull/16732))
+- Element editor slideouts now show other authors who are currently editing the same element. ([#16934](https://github.com/craftcms/cms/pull/16934))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
@@ -96,6 +97,9 @@
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
+- Added `craft\web\CpScreenResponseBehavior::$toolbarHtml`.
+- Added `craft\web\CpScreenResponseBehavior::toolbarHtml()`.
+- Added `craft\web\CpScreenResponseBehavior::toolbarTemplate()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
