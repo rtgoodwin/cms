@@ -654,6 +654,7 @@ JS, [
             $value instanceof ElementQueryInterface &&
             $element?->propagating &&
             $element->isNewForSite &&
+            !$element->resaving &&
             !$element->isNewSite &&
             !$this->targetSiteId &&
             !$this->showSiteMenu
