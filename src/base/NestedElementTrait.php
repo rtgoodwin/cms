@@ -477,17 +477,24 @@ trait NestedElementTrait
             $this->sortOrder = $max ? $max + 1 : 1;
         }
 
+        $ownerIds = array_unique([
+            $this->getPrimaryOwnerId(),
+            $ownerId,
+        ]);
+
         if (!$isNew) {
             Db::delete(Table::ELEMENTS_OWNERS, [
                 'elementId' => $this->id,
-                'ownerId' => $ownerId,
+                'ownerId' => $ownerIds,
             ]);
         }
 
-        Db::insert(Table::ELEMENTS_OWNERS, [
-            'elementId' => $this->id,
-            'ownerId' => $ownerId,
-            'sortOrder' => $this->sortOrder,
-        ]);
+        foreach ($ownerIds as $ownerId) {
+            Db::insert(Table::ELEMENTS_OWNERS, [
+                'elementId' => $this->id,
+                'ownerId' => $ownerId,
+                'sortOrder' => $this->sortOrder,
+            ]);
+        }
     }
 }
