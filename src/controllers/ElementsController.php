@@ -396,6 +396,10 @@ class ElementsController extends Controller
                 $isUnpublishedDraft,
                 $canCreateDrafts,
             ))
+            ->toolbarHtml(
+                Html::tag('div', options: ['class' => 'flex-grow']) .
+                Html::tag('div', options: ['class' => 'activity-container']),
+            )
             ->additionalButtonsHtml(fn() => $this->_additionalButtons(
                 $element,
                 $canonical,
@@ -926,11 +930,7 @@ JS, [
         bool $isUnpublishedDraft,
         bool $isDraft,
     ): string {
-        $components = [
-            Html::tag('div', options: [
-                'class' => ['activity-container'],
-            ]),
-        ];
+        $components = [];
 
         // Preview (View will be added later by JS)
         if ($previewTargets) {
