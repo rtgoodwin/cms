@@ -19,6 +19,7 @@ use craft\base\MergeableFieldInterface;
 use craft\base\NestedElementInterface;
 use craft\base\RelationalFieldInterface;
 use craft\base\ThumbableFieldInterface;
+use craft\behaviors\CustomFieldBehavior;
 use craft\behaviors\EventBehavior;
 use craft\db\FixedOrderExpression;
 use craft\db\Query;
@@ -653,6 +654,7 @@ JS, [
             $value instanceof ElementQueryInterface &&
             $element?->propagating &&
             $element->isNewForSite &&
+            !$element->resaving &&
             !$element->isNewSite &&
             !$this->targetSiteId &&
             !$this->showSiteMenu
@@ -673,20 +675,17 @@ JS, [
 
         if (is_array($value)) {
             $value = array_values(array_filter($value));
+            $query->andWhere(['elements.id' => $value]);
             if (!empty($value)) {
-                if ($this->maintainHierarchy) {
-                    $value = $this->fillGapsInStructure((clone $query)->andWhere(['elements.id' => $value]));
-                }
-                $query
-                    ->andWhere(['elements.id' => $value])
-                    ->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
-            } else {
-                $query->andWhere(['elements.id' => []]);
+                $query->orderBy([new FixedOrderExpression('elements.id', $value, Craft::$app->getDb())]);
             }
-        } elseif ($value === null && $element?->id && $this->isFirstInstance($element)) {
+        } elseif ($value === null && $element?->id && $this->fetchRelationsFromDbTable($element)) {
             // If $value is null, the element + field haven’t been saved since updating to Craft 5.3+,
-            // or since the field was added to the field layout. So only actually look at the `relations` table
-            // if this is the first instance of the field that was ever added to the field layout.
+            // or since the field was added to the field layout,
+            // or the value was added to not first instance of the field.
+            // So only actually look at the `relations` table
+            // if this is the first instance of the field that was ever added to the field layout
+            // and none of the other instances (which would have been added later on) have a value.
             if (!$this->allowMultipleSources && $this->source) {
                 $source = ElementHelper::findSource($class, $this->source, ElementSources::CONTEXT_FIELD);
 
@@ -694,19 +693,6 @@ JS, [
                 if (isset($source['criteria'])) {
                     Craft::configure($query, $source['criteria']);
                 }
-            }
-
-            // Make our query customizations via EVENT_BEFORE_PREPARE/EVENT_AFTER_PREPARE,
-            // so they get applied for cloned queries as well
-
-            if ($this->maintainHierarchy) {
-                $query->attachBehavior(sprintf('%s-once', self::class), new EventBehavior([
-                    ElementQuery::EVENT_BEFORE_PREPARE => function(CancelableEvent  $event, ElementQuery $query) {
-                        if ($query->id === null) {
-                            $query->id($this->fillGapsInStructure($query));
-                        }
-                    },
-                ], true));
             }
 
             $relationsAlias = sprintf('relations_%s', StringHelper::randomString(10));
@@ -765,46 +751,39 @@ JS, [
         return $query;
     }
 
-    /**
-     * @param ElementQueryInterface $query
-     * @return int[]
-     */
-    private function fillGapsInStructure(ElementQueryInterface $query): array
-    {
-        $structuresService = Craft::$app->getStructures();
-
-        /** @phpstan-ignore-next-line */
-        $elements = (clone($query))
-            ->select(['**' => '**'])
-            ->status(null)
-            ->all();
-
-        // Fill in any gaps
-        $structuresService->fillGapsInElements($elements);
-
-        // Enforce the branch limit
-        if ($this->branchLimit) {
-            $structuresService->applyBranchLimitToElements($elements, $this->branchLimit);
-        }
-
-        return array_map(fn(ElementInterface $element) => $element->id, $elements);
-    }
-
-    private function isFirstInstance(?Elementinterface $element): bool
+    private function fetchRelationsFromDbTable(?Elementinterface $element): bool
     {
         if ($this->layoutElement?->uid === null) {
             return false;
         }
 
-        /** @var CustomField|null $first */
-        $first = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
+        // Get all the instances of this field
+        /** @var Collection<CustomField> $fieldInstances */
+        $fieldInstances = Collection::make($element?->getFieldLayout()?->getCustomFieldElements())
             ->filter(fn(CustomField $layoutElement) => $layoutElement->getField()->id === $this->id)
-            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded)
-            ->first();
+            ->sortBy(fn(CustomField $layoutElement) => $layoutElement->dateAdded);
 
-        // Compare handles here rather than UUIDs, since the UUID will change
-        //if we're hot-swapping field layouts (e.g. changing an entry's type).
-        return $this->handle === $first?->getField()->handle;
+        // Only fetch DB relations if this is the first instance
+        // (Compare handles here rather than UUIDs, since the UUID will change
+        // if we're hot-swapping field layouts, e.g. changing an entry's type)
+        /** @var CustomField|null $first */
+        $first = $fieldInstances->shift();
+        if ($this->handle !== $first?->getField()->handle) {
+            return false;
+        }
+
+        // Make sure none of the other instances have values
+        /** @var CustomFieldBehavior $behavior */
+        $behavior = $element->getBehavior('customFields');
+        foreach ($fieldInstances as $fieldInstance) {
+            /** @var self $field */
+            $field = $fieldInstance->getField();
+            if (isset($behavior->{$field->handle})) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -866,11 +845,20 @@ JS, [
         if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         } else {
-            /** @var ElementQueryInterface $value */
-            $value = $this->_all($value, $element);
+            $value = $this->_all($value, $element)->all();
         }
 
-        /** @var ElementQuery|array $value */
+        if ($this->maintainHierarchy) {
+            $structuresService = Craft::$app->getStructures();
+            // Fill in any gaps
+            $structuresService->fillGapsInElements($value);
+            // Enforce the branch limit
+            if ($this->branchLimit) {
+                $structuresService->applyBranchLimitToElements($value, $this->branchLimit);
+            }
+        }
+
+        /** @var ElementInterface[] $value */
         $variables = $this->inputTemplateVariables($value, $element);
         $variables['inline'] = $inline || $variables['viewMode'] === 'large';
 
@@ -1014,7 +1002,7 @@ JS, [
                 foreach ($rawValue as $targetElementId) {
                     $map[] = ['source' => $sourceElement->id, 'target' => $targetElementId];
                 }
-            } elseif ($this->isFirstInstance($sourceElement)) {
+            } elseif ($this->fetchRelationsFromDbTable($sourceElement)) {
                 // The relation IDs aren't hardcoded yet and this is the first
                 // instance of this field in the field layout, so fetch the relations
                 // via the DB table
@@ -1397,7 +1385,7 @@ JS, [
     /**
      * Returns an array of variables that should be passed to the input template.
      *
-     * @param array|ElementQueryInterface|null $value
+     * @param ElementInterface[]|ElementQueryInterface|null $value
      * @param ElementInterface|null $element
      * @return array
      */
