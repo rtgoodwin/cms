@@ -1,18 +1,20 @@
+{% set orientation = craft.app.locale.getOrientation() -%}
+
 {% set links = [
   {
-    label: 'Skip to {title}'|t('app', {title: 'Main'|t('app')|lower}),
+    label: 'Skip to main section'|t('app'),
     url: '#main',
   },
   {
-    label: 'Skip to {title}'|t('app', {title: 'Sidebar'|t('app')|lower}),
+    label: orientation == 'ltr' ? 'Skip to left sidebar'|t('app') : 'Skip to right sidebar'|t('app'),
     url: '#sidebar-container',
   },
   {
-    label: 'Skip to {title}'|t('app', {title: 'Content container'|t('app')|lower}),
+    label: 'Skip to content'|t('app'),
     url: '#content-container',
   },
   {
-    label: 'Skip to {title}'|t('app', {title: 'Details'|t('app')|lower}),
+    label: orientation == 'ltr' ? 'Skip to right sidebar'|t('app') : 'Skip to left sidebar'|t('app'),
     url: '#details-container',
   },
 ] %}
