@@ -758,7 +758,6 @@ class Sections extends Component
                             'revisions' => null,
                         ],
                         'updateSearchIndex' => $hasNewSite,
-                        'hasNewSite' => $hasNewSite,
                     ]));
                 }
             }
