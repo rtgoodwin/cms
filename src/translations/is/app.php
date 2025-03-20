@@ -2096,7 +2096,7 @@ return [
     'drafts' => 'drög',
     'eight' => 'átta',
     'element' => 'þáttur',
-    'elements' => 'elements',
+    'elements' => 'þættir',
     'ends with' => 'endar með',
     'entries' => 'færslur',
     'entry' => 'færslu',
