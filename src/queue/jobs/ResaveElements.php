@@ -74,10 +74,10 @@ class ResaveElements extends BaseBatchedJob
     public bool $touch = false;
 
     /**
-     * @var bool Whether this is for a newly-added site.
+     * @var bool Whether we're resaving because we have a new site.
      * @since 4.14.12
      */
-    public bool $isNewSite = false;
+    public bool $hasNewSite = false;
 
     /**
      * @inheritdoc
@@ -126,6 +126,7 @@ class ResaveElements extends BaseBatchedJob
 
         $item->setScenario(Element::SCENARIO_ESSENTIALS);
         $item->resaving = true;
+        $item->isNewSite = $this->hasNewSite;
 
         try {
             Craft::$app->getElements()->saveElement($item,
