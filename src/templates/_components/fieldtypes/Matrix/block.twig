@@ -96,6 +96,15 @@
         data: {action: 'duplicate'},
       },
     },
+    {
+      icon: 'clone-dashed',
+      color: 'fuchsia',
+      label: 'Copy'|t('app'),
+      attributes: {
+        data: {action: 'copy'},
+      },
+    },
+    {hr: true},
   ]) %}
 
   {% for entryType in entryTypes %}
@@ -129,6 +138,10 @@
   }|filter,
   data: {
     id: entry.id,
+    'draft-id': entry.isProvisionalDraft ? null : entry.draftId,
+    'revision-id': entry.revisionId,
+    'owner-id': entry.getOwnerId(),
+    'site-id': entry.siteId,
     uid: entry.uid,
     type: entryType.handle,
     'type-name': entryTypeName,

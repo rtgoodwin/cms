@@ -542,8 +542,11 @@ class Table extends Field implements CrossSiteCopyableFieldInterface
 
                 $value = $row[$colId];
 
-                if (is_string($value) && !$supportsMb4) {
-                    $value = StringHelper::emojiToShortcodes(StringHelper::escapeShortcodes($value));
+                if (is_string($value)) {
+                    $value = StringHelper::escapeShortcodes($value);
+                    if (!$supportsMb4) {
+                        $value = StringHelper::emojiToShortcodes($value);
+                    }
                 }
 
                 $serializedRow[$colId] = parent::serializeValue($value ?? null, null);

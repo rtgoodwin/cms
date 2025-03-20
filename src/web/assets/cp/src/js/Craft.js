@@ -2896,7 +2896,10 @@ $.extend(Craft, {
         }
       });
 
-      transition.finished.then(resolve).catch(reject);
+      transition.finished.then(resolve).catch((e) => {
+        console.warn(e);
+        resolve();
+      });
     });
   },
 });
@@ -2920,14 +2923,17 @@ if (typeof BroadcastChannel !== 'undefined') {
 
       case 'trackJobProgress':
         Craft.cp.setJobData(ev.data.jobData);
-
         if (Craft.cp.jobInfo.length) {
           // Check again after a longer delay than usual,
           // as it looks like another browser tab is driving for now
           const delay = Craft.cp.getNextJobDelay() + 1000;
           Craft.cp.trackJobProgress(delay);
         }
+        break;
 
+      case 'copyElements':
+        const elementInfo = Craft.getLocalStorage('copiedElements');
+        Craft.cp.showElementCopyNotification(elementInfo || []);
         break;
     }
   });

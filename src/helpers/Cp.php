@@ -42,6 +42,7 @@ use craft\utilities\ProjectConfig as ProjectConfigUtility;
 use craft\utilities\Updates;
 use craft\web\twig\TemplateLoaderException;
 use craft\web\View;
+use DateTime;
 use Illuminate\Support\Collection;
 use yii\base\Event;
 use yii\base\InvalidArgumentException;
@@ -940,9 +941,10 @@ class Cp
                     'level' => $element->level,
                     'trashed' => $element->trashed,
                     'editable' => $editable,
-                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element),
-                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element),
-                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element),
+                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element, $user),
+                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
+                    'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
+                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
                 ]),
             ],
         );
@@ -1040,7 +1042,8 @@ class Cp
                 foreach ($actionMenuItems as &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
                         $item['attributes']['data']['edit-action'] = true;
-                        break;
+                    } elseif (str_starts_with($item['id'] ?? '', 'action-copy-')) {
+                        $item['attributes']['data']['copy-action'] = true;
                     }
                 }
 
@@ -2821,7 +2824,18 @@ JS;
         // Don't call FieldLayout::getConfig() here because we want to include *all* tabs, not just non-empty ones
         $fieldLayoutConfig = [
             'uid' => $fieldLayout->uid,
-            'tabs' => array_map(fn(FieldLayoutTab $tab) => $tab->getConfig(), $tabs),
+            'tabs' => array_map(function(FieldLayoutTab $tab) {
+                $config = $tab->getConfig();
+                foreach ($config['elements'] as &$elementConfig) {
+                    if (!isset($elementConfig['dateAdded'])) {
+                        // Default `dateAdded` to a minute ago, so there’s no chance that an element that predated 5.3 would get
+                        // the same timestamp as a newly-added element, if the layout was saved within a minute of being edited,
+                        // after updating to Craft 5.3+.
+                        $elementConfig['dateAdded'] = DateTimeHelper::toIso8601((new DateTime())->modify('-1 minute'));
+                    }
+                }
+                return $config;
+            }, $tabs),
         ];
 
         if ($fieldLayout->id) {

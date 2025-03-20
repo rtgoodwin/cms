@@ -2,7 +2,9 @@
 
 ### Content Management
 - Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
+- Added a “Copy” action to element indexes, nested element cards, and inline-editable Matrix blocks, for entries and addresses. ([#16888](https://github.com/craftcms/cms/pull/16888))
 - Added support for sorting embedded element indexes by element attributes and custom fields. ([#16732](https://github.com/craftcms/cms/pull/16732))
+- Element editor slideouts now show other authors who are currently editing the same element. ([#16934](https://github.com/craftcms/cms/pull/16934))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - Plain Text fields no longer show the remaining charater counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
@@ -12,6 +14,7 @@
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Accessibility
+- Entries and addresses within Matrix/Addresses fields now have “Move up/forward” and “Move down/backward” action items. ([#16893](https://github.com/craftcms/cms/pull/16893))
 - Improved the accessibility of Tags fields for screen readers. ([#16754](https://github.com/craftcms/cms/pull/16754))
 - Removed redundant ARIA roles and labels from reorder buttons. ([#16826](https://github.com/craftcms/cms/pull/16826))
 - Animated assets no longer have animated thumbnails. ([#16497](https://github.com/craftcms/cms/pull/16497))
@@ -56,7 +59,9 @@
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Editable tables now support `icon` columns.
 - Added `craft\base\Element::couldHaveAnimatedThumb()`.
+- Added `craft\base\ElementInterface::baseBulkDuplicateAttributes()`.
 - Added `craft\base\ElementInterface::baseGqlType()`.
+- Added `craft\base\ElementInterface::canCopy()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\Field::EVENT_DEFINE_ACTION_MENU_ITEMS`. ([#16779](https://github.com/craftcms/cms/discussions/16779))
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
@@ -67,6 +72,10 @@
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
+- Added `craft\elements\Entry::$placeInStructure`.
+- Added `craft\elements\actions\Copy`.
+- Added `craft\elements\actions\MoveDown`.
+- Added `craft\elements\actions\MoveUp`.
 - Added `craft\events\BulkOpEvent::defer()`. ([#16655](https://github.com/craftcms/cms/pull/16655))
 - Added `craft\fieldlayoutelements\CustomField::getEditCondition()`.
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
@@ -83,16 +92,31 @@
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
+- Added `craft\services\Elements::EVENT_AUTHORIZE_COPY`.
+- Added `craft\services\Elements::canCopy()`.
 - Added `craft\services\Elements::getBulkOpKeys()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
+- Added `craft\web\CpScreenResponseBehavior::$toolbarHtml`.
+- Added `craft\web\CpScreenResponseBehavior::toolbarHtml()`.
+- Added `craft\web\CpScreenResponseBehavior::toolbarTemplate()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
+- `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
+- `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
+- `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
+- `craft\services\Fields::getLayoutByType()` now has a `create` argument.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
+- Added `Craft.cp.clearCopiedElements()`.
+- Added `Craft.cp.getCopiedElements()`.
+- Added `Craft.cp.onCopyElements()`.
 - Added `Craft.ui.createIconPicker()`.
 - Added `Craft.ui.createIconPickerField()`.
+- Added `Craft.ui.createPasteButton()`.
 - Added `Craft.ui.icon()`.
-- `craft\base\Element::fieldLayoutFields()` now has an `$editableOnly` argument.
+- `Craft.ui.createButton()` now supports passing an `icon` config option.
+- The `_includes/forms/button.twig` control panel template now supports passing an `icon` variable.
+- Added the `elements/bulk-duplicate` action.
 - The `elements/duplicate` action no longer creates an unpublished draft by default, or deletes the source element if it’s a provisional draft by default. `asUnpublishDraft` and `deleteProvisionalDraft` params can be passed to it to re-enable those behaviors where needed.
 
 ### System
@@ -102,6 +126,8 @@
 - Date values for custom fields are now represented as ISO-8601 date strings (with time zones) within element exports. ([#16629](https://github.com/craftcms/cms/pull/16629))
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
+- Field layout elements no longer get new `dateAdded` values each time the project config is rebuilt, for field layouts that haven’t been explicitly saved since updating to Craft 5.3.0+. ([#16899](https://github.com/craftcms/cms/discussions/16899))
+- The user and address field layouts are no longer stored in the project config if they haven’t been explicitly saved yet.
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))

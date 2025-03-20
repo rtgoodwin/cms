@@ -1069,7 +1069,6 @@ button {
     border: 2px solid color.adjust(mixins.$grey800, $alpha: -0.8);
     box-sizing: border-box;
     box-shadow: 0 1px 1px 1px var(--white);
-    color: red;
 
     .cp-icon {
       --icon-size: calc(20rem / 16);
@@ -2098,6 +2097,7 @@ ul.icons {
   &.loading {
     &::before,
     &::after,
+    .cp-icon,
     .label {
       visibility: hidden;
     }
@@ -2251,24 +2251,30 @@ ul.icons {
 }
 
 craft-copy-attribute {
+  display: inline-block;
   @include mixins.fixed-width-font(calc(11rem / 16));
-  border: 1px solid var(--hairline-color);
-  padding-block: 0;
-  padding-inline: 5px;
-  border-radius: var(--button-border-radius);
   color: var(--medium-text-color);
+  height: calc(22rem / 16);
 
   button {
     gap: 5px;
     display: inline-flex;
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--button-border-radius);
+    padding-inline: 5px;
     flex-wrap: nowrap;
     align-items: center;
     cursor: pointer;
+    height: 100%;
 
     &:hover,
     &:focus {
       border-color: var(--medium-hairline-color);
       color: var(--text-color);
+    }
+
+    span[data-icon] {
+      margin-block-start: -3px;
     }
   }
 }
@@ -6423,6 +6429,11 @@ $min2ColWidth: 400px;
     background: var(--slideout-footer-bg);
     box-shadow: var(--slideout-footer-shadow);
     z-index: 3;
+
+    & > .so-notice {
+      display: flex;
+      align-items: center;
+    }
 
     & > .so-extra {
       flex: 0 0 100%;
