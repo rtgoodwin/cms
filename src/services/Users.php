@@ -44,6 +44,7 @@ use yii\base\Component;
 use yii\base\Exception;
 use yii\base\InvalidArgumentException;
 use yii\base\UserException;
+use yii\caching\TagDependency;
 
 /**
  * The Users service provides APIs for managing users.
@@ -526,6 +527,8 @@ class Users extends Component
         $userRecord->password = null;
         $userRecord->verificationCode = null;
 
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
+
         if (!$userRecord->save()) {
             return false;
         }
@@ -534,6 +537,11 @@ class Users extends Component
         $user->pending = false;
         $user->password = null;
         $user->verificationCode = null;
+        
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
+        
         return true;
     }
 
@@ -718,14 +726,16 @@ class Users extends Component
             $userRecord->lastLoginAttemptIp = Craft::$app->getRequest()->getUserIP();
         }
 
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
         $userRecord->save();
 
         // Update the User model too
         $user->lastLoginDate = $now;
         $user->invalidLoginCount = null;
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
     }
 
     /**
@@ -772,6 +782,7 @@ class Users extends Component
             $user->invalidLoginCount = $userRecord->invalidLoginCount;
         }
 
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
         $userRecord->save();
 
         // Update the User model too
@@ -784,8 +795,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
     }
 
     /**
@@ -846,6 +858,8 @@ class Users extends Component
             $userRecord->invalidLoginCount = null;
             $userRecord->lastInvalidLoginDate = null;
             $userRecord->lockoutDate = null;
+
+            $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
             $userRecord->save();
 
             // If they have an unverified email address, now is the time to set it to their primary email address
@@ -864,8 +878,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
 
         return true;
     }
@@ -903,6 +918,8 @@ class Users extends Component
             $userRecord->invalidLoginCount = null;
             $userRecord->lastInvalidLoginDate = null;
             $userRecord->lockoutDate = null;
+
+            $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
             $userRecord->save();
 
             $user->active = false;
@@ -928,9 +945,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
-
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
         return true;
     }
 
@@ -956,6 +973,8 @@ class Users extends Component
             $userRecord->username = $user->unverifiedEmail;
         }
 
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
+
         if (!$userRecord->save()) {
             $user->addErrors($userRecord->getErrors());
             return false;
@@ -964,6 +983,8 @@ class Users extends Component
         // If the user status is pending, let's activate them.
         if ($userRecord->pending) {
             $this->activateUser($user);
+        } elseif ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
         }
 
         return true;
@@ -995,6 +1016,8 @@ class Users extends Component
             $userRecord->invalidLoginCount = null;
             $userRecord->invalidLoginWindowStart = null;
             $userRecord->lockoutDate = null;
+
+            $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
             $userRecord->save();
 
             $transaction->commit();
@@ -1015,8 +1038,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
 
         return true;
     }
@@ -1043,6 +1067,8 @@ class Users extends Component
         $userRecord = $this->_getUserRecordById($user->id);
         $userRecord->suspended = true;
         $user->suspended = true;
+
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
         $userRecord->save();
 
         // Destroy all sessions for this user
@@ -1055,8 +1081,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
 
         return true;
     }
@@ -1085,6 +1112,8 @@ class Users extends Component
         try {
             $userRecord = $this->_getUserRecordById($user->id);
             $userRecord->suspended = false;
+
+            $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
             $userRecord->save();
 
             $transaction->commit();
@@ -1104,8 +1133,9 @@ class Users extends Component
             ]));
         }
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
 
         return true;
     }
@@ -1196,6 +1226,7 @@ class Users extends Component
         }
 
         $transaction = Craft::$app->getDb()->beginTransaction();
+        $indexAttributesChanged = $userRecord->haveIndexAttributesChanged();
         $userRecord->save();
 
         $originalUser = clone $user;
@@ -1214,8 +1245,9 @@ class Users extends Component
 
         $transaction->commit();
 
-        // Invalidate caches
-        Craft::$app->getElements()->invalidateCachesForElement($user);
+        if ($indexAttributesChanged) {
+            $this->invalidateIndexCaches();
+        }
 
         return $unhashedCode;
     }
@@ -1348,6 +1380,8 @@ class Users extends Component
                 'newGroupIds' => $event->newGroupIds,
             ]));
         }
+
+        $this->invalidateIndexCaches();
 
         return true;
     }
@@ -1631,5 +1665,17 @@ class Users extends Component
         }
 
         return $url;
+    }
+
+    /**
+     * Invalidates user index caches.
+     *
+     * @since 4.15.0
+     */
+    public function invalidateIndexCaches(): void
+    {
+        TagDependency::invalidate(Craft::$app->getCache(), [
+            sprintf('element-index-query::%s', User::class),
+        ]);
     }
 }
