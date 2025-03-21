@@ -183,7 +183,7 @@ abstract class BaseBatchedJob extends BaseJob implements RetryableJobInterface
     /**
      * @inheritdoc
      */
-    public function getTtr(): ?int
+    public function getTtr()
     {
         return $this->ttr;
     }
