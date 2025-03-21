@@ -13,6 +13,7 @@ Craft.AssetMover = Garnish.Base.extend({
 
   undoMovedAssets: null,
   undoMovedFolders: null,
+  conflictCount: 0,
 
   init: function () {
     this.undoMovedAssets = {
@@ -66,7 +67,7 @@ Craft.AssetMover = Garnish.Base.extend({
     let details = null;
     let $undoBtn = null;
 
-    if (allowUndo) {
+    if (allowUndo && this.conflictCount === 0) {
       $undoBtn = Craft.ui.createButton({
         label: Craft.t('app', 'Undo'),
         spinner: true,
@@ -313,6 +314,7 @@ Craft.AssetMover = Garnish.Base.extend({
 
           // Push prompt into prompt array
           if (response.conflict) {
+            this.conflictCount++;
             Craft.elementIndex.promptHandler.addPrompt(
               Object.assign({}, response, {
                 prompt: {
