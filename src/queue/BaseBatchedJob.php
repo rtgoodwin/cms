@@ -152,7 +152,7 @@ abstract class BaseBatchedJob extends BaseJob implements RetryableJobInterface
         if ($this->itemOffset < $this->totalItems()) {
             $nextJob = clone $this;
             $nextJob->batchIndex++;
-            QueueHelper::push($nextJob, $this->priority, 0, $this->ttr, $queue);
+            QueueHelper::push($nextJob, $this->priority, 0, $this->getTtr(), $queue);
         }
     }
 
