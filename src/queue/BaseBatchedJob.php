@@ -12,6 +12,7 @@ use craft\base\Batchable;
 use craft\helpers\ConfigHelper;
 use craft\helpers\Queue as QueueHelper;
 use craft\i18n\Translation;
+use yii\queue\RetryableJobInterface;
 
 /**
  * BaseBatchedJob is the base class for large jobs that may need to spawn
@@ -31,7 +32,7 @@ use craft\i18n\Translation;
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 4.4.0
  */
-abstract class BaseBatchedJob extends BaseJob
+abstract class BaseBatchedJob extends BaseJob implements RetryableJobInterface
 {
     /**
      * @var int The number of items that should be processed in a single batch
@@ -177,5 +178,21 @@ abstract class BaseBatchedJob extends BaseJob
             'index' => $this->batchIndex + 1,
             'total' => $totalBatches,
         ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getTtr(): ?int
+    {
+        return $this->ttr;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canRetry($attempt, $error): bool
+    {
+        return false;
     }
 }
