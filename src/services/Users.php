@@ -1667,12 +1667,7 @@ class Users extends Component
         return $url;
     }
 
-    /**
-     * Invalidates user index caches.
-     *
-     * @since 4.15.0
-     */
-    public function invalidateIndexCaches(): void
+    private function invalidateIndexCaches(): void
     {
         TagDependency::invalidate(Craft::$app->getCache(), [
             sprintf('element-index-query::%s', User::class),
