@@ -12,6 +12,7 @@ use Craft;
 use craft\behaviors\CustomFieldBehavior;
 use craft\behaviors\DraftBehavior;
 use craft\behaviors\RevisionBehavior;
+use craft\cache\ElementQueryTagDependency;
 use craft\db\CoalesceColumnsExpression;
 use craft\db\Command;
 use craft\db\Connection;
@@ -1318,8 +1319,13 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Only cache if there's no search term
-        if (!$elementQuery->search) {
-            $elementQuery->cache();
+        if ($elementQuery instanceof ElementQuery && !$elementQuery->search) {
+            $elementQuery->cache(dependency: new ElementQueryTagDependency($elementQuery, [
+                'tags' => [
+                    'element-index-query',
+                    sprintf('element-index-query::%s', static::class),
+                ],
+            ]));
         }
 
         $elements = static::indexElements($elementQuery, $sourceKey);

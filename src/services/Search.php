@@ -414,7 +414,12 @@ class Search extends Component
 
         $results = $query
             ->andWhere(['elementId' => $elementQuery])
-            ->cache(true, new ElementQueryTagDependency($elementQuery))
+            ->cache(true, new ElementQueryTagDependency($elementQuery, [
+                'tags' => [
+                    'element-index-query',
+                    sprintf('element-index-query::%s', $elementQuery->elementType),
+                ],
+            ]))
             ->all();
 
         // Score the results
