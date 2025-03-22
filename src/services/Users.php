@@ -1692,12 +1692,7 @@ class Users extends Component
         return !$maxUsers || $maxUsers > User::find()->status(null)->count();
     }
 
-    /**
-     * Invalidates user index caches.
-     *
-     * @since 5.7.0
-     */
-    public function invalidateIndexCaches(): void
+    private function invalidateIndexCaches(): void
     {
         TagDependency::invalidate(Craft::$app->getCache(), [
             sprintf('element-index-query::%s', User::class),
