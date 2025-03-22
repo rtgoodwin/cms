@@ -93,6 +93,12 @@ class ResaveController extends Controller
     public bool $queue = false;
 
     /**
+     * @var int The number of entries that should be resaved per queue job, if --queue is passed.
+     * @since 4.15.0
+     */
+    public int $batchSize = 100;
+
+    /**
      * @var bool Whether to resave element drafts.
      * @since 3.6.5
      */
@@ -243,6 +249,7 @@ class ResaveController extends Controller
     {
         $options = parent::options($actionID);
         $options[] = 'queue';
+        $options[] = 'batchSize';
         $options[] = 'elementId';
         $options[] = 'uid';
         $options[] = 'site';
@@ -459,6 +466,7 @@ class ResaveController extends Controller
                 'ifInvalid' => $this->ifInvalid,
                 'touch' => $this->touch,
                 'updateSearchIndex' => $this->updateSearchIndex,
+                'batchSize' => $this->batchSize,
             ]));
             $this->stdout($elementType::pluralDisplayName() . ' queued to be resaved.' . PHP_EOL);
             return ExitCode::OK;

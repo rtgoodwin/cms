@@ -587,6 +587,7 @@ JS, [
             $value instanceof ElementQueryInterface &&
             $element?->propagating &&
             $element->isNewForSite &&
+            !$element->resaving &&
             !$element->isNewSite &&
             !$this->targetSiteId &&
             !$this->showSiteMenu
@@ -611,8 +612,6 @@ JS, [
                 ->id(array_values(array_filter($value)))
                 ->fixedOrder();
         } elseif ($value !== '' && $element && $element->id) {
-            $originalQuery = clone $query;
-
             $query->innerJoin(
                 ['relations' => DbTable::RELATIONS],
                 [
@@ -641,26 +640,6 @@ JS, [
                 if (isset($source['criteria'])) {
                     Craft::configure($query, $source['criteria']);
                 }
-            }
-
-            if ($this->maintainHierarchy) {
-                $structuresService = Craft::$app->getStructures();
-
-                /** @var ElementInterface[] $structureElements */
-                $structureElements = (clone $query)
-                    ->status(null)
-                    ->all();
-
-                // Fill in any gaps
-                $structuresService->fillGapsInElements($structureElements);
-
-                // Enforce the branch limit
-                if ($this->branchLimit) {
-                    $structuresService->applyBranchLimitToElements($structureElements, $this->branchLimit);
-                }
-
-                $query = (clone $originalQuery)
-                    ->id(array_map(fn(ElementInterface $element) => $element->id, $structureElements));
             }
         } else {
             $query->id(false);
@@ -780,11 +759,20 @@ JS, [
         if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         } else {
-            /** @var ElementQueryInterface $value */
-            $value = $this->_all($value, $element);
+            $value = $this->_all($value, $element)->all();
         }
 
-        /** @var ElementQuery|array $value */
+        if ($this->maintainHierarchy) {
+            $structuresService = Craft::$app->getStructures();
+            // Fill in any gaps
+            $structuresService->fillGapsInElements($value);
+            // Enforce the branch limit
+            if ($this->branchLimit) {
+                $structuresService->applyBranchLimitToElements($value, $this->branchLimit);
+            }
+        }
+
+        /** @var ElementInterface[] $value */
         $variables = $this->inputTemplateVariables($value, $element);
 
         return Craft::$app->getView()->renderTemplate($this->inputTemplate, $variables);
@@ -943,7 +931,7 @@ JS, [
      */
     public function afterSave(bool $isNew): void
     {
-        // If the propagation method just changed, resave all the Matrix blocks
+        // If the propagation method just changed, resave all the elements
         if (isset($this->oldSettings)) {
             $oldLocalizeRelations = (bool)($this->oldSettings['localizeRelations'] ?? false);
             if ($this->localizeRelations !== $oldLocalizeRelations) {
@@ -1210,7 +1198,7 @@ JS, [
     /**
      * Returns an array of variables that should be passed to the input template.
      *
-     * @param array|ElementQueryInterface|null $value
+     * @param ElementInterface[]|ElementQueryInterface|null $value
      * @param ElementInterface|null $element
      * @return array
      */

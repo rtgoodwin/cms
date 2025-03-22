@@ -154,6 +154,7 @@ class Gc extends Component
         $this->_deleteOrphanedRelations();
         $this->_deleteOrphanedStructureElements();
         $this->_deleteOrphanedFkRows();
+        $this->_deletePointlessChangeData();
 
         $this->_hardDeleteStructures();
 
@@ -582,6 +583,37 @@ SQL;
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
+    }
+
+    private function _deletePointlessChangeData(): void
+    {
+        $db = Craft::$app->getDb();
+        $schema = $db->getSchema();
+
+        foreach ([Table::CHANGEDATTRIBUTES, Table::CHANGEDFIELDS] as $table) {
+            $this->_stdout(sprintf('    > deleting pointless rows in the %s table ... ', $schema->getRawTableName($table)));
+
+            // fetch any rows in the table for canonical elements that don't have any drafts
+            $query = (new Query())
+                ->select('t.elementId')
+                ->from(['t' => $table])
+                ->innerJoin(['e' => Table::ELEMENTS], '[[e.id]] = [[t.elementId]]')
+                ->leftJoin(['d' => Table::ELEMENTS], [
+                    'and',
+                    ['not', ['d.draftId' => null]],
+                    '[[d.canonicalId]] = [[e.id]]',
+                ])
+                ->where(['e.canonicalId' => null])
+                ->andWhere(['d.id' => null])
+                ->groupBy('t.elementId');
+
+            foreach (Db::batch($query) as $batch) {
+                $elementIds = array_column($batch, 'elementId');
+                Db::delete($table, ['elementId' => $elementIds]);
+            }
+
+            $this->_stdout("done\n", Console::FG_GREEN);
+        }
     }
 
     /**
