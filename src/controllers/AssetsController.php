@@ -1364,10 +1364,23 @@ class AssetsController extends Controller
         $folderIds = Craft::$app->getRequest()->getBodyParam('folderIds', []);
         $assetIds = Craft::$app->getRequest()->getBodyParam('assetIds', []);
 
+        if (!empty($folderIds)) {
+            // Add descendant folders
+            $assetsService = Craft::$app->getAssets();
+            foreach ($folderIds as $folderId) {
+                $folder = $assetsService->getFolderById($folderId);
+                if (!$folder) {
+                    throw new BadRequestHttpException("Invalid folder ID: $folderId");
+                }
+                $descendants = $assetsService->getAllDescendantFolders($folder);
+                array_push($folderIds, ...array_keys($descendants));
+            }
+        }
+
         $totalSize = (new Query())
             ->select('SUM(size) as totalSize')
             ->from('{{%assets}}')
-            ->where(['folderId' => $folderIds])
+            ->where(['folderId' => array_unique($folderIds)])
             ->orWhere(['id' => $assetIds])
             ->scalar();
 
