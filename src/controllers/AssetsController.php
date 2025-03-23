@@ -12,6 +12,7 @@ use craft\assetpreviews\Image as ImagePreview;
 use craft\base\Element;
 use craft\base\LocalFsInterface;
 use craft\db\Query;
+use craft\db\Table;
 use craft\elements\Asset;
 use craft\elements\conditions\ElementCondition;
 use craft\errors\AssetException;
@@ -1351,15 +1352,16 @@ class AssetsController extends Controller
     }
 
     /**
-     * Get total size of the assets based on provided folderIds and assetIds.
+     * Returns the total number of assets, and their total file size, based on their IDs and/or folder IDs.
      *
      * @return Response
      * @throws BadRequestHttpException
      * @since 4.15.0
      */
-    public function actionGetTotalMoveSize()
+    public function actionMoveInfo(): Response
     {
         $this->requireCpRequest();
+        $this->requirePostRequest();
 
         $folderIds = Craft::$app->getRequest()->getBodyParam('folderIds', []);
         $assetIds = Craft::$app->getRequest()->getBodyParam('assetIds', []);
@@ -1377,14 +1379,18 @@ class AssetsController extends Controller
             }
         }
 
-        $totalSize = (new Query())
-            ->select('SUM(size) as totalSize')
-            ->from('{{%assets}}')
-            ->where(['folderId' => array_unique($folderIds)])
-            ->orWhere(['id' => $assetIds])
-            ->scalar();
+        $query = (new Query())
+            ->from(Table::ASSETS)
+            ->where([
+                'or',
+                ['id' => $assetIds],
+                ['folderId' => array_unique($folderIds)],
+            ]);
+        $count = (int)$query->count();
+        $totalSize = (int)$query->sum('[[size]]');
 
         return $this->asJson([
+            'count' => $count,
             'totalSize' => $totalSize,
         ]);
     }

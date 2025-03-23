@@ -118,34 +118,36 @@ Craft.AssetIndex = Craft.BaseElementIndex.extend(
 
             const moveParams = await mover.getMoveParams(folderIds, assetIds);
             if (!moveParams.proceed) {
+              $draggee.closest('tr,li').removeClass('draggee');
               return;
             }
 
-            mover
-              .moveFolders(folderIds, targetFolderId, this.currentFolderId)
-              .then((totalFoldersMoved) => {
-                mover
-                  .moveAssets(assetIds, targetFolderId, this.currentFolderId)
-                  .then((totalAssetsMoved) => {
-                    const totalItemsMoved =
-                      totalFoldersMoved + totalAssetsMoved;
-                    if (totalItemsMoved) {
-                      mover.successNotice(
-                        moveParams,
-                        Craft.t(
-                          'app',
-                          '{totalItems, plural, =1{Item} other{Items}} moved.',
-                          {
-                            totalItems: totalItemsMoved,
-                          }
-                        )
-                      );
-                      Craft.elementIndex.updateElements(true);
-                    } else {
-                      $draggee.closest('tr,li').removeClass('draggee');
-                    }
-                  });
-              });
+            const totalFoldersMoved = await mover.moveFolders(
+              folderIds,
+              targetFolderId,
+              this.currentFolderId
+            );
+            const totalAssetsMoved = await mover.moveAssets(
+              assetIds,
+              targetFolderId,
+              this.currentFolderId
+            );
+            const totalItemsMoved = totalFoldersMoved + totalAssetsMoved;
+            if (totalItemsMoved) {
+              mover.successNotice(
+                moveParams,
+                Craft.t(
+                  'app',
+                  '{totalItems, plural, =1{Item} other{Items}} moved.',
+                  {
+                    totalItems: totalItemsMoved,
+                  }
+                )
+              );
+              Craft.elementIndex.updateElements(true);
+            } else {
+              $draggee.closest('tr,li').removeClass('draggee');
+            }
           },
         });
 
