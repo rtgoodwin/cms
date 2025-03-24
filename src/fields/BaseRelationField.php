@@ -951,8 +951,10 @@ JS, [
     {
         // Skip if nothing changed, or the element is just propagating and we're not localizing relations
         if (
-            ($element->duplicateOf || $element->isFieldDirty($this->handle) || $this->maintainHierarchy) &&
-            (!$element->propagating || $this->localizeRelations)
+            $isNew || (
+                ($element->duplicateOf || $element->isFieldDirty($this->handle) || $this->maintainHierarchy) &&
+                (!$element->propagating || $this->localizeRelations)
+            )
         ) {
             /** @var ElementQueryInterface|Collection $value */
             $value = $element->getFieldValue($this->handle);
