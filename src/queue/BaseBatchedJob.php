@@ -34,9 +34,9 @@ use craft\i18n\Translation;
 abstract class BaseBatchedJob extends BaseJob
 {
     /**
-     * @var int The number of items that should be processed in a single batch
+     * @var int|null The number of items that should be processed in a single batch
      */
-    public int $batchSize = 100;
+    public ?int $batchSize = 100;
 
     /**
      * @var int The index of the current batch (starting with `0`)
@@ -106,6 +106,10 @@ abstract class BaseBatchedJob extends BaseJob
      */
     final protected function totalBatches(): int
     {
+        if ($this->batchSize === null) {
+            return 1;
+        }
+
         return (int)ceil($this->totalItems() / $this->batchSize);
     }
 
@@ -118,6 +122,7 @@ abstract class BaseBatchedJob extends BaseJob
 
         $memoryLimit = ConfigHelper::sizeInBytes(ini_get('memory_limit'));
         $startMemory = $memoryLimit != -1 ? memory_get_usage() : null;
+        $start = microtime(true);
 
         $i = 0;
 
@@ -132,7 +137,23 @@ abstract class BaseBatchedJob extends BaseJob
             $this->itemOffset++;
             $i++;
 
-            // Make sure we're not getting uncomfortably close to the memory limit, every 10 items
+            // Make sure we're not getting uncomfortably close to the memory limit or TTL, every 10 items
+            if ($i % 10 === 0) {
+                if ($startMemory !== null) {
+                    $memory = memory_get_usage();
+                    $avgMemory = ($memory - $startMemory) / $i;
+                    if ($memory + ($avgMemory * 15) > $memoryLimit) {
+                        break;
+                    }
+                }
+
+                $runningTime = microtime(true) - $start;
+                if ($runningTime + 5 > $this->ttr) {
+                    break;
+                }
+            }
+
+
             if ($startMemory !== null && $i % 10 === 0) {
                 $memory = memory_get_usage();
                 $avgMemory = ($memory - $startMemory) / $i;
@@ -140,6 +161,12 @@ abstract class BaseBatchedJob extends BaseJob
                     break;
                 }
             }
+
+            // Make sure we're not getting uncomfortably close to the memory limit, every 10 items
+            if ($start - microtime(true) > 5) {
+                break;
+            }
+
 
             // Make sure the job is still reserved before continuing
             if ($queue instanceof Queue && !$queue->isReserved($queue->getJobId())) {
