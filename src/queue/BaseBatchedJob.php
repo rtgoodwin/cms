@@ -148,7 +148,7 @@ abstract class BaseBatchedJob extends BaseJob
                 }
 
                 $runningTime = microtime(true) - $start;
-                if ($runningTime + 5 > $this->ttr) {
+                if ($runningTime + 10 > $this->ttr) {
                     break;
                 }
             }
