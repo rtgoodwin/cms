@@ -153,21 +153,6 @@ abstract class BaseBatchedJob extends BaseJob
                 }
             }
 
-
-            if ($startMemory !== null && $i % 10 === 0) {
-                $memory = memory_get_usage();
-                $avgMemory = ($memory - $startMemory) / $i;
-                if ($memory + ($avgMemory * 15) > $memoryLimit) {
-                    break;
-                }
-            }
-
-            // Make sure we're not getting uncomfortably close to the memory limit, every 10 items
-            if ($start - microtime(true) > 5) {
-                break;
-            }
-
-
             // Make sure the job is still reserved before continuing
             if ($queue instanceof Queue && !$queue->isReserved($queue->getJobId())) {
                 return;
