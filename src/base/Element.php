@@ -6160,7 +6160,7 @@ JS, [
     public function afterSave(bool $isNew): void
     {
         // Update the element’s relation data
-        $this->updateRelations();
+        $this->updateRelations($isNew);
 
         // Tell the fields about it
         foreach ($this->fieldLayoutFields() as $field) {
@@ -6175,7 +6175,7 @@ JS, [
         }
     }
 
-    private function updateRelations(): void
+    private function updateRelations(bool $isNew): void
     {
         if (!$this->hasFieldLayout()) {
             return;
@@ -6197,8 +6197,10 @@ JS, [
             foreach ($instances as $field) {
                 // Skip if nothing changed, or the element is just propagating and we're not localizing relations
                 if (
-                    ($this->duplicateOf || $this->isFieldDirty($field->handle) || $field->forceUpdateRelations($this)) &&
-                    (!$this->propagating || $localizeRelations)
+                    $isNew || (
+                        ($this->duplicateOf || $this->isFieldDirty($field->handle) || $field->forceUpdateRelations($this)) &&
+                        (!$this->propagating || $localizeRelations)
+                    )
                 ) {
                     $include = true;
                     break;
