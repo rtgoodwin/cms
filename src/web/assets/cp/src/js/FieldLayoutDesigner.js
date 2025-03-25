@@ -194,6 +194,22 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
         ?.dragSort.on('dragStop', function () {
           cvd.updatePreview();
         });
+
+      // Add skip link
+      const skipLinkAnchor = cvd.$container.attr('id');
+
+      if (skipLinkAnchor) {
+        const $skipLink = $('<a/>', {
+          class: 'skip-link btn',
+          text: Craft.t('app', 'Skip to {name}', {
+            name: Craft.t('app', 'Card View Designer')
+          }),
+          href: `#${skipLinkAnchor}`,
+        });
+
+        cvd.$container.attr('tabindex', '-1');
+        this.$innerContainer.prepend($skipLink);
+      }
     },
 
     initTab: function ($tab) {
