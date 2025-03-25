@@ -33,8 +33,6 @@ use craft\i18n\Translation;
  */
 abstract class BaseBatchedJob extends BaseJob
 {
-    public const TTR_BUFFER_SECONDS = 10;
-
     /**
      * @var int|null The number of items that should be processed in a single batch
      */
@@ -148,9 +146,10 @@ abstract class BaseBatchedJob extends BaseJob
                 }
             }
 
-            // Make sure we're not getting uncomfortably close to the TTL.
+            // Make sure we don't hit the TTL, even if the next item takes twice as long as the average
             $runningTime = microtime(true) - $start;
-            if ($runningTime + static::TTR_BUFFER_SECONDS > $this->ttr) {
+            $avgRunningTime = $runningTime / $i;
+            if ($runningTime + ($avgRunningTime * 2) > $this->ttr) {
                 break;
             }
 
