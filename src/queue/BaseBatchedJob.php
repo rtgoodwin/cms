@@ -33,6 +33,8 @@ use craft\i18n\Translation;
  */
 abstract class BaseBatchedJob extends BaseJob
 {
+    const TTR_BUFFER_SECONDS = 10;
+
     /**
      * @var int|null The number of items that should be processed in a single batch
      */
@@ -137,7 +139,7 @@ abstract class BaseBatchedJob extends BaseJob
             $this->itemOffset++;
             $i++;
 
-            // Make sure we're not getting uncomfortably close to the memory limit or TTL, every 10 items
+            // Make sure we're not getting uncomfortably close to the memory limit, every 10 items
             if ($i % 10 === 0) {
                 if ($startMemory !== null) {
                     $memory = memory_get_usage();
@@ -146,11 +148,12 @@ abstract class BaseBatchedJob extends BaseJob
                         break;
                     }
                 }
+            }
 
-                $runningTime = microtime(true) - $start;
-                if ($runningTime + 10 > $this->ttr) {
-                    break;
-                }
+            // Make sure we're not getting uncomfortably close to the TTL.
+            $runningTime = microtime(true) - $start;
+            if ($runningTime + static::TTR_BUFFER_SECONDS > $this->ttr) {
+                break;
             }
 
             // Make sure the job is still reserved before continuing
