@@ -54,7 +54,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
         if (this.settings.mode === 'cards') {
           const $btnContainer = $('<div/>').appendTo(this.$container);
-          this.$createBtn.addClass('dashed').appendTo($btnContainer);
+          this.$createBtn.addClass('dashed wrap').appendTo($btnContainer);
           this.updateCreateBtn();
         } else {
           this.$createBtn.appendTo(this.elementIndex.$toolbar);
@@ -184,6 +184,12 @@ Craft.NestedElementManager = Garnish.Base.extend(
             },
             canDeleteElements: ($selectedItems) => {
               return this.canDelete($selectedItems.length);
+            },
+            onBeforeMoveElementsToPage: async () => {
+              await this.markAsDirty();
+            },
+            onMoveElementsToPage: async () => {
+              await this.markAsDirty();
             },
             onBeforeDuplicateElements: async () => {
               await this.markAsDirty();
@@ -477,6 +483,9 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
     createElementEditor($element) {
       const slideout = Craft.createElementEditor(this.elementType, $element, {
+        ownerId: this.elementEditor?.getDraftElementId(
+          $element.data('ownerId')
+        ),
         onLoad: () => {
           slideout.elementEditor.on('update', () => {
             Craft.Preview.refresh();

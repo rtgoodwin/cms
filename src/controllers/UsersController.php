@@ -262,9 +262,10 @@ class UsersController extends Controller
                         $authService->setUser(null);
                         throw new InvalidConfigException('User requires two-step verification, but the loginPath config setting is disabled.');
                     }
-                    return $this->redirect(UrlHelper::siteUrl($loginPath, [
+                    return $this->redirect(UrlHelper::siteUrl($loginPath, array_filter([
                         'verify' => 1,
-                    ]));
+                        'returnUrl' => $this->getPostedRedirectUrl($user),
+                    ])));
                 }
 
                 return $this->runAction('auth-form');
@@ -2445,11 +2446,15 @@ JS);
             $view->setTemplateMode($templateMode);
         }
 
-        if ($this->request->getIsCpRequest()) {
-            // explicitly set the default return URL here, since checkPermission('accessCp') will be false
-            $defaultReturnUrl = UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
-        } else {
-            $defaultReturnUrl = UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
+        $returnUrl = $this->request->getQueryParam('returnUrl');
+        if (!$returnUrl) {
+            if ($this->request->getIsCpRequest()) {
+                // explicitly set the default return URL here, since checkPermission('accessCp') will be false
+                $defaultReturnUrl = UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
+            } else {
+                $defaultReturnUrl = UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
+            }
+            $returnUrl = $userSession->getReturnUrl($defaultReturnUrl);
         }
 
         $authFormData = [
@@ -2459,7 +2464,7 @@ JS);
                 'class' => $method::class,
             ], $activeMethods),
             'authForm' => $html,
-            'returnUrl' => $userSession->getReturnUrl($defaultReturnUrl),
+            'returnUrl' => $returnUrl,
         ];
 
         if ($this->request->getAcceptsJson()) {

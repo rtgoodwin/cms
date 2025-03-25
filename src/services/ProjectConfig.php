@@ -41,7 +41,7 @@ use yii\web\ServerErrorHttpException;
 /**
  * Project Config service.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getProjectConfig()|`Craft::$app->projectConfig`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getProjectConfig()|`Craft::$app->getProjectConfig()`]].
  *
  * @property-read bool $isApplyingExternalChanges
  * @property-read bool $isApplyingYamlChanges
