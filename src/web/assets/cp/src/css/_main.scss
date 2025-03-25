@@ -1069,7 +1069,6 @@ button {
     border: 2px solid color.adjust(mixins.$grey800, $alpha: -0.8);
     box-sizing: border-box;
     box-shadow: 0 1px 1px 1px var(--white);
-    color: red;
 
     .cp-icon {
       --icon-size: calc(20rem / 16);
@@ -2246,24 +2245,30 @@ ul.icons {
 }
 
 craft-copy-attribute {
+  display: inline-block;
   @include mixins.fixed-width-font(calc(11rem / 16));
-  border: 1px solid var(--hairline-color);
-  padding-block: 0;
-  padding-inline: 5px;
-  border-radius: var(--button-border-radius);
   color: var(--medium-text-color);
+  height: calc(22rem / 16);
 
   button {
     gap: 5px;
     display: inline-flex;
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--button-border-radius);
+    padding-inline: 5px;
     flex-wrap: nowrap;
     align-items: center;
     cursor: pointer;
+    height: 100%;
 
     &:hover,
     &:focus {
       border-color: var(--medium-hairline-color);
       color: var(--text-color);
+    }
+
+    span[data-icon] {
+      margin-block-start: -3px;
     }
   }
 }
@@ -3233,6 +3238,10 @@ table {
             th,
             td {
               background-color: var(--hover-bg-color);
+
+              .chip:not(.chromeless) {
+                background-color: var(--custom-bg-color, var(--gray-100));
+              }
             }
           }
 
@@ -3261,6 +3270,17 @@ table {
             td {
               color: var(--white);
               background-color: var(--selected-bg-color);
+
+              .chip {
+                color: var(--white);
+
+                &:not(.chromeless) {
+                  background-color: var(
+                    --custom-sel-bg-color,
+                    var(--gray-600)
+                  ) !important;
+                }
+              }
             }
 
             .icon,
@@ -3677,14 +3697,14 @@ table {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  gap: var(--s);
+  gap: var(--xs);
 
   .chip {
     margin: 0 !important;
   }
 }
 
-.elements.inline-chips {
+.elements.inline-chips.chips-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
@@ -4206,6 +4226,11 @@ table {
 
   // table views
   .tableview {
+    th,
+    td {
+      height: 34px;
+    }
+
     th {
       .move,
       .toggle {
@@ -4238,10 +4263,6 @@ table {
       .enabled-label {
         margin-inline-start: var(--xs);
       }
-    }
-
-    .chip {
-      background-color: transparent;
     }
 
     tr.disabled {
@@ -4295,15 +4316,6 @@ table {
 
     .chip-content {
       max-width: 100%;
-    }
-  }
-}
-
-.tableview {
-  .inline-chips {
-    .chip {
-      padding: 0;
-      background-color: transparent;
     }
   }
 }
@@ -6051,11 +6063,11 @@ $min2ColWidth: 400px;
 
             @media screen and (min-width: $min2ColWidth) {
               margin-inline: calc(var(--s) * -1) 0;
-              padding-inline-start: var(--m);
+              padding-inline-start: var(--s);
             }
 
             &:placeholder-shown + div[data-icon] {
-              inset-inline-start: 6px;
+              inset-inline-start: 1px;
             }
           }
         }
@@ -6093,9 +6105,13 @@ $min2ColWidth: 400px;
       & > ul.errors {
         margin: 0;
         padding-block: 0 6px;
-        padding-inline: 0;
+        padding-inline: 10px;
         width: 100%;
         list-style-type: none;
+
+        @media screen and (min-width: $min2ColWidth) {
+          padding-inline: var(--m);
+        }
       }
 
       & > .clear-btn {

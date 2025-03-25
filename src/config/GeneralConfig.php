@@ -566,7 +566,7 @@ class GeneralConfig extends BaseConfig
     /**
      * @var mixed The default length of time Craft will store data, RSS feed, and template caches.
      *
-     * If set to `0`, data and RSS feed caches will be stored indefinitely; template caches will be stored for one year.
+     * If set to `0`, data and RSS feed caches will be stored indefinitely.
      *
      * See [[ConfigHelper::durationInSeconds()]] for a list of supported value types.
      *
@@ -3097,6 +3097,15 @@ class GeneralConfig extends BaseConfig
      * ```
      * :::
      *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
+     *
      * @group System
      */
     public bool $translationDebugOutput = false;
@@ -3885,7 +3894,7 @@ class GeneralConfig extends BaseConfig
     /**
      * The default length of time Craft will store data, RSS feed, and template caches.
      *
-     * If set to `0`, data and RSS feed caches will be stored indefinitely; template caches will be stored for one year.
+     * If set to `0`, data and RSS feed caches will be stored indefinitely.
      *
      * See [[ConfigHelper::durationInSeconds()]] for a list of supported value types.
      *
@@ -6791,6 +6800,15 @@ class GeneralConfig extends BaseConfig
      * ```php
      * ->translationDebugOutput(true)
      * ```
+     *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
      *
      * @group System
      * @param bool $value

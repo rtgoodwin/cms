@@ -1,8 +1,66 @@
 # Release Notes for Craft CMS 5
 
+## 5.6.13 - 2025-03-19
+
+- Fixed a performance degradation bug that occurred when working with Categories or Entries fields with “Maintain hierarchy” enabled. ([#16920](https://github.com/craftcms/cms/issues/16920))
+- Fixed a bug where Categories and Entries fields with “Maintain hierarchy” enabled were getting all relatable entries/categories selected by default. ([#16925](https://github.com/craftcms/cms/issues/16925))
+- Fixed a bug where Plain Text and Table fields were converting posted shortcode-looking strings to emoji. ([#12935](https://github.com/craftcms/cms/issues/12935), [#16917](https://github.com/craftcms/cms/issues/16917))
+- Fixed a bug where relation fields could show relations from another instance of the same field. ([#16912](https://github.com/craftcms/cms/issues/16912))
+- Fixed a bug where tooltips could show and hide repeatedly. ([#16922](https://github.com/craftcms/cms/issues/16922))
+
+## 5.6.12 - 2025-03-18
+
+- Improved table styling. ([#16771](https://github.com/craftcms/cms/issues/16771), [#16829](https://github.com/craftcms/cms/issues/16829))
+- Field layout designers now close the element library HUD automatically after creating a new field. ([#16521](https://github.com/craftcms/cms/discussions/16521))
+- Fixed a bug where relational fields with “Maintain hierarchy” enabled weren’t displaying the correct relations after an element was moved within its structure. ([#16843](https://github.com/craftcms/cms/issues/16843))
+- Fixed a bug where letterbox transforms were getting transparent fills if the source image was grayscale. ([#16857](https://github.com/craftcms/cms/issues/16857))
+- Fixed a bug where elements could be missing data for attributes that shared a name with an eager-loadable attribute from another element type. ([#16862](https://github.com/craftcms/cms/issues/16862))
+- Fixed a bug where Selectize inputs would re-expand themselves after a selection was made. ([#16865](https://github.com/craftcms/cms/pull/16865))
+- Fixed a bug where entry revisions’ `revisionNotes` GraphQL fields were returning the entry’s current revision’s notes. ([#16909](https://github.com/craftcms/cms/issues/16909))
+- Fixed a bug where `craft\base\NestedElementTrait::setPrimaryOwnerId()` and `setOwnerId()` weren’t clearing out the memoized owner element.
+- Fixed an error that could occur when duplicating a nested element, and assigning an owner of a different element type.
+- Fixed an error that could occur during passkey setup in Firefox. ([#16847](https://github.com/craftcms/cms/pull/16847))
+- Fixed a bug where the “Move to page…” element index action wasn’t ensuring the owner element was a draft first. ([#16894](https://github.com/craftcms/cms/pull/16894))
+- Fixed a bug where HUDs attached to slideouts could be positioned incorrectly after a nested slideout was closed. ([#16856](https://github.com/craftcms/cms/issues/16856))
+- Fixed a bug where tooltips weren’t always being shown when truncated links were focused. ([#16881](https://github.com/craftcms/cms/pull/16881))
+- Fixed a bug where tooltips weren’t closing when <kbd>Esc</kbd> was pressed. ([#16881](https://github.com/craftcms/cms/pull/16881))
+- Fixed a bug where tooltips weren’t closing if the target element was focused and blurred in rapid succession.
+- Fixed a bug where the “Copy value from site…” field action couldn’t be activated via the keyboard. ([#16868](https://github.com/craftcms/cms/pull/16868))
+- Fixed a bug where accessible names were not available for global sidebar links when the sidebar was collapsed. ([#16879](https://github.com/craftcms/cms/pull/16879))
+- Fixed a bug where some buttons with customizable labels weren’t wrapping. ([#16871](https://github.com/craftcms/cms/issues/16871))
+- Fixed a SQL error that could occur when setting a section’s “Max Authors” setting to a very large number. ([#16874](https://github.com/craftcms/cms/issues/16874))
+- Fixed a bug where nested elements that were created via “Applying new propagation method to elements” queue jobs weren’t retaining the original element’s sort position. ([#16872](https://github.com/craftcms/cms/issues/16872))
+- Fixed a bug where field handle button labels could get “Copy to clipboard” text appended to them. ([#16896](https://github.com/craftcms/cms/pull/16896))
+- Fixed a bug where front-end verification forms weren’t respecting `redirect` params passed by login forms. ([#16905](https://github.com/craftcms/cms/issues/16905))
+- Fixed an error that could occur when saving a nested element. ([#16778](https://github.com/craftcms/cms/issues/16778))
+- Fixed styling issues. ([#16830](https://github.com/craftcms/cms/issues/16830), [#16903](https://github.com/craftcms/cms/pull/16903))
+
+## 5.6.11 - 2025-03-04
+
+- Added `craft\base\conditions\BaseTextConditionRule::isEmpty()`.
+- Added `craft\htmlpurifier\RelAttrLinkTypeDef`.
+- The default HTML Purifier config now allows `rel` attributes to be set to any value. ([#16798](https://github.com/craftcms/cms/pull/16798))
+- Tightened up relation preview styling in element indexes and cards. ([#16771](https://github.com/craftcms/cms/issues/16771))
+- Fixed an error that could occur when generating an image transform URL via a console request. ([#16793](https://github.com/craftcms/cms/issues/16793))
+- Fixed a bug where `_includes/forms/button.twig` was always adding `class="btngroup-btn-first"` to the resulting button HTML.
+- Fixed a bug where Assets fields with `{slug}` in the subpath could create folders named after temporary slugs. ([#16799](https://github.com/craftcms/cms/issues/16799))
+- Fixed a bug where date and time inputs without values were showing clear buttons. ([#16804](https://github.com/craftcms/cms/issues/16804))
+- Fixed an error that could occur when executing “Updating element slugs and URIs” queue jobs. ([#16787](https://github.com/craftcms/cms/issues/16787))
+- Fixed a bug where automatic slug generation wasn’t working after changing entry types. ([#16816](https://github.com/craftcms/cms/pull/16816))
+- Fixed a bug where “Slug” condition rules weren’t considering temporary slugs to be empty. ([#16817](https://github.com/craftcms/cms/pull/16817))
+- Fixed a bug where lazy eager-loading was invoked even if the source element was queried alone.
+- Fixed a bug where element selection condition rules weren’t remembering their element ID value if they were created before Craft 5.6.
+- Fixed an error that could occur when saving a Commerce variant. ([#16789](https://github.com/craftcms/cms/pull/16789))
+- Fixed a bug where two entries could be created simultaneously when creating a new entry via the “New entry” menu on the Entries index page. ([#16487](https://github.com/craftcms/cms/issues/16487))
+- Fixed an error that could occur if a field was removed from a field layout, if another field had been conditional based on it. ([#16801](https://github.com/craftcms/cms/issues/16801))
+- Fixed an error that occurred when attempting to save a nested entry via a slideout, which had been duplicated from another entry and wasn’t yet fully saved. ([#16807](https://github.com/craftcms/cms/issues/16807))
+- Fixed a bug where field values could be lost after switching entry types. ([#16797](https://github.com/craftcms/cms/issues/16797))
+- Fixed a bug where focus wasn’t returned to the action menu trigger after closing a field layout element’s settings slideout. ([#16824](https://github.com/craftcms/cms/pull/16824))
+- Fixed styling issues. ([#16791](https://github.com/craftcms/cms/issues/16791), [#16823](https://github.com/craftcms/cms/issues/16823))
+
 ## 5.6.10.2 - 2025-02-26
 
-- The Fields/UI Elements toggle and “Ne field” button are now always visible within field layout designers’ library HUDs.
+- The Fields/UI Elements toggle and “New field” button are now always visible within field layout designers’ library HUDs.
 - (Really) fixed a bug where field layout designers’ library HUDs weren’t scrollable. ([#16775](https://github.com/craftcms/cms/issues/16775))
 - Fixed a styling issue. ([#16777](https://github.com/craftcms/cms/issues/16777))
 
