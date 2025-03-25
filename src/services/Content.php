@@ -93,7 +93,7 @@ class Content extends Component
                     (!$element->contentId || $element->isFieldDirty($field->handle)) &&
                     $field::hasContentColumn()
                 ) {
-                    $serializedFieldValues[$field->uid] = $field->serializeValue($element->getFieldValue($field->handle), $element);
+                    $serializedFieldValues[$field->uid] = $field->serializeValueForDb($element->getFieldValue($field->handle), $element);
                     $fields[$field->uid] = $field;
                 }
             }
