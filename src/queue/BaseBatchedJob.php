@@ -33,7 +33,7 @@ use craft\i18n\Translation;
  */
 abstract class BaseBatchedJob extends BaseJob
 {
-    const TTR_BUFFER_SECONDS = 10;
+    public const TTR_BUFFER_SECONDS = 10;
 
     /**
      * @var int|null The number of items that should be processed in a single batch
