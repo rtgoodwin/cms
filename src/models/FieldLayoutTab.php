@@ -54,7 +54,10 @@ class FieldLayoutTab extends FieldLayoutComponent
     public function labelHtml(): string
     {
         return
-            Html::tag('span', Html::encode($this->name)) .
+            Html::tag('span', Html::encode($this->name), [
+                'role' => 'heading',
+                'aria-level' => '3',
+            ]) .
             ($this->hasConditions() ? Html::tag('div', Cp::iconSvg('diamond'), [
                 'class' => array_filter(array_merge(['cp-icon', 'puny', 'orange'])),
                 'title' => Craft::t('app', 'This tab is conditional'),

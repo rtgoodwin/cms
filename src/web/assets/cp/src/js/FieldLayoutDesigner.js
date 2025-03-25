@@ -229,7 +229,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
 <div class="fld-tab">
   <div class="tabs">
     <div class="tab sel draggable">
-      <span>${name}</span>
+      <span role="heading" aria-level="3">${name}</span>
     </div>
   </div>
   <div class="fld-tabcontent">
