@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
+- Fixed a bug where Assets fields set to restrict assets to a single location were relocating assets on element propagation. ([#12767](https://github.com/craftcms/cms/issues/12767), [#16936](https://github.com/craftcms/cms/issues/16936))
+- Fixed a bug where relations weren’t getting saved for new elements, if the element was created with `Craft::createObject()` with its relation field data included in the passed-in config. ([#16942](https://github.com/craftcms/cms/pull/16942))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
 
 ## 5.6.13 - 2025-03-19
