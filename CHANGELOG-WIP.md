@@ -57,6 +57,7 @@
 - Added the `download` and `filename` nested fields to Link fields’ GraphQL data. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added `element`, `asset`, `entry`, etc., nested fields to Link fields’ GraphQL data. ([#16698](https://github.com/craftcms/cms/pull/16698))
 - Added the `withProvisionalDrafts` GraphQL element query argument. ([#16720](https://github.com/craftcms/cms/pull/16720))
+- Added the `revisionNotes` GraphQL entry mutation argument. ([#16943](https://github.com/craftcms/cms/issues/16943))
 - It’s now possible to reference custom field handles in advanced element query `orderBy` expressions. ([#16729](https://github.com/craftcms/cms/pull/16729))
 
 ### Extensibility
