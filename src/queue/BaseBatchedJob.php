@@ -139,14 +139,12 @@ abstract class BaseBatchedJob extends BaseJob
             $this->itemOffset++;
             $i++;
 
-            // Make sure we're not getting uncomfortably close to the memory limit, every 10 items
-            if ($i % 10 === 0) {
-                if ($startMemory !== null) {
-                    $memory = memory_get_usage();
-                    $avgMemory = ($memory - $startMemory) / $i;
-                    if ($memory + ($avgMemory * 15) > $memoryLimit) {
-                        break;
-                    }
+            // Make sure we're not getting uncomfortably close to the memory limit
+            if ($startMemory !== null) {
+                $memory = memory_get_usage();
+                $avgMemory = ($memory - $startMemory) / $i;
+                if ($memory + ($avgMemory * 15) > $memoryLimit) {
+                    break;
                 }
             }
 
