@@ -41,3 +41,4 @@
 - User caches are no longer invalidated on login attempts or when user management actions are taken. ([#16937](https://github.com/craftcms/cms/pull/16937))
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
+- Updated Axios to 1.8.4.
