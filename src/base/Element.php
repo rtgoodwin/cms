@@ -1289,8 +1289,8 @@ abstract class Element extends Component implements ElementInterface
             }
         }
 
-        // Only cache if there's no search term
-        if (!$elementQuery->search) {
+        // Only cache if there's no search term or relation param
+        if (!$elementQuery->search && !$elementQuery->relatedTo) {
             $elementQuery->cache();
         }
 
