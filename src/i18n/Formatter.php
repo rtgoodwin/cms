@@ -11,9 +11,12 @@ use Craft;
 use craft\helpers\DateTimeHelper;
 use DateTime;
 use DateTimeZone;
+use IntlTimeZone;
 use NumberFormatter;
+use Yii;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
+use yii\helpers\FormatConverter;
 
 /**
  * @inheritdoc
@@ -80,11 +83,68 @@ class Formatter extends \yii\i18n\Formatter
             $format = $this->dateTimeFormats[$format]['date'];
         }
 
+        // https://github.com/craftcms/cms/issues/16953
+        $dateFormattedWithoutIntl = $this->formatDateWithoutIntl($value, $format);
+        if ($dateFormattedWithoutIntl !== null) {
+            return $dateFormattedWithoutIntl;
+        }
+
+
         if (strncmp($format, 'php:', 4) === 0) {
             return $this->_formatDateTimeValueWithPhpFormat($value, substr($format, 4), 'date');
         }
 
         return parent::asDate($value, $format);
+    }
+
+    /**
+     * Checks if the date should be formatted without the help of intl.
+     * This is needed for some "old" dates, like dates from 19th century from Europe/Amsterdam timezone
+     *
+     * @param int|string|DateTime $value
+     * @param string|null $format
+     * @return string|null
+     * @throws \Exception
+     */
+    protected function formatDateWithoutIntl(int|string|DateTime $value, ?string $format): ?string
+    {
+        // see https://github.com/craftcms/cms/issues/16953 for more details on why this method was added
+
+        if (!($value instanceof DateTime)) {
+            return null;
+        }
+
+        $intlLoaded = extension_loaded('intl');
+        if (!$intlLoaded) {
+            return null;
+        }
+
+        $intlTimeZone = IntlTimeZone::fromDateTimeZone($value->getTimezone());
+        $intlTimeZone->getOffset($value->getTimestamp(), true, $o1, $o2);
+        $intlTimeZone->getOffset($value->getTimestamp(), false, $o3, $o4);
+
+        // get PHP DateTime offset for this date
+        $phpOffset = $value->getTimezone()->getOffset($value);
+        // get DST offset that intl time zone would use (divided by 1000, cause different units)
+        $dstIntlOffset = ($intlTimeZone->getRawOffset() + $intlTimeZone->getDSTSavings()) / 1000;
+        // get raw offset that intl time zone would use (divided by 1000, cause different units)
+        $rawIntlOffset = $intlTimeZone->getRawOffset() / 1000;
+
+        // compare the php and intl offsets
+        // if either are the same, we're good to proceed with the intl approach, as we used to;
+        // but if they're both different, we should use PHP to format the date
+        if ($phpOffset === $dstIntlOffset || $phpOffset === $rawIntlOffset) {
+            return null;
+        }
+
+        // copied from yii\i18n\Formatter::formatDateTimeValue()
+        if (strncmp($format, 'php:', 4) === 0) {
+            $format = substr($format, 4);
+        } else {
+            $format = FormatConverter::convertDateIcuToPhp($format, 'date', Yii::$app->language);
+        }
+
+        return $value->format($format);
     }
 
     /**
