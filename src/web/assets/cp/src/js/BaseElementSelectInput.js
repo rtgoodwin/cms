@@ -520,10 +520,11 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
           storageKey: this.modalStorageKey,
           sources: this.settings.sources,
           condition: this.settings.condition,
-          referenceElementId:
-            this.elementEditor?.duplicatedElements[
-              this.settings.referenceElementId
-            ] || this.settings.referenceElementId,
+          referenceElementId: this.settings.referenceElementId
+            ? this.elementEditor?.duplicatedElements[
+                this.settings.referenceElementId
+              ] || this.settings.referenceElementId
+            : null,
           referenceElementOwnerId,
           referenceElementSiteId: this.settings.referenceElementSiteId,
           criteria: Object.assign({}, this.settings.criteria),
