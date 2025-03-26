@@ -245,7 +245,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
 <div class="fld-tab">
   <div class="tabs">
     <div class="tab sel draggable">
-      <span role="heading" aria-level="3">${name}</span>
+      <h3 class="fld-tab__name">${name}</h3>
     </div>
   </div>
   <div class="fld-tabcontent">
@@ -483,7 +483,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
       this.uid = Craft.uuid();
       this.config = {
         uid: this.uid,
-        name: this.$container.find('.tabs .tab span').text(),
+        name: this.$container.find('.tabs .tab .fld-tab__name').text(),
         elements: [],
       };
     }
@@ -739,7 +739,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
 
     // Is the name changing?
     if (config.name && config.name !== this.config.name) {
-      this.$container.find('.tabs .tab span').text(config.name);
+      this.$container.find('.tabs .tab .fld-tab__name').text(config.name);
     }
 
     const designerConfig = this.designer.config;
