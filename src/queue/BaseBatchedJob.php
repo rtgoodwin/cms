@@ -106,11 +106,12 @@ abstract class BaseBatchedJob extends BaseJob
      */
     final protected function totalBatches(): int
     {
-        if ($this->batchSize === null) {
-            return 1;
-        }
+        return (int)ceil($this->totalItems() / $this->batchSize());
+    }
 
-        return (int)ceil($this->totalItems() / $this->batchSize);
+    final protected function batchSize(): int
+    {
+        return $this->batchSize ?? 1;
     }
 
     /**
@@ -118,7 +119,7 @@ abstract class BaseBatchedJob extends BaseJob
      */
     public function execute($queue): void
     {
-        $items = $this->data()->getSlice($this->itemOffset, $this->batchSize);
+        $items = $this->data()->getSlice($this->itemOffset, $this->batchSize());
 
         $memoryLimit = ConfigHelper::sizeInBytes(ini_get('memory_limit'));
         $startMemory = $memoryLimit != -1 ? memory_get_usage() : null;
