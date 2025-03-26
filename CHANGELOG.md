@@ -5,6 +5,7 @@
 - Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
 - Fixed a bug where Assets fields set to restrict assets to a single location were relocating assets on element propagation. ([#12767](https://github.com/craftcms/cms/issues/12767), [#16936](https://github.com/craftcms/cms/issues/16936))
 - Fixed a bug where relations weren’t getting saved for new elements, if the element was created with `Craft::createObject()` with its relation field data included in the passed-in config. ([#16942](https://github.com/craftcms/cms/pull/16942))
+- Fixed a bug where relational fields with a “Related To” rule on their selectable elements condition weren’t making all expected elements selectable. ([#16945](https://github.com/craftcms/cms/issues/16945))
 - Added “Aberdeen City” and “Aberdeenshire” to GB subdivisions. ([#16951](https://github.com/craftcms/commerce/cms/16951))
 
 ## 4.14.11.1 - 2025-03-19
