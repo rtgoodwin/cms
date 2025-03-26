@@ -55,6 +55,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     assetId: null,
     cacheBust: null,
     draggingCropper: false,
+    movingCropper: false,
     scalingCropper: false,
     handleClicked: false,
     draggingFocal: false,
@@ -342,6 +343,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           'mouseout,touchcancel',
           this._handleMouseOut
         );
+
+        // Add keyboard event listeners
+        this.addListener(
+          this.$croppingCanvas,
+          'keydown',
+          this._handleKeyDown
+        )
 
         this._hideSpinner();
 
@@ -2413,6 +2421,38 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
     },
 
+    _toggleFocalModeStyles: function () {
+      let indicatorStrokeWidth;
+      let indicatorFill;
+
+      if (this.focalPickedUp) {
+        indicatorStrokeWidth = 2;
+        indicatorFill = 'rgba(0,0,0,0.5)';
+        $('.body').css('cursor', 'grabbing');
+      } else {
+        indicatorStrokeWidth = 0;
+        indicatorFill = 'rgba(0,0,0,0)';
+        $('.body').css('cursor', 'pointer');
+      }
+
+      this.focalPointPickedIndicator.set({
+        strokeWidth: indicatorStrokeWidth,
+        fill: indicatorFill,
+      });
+
+      this.canvas.renderAll();
+    },
+
+    _handleKeyDown: function (ev) {
+      const {target} = ev;
+
+      const cropper = this.croppingCanvas && target.closest('#cropping-canvas');
+
+      if (cropper) {
+        console.log('move cropper');
+      }
+    },
+
     /**
      * Handle the mouse being clicked.
      *
@@ -2436,28 +2476,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.cropperClicked = true;
         }
       }
-    },
-
-    _toggleFocalModeStyles: function () {
-      let indicatorStrokeWidth;
-      let indicatorFill;
-
-      if (this.focalPickedUp) {
-        indicatorStrokeWidth = 2;
-        indicatorFill = 'rgba(0,0,0,0.5)';
-        $('.body').css('cursor', 'grabbing');
-      } else {
-        indicatorStrokeWidth = 0;
-        indicatorFill = 'rgba(0,0,0,0)';
-        $('.body').css('cursor', 'pointer');
-      }
-
-      this.focalPointPickedIndicator.set({
-        strokeWidth: indicatorStrokeWidth,
-        fill: indicatorFill,
-      });
-
-      this.canvas.renderAll();
     },
 
     /**
