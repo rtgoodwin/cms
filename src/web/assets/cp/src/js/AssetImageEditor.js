@@ -2126,6 +2126,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         left: 0,
       });
 
+      $('#cropping-canvas', this.$editorContainer).attr('tabindex', 0);
+
       this.croppingShade = new fabric.Rect({
         left: this.editorWidth / 2,
         top: this.editorHeight / 2,
