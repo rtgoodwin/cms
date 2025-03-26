@@ -198,16 +198,13 @@ trait NestedElementTrait
             /** @phpstan-ignore-next-line */
             if (!isset($this->_primaryOwner) || $this->_primaryOwner === false) {
                 // Either we didn't try, or the primary owner couldn't be eager-loaded for some reason
+                // if the $this->primaryOwnerId got nullified during the eager loading process, set it back to what it should be
+                if ($this->primaryOwnerId === null) {
+                    $this->primaryOwnerId = $primaryOwnerId;
+                }
                 $ownerType = $this->ownerType();
                 if (!$ownerType) {
-                    // try again, using the $primaryOwnerId,
-                    // ownerType() was not able to get it this way cause $this->primaryOwnerId got nullified during the eager loading process
-                    $ownerType = Craft::$app->getElements()->getElementTypeById($primaryOwnerId);
-                    if (!$ownerType) {
-                        return null;
-                    }
-                    // if we were able to find the owner type, set the primaryOwnerId back to what it was
-                    $this->primaryOwnerId = $primaryOwnerId;
+                    return null;
                 }
 
                 $query = $ownerType::find()->id($primaryOwnerId);
