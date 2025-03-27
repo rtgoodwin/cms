@@ -3483,8 +3483,8 @@ class Elements extends Component
             $maps = $this->groupMapsByElementType($map['map']);
             if (isset($map['criteria']) || isset($map['createElement'])) {
                 foreach ($maps as &$m) {
-                    $m['criteria'] = $map['criteria'] ?? [];
-                    $m['createElement'] = $map['createElement'] ?? null;
+                    $m['criteria'] ??= $map['criteria'] ?? [];
+                    $m['createElement'] ??= $map['createElement'] ?? null;
                 }
             }
             return $maps;
