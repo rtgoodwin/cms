@@ -8025,6 +8025,22 @@ fieldset {
   }
 }
 
+// Special adjustments for markdown within UI Elements.
+[data-layout-element] .markdown {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-block-end: 0.3em;
+  }
+
+  p {
+    margin-block: 0.25em;
+  }
+}
+
 .cross-site-copy-modal {
   max-width: 380px;
 }
