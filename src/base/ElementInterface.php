@@ -30,6 +30,7 @@ use yii\web\Response;
  * @mixin CustomFieldBehavior
  * @mixin Component
  * @phpstan-require-extends Element
+ * @phpstan-type EagerLoadingMap array{elementType?:class-string<ElementInterface>,map:array{elementType?:class-string<ElementInterface>,source:int,target:int}[],criteria?:array,createElement?:callable}
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -618,8 +619,8 @@ interface ElementInterface extends
      *
      * @param self[] $sourceElements An array of the source elements
      * @param string $handle The property handle used to identify which target elements should be included in the map
-     * @return array|null|false The eager-loading element ID mappings, false if no mappings exist, or null if the result
-     * should be ignored
+     * @return EagerLoadingMap|EagerLoadingMap[]|null|false The eager-loading element ID mappings, false if no mappings
+     * exist, or null if the result should be ignored
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false;
 

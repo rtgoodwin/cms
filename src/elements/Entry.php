@@ -740,6 +740,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     }
                 }
 
+                /** @phpstan-ignore-next-line */
                 return [
                     'elementType' => User::class,
                     'map' => $map,
