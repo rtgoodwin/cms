@@ -8,6 +8,7 @@
 - Fixed a bug where relational fields with a “Related To” rule on their selectable elements condition weren’t making all expected elements selectable. ([#16945](https://github.com/craftcms/cms/issues/16945))
 - Fixed a bug where some subdivisions weren’t available when creating addresses. ([#16951](https://github.com/craftcms/cms/issues/16951))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
+- Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
 
 ## 5.6.13 - 2025-03-19
 
