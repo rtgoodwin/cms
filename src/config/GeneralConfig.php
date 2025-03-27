@@ -2528,7 +2528,7 @@ class GeneralConfig extends BaseConfig
     public string $resourceBasePath = '@webroot/cpresources';
 
     /**
-     * @var string The URL to the root directory that should store published control panel resources.
+     * @var string The URL to the root directory where control panel resources are published.
      *
      * ::: code
      * ```php Static Config
@@ -6155,7 +6155,7 @@ class GeneralConfig extends BaseConfig
     }
 
     /**
-     * The URL to the root directory that should store published control panel resources.
+     * The URL to the root directory where control panel resources are published.
      *
      * ```php
      * ->resourceBaseUrl('@web/craft-resources')
