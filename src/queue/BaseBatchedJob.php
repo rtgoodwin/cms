@@ -34,9 +34,9 @@ use craft\i18n\Translation;
 abstract class BaseBatchedJob extends BaseJob
 {
     /**
-     * @var int|null The number of items that should be processed in a single batch
+     * @var int The number of items that should be processed in a single batch
      */
-    public ?int $batchSize = 100;
+    public int $batchSize = 100;
 
     /**
      * @var int The index of the current batch (starting with `0`)
@@ -106,12 +106,7 @@ abstract class BaseBatchedJob extends BaseJob
      */
     final protected function totalBatches(): int
     {
-        return (int)ceil($this->totalItems() / $this->batchSize());
-    }
-
-    final protected function batchSize(): int
-    {
-        return $this->batchSize ?? 1;
+        return (int)ceil($this->totalItems() / $this->batchSize);
     }
 
     /**
@@ -119,7 +114,7 @@ abstract class BaseBatchedJob extends BaseJob
      */
     public function execute($queue): void
     {
-        $items = $this->data()->getSlice($this->itemOffset, $this->batchSize());
+        $items = $this->data()->getSlice($this->itemOffset, $this->batchSize);
 
         $memoryLimit = ConfigHelper::sizeInBytes(ini_get('memory_limit'));
         $startMemory = $memoryLimit != -1 ? memory_get_usage() : null;
