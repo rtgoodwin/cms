@@ -201,9 +201,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       if (skipLinkAnchor) {
         const $skipLink = $('<a/>', {
           class: 'skip-link btn',
-          text: Craft.t('app', 'Skip to {name}', {
-            name: Craft.t('app', 'Card View Designer'),
-          }),
+          text: Craft.t('app', 'Skip to card view designer'),
           href: `#${skipLinkAnchor}`,
         });
 
