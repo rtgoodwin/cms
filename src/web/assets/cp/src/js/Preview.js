@@ -131,9 +131,7 @@ Craft.Preview = Garnish.Base.extend(
       $(document.activeElement).trigger('blur');
 
       if (!this.$editor) {
-        const previewSkipLinkText = Craft.t('app', 'Skip to {title}', {
-          title: Craft.t('app', 'Top of preview'),
-        });
+        const previewSkipLinkText = Craft.t('app', 'Skip to top of preview');
 
         this.$shade = $('<div/>', {class: 'modal-shade dark'}).appendTo(
           Garnish.$bod
