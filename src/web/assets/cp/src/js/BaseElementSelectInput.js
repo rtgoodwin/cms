@@ -506,13 +506,26 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     },
 
     getModalSettings: function () {
+      let referenceElementOwnerId = this.settings.referenceElementOwnerId;
+      if (
+        referenceElementOwnerId &&
+        referenceElementOwnerId == this.elementEditor?.settings.canonicalId
+      ) {
+        referenceElementOwnerId = this.elementEditor.settings.elementId;
+      }
+
       const settings = $.extend(
         {
           closeOtherModals: false,
           storageKey: this.modalStorageKey,
           sources: this.settings.sources,
           condition: this.settings.condition,
-          referenceElementId: this.settings.referenceElementId,
+          referenceElementId: this.settings.referenceElementId
+            ? this.elementEditor?.duplicatedElements[
+                this.settings.referenceElementId
+              ] || this.settings.referenceElementId
+            : null,
+          referenceElementOwnerId,
           referenceElementSiteId: this.settings.referenceElementSiteId,
           criteria: Object.assign({}, this.settings.criteria),
           multiSelect: this.settings.limit != 1,
@@ -819,6 +832,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       sources: null,
       condition: null,
       referenceElementId: null,
+      referenceElementOwnerId: null,
       referenceElementSiteId: null,
       criteria: {},
       allowSelfRelations: false,
