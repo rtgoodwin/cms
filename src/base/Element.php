@@ -1318,8 +1318,8 @@ abstract class Element extends Component implements ElementInterface
             }
         }
 
-        // Only cache if there's no search term
-        if ($elementQuery instanceof ElementQuery && !$elementQuery->search) {
+        // Only cache if there's no search term or relation param
+        if ($elementQuery instanceof ElementQuery && !$elementQuery->search && !$elementQuery->relatedTo) {
             $elementQuery->cache(dependency: new ElementQueryTagDependency($elementQuery, [
                 'tags' => [
                     'element-index-query',
