@@ -729,7 +729,16 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
           storageKey: this.modalStorageKey,
           sources: this.settings.sources,
           condition: this.settings.condition,
-          referenceElementId: this.settings.referenceElementId,
+          referenceElementId: this.settings.referenceElementId
+            ? this.elementEditor?.getDraftElementId(
+                this.settings.referenceElementId
+              ) || this.settings.referenceElementId
+            : null,
+          referenceElementOwnerId: this.settings.referenceElementOwnerId
+            ? this.elementEditor?.getDraftElementId(
+                this.settings.referenceElementOwnerId
+              ) || this.settings.referenceElementOwnerId
+            : null,
           referenceElementSiteId: this.settings.referenceElementSiteId,
           criteria: Object.assign({}, this.settings.criteria),
           multiSelect: this.settings.limit != 1,
@@ -1102,6 +1111,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       sources: null,
       condition: null,
       referenceElementId: null,
+      referenceElementOwnerId: null,
       referenceElementSiteId: null,
       criteria: {},
       allowAdd: true,
