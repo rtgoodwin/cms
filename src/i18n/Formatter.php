@@ -11,6 +11,7 @@ use Craft;
 use craft\helpers\DateTimeHelper;
 use DateTime;
 use DateTimeZone;
+use Exception;
 use IntlTimeZone;
 use NumberFormatter;
 use Yii;
@@ -89,7 +90,6 @@ class Formatter extends \yii\i18n\Formatter
             return $dateFormattedWithoutIntl;
         }
 
-
         if (strncmp($format, 'php:', 4) === 0) {
             return $this->_formatDateTimeValueWithPhpFormat($value, substr($format, 4), 'date');
         }
@@ -104,18 +104,13 @@ class Formatter extends \yii\i18n\Formatter
      * @param int|string|DateTime $value
      * @param string|null $format
      * @return string|null
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function formatDateWithoutIntl(int|string|DateTime $value, ?string $format): ?string
+    private function formatDateWithoutIntl(int|string|DateTime $value, ?string $format): ?string
     {
         // see https://github.com/craftcms/cms/issues/16953 for more details on why this method was added
 
-        if (!($value instanceof DateTime)) {
-            return null;
-        }
-
-        $intlLoaded = extension_loaded('intl');
-        if (!$intlLoaded) {
+        if (!$value instanceof DateTime || !extension_loaded('intl')) {
             return null;
         }
 
@@ -125,9 +120,9 @@ class Formatter extends \yii\i18n\Formatter
 
         // get PHP DateTime offset for this date
         $phpOffset = $value->getTimezone()->getOffset($value);
-        // get DST offset that intl time zone would use (divided by 1000, cause different units)
+        // get DST offset that intl time zone would use (divided by 1000, b/c different units)
         $dstIntlOffset = ($intlTimeZone->getRawOffset() + $intlTimeZone->getDSTSavings()) / 1000;
-        // get raw offset that intl time zone would use (divided by 1000, cause different units)
+        // get raw offset that intl time zone would use (divided by 1000, b/c different units)
         $rawIntlOffset = $intlTimeZone->getRawOffset() / 1000;
 
         // compare the php and intl offsets
