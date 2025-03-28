@@ -13,6 +13,7 @@
 - When switching field types, any field settings which are defined by the same base class are now preserved. ([#16783](https://github.com/craftcms/cms/pull/16783))
 
 ### Development
+- Added the `searchTermOptions` GraphQL query argument. ([#16979](https://github.com/craftcms/cms/pull/16979))
 - Added the `revisionNotes` GraphQL entry mutation argument. ([#16943](https://github.com/craftcms/cms/issues/16943)) 
 
 ### Extensibility
