@@ -357,6 +357,7 @@ JS;
             'Showing {total, number} {total, plural, =1{{item}} other{{items}}}',
             'Sign out now',
             'Sites',
+            'Skip to card view designer',
             'Skip to {title}',
             'Sort ascending',
             'Sort attribute',

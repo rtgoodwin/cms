@@ -1547,6 +1547,7 @@ return [
     'Site' => 'Site',
     'Sites' => 'Sites',
     'Size' => 'Size',
+    'Skip to card view designer' => 'Skip to card view designer',
     'Skip to content' => 'Skip to content',
     'Skip to left sidebar' => 'Skip to left sidebar',
     'Skip to main section' => 'Skip to main section',
