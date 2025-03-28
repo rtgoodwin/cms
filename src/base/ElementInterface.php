@@ -30,6 +30,7 @@ use yii\web\Response;
  * @mixin CustomFieldBehavior
  * @mixin Component
  * @phpstan-require-extends Element
+ * @phpstan-type EagerLoadingMap array{elementType?:class-string<ElementInterface>,map:array{elementType?:class-string<ElementInterface>,source:int,target:int}[],criteria?:array,createElement?:callable}
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -574,12 +575,19 @@ interface ElementInterface extends
      *
      * This method aids in the eager-loading of elements when performing an element query. The returned array should
      * contain the following keys:
-     * - `elementType` – the fully qualified class name of the element type that should be eager-loaded
-     * - `map` – an array of element ID mappings, where each element is a sub-array with `source` and `target` keys
+     * - `map` – an array defining source-target element mappings
+     * - `elementType` *(optional)* – the fully qualified class name of the element type that should be eager-loaded,
+     *   if each target element is of the same element type
      * - `criteria` *(optional)* – any criteria parameters that should be applied to the element query when fetching the
      *   eager-loaded elements
      * - `createElement` *(optional)* - an element factory function, which will be passed the element query, the current
      *   query result data, and the first source element that the result was eager-loaded for
+     *
+     * Each mapping listed in `map` should be an array with the following keys:
+     * - `source` – the source element ID
+     * - `target` – the target element ID
+     * - `elementType` *(optional)* – the target element type (only checked for if the top-level array doesn’t specify
+     *   an `elementType` key)
      *
      * ```php
      * use craft\base\ElementInterface;
@@ -616,10 +624,13 @@ interface ElementInterface extends
      * }
      * ```
      *
+     * Alternatively, the method can return an array of multiple sets of mappings, each with their own nested `map`,
+     * `elementType`, `criteria`, and `createElement` keys.
+     *
      * @param self[] $sourceElements An array of the source elements
      * @param string $handle The property handle used to identify which target elements should be included in the map
-     * @return array|null|false The eager-loading element ID mappings, false if no mappings exist, or null if the result
-     * should be ignored
+     * @return EagerLoadingMap|EagerLoadingMap[]|null|false The eager-loading element ID mappings, false if no mappings
+     * exist, or null if the result should be ignored
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false;
 
