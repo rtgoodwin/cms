@@ -8025,8 +8025,8 @@ fieldset {
   }
 }
 
-// Special adjustments for markdown within UI Elements.
-[data-layout-element] .markdown {
+// Special adjustments for content formatted via Markdown
+.markdown {
   h1,
   h2,
   h3,
