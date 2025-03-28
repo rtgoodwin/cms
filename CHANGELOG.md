@@ -8,6 +8,7 @@
 - Fixed a bug where relational fields with a “Related To” rule on their selectable elements condition weren’t making all expected elements selectable. ([#16945](https://github.com/craftcms/cms/issues/16945))
 - Fixed a bug where some subdivisions weren’t available when creating addresses. ([#16951](https://github.com/craftcms/cms/issues/16951))
 - Fixed a bug where some older dates could be formatted incorrectly. ([#16953](https://github.com/craftcms/cms/issues/16953))
+- Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
 
 ## 4.14.11.1 - 2025-03-19
 

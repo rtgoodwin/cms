@@ -4867,7 +4867,7 @@ $min2ColWidth: 400px;
       height: 100%;
       max-width: 100%;
       overflow: hidden auto;
-      z-index: 1;
+      z-index: 1001;
 
       body.ltr & {
         transition: right linear 250ms;
