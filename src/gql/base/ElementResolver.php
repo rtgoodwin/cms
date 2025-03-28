@@ -14,6 +14,7 @@ use craft\base\GqlInlineFragmentFieldInterface;
 use craft\elements\db\ElementQuery;
 use craft\gql\ArgumentManager;
 use craft\gql\ElementQueryConditionBuilder;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Gql as GqlHelper;
 use GraphQL\Type\Definition\ResolveInfo;
 use Illuminate\Support\Collection;
@@ -83,6 +84,13 @@ abstract class ElementResolver extends Resolver
         $arguments = $argumentManager->prepareArguments($arguments);
 
         $fieldName = GqlHelper::getFieldNameWithAlias($resolveInfo, $source, $context);
+
+        // combine `search` and `searchTermOptions` if both are set
+        $searchTermOptions = ArrayHelper::remove($arguments, 'searchTermOptions');
+        if ($searchTermOptions && isset($arguments['search'])) {
+            $searchTermOptions['query'] = $arguments['search'];
+            $arguments['search'] = $searchTermOptions;
+        }
 
         /** @var ElementQuery $query */
         $query = static::prepareQuery($source, $arguments, $fieldName);
