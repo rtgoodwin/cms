@@ -1351,13 +1351,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     /**
      * @inheritdoc
      */
-    public function getCardBodyHtml(): ?string
+    public function getCardTitlebarLabel(): ?string
     {
-        $html = parent::getCardBodyHtml();
-        if ($html === '') {
-            return Html::tag('div', Html::tag('em', Craft::t('site', $this->getType()->name)));
-        }
-        return $html;
+        return $this->getType()->getUiLabel();
     }
 
     /**

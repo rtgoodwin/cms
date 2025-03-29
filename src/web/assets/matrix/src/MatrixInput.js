@@ -791,11 +791,11 @@
 
       if (animate && !Garnish.prefersReducedMotion()) {
         this.$fieldsContainer.velocity('fadeOut', {duration: 'fast'});
-        this.$container.velocity({height: 34}, 'fast');
+        this.$container.velocity({height: 30}, 'fast');
       } else {
         this.$previewContainer.show();
         this.$fieldsContainer.hide();
-        this.$container.css({height: 34});
+        this.$container.css({height: 30});
       }
 
       this.$tabContainer.hide();

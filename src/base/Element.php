@@ -3561,6 +3561,14 @@ abstract class Element extends Component implements ElementInterface
     /**
      * @inheritdoc
      */
+    public function getCardTitlebarLabel(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getCardBodyHtml(): ?string
     {
         $this->viewMode = 'cards';

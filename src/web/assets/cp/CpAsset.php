@@ -476,6 +476,7 @@ JS;
             'gear',
             'image',
             'image-slash',
+            'move',
             'pencil',
             'plus',
             'remove',

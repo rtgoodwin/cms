@@ -366,6 +366,7 @@ class Cp
                 ...Html::explodeClass($config['class']),
             ],
             'style' => array_filter([
+                '--custom-border-color' => $color?->cssVar(200),
                 '--custom-bg-color' => $color?->cssVar(50),
                 '--custom-text-color' => $color?->cssVar(900),
                 '--custom-sel-bg-color' => $color?->cssVar(900),
@@ -463,11 +464,16 @@ class Cp
             $html .= self::componentActionMenu($component);
         }
         if ($config['sortable']) {
-            $html .= Html::button('', [
-                'class' => ['move', 'icon'],
-                'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
+            $html .= static::buttonHtml([
+                'class' => ['chromeless', 'small', 'move-btn'],
+                'icon' => 'move',
+                'attributes' => [
+                    'title' => Craft::t('app', 'Reorder'),
+                    'aria' => [
+                        'label' => Craft::t('app', 'Reorder'),
+                    ],
+                    'role' => 'none',
+                    'tabindex' => '-1',
                 ],
             ]);
         }
@@ -602,11 +608,40 @@ class Cp
             'autoReload' => true,
             'context' => 'index',
             'id' => sprintf('card-%s', mt_rand()),
+            'hyperlink' => true,
             'inputName' => null,
             'selectable' => false,
+            'showEditButton' => true,
             'showActionMenu' => false,
             'sortable' => false,
         ];
+
+        $showEditButton = $config['showEditButton'] && Craft::$app->getElements()->canView($element);
+
+        if ($showEditButton) {
+            $editId = sprintf('action-edit-%s', mt_rand());
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $elementType, $settings, $cpEditUrl) => <<<JS
+$('#' + $id).on('activate', (ev) => {
+  if ($cpEditUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
+    window.open($cpEditUrl);
+  } else {
+    Craft.createElementEditor($elementType, $settings);
+  }
+});
+JS, [
+                $view->namespaceInputId($editId),
+                $element::class,
+                [
+                    'elementId' => $element->isProvisionalDraft ? $element->getCanonicalId() : $element->id,
+                    'draftId' => $element->isProvisionalDraft ? null : $element->draftId,
+                    'revisionId' => $element->revisionId,
+                    'siteId' => $element->siteId,
+                    'ownerId' => $element instanceof NestedElementInterface ? $element->getOwnerId() : null,
+                ],
+                'cpEditUrl' => $element->getCpEditUrl(),
+            ]);
+        }
 
         if ($element->getIsRevision()) {
             $config['showActionMenu'] = false;
@@ -625,12 +660,16 @@ class Cp
             [
                 'class' => $classes,
                 'style' => array_filter([
+                    '--custom-border-color' => $color?->cssVar(200),
+                    '--custom-titlebar-bg-color' => $color?->cssVar(100),
                     '--custom-bg-color' => $color?->cssVar(50),
                     '--custom-text-color' => $color?->cssVar(900),
-                    '--custom-sel-bg-color' => $color?->cssVar(900),
+                    '--custom-sel-titlebar-bg-color' => $color?->cssVar(900),
+                    '--custom-sel-bg-color' => $color?->cssVar(800),
                 ]),
                 'data' => array_filter([
                     'settings' => $config['autoReload'] ? [
+                        'hyperlink' => $config['hyperlink'],
                         'selectable' => $config['selectable'],
                         'context' => $config['context'],
                         'id' => Craft::$app->getView()->namespaceInputId($config['id']),
@@ -688,39 +727,67 @@ class Cp
                 Html::endTag('div');
         }
 
-        $thumb = $element->getThumbHtml(128);
-        if ($thumb === null && $element instanceof Iconic) {
-            $icon = $element->getIcon();
-            if ($icon) {
-                $thumb = Html::tag('div', Cp::iconSvg($icon), [
-                    'class' => array_filter([
-                        'cp-icon',
-                        $element instanceof Colorable ? $element->getColor()?->value : null,
-                    ]),
-                    'aria' => ['hidden' => true],
-                ]);
-            }
-        }
+        $thumb = $element->getThumbHtml(120);
+        $icon = $element instanceof Iconic ? $element->getIcon() : null;
+        $titlebarLabel = $element->getCardTitlebarLabel();
 
         $html = Html::beginTag('div', $attributes) .
+            Html::beginTag('div', ['class' => 'card-titlebar']) .
+            Html::beginTag('div', [
+                'class' => ['flex', 'flex-nowrap', 'flex-gap-xs'],
+            ]) .
+            ($icon ? Html::tag('div', Cp::iconSvg($icon), [
+                'class' => array_filter([
+                    'cp-icon',
+                    'small',
+                    $element instanceof Colorable ? $element->getColor()?->value : null,
+                ]),
+                'aria' => ['hidden' => true],
+            ]) : '') .
+            ($titlebarLabel ? Html::tag('div', Html::encode($titlebarLabel), ['class' => 'card-titlebar-label']) : '') .
+            Html::endTag('div') . // .flex
             ($status ?? '') .
-            ($thumb ?? '') .
+            Html::beginTag('div', ['class' => 'card-actions-container']) .
+            Html::beginTag('div', ['class' => 'card-actions']) .
+            ($config['selectable'] ? self::componentCheckboxHtml(sprintf('%s-label', $config['id'])) : '') .
+            ($showEditButton ? static::buttonHtml([
+                'class' => ['chromeless', 'small', 'edit-btn'],
+                'icon' => 'edit',
+                'attributes' => [
+                    'id' => $editId,
+                    'title' => StringHelper::upperCaseFirst(Craft::t('app', 'Edit {type}', [
+                        'type' => $element::lowerDisplayName(),
+                    ])),
+                    'aria' => [
+                        'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Edit {type}', [
+                            'type' => $element::lowerDisplayName(),
+                        ])),
+                    ],
+                ],
+            ]) : '') .
+            ($config['showActionMenu'] ? self::componentActionMenu($element, !$showEditButton) : '') .
+            ($config['sortable'] ? static::buttonHtml([
+                'class' => ['chromeless', 'small', 'move-btn'],
+                'icon' => 'move',
+                'attributes' => [
+                    'title' => Craft::t('app', 'Reorder'),
+                    'aria' => [
+                        'label' => Craft::t('app', 'Reorder'),
+                    ],
+                    'role' => 'none',
+                    'tabindex' => '-1',
+                ],
+            ]) : '') .
+            Html::endTag('div') . // .card-actions
+            Html::endTag('div') . // .card-actions-container
+            Html::endTag('div') . // .card-titlebar
+            Html::beginTag('div', ['class' => 'card-main']) .
             Html::beginTag('div', ['class' => 'card-content']) .
             ($headingContent !== '' ? Html::tag('div', $headingContent, ['class' => 'card-heading']) : '') .
             ($bodyContent !== '' ? Html::tag('div', $bodyContent, ['class' => 'card-body']) : '') .
             Html::endTag('div') . // .card-content
-            Html::beginTag('div', ['class' => 'card-actions-container']) .
-            Html::beginTag('div', ['class' => 'card-actions']) .
-            ($config['selectable'] ? self::componentCheckboxHtml(sprintf('%s-label', $config['id'])) : '') .
-            ($config['showActionMenu'] ? self::componentActionMenu($element) : '') .
-            ($config['sortable'] ? Html::button('', [
-                'class' => ['move', 'icon'],
-                'title' => Craft::t('app', 'Reorder'),
-                'role' => 'none',
-                'tabindex' => '-1',
-            ]) : '') .
-            Html::endTag('div') . // .card-actions
-            Html::endTag('div'); // .card-actions-container
+            ($thumb ?? '') .
+            Html::endTag('div'); // .card-main
 
         if ($config['context'] === 'field' && $config['inputName'] !== null) {
             $inputValue = $element->isProvisionalDraft ? $element->getCanonicalId() : $element->id;
@@ -1005,16 +1072,21 @@ class Cp
         }
 
         // the inner span is needed for `text-overflow: ellipsis` (e.g. within breadcrumbs)
-        $content = ($content !== '' ? Html::tag('a', Html::tag('span', $content), [
+        if (($config['hyperlink'] ?? true) && $content !== '') {
+            $content = Html::tag('a', Html::tag('span', $content), [
                 'class' => ['label-link'],
                 'href' => !$element->trashed && $config['context'] !== 'modal'
                     ? ($attributes['data']['cp-url'] ?? null) : null,
-            ]) : '') .
-            ($config['context'] === 'field' && $element->hasErrors() ? Html::tag('span', '', [
+            ]);
+        }
+
+        if ($config['context'] === 'field' && $element->hasErrors()) {
+            $content .= Html::tag('span', '', [
                 'data' => ['icon' => 'triangle-exclamation'],
                 'aria' => ['label' => Craft::t('app', 'Error')],
                 'role' => 'img',
-            ]) : '');
+            ]);
+        }
 
         if ($content === '') {
             return '';
@@ -1026,10 +1098,10 @@ class Cp
         ]);
     }
 
-    private static function componentActionMenu(Actionable $component): string
+    private static function componentActionMenu(Actionable $component, bool $withEdit = true): string
     {
         return Craft::$app->getView()->namespaceInputs(
-            function() use ($component): string {
+            function() use ($component, $withEdit): string {
                 $actionMenuItems = array_filter(
                     $component->getActionMenuItems(),
                     fn(array $item) => $item['showInChips'] ?? !($item['destructive'] ?? false)
@@ -1039,9 +1111,13 @@ class Cp
                     return '';
                 }
 
-                foreach ($actionMenuItems as &$item) {
+                foreach ($actionMenuItems as $i => &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
-                        $item['attributes']['data']['edit-action'] = true;
+                        if (!$withEdit) {
+                            unset($actionMenuItems[$i]);
+                        } else {
+                            $item['attributes']['data']['edit-action'] = true;
+                        }
                     } elseif (str_starts_with($item['id'] ?? '', 'action-copy-')) {
                         $item['attributes']['data']['copy-action'] = true;
                     }

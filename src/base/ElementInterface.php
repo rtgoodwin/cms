@@ -885,6 +885,14 @@ interface ElementInterface extends
     public function showStatusIndicator(): bool;
 
     /**
+     * Returns the titlebar label for element cards.
+     *
+     * @return string|null
+     * @since 5.7.0
+     */
+    public function getCardTitlebarLabel(): ?string;
+
+    /**
      * Returns the body HTML for element cards.
      *
      * @return string|null
