@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Waar bestanden moeten worden opgeslagen in het bestandssysteem.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Waar bestanden moeten worden opgeslagen wanneer ze rechtstreeks in het veld worden geüpload.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Waar wil u de gebruikersfoto\'s opslaam? Let op dat de submap variabelen kan bevatten zoals <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Waar nieuwe {type} standaard moeten worden geplaatst in de structuur.',
     'Where transforms should be stored on the filesystem.' => 'Waar transformaties moeten worden opgeslagen in het bestandssysteem.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Of auteurs zouden moeten kunnen kiezen in welke tijdzone de tijd is.',
