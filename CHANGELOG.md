@@ -9,6 +9,7 @@
 - Fixed a bug where relational fields with a “Related To” rule on their selectable elements condition weren’t making all expected elements selectable. ([#16945](https://github.com/craftcms/cms/issues/16945))
 - Fixed a bug where some subdivisions weren’t available when creating addresses. ([#16951](https://github.com/craftcms/cms/issues/16951))
 - Fixed a bug where some older dates could be formatted incorrectly. ([#16953](https://github.com/craftcms/cms/issues/16953))
+- Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
 - Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
 - Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
