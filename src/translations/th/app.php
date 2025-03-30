@@ -2000,6 +2000,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'ตำแหน่งที่ควรจัดเก็บแอสเซทไว้ในระบบไฟล์',
     'Where assets should be stored when they are uploaded directly to the field.' => 'ตำแหน่งที่ควรจัดเก็บแอสเซท เมื่อมีการอัปโหลดไปยังฟิลด์โดยตรง',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'คุณต้องการจัดเก็บรูปภาพของผู้ใช้ไว้ที่ไหน โปรดทราบว่าเส้นทางโฟลเดอร์ย่อยสามารถมีตัวแปร เช่น <code>{username}</code> ได้',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => '{type} ใหม่ควรถูกวางไว้ที่ใดในโครงสร้างตามค่าเริ่มต้น',
     'Where transforms should be stored on the filesystem.' => 'ควรจัดเก็บการแปลงไว้ที่ใดในระบบไฟล์',
     'Whether authors should be able to choose which time zone the time is in.' => 'ผู้เขียนควรจะสามารถเลือกเขตเวลาที่จะอยู่ได้หรือไม่',
