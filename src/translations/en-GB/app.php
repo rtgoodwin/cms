@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Where assets should be stored on the filesystem.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Where assets should be stored when they are uploaded directly to the field.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Where new {type} should be placed by default in the structure.',
     'Where transforms should be stored on the filesystem.' => 'Where transforms should be stored on the filesystem.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Whether authors should be able to choose which time zone the time is in.',
