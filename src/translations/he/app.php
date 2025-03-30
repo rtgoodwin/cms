@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'היכן שהנכסים צריכים להיות מאוחסנים במערכת הקבצים.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'היכן יש לאחסן נכסים כאשר הם מועלים ישירות לשדה.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'היכן לאחסן את התמונות שלך? שים לב, נתיב תיקיית המשנה יכול להכיל משתנים כמו <code dir="rtl">{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'היכן {type} חדש צריך להיות ממוקם במבנה.',
     'Where transforms should be stored on the filesystem.' => 'היכן התמרות צריכות להיות מאוחסנות במערכת הקבצים.',
     'Whether authors should be able to choose which time zone the time is in.' => 'האם יוצרי התוכן יוכלו לבחור באיזה אזור זמן נמצא הזמן.',
