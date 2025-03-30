@@ -2564,6 +2564,7 @@ JS, [
         $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
 
         // get remaining attributes
+        /** @var class-string<ElementInterface> $elementType */
         $elementType = new ($fieldLayout['type']);
         $remainingItems = $elementType::cardAttributes();
         foreach ($remainingItems as $key => $cardAttributes) {
@@ -3329,14 +3330,18 @@ JS;
      *
      * System icons can be found in `src/icons/solid/`.
      *
-     * @param string $icon
+     * @param string|null $icon
      * @param string|null $fallbackLabel
      * @param string|null $altText
-     * @return string
+     * @return string|null
      * @since 5.0.0
      */
-    public static function iconSvg(string $icon, ?string $fallbackLabel = null, ?string $altText = null): string
+    public static function iconSvg(?string $icon, ?string $fallbackLabel = null, ?string $altText = null): ?string
     {
+        if ($icon === null) {
+            return null;
+        }
+
         $locale = Craft::$app->getLocale();
         $orientation = $locale->getOrientation();
         $attributes = [
