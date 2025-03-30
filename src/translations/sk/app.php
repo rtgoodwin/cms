@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Kde by mali byť aktíva uložené v systéme súborov.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Kde sa majú ukladať prostriedky, ak sa nahrajú priamo do poľa.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Kde chcete uchovať fotografie používateľov? Upozorňujeme, že cesta k podpriečinku môže obsahovať premenné, ako napríklad <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Predvolené umiestnenie nového {type} v štruktúre.',
     'Where transforms should be stored on the filesystem.' => 'Kde by mali byť transformácie uložené v systéme súborov.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Či by autori mali mať možnosť vybrať si, v ktorom časovom pásme sa tento čas nachádza.',
