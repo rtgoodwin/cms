@@ -987,7 +987,12 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     },
 
     appendElement: function ($element) {
-      $('<li/>').append($element).appendTo(this.$elementsContainer);
+      const $li = $('<li/>').append($element);
+      if (this.settings.defaultPlacement === 'beginning') {
+        $li.prependTo(this.$elementsContainer);
+      } else {
+        $li.appendTo(this.$elementsContainer);
+      }
     },
 
     animateElementIntoPlace: async function ($modalElement, $inputElement) {
@@ -1124,6 +1129,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       maintainHierarchy: false,
       branchLimit: null,
       limit: null,
+      defaultPlacement: 'end',
       showSiteMenu: false,
       modalStorageKey: null,
       modalSettings: {},
