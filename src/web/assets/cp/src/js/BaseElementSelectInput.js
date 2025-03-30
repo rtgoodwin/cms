@@ -1010,7 +1010,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
         Craft.BaseElementSelectInput.ADD_FX_DURATION,
         function () {
           $helper.remove();
-          $inputElement.css('visibility', 'visible');
+          $inputElement.css('visibility', '');
         }
       );
     },
