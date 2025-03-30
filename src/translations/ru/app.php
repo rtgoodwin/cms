@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Место, где в файловой системе должны храниться ресурсы.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Где должны храниться ресурсы при загрузке непосредственно в поле.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Где следует сохранять фото пользователя? Обратите внимание: путь подпапки может содержать переменные, такие как <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Где в структуре будет по умолчанию размещаться новый {type}.',
     'Where transforms should be stored on the filesystem.' => 'Место, где в файловой системе должны храниться преобразования.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Будет ли авторам предоставлена возможность выбора часового пояса, в котором указывается время.',
