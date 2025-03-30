@@ -376,11 +376,21 @@ JS;
             return '';
         }
 
-        return match ($this->previewFormat) {
+        $formatted = match ($this->previewFormat) {
             self::FORMAT_DECIMAL => Craft::$app->getFormatter()->asDecimal($value, $this->decimals),
             self::FORMAT_CURRENCY => Craft::$app->getFormatter()->asCurrency($value, $this->previewCurrency, [], [], !$this->decimals),
             default => $value,
         };
+
+        if ($this->prefix) {
+            $formatted = $this->prefix . $formatted;
+        }
+
+        if ($this->suffix) {
+            $formatted = $formatted . $this->suffix;
+        }
+
+        return $formatted;
     }
 
     /**
