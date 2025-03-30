@@ -704,7 +704,6 @@ class Asset extends Element
             ],
             'link' => [
                 'label' => Craft::t('app', 'Link'),
-                'icon' => 'world',
                 'placeholder' => fn() => ElementHelper::linkAttributeHtml(null),
             ],
             'dateModified' => [

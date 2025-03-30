@@ -1643,7 +1643,6 @@ abstract class Element extends Component implements ElementInterface
             $attributes = array_merge($attributes, [
                 'link' => [
                     'label' => Craft::t('app', 'Link'),
-                    'icon' => 'world',
                     'placeholder' => fn() => ElementHelper::linkAttributeHtml('#'),
                 ],
                 'slug' => [
