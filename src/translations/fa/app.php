@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'جایی که دارایی‌ها باید در فایل سیستم ذخیره شوند.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'جایی که فایل‌های پروژه باید نگهداری گردند زمانی که آن‌ها مستقیما به فیلد آپلود می‌شوند.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'تصاویر کاربران را کجا می خواهید آپلود نمایید؟ توجه نمایید که مسیر زیر پوشه می تواند شامل متغیرهایی مانند <code>{username}</code> باشد.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'جایی در ساختار که {type} جدید به‌طور پیش‌فرض باید در آن قرار بگیرد.',
     'Where transforms should be stored on the filesystem.' => 'جایی که تغییر‌شکل‌ها باید در سیستم‌فایل نگهداری شود.',
     'Whether authors should be able to choose which time zone the time is in.' => 'این که نویسندگان باید بتوانند منطقه زمانی که در آن هستند را انتخاب نمایند.',
