@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => '资产应存储在文件系统上的位置。',
     'Where assets should be stored when they are uploaded directly to the field.' => '资产直接上传到字段时应存储的位置。',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => '您想在哪里存储用户照片？请注意，子文件夹路径可以包含 <code>{username}</code> 等变量。',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => '默认情况下，新的{type}应该放在结构中。',
     'Where transforms should be stored on the filesystem.' => '转换应存储在文件系统上的位置。',
     'Whether authors should be able to choose which time zone the time is in.' => '作者是否应能够选择时间所在的时区。',
