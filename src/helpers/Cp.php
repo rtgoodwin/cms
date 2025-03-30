@@ -335,7 +335,7 @@ class Cp
             'autoReload' => true,
             'id' => sprintf('chip-%s', mt_rand()),
             'class' => null,
-            'hyperlink' => false,
+            'hyperlink' => true,
             'inputName' => null,
             'inputValue' => null,
             'labelHtml' => null,
