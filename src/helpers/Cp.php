@@ -2776,15 +2776,12 @@ JS, [
             $previewHtml .= Html::tag('div', $previewThumb, ['class' => ['thumb']]);
         }
 
-
         $previewHtml .=
-            Html::beginTag('div', [
-                'class' => ['card-content'],
-            ]) .
+            Html::tag('div', options: ['class' => 'card-titlebar']) .
+            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-content']) .
             Html::tag('div', $heading, ['class' => 'card-heading']) .
-            Html::beginTag('div', [
-                'class' => 'card-body',
-            ]);
+            Html::beginTag('div', ['class' => 'card-body']);
 
         // get body elements (fields and attributes)
         $cardElements = $fieldLayout->getCardBodyElements(null, $cardElements);
@@ -2813,6 +2810,7 @@ JS, [
         $previewHtml .=
             Html::endTag('div') . // .card-body
             Html::endTag('div') . // .card-content
+            Html::endTag('div') . // .card-main
             Html::tag('div', '', ['class' => 'spinner spinner-absolute']) .
             Html::endTag('div'); // .element.card
 
