@@ -13,6 +13,8 @@
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
 - User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
 - Element index filters are now shown in a modal window on smaller screens. ([#16869](https://github.com/craftcms/cms/pull/16869))
+- <kbd>Command</kbd>/<kbd>Ctrl</kbd>-clicking on element index page sources now opens the source in a new window.
+- <kbd>Command</kbd>/<kbd>Ctrl</kbd>-clicking on element edit page tabs now opens the tab in a new window.
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
 
 ### Accessibility
