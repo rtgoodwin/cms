@@ -193,7 +193,12 @@ class NestedElementManager extends Component
                 ->drafts(null)
                 ->savedDraftsOnly()
                 ->status(null)
-                ->limit(null);
+                ->limit(null)
+                ->andWhere([
+                    'or',
+                    ['elements.draftId' => null],
+                    ['elements.canonicalId' => null],
+                ]);
         }
 
         return $query;
@@ -707,7 +712,7 @@ JS, [
         } else {
             $elements = $value->getCachedResult();
             if ($elements !== null) {
-                $saveAll = false;
+                $saveAll = !empty($owner->newSiteIds);
             } else {
                 $elements = $value->all();
                 $saveAll = true;
@@ -893,6 +898,11 @@ JS, [
             ->status(null)
             ->siteId($owner->siteId)
             ->andWhere(['not', ['elements.id' => $except]])
+            ->andWhere([
+                'or',
+                ['elements.draftId' => null],
+                ['elements.canonicalId' => null],
+            ])
             ->all();
 
         $elementsService = Craft::$app->getElements();
@@ -1241,6 +1251,7 @@ JS, [
             }
             $query->{$this->ownerIdParam} = null;
             $query->{$this->primaryOwnerIdParam} = $owner->id;
+
             /** @var NestedElementInterface[] $elements */
             $elements = $query->all();
 

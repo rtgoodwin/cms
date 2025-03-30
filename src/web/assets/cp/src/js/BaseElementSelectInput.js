@@ -731,7 +731,16 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
           storageKey: this.modalStorageKey,
           sources: this.settings.sources,
           condition: this.settings.condition,
-          referenceElementId: this.settings.referenceElementId,
+          referenceElementId: this.settings.referenceElementId
+            ? this.elementEditor?.getDraftElementId(
+                this.settings.referenceElementId
+              ) || this.settings.referenceElementId
+            : null,
+          referenceElementOwnerId: this.settings.referenceElementOwnerId
+            ? this.elementEditor?.getDraftElementId(
+                this.settings.referenceElementOwnerId
+              ) || this.settings.referenceElementOwnerId
+            : null,
           referenceElementSiteId: this.settings.referenceElementSiteId,
           criteria: Object.assign({}, this.settings.criteria),
           multiSelect: this.settings.limit != 1,
@@ -781,10 +790,10 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
     onModalSelect: async function (elements) {
       // Disable the modal
-      this.modal.disable();
-      this.modal.disableCancelBtn();
-      this.modal.disableSelectBtn();
-      this.modal.showFooterSpinner();
+      this.modal?.disable();
+      this.modal?.disableCancelBtn();
+      this.modal?.disableSelectBtn();
+      this.modal?.showFooterSpinner();
 
       if (this._$replaceElement) {
         this.removeElement(this._$replaceElement);
@@ -850,11 +859,11 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
 
       // Re-enable and hide the modal
-      this.modal.enable();
-      this.modal.enableCancelBtn();
-      this.modal.enableSelectBtn();
-      this.modal.hideFooterSpinner();
-      this.modal.hide();
+      this.modal?.enable();
+      this.modal?.enableCancelBtn();
+      this.modal?.enableSelectBtn();
+      this.modal?.hideFooterSpinner();
+      this.modal?.hide();
 
       await Craft.appendHeadHtml(data.headHtml);
       await Craft.appendBodyHtml(data.bodyHtml);
@@ -1007,7 +1016,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     },
 
     updateDisabledElementsInModal: function () {
-      if (this.modal.elementIndex) {
+      if (this.modal?.elementIndex) {
         this.modal.elementIndex.disableElementsById(
           this.getDisabledElementIds()
         );
@@ -1081,6 +1090,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       sources: null,
       condition: null,
       referenceElementId: null,
+      referenceElementOwnerId: null,
       referenceElementSiteId: null,
       criteria: {},
       allowAdd: true,

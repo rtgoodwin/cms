@@ -740,6 +740,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public static function gqlTypeName(EntryType $entryType): string
     {
+        // Don't use override data
+        $entryType = $entryType->original ?? $entryType;
+
         return sprintf('%s_Entry', $entryType->handle);
     }
 
@@ -1236,7 +1239,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             $elementsService = Craft::$app->getElements();
             $user = Craft::$app->getUser()->getIdentity();
 
-            foreach ($this->getAncestors()->all() as $ancestor) {
+            $ancestors = $this->getAncestors();
+            if ($ancestors instanceof ElementQueryInterface) {
+                $ancestors->status(null);
+            }
+
+            foreach ($ancestors->all() as $ancestor) {
                 if ($elementsService->canView($ancestor, $user)) {
                     $crumbs[] = ['html' => Cp::elementChipHtml($ancestor)];
                 }
@@ -1530,7 +1538,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     fn(EntryType $entryType) => $entryType->id === $this->_typeId,
                 );
                 if (!$entryType) {
-                    throw new InvalidConfigException("Invalid entry type ID: $this->_typeId");
+                    // Maybe the section/field no longer allows this type,
+                    // so get it directly from the Entries service instead
+                    $entryType = Craft::$app->getEntries()->getEntryTypeById($this->_typeId);
+                    if (!$entryType) {
+                        throw new InvalidConfigException("Invalid entry type ID: $this->_typeId");
+                    }
                 }
             } else {
                 // Default to the section/field's first entry type
@@ -2053,7 +2066,11 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 return $section ? Html::encode(Craft::t('site', $section->name)) : '';
             case 'type':
                 try {
-                    $config = [];
+                    $config = [
+                        'attributes' => [
+                            'class' => ['chromeless'],
+                        ],
+                    ];
                     if ($this->viewMode === 'cards') {
                         $config['showThumb'] = false;
                     }
@@ -2501,42 +2518,6 @@ JS;
 
     /**
      * @inheritdoc
-     */
-    public function beforeValidate(): bool
-    {
-        if (
-            (!isset($this->_authorIds) || empty($this->_authorIds)) &&
-            !isset($this->fieldId) &&
-            $this->getSection()->type !== Section::TYPE_SINGLE
-        ) {
-            $user = Craft::$app->getUser()->getIdentity();
-            if ($user) {
-                $this->setAuthor($user);
-            }
-        }
-
-        if (
-            !$this->_userPostDate() &&
-            (
-                in_array($this->scenario, [self::SCENARIO_LIVE, self::SCENARIO_DEFAULT]) ||
-                (!$this->getIsDraft() && !$this->getIsRevision())
-            )
-        ) {
-            // Default the post date to the current date/time
-            $this->postDate = new DateTime();
-            // ...without the seconds
-            $this->postDate->setTimestamp($this->postDate->getTimestamp() - ($this->postDate->getTimestamp() % 60));
-            // ...unless an expiry date is set in the past
-            if ($this->expiryDate && $this->postDate >= $this->expiryDate) {
-                $this->postDate = (clone $this->expiryDate)->modify('-1 day');
-            }
-        }
-
-        return parent::beforeValidate();
-    }
-
-    /**
-     * @inheritdoc
      * @throws Exception if reasons
      */
     public function beforeSave(bool $isNew): bool
@@ -2597,9 +2578,47 @@ JS;
             }
         }
 
+        $this->maybeSetDefaultAttributes();
+
         $this->updateTitle();
 
         return parent::beforeSave($isNew);
+    }
+
+    /**
+     * Set the default values for attributes if certain conditions are met.
+     *
+     * @return void
+     */
+    private function maybeSetDefaultAttributes(): void
+    {
+        if (
+            (!isset($this->_authorIds) || empty($this->_authorIds)) &&
+            !isset($this->fieldId) &&
+            $this->getSection()->type !== Section::TYPE_SINGLE
+        ) {
+            $user = Craft::$app->getUser()->getIdentity();
+            if ($user) {
+                $this->setAuthor($user);
+            }
+        }
+
+        if (
+            !$this->_userPostDate() &&
+            (
+                in_array($this->scenario, [self::SCENARIO_LIVE, self::SCENARIO_DEFAULT]) ||
+                (!$this->getIsDraft() && !$this->getIsRevision())
+            )
+        ) {
+            // Default the post date to the current date/time
+            $this->postDate = new DateTime();
+            // ...without the seconds
+            $this->postDate->setTimestamp($this->postDate->getTimestamp() - ($this->postDate->getTimestamp() % 60));
+            // ...unless an expiry date is set in the past
+            if ($this->expiryDate && $this->postDate >= $this->expiryDate) {
+                $this->postDate = (clone $this->expiryDate)->modify('-1 day');
+            }
+        }
     }
 
     /**
@@ -2696,6 +2715,8 @@ JS;
                 ->ancestorOf($this->getCanonicalId())
                 ->ancestorDist(1)
                 ->status(null)
+                ->site('*')
+                ->unique()
                 ->scalar();
 
             if ($parentId == $canonicalParentId) {
@@ -2751,7 +2772,8 @@ JS;
 
         if ($this->structureId) {
             // Remember the parent ID, in case the entry needs to be restored later
-            $parentId = $this->getAncestors(1)
+            $parentId = $this->ancestors()
+                ->ancestorDist(1)
                 ->status(null)
                 ->select(['elements.id'])
                 ->scalar();

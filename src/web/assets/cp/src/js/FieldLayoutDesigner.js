@@ -64,7 +64,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       // Set up the layout grids
       this.tabGrid = new Craft.Grid(this.$tabContainer, {
         itemSelector: '.fld-tab',
-        minColWidth: 24 * 12,
+        minColWidth: 24 * 13,
         fillMode: 'grid',
         snapToGrid: 24,
       });
@@ -314,6 +314,10 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
 
         // add it to the active tab
         this.addLibraryElementToActiveTab($selector);
+
+        Garnish.requestAnimationFrame(() => {
+          this.getActiveHud()?.hide();
+        });
       });
     },
 
@@ -322,6 +326,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
 
       this.addListener($elements, 'activate', (ev) => {
         ev.stopPropagation();
+        ev.originalEvent.preventDefault();
         this.addLibraryElementToActiveTab(ev.currentTarget);
       });
     },
@@ -368,10 +373,6 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       const element = tab.initElement($element);
       element.updatePositionInConfig();
       this.tabGrid.refreshCols(true);
-
-      Garnish.requestAnimationFrame(() => {
-        hud.hide();
-      });
     },
   },
   {
@@ -383,7 +384,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       readOnly: false,
     },
 
-    async createSlideout(data, js) {
+    async createSlideout(data, js, settings = {}) {
       const $body = $('<div/>', {class: 'fld-element-settings-body'});
       $('<div/>', {class: 'fields', html: data.settingsHtml}).appendTo($body);
       const $footer = $('<div/>', {class: 'fld-element-settings-footer'});
@@ -403,15 +404,21 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
         .appendTo($footer);
       const $contents = $body.add($footer);
 
-      const slideout = new Craft.Slideout($contents, {
-        containerElement: 'form',
-        containerAttributes: {
-          action: '',
-          method: 'post',
-          novalidate: '',
-          class: 'fld-element-settings',
-        },
-      });
+      const slideout = new Craft.Slideout(
+        $contents,
+        Object.assign(
+          {
+            containerElement: 'form',
+            containerAttributes: {
+              action: '',
+              method: 'post',
+              novalidate: '',
+              class: 'fld-element-settings',
+            },
+          },
+          settings
+        )
+      );
       slideout.on('open', () => {
         // Hold off a sec until it's positioned...
         Garnish.requestAnimationFrame(() => {
@@ -477,6 +484,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
       hudClass: 'hud fld-library-hud',
       listenToMainResize: false,
       showOnInit: false,
+      orientations: ['right', 'bottom', 'left'],
     });
     hud.on('show', () => {
       this.designer.$libraryContainer.appendTo(hud.$main);
@@ -486,7 +494,6 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
       this.designer.$fieldLibrary.scrollTop(0);
     });
     hud.on('hide', () => {
-      this.designer.$libraryContainer.appendTo(this.designer.$innerContainer);
       this.$addBtn.focus();
     });
 
@@ -607,7 +614,9 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
     }
 
     this.settingsNamespace = data.namespace;
-    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data);
+    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data, null, {
+      triggerElement: this.$actionBtn,
+    });
 
     this.slideout.$container.on('submit', (ev) => {
       ev.preventDefault();
@@ -798,6 +807,7 @@ Craft.FieldLayoutDesigner.Tab = Garnish.Base.extend({
 Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
   tab: null,
   $container: null,
+  $actionBtn: null,
 
   uid: null,
   isMandatory: false,
@@ -894,7 +904,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
 
     // create the action menu
     const menuId = `actionmenu${Math.floor(Math.random() * 1000000)}`;
-    const $actionBtn = $('<button/>', {
+    this.$actionBtn = $('<button/>', {
       type: 'button',
       class: 'btn action-btn',
       'data-disclosure-trigger': 'true',
@@ -909,7 +919,9 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
       class: 'menu menu--disclosure',
       'data-disclosure-menu': 'true',
     }).appendTo(this.$container);
-    const disclosureMenu = $actionBtn.disclosureMenu().data('disclosureMenu');
+    const disclosureMenu = this.$actionBtn
+      .disclosureMenu()
+      .data('disclosureMenu');
 
     let makeRequiredBtn, dropRequiredBtn, makeThumbnailBtn, dropThumbnailBtn;
 
@@ -1066,7 +1078,9 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     }
 
     this.settingsNamespace = data.namespace;
-    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data);
+    this.slideout = await Craft.FieldLayoutDesigner.createSlideout(data, null, {
+      triggerElement: this.$actionBtn,
+    });
 
     this.slideout.$container.on('submit', (ev) => {
       ev.preventDefault();
@@ -1712,15 +1726,6 @@ Craft.FieldLayoutDesigner.ElementDrag =
       }
 
       this.setMidpoints();
-
-      // If we're dragging an element from the library, and it's within an HUD,
-      // hide the HUD
-      if (this.draggingLibraryElement) {
-        const $hud = this.$draggee.closest('.fld-library-hud');
-        if ($hud.length) {
-          $hud.data('hud').hide();
-        }
-      }
     },
 
     /**

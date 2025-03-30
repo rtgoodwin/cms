@@ -262,9 +262,10 @@ class UsersController extends Controller
                         $authService->setUser(null);
                         throw new InvalidConfigException('User requires two-step verification, but the loginPath config setting is disabled.');
                     }
-                    return $this->redirect(UrlHelper::siteUrl($loginPath, [
+                    return $this->redirect(UrlHelper::siteUrl($loginPath, array_filter([
                         'verify' => 1,
-                    ]));
+                        'returnUrl' => $this->getPostedRedirectUrl($user),
+                    ])));
                 }
 
                 return $this->runAction('auth-form');
@@ -368,6 +369,16 @@ class UsersController extends Controller
         }
 
         return $user;
+    }
+
+    /**
+     * Redirects the user to the default post-login URL.
+     *
+     * @return Response
+     */
+    public function actionRedirect(): Response
+    {
+        return $this->redirect(Craft::$app->getUser()->getDefaultReturnUrl());
     }
 
     /**
@@ -657,7 +668,7 @@ class UsersController extends Controller
 
             $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($loginName);
 
-            if (!$user || !$user->getIsCredentialed()) {
+            if (!$user || !$user->getIsCredentialed() || !$user->getHasPassword()) {
                 $errors[] = Craft::$app->getConfig()->getGeneral()->useEmailAsUsername
                     ? Craft::t('app', 'Invalid email.')
                     : Craft::t('app', 'Invalid username or email.');
@@ -681,9 +692,7 @@ class UsersController extends Controller
             $this->_randomlyDelayResponse(microtime(true) - $time);
 
             if (!empty($errors)) {
-                $list = implode("\n", array_map(function(string $error) {
-                    return sprintf('- %s', $error);
-                }, $errors));
+                $list = implode("\n", array_map(fn(string $error) => sprintf('- %s', $error), $errors));
                 Craft::warning(sprintf("Password reset email not sent:\n%s", $list), __METHOD__);
                 $errors = [];
             }
@@ -1521,7 +1530,7 @@ JS);
                 }
             }
 
-            $user = $user ?? new User();
+            $user ??= new User();
         }
 
         $isCurrentUser = $user->getIsCurrent();
@@ -2437,11 +2446,15 @@ JS);
             $view->setTemplateMode($templateMode);
         }
 
-        if ($this->request->getIsCpRequest()) {
-            // explicitly set the default return URL here, since checkPermission('accessCp') will be false
-            $defaultReturnUrl = UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
-        } else {
-            $defaultReturnUrl = UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
+        $returnUrl = $this->request->getQueryParam('returnUrl');
+        if (!$returnUrl) {
+            if ($this->request->getIsCpRequest()) {
+                // explicitly set the default return URL here, since checkPermission('accessCp') will be false
+                $defaultReturnUrl = UrlHelper::cpUrl(Craft::$app->getConfig()->getGeneral()->getPostCpLoginRedirect());
+            } else {
+                $defaultReturnUrl = UrlHelper::siteUrl(Craft::$app->getConfig()->getGeneral()->getPostLoginRedirect());
+            }
+            $returnUrl = $userSession->getReturnUrl($defaultReturnUrl);
         }
 
         $authFormData = [
@@ -2451,7 +2464,7 @@ JS);
                 'class' => $method::class,
             ], $activeMethods),
             'authForm' => $html,
-            'returnUrl' => $userSession->getReturnUrl($defaultReturnUrl),
+            'returnUrl' => $returnUrl,
         ];
 
         if ($this->request->getAcceptsJson()) {

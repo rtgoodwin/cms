@@ -175,7 +175,13 @@ class ElementsController extends Controller
      */
     public function actionRedirect(?int $elementId = null, ?string $elementUid = null): Response
     {
-        $element = $this->element = $this->_element($elementId, $elementUid);
+        $element = $this->_element($elementId, $elementUid);
+
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        $this->element = $element;
         $url = $element->getCpEditUrl();
 
         if (!$url) {
@@ -563,7 +569,11 @@ JS, [
         }
 
         $copyFromSiteId = (int)$this->request->getRequiredBodyParam('fromSiteId');
-        $this->requirePermission("editSite:$copyFromSiteId");
+        $site = Craft::$app->getSites()->getSiteById($copyFromSiteId);
+        if (!$site) {
+            throw new BadRequestHttpException("Invalid site ID: $copyFromSiteId");
+        }
+        $this->requirePermission("editSite:$site->uid");
 
         $layoutElementUid = $this->request->getRequiredBodyParam('layoutElementUid');
         $namespace = $this->request->getBodyParam('namespace');
@@ -1702,16 +1712,17 @@ JS, [
 
         if (!$element->getIsDraft() && $this->_provisional) {
             // Make sure a provisional draft doesn't already exist for this element/user combo
-            $provisionalExists = $element::find()
+            $existingProvisionalDraft = $element::find()
                 ->provisionalDrafts()
                 ->draftOf($element->id)
                 ->draftCreator($user->id)
                 ->site('*')
                 ->status(null)
-                ->exists();
+                ->one();
 
-            if ($provisionalExists) {
-                throw new BadRequestHttpException("A provisional draft already exists for element/user $element->id/$user->id.");
+            if ($existingProvisionalDraft) {
+                Craft::warning("Overwriting an existing provisional draft for element/user $element->id/$user->id", __METHOD__);
+                $elementsService->deleteElement($existingProvisionalDraft, true);
             }
         }
 
@@ -1995,8 +2006,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || !$element->getIsDraft()) {
             throw new BadRequestHttpException('No draft was identified by the request.');
@@ -2267,8 +2281,8 @@ JS, [
         bool $checkForProvisionalDraft = false,
         bool $strictSite = true,
     ): ElementInterface|Response|null {
-        $elementId = $elementId ?? $this->_elementId;
-        $elementUid = $elementUid ?? $this->_elementUid;
+        $elementId ??= $this->_elementId;
+        $elementUid ??= $this->_elementUid;
 
         $elementsService = Craft::$app->getElements();
         $user = static::currentUser();

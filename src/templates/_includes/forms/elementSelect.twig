@@ -74,6 +74,7 @@
                     'add',
                     'icon',
                     'dashed',
+                    'wrap',
                     disabled ? 'disabled',
                     limit and elements|length >= limit ? 'hidden',
                 ]|filter,
@@ -97,6 +98,9 @@
         sources: sources,
         condition: condition ? condition.getConfig() : null,
         referenceElementId: referenceElement.id ?? null,
+        referenceElementOwnerId: (referenceElement ?? null) is instance of('craft\\base\\NestedElementInterface')
+            ? referenceElement.getOwnerId()
+            : null,
         referenceElementSiteId: referenceElement.siteId ?? null,
         criteria: criteria,
         allowAdd: allowAdd,

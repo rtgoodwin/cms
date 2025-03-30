@@ -49,7 +49,7 @@ use yii\base\UserException;
 /**
  * The Users service provides APIs for managing users.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getUsers()|`Craft::$app->users`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getUsers()|`Craft::$app->getUsers()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
@@ -334,7 +334,7 @@ class Users extends Component
 
         // Make sure it’s not expired
         if ($user->verificationCodeIssuedDate < $minCodeIssueDate) {
-            $userRecord = $userRecord ?? $this->_getUserRecordById($user->id);
+            $userRecord ??= $this->_getUserRecordById($user->id);
             $userRecord->verificationCode = $user->verificationCode = null;
             $userRecord->verificationCodeIssuedDate = $user->verificationCodeIssuedDate = null;
             $userRecord->save();

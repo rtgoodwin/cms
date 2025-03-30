@@ -549,7 +549,7 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
                 ];
                 $view->registerJsWithVars(fn($id, $params) => <<<JS
 (() => {
-  $('#' + $id).on('click', () => {
+  $('#' + $id).on('activate', () => {
     new Craft.CpScreenSlideout('fields/edit-field', {
       params: $params,
     });
@@ -571,7 +571,7 @@ JS, [
                 ];
                 $view->registerJsWithVars(fn($id, $attribute) => <<<JS
 (() => {
-  $('#' + $id).on('click', () => {
+  $('#' + $id).on('activate', () => {
     Craft.ui.createCopyTextPrompt({
       label: Craft.t('app', 'Field Handle'),
       value: $attribute,
@@ -1004,7 +1004,7 @@ JS, [
         }
 
         if ($key !== null && (!is_array($dbType) || !isset($dbType[$key]))) {
-            throw new InvalidArgumentException(sprintf('%s doesn’t store values under the key “%s”.', __CLASS__, $key));
+            throw new InvalidArgumentException(sprintf('%s doesn’t store values under the key “%s”.', self::class, $key));
         }
 
         $db = Craft::$app->getDb();
@@ -1050,6 +1050,7 @@ JS, [
         if ($db->getIsPgsql()) {
             $castType = match (Db::parseColumnType($dbType)) {
                 Schema::TYPE_DECIMAL => 'DECIMAL',
+                Schema::TYPE_INTEGER => 'INTEGER',
                 default => null,
             };
         }

@@ -566,7 +566,7 @@ class GeneralConfig extends BaseConfig
     /**
      * @var mixed The default length of time Craft will store data, RSS feed, and template caches.
      *
-     * If set to `0`, data and RSS feed caches will be stored indefinitely; template caches will be stored for one year.
+     * If set to `0`, data and RSS feed caches will be stored indefinitely.
      *
      * See [[ConfigHelper::durationInSeconds()]] for a list of supported value types.
      *
@@ -910,11 +910,9 @@ class GeneralConfig extends BaseConfig
     public int $defaultWeekStartDay = 1;
 
     /**
-     * @var bool By default, Craft requires a front-end “password” field for public user registrations. Setting this to `true`
-     * removes that requirement for the initial registration form.
-     *
-     * If you have email verification enabled, new users will set their password once they’ve followed the verification link in the email.
-     * If you don’t, the only way they can set their password is to go through your “forgot password” workflow.
+     * @var bool By default, Craft requires a front-end “password” field for public user registrations. Setting this to
+     * `true` removes that requirement for the initial registration form. Instead, new users will set their password
+     * once they’ve followed the link in their activation email.
      *
      * ::: code
      * ```php Static Config
@@ -2530,7 +2528,7 @@ class GeneralConfig extends BaseConfig
     public string $resourceBasePath = '@webroot/cpresources';
 
     /**
-     * @var string The URL to the root directory that should store published control panel resources.
+     * @var string The URL to the root directory where control panel resources are published.
      *
      * ::: code
      * ```php Static Config
@@ -3098,6 +3096,15 @@ class GeneralConfig extends BaseConfig
      * CRAFT_TRANSLATION_DEBUG_OUTPUT=true
      * ```
      * :::
+     *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
      *
      * @group System
      */
@@ -3887,7 +3894,7 @@ class GeneralConfig extends BaseConfig
     /**
      * The default length of time Craft will store data, RSS feed, and template caches.
      *
-     * If set to `0`, data and RSS feed caches will be stored indefinitely; template caches will be stored for one year.
+     * If set to `0`, data and RSS feed caches will be stored indefinitely.
      *
      * See [[ConfigHelper::durationInSeconds()]] for a list of supported value types.
      *
@@ -4305,11 +4312,9 @@ class GeneralConfig extends BaseConfig
     }
 
     /**
-     * By default, Craft requires a front-end “password” field for public user registrations. Setting this to `true`
-     * removes that requirement for the initial registration form.
-     *
-     * If you have email verification enabled, new users will set their password once they’ve followed the verification link in the email.
-     * If you don’t, the only way they can set their password is to go through your “forgot password” workflow.
+     * By default, Craft requires a front-end “password” field for public user registrations. Setting this to
+     * `true` removes that requirement for the initial registration form. Instead, new users will set their password
+     * once they’ve followed the link in their activation email.
      *
      * ```php
      * ->deferPublicRegistrationPassword(true)
@@ -6150,7 +6155,7 @@ class GeneralConfig extends BaseConfig
     }
 
     /**
-     * The URL to the root directory that should store published control panel resources.
+     * The URL to the root directory where control panel resources are published.
      *
      * ```php
      * ->resourceBaseUrl('@web/craft-resources')
@@ -6795,6 +6800,15 @@ class GeneralConfig extends BaseConfig
      * ```php
      * ->translationDebugOutput(true)
      * ```
+     *
+     * The symbols are as follows:
+     *
+     * | Symbol | Example | Category |
+     * | `$` | `$Date Field$` | Site |
+     * | `@` | `@Entry Type@` | Application |
+     * | `%` | `%Object Template% | Other (plugin or custom source) |
+     *
+     * Translations _may_ be nested or surrounded by multiple symbols.
      *
      * @group System
      * @param bool $value

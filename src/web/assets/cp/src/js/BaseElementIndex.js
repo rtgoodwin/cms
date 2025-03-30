@@ -1569,6 +1569,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         source: this.sourceKey,
         condition: this.settings.condition,
         referenceElementId: this.settings.referenceElementId,
+        referenceElementOwnerId: this.settings.referenceElementOwnerId,
         referenceElementSiteId: this.settings.referenceElementSiteId,
         baseCriteria,
         criteria,
@@ -3800,6 +3801,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       storageKey: null,
       condition: null,
       referenceElementId: null,
+      referenceElementOwnerId: null,
       referenceElementSiteId: null,
       allowedViewModes: null,
       showHeaderColumn: true,
@@ -3812,6 +3814,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       waitForDoubleClicks: false,
       canSelectElement: null,
       canDuplicateElements: (selectedItems) => true,
+      onBeforeMoveElementsToPage: async (selectedItems, page) => {},
+      onMoveElementsToPage: async (selectedItems, page) => {},
       onBeforeDuplicateElements: async (selectedItems) => {},
       onDuplicateElements: async (selectedItems) => {},
       canDeleteElements: (selectedItems) => true,
@@ -4057,6 +4061,7 @@ const ViewMenu = Garnish.Base.extend({
 
     this.menu.on('show', () => {
       this.$trigger.addClass('active');
+      this.updateSortField();
     });
 
     this.menu.on('hide', () => {
@@ -4606,6 +4611,7 @@ const FilterHud = Garnish.HUD.extend({
     Craft.cp.announce(Craft.t('app', 'Loading'));
     Craft.sendActionRequest('POST', 'element-indexes/filter-hud', {
       data: {
+        context: this.elementIndex.settings.context,
         elementType: this.elementIndex.elementType,
         source: this.sourceKey,
         condition: this.elementIndex.settings.condition,

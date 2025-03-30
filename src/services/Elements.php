@@ -88,7 +88,7 @@ use yii\di\Instance;
 /**
  * The Elements service provides APIs for managing elements.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getElements()|`Craft::$app->elements`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getElements()|`Craft::$app->getElements()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
@@ -1652,9 +1652,7 @@ class Elements extends Component
 
         if ($siteIds !== null) {
             // Typecast to integers
-            $siteIds = array_map(function($siteId) {
-                return (int)$siteId;
-            }, (array)$siteIds);
+            $siteIds = array_map(fn($siteId) => (int)$siteId, (array)$siteIds);
         }
 
         $this->ensureBulkOp(function() use ($query, $siteIds, $continueOnError) {
@@ -3166,7 +3164,7 @@ class Elements extends Component
      *
      * @param class-string<ElementInterface> $elementType The root element type class
      * @param ElementInterface[] $elements The root element models that should be updated with the eager-loaded elements
-     * @param array|string|EagerLoadPlan[] $with Dot-delimited paths of the elements that should be eager-loaded into the root elements
+     * @param array<string|array>|string|EagerLoadPlan[] $with Dot-delimited paths of the elements that should be eager-loaded into the root elements
      */
     public function eagerLoadElements(string $elementType, array $elements, array|string $with): void
     {
@@ -3235,8 +3233,10 @@ class Elements extends Component
                     $targetElementIdsBySourceIds = [];
 
                     foreach ($map['map'] as $mapping) {
-                        $uniqueTargetElementIds[$mapping['target']] = true;
-                        $targetElementIdsBySourceIds[$mapping['source']][$mapping['target']] = true;
+                        if (!empty($mapping['target'])) {
+                            $uniqueTargetElementIds[$mapping['target']] = true;
+                            $targetElementIdsBySourceIds[$mapping['source']][$mapping['target']] = true;
+                        }
                     }
 
                     // Get the target elements
@@ -3510,7 +3510,7 @@ class Elements extends Component
         }
 
         // Get the sites supported by this element
-        $supportedSites = $supportedSites ?? ArrayHelper::index(ElementHelper::supportedSitesForElement($element), 'siteId');
+        $supportedSites ??= ArrayHelper::index(ElementHelper::supportedSitesForElement($element), 'siteId');
 
         // Make sure the element actually supports the site it's being saved in
         if (!isset($supportedSites[$element->siteId])) {
@@ -3558,8 +3558,14 @@ class Elements extends Component
 
         // Validate
         if ($runValidation) {
-            // If we're propagating, only validate changed custom fields
-            if ($element->propagating) {
+            // If we're propagating, only validate changed custom fields,
+            // unless we're enabling this element
+            if ($element->propagating && !(
+                $element->getIsDerivative() &&
+                $element->getIsDraft() &&
+                $element->getEnabledForSite() &&
+                !$element->getCanonical()->getEnabledForSite())
+            ) {
                 $names = array_map(
                     fn(string $handle) => "field:$handle",
                     array_unique(array_merge($dirtyFields, $element->getModifiedFields()))
@@ -3735,7 +3741,13 @@ class Elements extends Component
                     if ($fieldLayout) {
                         foreach ($fieldLayout->getCustomFields() as $field) {
                             if (($saveContent || in_array($field->handle, $dirtyFields)) && $field::dbType() !== null) {
-                                $serializedValue = $field->serializeValue($element->getFieldValue($field->handle), $element);
+                                $value = $element->getFieldValue($field->handle);
+                                if ($element->isNewForSite && $field->isValueEmpty($value, $element)) {
+                                    // don't store empty values if element is new for site
+                                    // https://github.com/craftcms/cms/issues/16797
+                                    continue;
+                                }
+                                $serializedValue = $field->serializeValue($value, $element);
                                 if ($serializedValue !== null) {
                                     $content[$field->layoutElement->uid] = $serializedValue;
                                 } elseif (!$saveContent) {
@@ -3946,7 +3958,7 @@ class Elements extends Component
             Queue::push(new UpdateSearchIndex([
                 'elementType' => get_class($element),
                 'elementId' => $element->id,
-                'siteId' => $propagate ? '*' : $element->siteId,
+                'siteId' => $element->siteId,
                 'fieldHandles' => $searchableDirtyFields,
             ]), 2048);
         }
@@ -4077,9 +4089,7 @@ class Elements extends Component
         }
 
         // Copy the dirty attributes (except title, slug and uri, which may be translatable)
-        $siteElement->setDirtyAttributes(array_filter($element->getDirtyAttributes(), function(string $attribute): bool {
-            return $attribute !== 'title' && $attribute !== 'slug';
-        }));
+        $siteElement->setDirtyAttributes(array_filter($element->getDirtyAttributes(), fn(string $attribute): bool => $attribute !== 'title' && $attribute !== 'slug'));
 
         if ($saveContent) {
             // Copy any non-translatable field values

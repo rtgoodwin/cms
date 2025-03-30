@@ -209,11 +209,11 @@ class AssetQuery extends ElementQuery
     public bool $includeSubfolders = false;
 
     /**
-     * @var string|null The folder path that resulting assets must live within
+     * @var mixed The folder path that resulting assets must live within
      * @used-by folderPath()
      * @since 3.7.39
      */
-    public ?string $folderPath = null;
+    public mixed $folderPath = null;
 
     /**
      * @var mixed The asset transform indexes that should be eager-loaded, if they exist

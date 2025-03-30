@@ -36,7 +36,7 @@ use yii\web\HttpException;
 /**
  * The Plugins service provides APIs for managing plugins.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getPlugins()|`Craft::$app->plugins`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getPlugins()|`Craft::$app->getPlugins()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
@@ -301,11 +301,7 @@ class Plugins extends Component
     {
         $this->loadPlugins();
 
-        if (isset($this->_plugins[$handle])) {
-            return $this->_plugins[$handle];
-        }
-
-        return null;
+        return $this->_plugins[$handle] ?? null;
     }
 
     /**
@@ -854,14 +850,11 @@ class Plugins extends Component
             $this->_storedPluginInfo[$plugin->id]['schemaVersion'] = $plugin->schemaVersion;
         }
 
-        // Only update the schema version if it's changed from what's in the file,
-        // so we don't accidentally overwrite other pending changes
-        $projectConfig = Craft::$app->getProjectConfig();
-        $key = ProjectConfig::PATH_PLUGINS . ".$plugin->id.schemaVersion";
-
-        if ($projectConfig->get($key, true) !== $plugin->schemaVersion) {
-            Craft::$app->getProjectConfig()->set($key, $plugin->schemaVersion, "Update plugin schema version for “{$plugin->handle}”");
-        }
+        Craft::$app->getProjectConfig()->set(
+            sprintf('%s.%s.schemaVersion', ProjectConfig::PATH_PLUGINS, $plugin->id),
+            $plugin->schemaVersion,
+            "Update plugin schema version for “{$plugin->handle}”",
+        );
     }
 
     /**

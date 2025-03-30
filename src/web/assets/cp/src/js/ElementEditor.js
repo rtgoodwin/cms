@@ -151,7 +151,7 @@ Craft.ElementEditor = Garnish.Base.extend(
         );
 
         // Use event delegation so we don't have to reinitialize when markup is replaced
-        Garnish.$bod.on('click', '[data-cross-site-copy]', (ev) => {
+        Garnish.$bod.on('activate', '[data-cross-site-copy]', (ev) => {
           // Make sure the action menu is within this element editor container
           const $target = $(ev.currentTarget);
           const $field = $target
@@ -680,9 +680,11 @@ Craft.ElementEditor = Garnish.Base.extend(
 
           const $newField = $(fieldHtml);
           $field.replaceWith($newField);
-          Craft.initUiElements($newField);
+          // Execute the response JS first so any Selectize inputs, etc.,
+          // get instantiated before field toggles
           await Craft.appendHeadHtml(headHtml);
           await Craft.appendBodyHtml(bodyHtml);
+          Craft.initUiElements($newField);
 
           Craft.cp.displaySuccess(message);
         } finally {
@@ -1920,6 +1922,7 @@ Craft.ElementEditor = Garnish.Base.extend(
                 $newElement.appendTo($tabContainer);
               }
               Craft.initUiElements($newElement);
+              Craft.cp.elementThumbLoader.load($newElement);
               changedElements = true;
             }
           } else {

@@ -213,13 +213,17 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
         $config['advancedFields'] ??= [];
 
         if (isset($config['showTargetField'])) {
+            if ($config['showTargetField'] === true) {
+                $config['advancedFields'][] = 'target';
+            }
             unset($config['showTargetField']);
-            $config['advancedFields'][] = 'target';
         }
 
         if (isset($config['showUrlSuffixField'])) {
+            if ($config['showUrlSuffixField'] === true) {
+                $config['advancedFields'][] = 'urlSuffix';
+            }
             unset($config['showUrlSuffixField']);
-            $config['advancedFields'][] = 'urlSuffix';
         }
 
         if (isset($config['graphqlMode'])) {
@@ -360,9 +364,7 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
         $remainingTypes = Collection::make();
         if ($selectedTypes->count() < count(self::types())) {
             $remainingTypes = Collection::make(self::types())
-                ->filter(function($value, $key) use ($selectedTypes) {
-                    return !isset($selectedTypes[$key]);
-                })
+                ->filter(fn($value, $key) => !isset($selectedTypes[$key]))
                 // and sort them by label, with URL at the top
                 ->sort(function(string $a, string $b) {
                     /** @var class-string<BaseLinkType> $a */
@@ -625,14 +627,6 @@ new Craft.LinkField($('#' + $id));
 JS, [
             $view->namespaceInputId($id),
         ]);
-
-        if (!$value) {
-            // Override the initial value being set to null by CustomField::inputHtml()
-            $view->setInitialDeltaValue($this->handle, [
-                'type' => $valueTypeId,
-                'value' => '',
-            ]);
-        }
 
         $typeInputName = "$this->handle[type]";
 

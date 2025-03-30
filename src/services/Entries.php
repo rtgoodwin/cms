@@ -58,7 +58,7 @@ use yii\caching\TagDependency;
 /**
  * The Entries service provides APIs for managing entries in Craft.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getEntries()|`Craft::$app->entries`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getEntries()|`Craft::$app->getEntries()`]].
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
@@ -344,9 +344,7 @@ class Entries extends Component
             return [];
         }
 
-        return ArrayHelper::where($this->getAllSections(), function(Section $section) use ($user) {
-            return $user->can("viewEntries:$section->uid");
-        }, true, true, false);
+        return ArrayHelper::where($this->getAllSections(), fn(Section $section) => $user->can("viewEntries:$section->uid"), true, true, false);
     }
 
     /**
@@ -661,12 +659,26 @@ class Entries extends Component
             $propagationMethodChanged = $sectionRecord->propagationMethod != $sectionRecord->getOldAttribute('propagationMethod');
 
             if ($data['type'] === Section::TYPE_STRUCTURE) {
+                $structuresService = Craft::$app->getStructures();
+
                 // Save the structure
                 $structureUid = $data['structure']['uid'];
-                $structure = Craft::$app->getStructures()->getStructureByUid($structureUid, true) ?? new Structure(['uid' => $structureUid]);
+                $structure = $structuresService->getStructureByUid($structureUid, true) ?? new Structure(['uid' => $structureUid]);
                 $isNewStructure = empty($structure->id);
                 $structure->maxLevels = $data['structure']['maxLevels'];
-                Craft::$app->getStructures()->saveStructure($structure);
+
+                // check if we need to soft-delete an old structure
+                // see https://github.com/craftcms/cms/issues/16450
+                if (
+                    $isNewStructure &&
+                    ($event->oldValue['type'] ?? null) === Section::TYPE_STRUCTURE &&
+                    ($event->oldValue['structure']['uid'] ?? null) !== $structureUid &&
+                    $sectionRecord->structureId
+                ) {
+                    $structuresService->deleteStructureById($sectionRecord->structureId);
+                }
+
+                $structuresService->saveStructure($structure);
                 $sectionRecord->structureId = $structure->id;
             } else {
                 if ($sectionRecord->structureId) {
@@ -931,10 +943,9 @@ class Entries extends Component
             throw new Exception('No site settings exist for section ' . $section->id);
         }
 
-        $sites = ArrayHelper::where(Craft::$app->getSites()->getAllSites(), function(Site $site) use ($siteSettings) {
+        $sites = ArrayHelper::where(Craft::$app->getSites()->getAllSites(), fn(Site $site) =>
             // Only include it if it's one of this section's sites
-            return isset($siteSettings[$site->uid]);
-        }, true, true, false);
+            isset($siteSettings[$site->uid]), true, true, false);
 
         $siteIds = array_map(fn(Site $site) => $site->id, $sites);
 

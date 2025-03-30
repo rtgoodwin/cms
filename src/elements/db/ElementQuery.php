@@ -602,7 +602,7 @@ class ElementQuery extends Query implements ElementQueryInterface
         $this->elementType = $elementType;
 
         // Use ** as a placeholder for "all the default columns"
-        $config['select'] = $config['select'] ?? ['**' => '**'];
+        $config['select'] ??= ['**' => '**'];
 
         // Set a placeholder for the default `orderBy` param
         if (!isset($this->orderBy)) {
@@ -631,7 +631,7 @@ class ElementQuery extends Query implements ElementQueryInterface
      */
     public function __toString()
     {
-        return __CLASS__;
+        return self::class;
     }
 
     /**
@@ -1859,7 +1859,11 @@ class ElementQuery extends Query implements ElementQueryInterface
 
     private function eagerLoad(bool $count = false, array $criteria = []): ElementCollection|int|null
     {
-        if (!$this->eagerly || !isset($this->eagerLoadSourceElement->elementQueryResult, $this->eagerLoadHandle)) {
+        if (
+            !$this->eagerly ||
+            !isset($this->eagerLoadSourceElement->elementQueryResult, $this->eagerLoadHandle) ||
+            count($this->eagerLoadSourceElement->elementQueryResult) < 2
+        ) {
             return null;
         }
 
@@ -2451,8 +2455,11 @@ class ElementQuery extends Query implements ElementQueryInterface
                 "element::$this->elementType",
             ];
 
-            // If specific IDs were requested, then use those
-            if (is_numeric($this->id) || (is_array($this->id) && ArrayHelper::isNumeric($this->id))) {
+            // If (<= 100) specific IDs were requested, then use those
+            if (
+                is_numeric($this->id) ||
+                (is_array($this->id) && count($this->id) <= 100 && ArrayHelper::isNumeric($this->id))
+            ) {
                 array_push($this->_cacheTags, ...array_map(fn($id) => "element::$id", (array)$this->id));
             } else {
                 $queryTags = $this->cacheTags();

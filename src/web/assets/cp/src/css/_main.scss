@@ -1010,7 +1010,7 @@ button {
       position: relative;
       inset-inline-start: 1px;
       color: var(--blue-800) !important;
-      font-size: 18px;
+      font-size: 17px;
     }
 
     &::after {
@@ -1070,11 +1070,8 @@ button {
     box-sizing: border-box;
     box-shadow: 0 1px 1px 1px var(--white);
 
-    &::before {
-      position: relative;
-      inset-inline-start: 1px;
-      color: var(--grey-800) !important;
-      font-size: 18px;
+    .cp-icon {
+      --icon-size: calc(20rem / 16);
     }
 
     &::after {
@@ -1954,27 +1951,15 @@ ul.icons {
   text-wrap: nowrap;
   background-color: var(--button-bg);
 
-  &:not(:focus) {
-    box-shadow: var(--button-shadow);
-  }
-
   &:hover {
     border: var(--button-border--hover);
     background: var(--button-bg--hover);
-
-    &:not(:focus) {
-      box-shadow: var(--button-shadow--hover);
-    }
   }
 
   &:active,
   &.active {
     border: var(--button-border--active);
     background: var(--button-bg--active);
-
-    &:not(:focus) {
-      box-shadow: var(--button-shadow--active);
-    }
   }
 
   &:not([aria-current]) {
@@ -1993,6 +1978,10 @@ ul.icons {
     border: none;
     background: transparent;
     box-shadow: none;
+
+    &:focus-visible {
+      box-shadow: var(--focus-ring);
+    }
   }
 
   &.chromeless {
@@ -2256,24 +2245,30 @@ ul.icons {
 }
 
 craft-copy-attribute {
+  display: inline-block;
   @include mixins.fixed-width-font(calc(11rem / 16));
-  border: 1px solid var(--hairline-color);
-  padding-block: 0;
-  padding-inline: 5px;
-  border-radius: var(--button-border-radius);
   color: var(--medium-text-color);
+  height: calc(22rem / 16);
 
   button {
     gap: 5px;
     display: inline-flex;
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--button-border-radius);
+    padding-inline: 5px;
     flex-wrap: nowrap;
     align-items: center;
     cursor: pointer;
+    height: 100%;
 
     &:hover,
     &:focus {
       border-color: var(--medium-hairline-color);
       color: var(--text-color);
+    }
+
+    span[data-icon] {
+      margin-block-start: -3px;
     }
   }
 }
@@ -2467,7 +2462,6 @@ craft-copy-attribute {
     border: var(--primary-button-border) !important;
     color: var(--primary-button-text-color) !important;
     background: var(--primary-button-bg) !important;
-    box-shadow: var(--primary-button-shadow) !important;
 
     &:not(.disabled, .inactive, .loading) {
       &:hover,
@@ -2475,7 +2469,6 @@ craft-copy-attribute {
       &:focus {
         border: var(--primary-button-border--hover) !important;
         background: var(--primary-button-bg--hover) !important;
-        box-shadow: var(--primary-button-shadow--hover) !important;
       }
 
       &:active,
@@ -2483,7 +2476,6 @@ craft-copy-attribute {
       &[aria-expanded='true'] {
         border: var(--primary-button-border--active) !important;
         background: var(--primary-button-bg--active) !important;
-        box-shadow: var(--primary-button-shadow--active) !important;
       }
     }
   }
@@ -2514,7 +2506,6 @@ craft-copy-attribute {
   border: var(--secondary-button-border) !important;
   color: var(--secondary-button-text-color) !important;
   background: var(--secondary-button-bg) !important;
-  box-shadow: var(--secondary-button-shadow) !important;
 }
 
 .secondary-buttons .btn.submit:not(.disabled, .inactive, .loading):hover,
@@ -2525,7 +2516,6 @@ craft-copy-attribute {
 .btn.secondary:not(.disabled, .inactive, .loading):focus {
   border: var(--secondary-button-border--hover) !important;
   background: var(--secondary-button-bg--hover) !important;
-  box-shadow: var(--secondary-button-shadow--hover) !important;
 }
 
 .secondary-buttons .btn.submit:not(.disabled, .inactive, .loading):active,
@@ -2537,7 +2527,6 @@ craft-copy-attribute {
 .btn.secondary:not(.disabled, .inactive, .loading)[aria-expanded='true'] {
   border: var(--secondary-button-border--active) !important;
   background: var(--secondary-button-bg--active) !important;
-  box-shadow: var(--secondary-button-shadow--active) !important;
 }
 
 div.btn.submit {
@@ -3249,6 +3238,10 @@ table {
             th,
             td {
               background-color: var(--hover-bg-color);
+
+              .chip:not(.chromeless) {
+                background-color: var(--custom-bg-color, var(--gray-100));
+              }
             }
           }
 
@@ -3277,6 +3270,17 @@ table {
             td {
               color: var(--white);
               background-color: var(--selected-bg-color);
+
+              .chip {
+                color: var(--white);
+
+                &:not(.chromeless) {
+                  background-color: var(
+                    --custom-sel-bg-color,
+                    var(--gray-600)
+                  ) !important;
+                }
+              }
             }
 
             .icon,
@@ -3436,11 +3440,13 @@ table {
 .chip,
 .card {
   color: var(--custom-text-color, var(--text-color));
-  background-color: var(--custom-bg-color, var(--gray-050));
+
+  &:not(.chromeless, .hairline) {
+    background-color: var(--custom-bg-color, var(--gray-050));
+  }
 
   &.hairline {
     border: 1px solid var(--medium-hairline-color);
-    background-color: transparent;
   }
 }
 
@@ -3453,23 +3459,33 @@ table {
   user-select: none;
   font-weight: normal;
   padding-block: 0;
-  padding-inline: var(--s);
   max-width: 100%;
   gap: var(--xs);
   border-radius: var(--large-border-radius);
 
+  &:not(.chromeless) {
+    padding-inline: var(--s);
+  }
+
   &.small {
     flex-direction: row;
-    min-height: calc(26rem / 16 + 8px);
 
     --thumb-size: calc(30rem / 16);
 
     & > .thumb {
-      margin-inline: -2px 2px;
+      margin-inline-end: 2px;
       margin-block: 0;
 
       &.cp-icon {
         --thumb-size: 1rem; // 16px
+      }
+    }
+
+    &:not(.chromeless) {
+      min-height: calc(26rem / 16 + 8px);
+
+      & > .thumb {
+        margin-inline-start: -2px;
       }
     }
   }
@@ -3480,10 +3496,13 @@ table {
     --thumb-size: 120px;
     min-width: calc(var(--s) * 2 + var(--thumb-size));
     width: 100%;
-    padding-block: var(--xs);
 
     .chip-content {
       width: 100%;
+    }
+
+    &:not(.chromeless) {
+      padding-block: var(--xs);
     }
   }
 
@@ -3678,14 +3697,14 @@ table {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  gap: var(--s);
+  gap: var(--xs);
 
   .chip {
     margin: 0 !important;
   }
 }
 
-.elements.inline-chips {
+.elements.inline-chips.chips-large {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
@@ -3751,6 +3770,7 @@ table {
     display: flex;
     flex: 0 0 128px;
     width: 128px;
+    aspect-ratio: 1/1;
     overflow: hidden;
     align-self: start;
     border-radius: var(--small-border-radius);
@@ -4053,8 +4073,12 @@ table {
 
   &.main {
     .source-path {
-      margin-block: -22px 24px;
+      margin-block: calc(var(--padding) * -1 + 2px) 24px;
       margin-inline: calc(var(--padding) * -1 + 2px);
+
+      & + .elements > .tablepane {
+        margin-block-start: calc(var(--xl) * -1 + 2px);
+      }
     }
 
     .inline-editing {
@@ -4202,6 +4226,11 @@ table {
 
   // table views
   .tableview {
+    th,
+    td {
+      height: 34px;
+    }
+
     th {
       .move,
       .toggle {
@@ -4234,10 +4263,6 @@ table {
       .enabled-label {
         margin-inline-start: var(--xs);
       }
-    }
-
-    .chip {
-      background-color: transparent;
     }
 
     tr.disabled {
@@ -4291,15 +4316,6 @@ table {
 
     .chip-content {
       max-width: 100%;
-    }
-  }
-}
-
-.tableview {
-  .inline-chips {
-    .chip {
-      padding: 0;
-      background-color: transparent;
     }
   }
 }
@@ -5472,7 +5488,8 @@ table.data tbody tr:not(.disabled).active-drop-target {
 
   .pane &,
   .slideout &,
-  #content & {
+  #content &,
+  .lp-content & {
     border: 1px solid var(--hairline-color);
     background: var(--secondary-pane-bg);
     box-shadow: none;
@@ -5854,7 +5871,7 @@ $min2ColWidth: 400px;
   --heading-width: 150px;
 
   #details & {
-    --heading-width: 126px;
+    --heading-width: 132px;
   }
 
   &,
@@ -5874,8 +5891,12 @@ $min2ColWidth: 400px;
         padding-inline-start linear 100ms,
         padding-inline-end linear 100ms;
 
-      &.nested > .heading {
-        padding-inline-start: calc(var(--m) * 2);
+      &.nested {
+        padding-inline-start: 38px;
+
+        & > .heading {
+          padding-inline-start: 10px;
+        }
       }
 
       &.add {
@@ -5883,8 +5904,9 @@ $min2ColWidth: 400px;
 
         &::before {
           position: absolute;
+          inset-block-start: var(--m);
           inset-inline-start: 0;
-          width: 31px;
+          width: 48px;
           text-align: end;
           @include mixins.icon;
           content: 'plus';
@@ -5964,6 +5986,12 @@ $min2ColWidth: 400px;
         width: calc(100% - var(--heading-width));
         padding-inline: var(--s) var(--m);
       }
+
+      // Fixes https://github.com/craftcms/cms/issues/16473
+      // h/t https://stackoverflow.com/a/66689926/1688568
+      > * {
+        min-width: 0;
+      }
     }
 
     & > .data > .value {
@@ -6035,11 +6063,11 @@ $min2ColWidth: 400px;
 
             @media screen and (min-width: $min2ColWidth) {
               margin-inline: calc(var(--s) * -1) 0;
-              padding-inline-start: var(--m);
+              padding-inline-start: var(--s);
             }
 
             &:placeholder-shown + div[data-icon] {
-              inset-inline-start: 6px;
+              inset-inline-start: 1px;
             }
           }
         }
@@ -6077,9 +6105,13 @@ $min2ColWidth: 400px;
       & > ul.errors {
         margin: 0;
         padding-block: 0 6px;
-        padding-inline: 0;
+        padding-inline: 10px;
         width: 100%;
         list-style-type: none;
+
+        @media screen and (min-width: $min2ColWidth) {
+          padding-inline: var(--m);
+        }
       }
 
       & > .clear-btn {
@@ -6364,7 +6396,7 @@ $min2ColWidth: 400px;
       height: 100%;
       max-width: 100%;
       overflow: hidden auto;
-      z-index: 1;
+      z-index: 1001;
 
       body.ltr & {
         transition: inset-inline-end linear 250ms;
@@ -6372,6 +6404,10 @@ $min2ColWidth: 400px;
 
       body.rtl & {
         transition: inset-inline-start linear 250ms;
+      }
+
+      & > fieldset:first-child {
+        margin-block-start: 24px !important;
       }
     }
   }
@@ -7960,6 +7996,7 @@ fieldset {
 }
 
 .field > .instructions,
+.markdown,
   // BC
 .field > .heading > .instructions,
 .checkboxfield .instructions {
@@ -7985,6 +8022,22 @@ fieldset {
 
   li + li {
     margin-block-start: 0.25em;
+  }
+}
+
+// Special adjustments for content formatted via Markdown
+.markdown {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-block-end: 0.3em;
+  }
+
+  p {
+    margin-block: 0.25em;
   }
 }
 
@@ -8343,6 +8396,7 @@ td.errors .text,
 .input.errors > .border-box,
 .input.errors > .passwordwrapper,
 .input.errors > .autosuggest-container .text,
+.input.errors > .datetimewrapper .text,
 .text.error {
   border: 1px solid var(--error-color) !important;
 }
@@ -8855,8 +8909,6 @@ body {
   position: fixed;
   inset-block-start: -300px;
   margin-inline-start: 1px;
-  width: 210px;
-  height: 242px;
   z-index: 101 !important;
 }
 

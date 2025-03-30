@@ -39,7 +39,7 @@ use yii\di\Instance;
 /**
  * Image Transforms service.
  *
- * An instance of the service is available via [[\craft\base\ApplicationTrait::getImageTransforms()|`Craft::$app->imageTransforms`]].
+ * An instance of the service is available via [[\craft\base\ApplicationTrait::getImageTransforms()|`Craft::$app->getImageTransforms()`]].
  *
  * @property-read ImageTransform[] $allTransforms
  * @property-read array $pendingTransformIndexIds
@@ -427,6 +427,8 @@ class ImageTransforms extends Component
                     'class' => ImageTransform::class,
                         ...$refTransform->toArray(),
                 ]);
+
+                unset($transform->name, $transform->handle);
 
                 if ($sizeUnit === 'w') {
                     $transform->width = (int)$sizeValue;
