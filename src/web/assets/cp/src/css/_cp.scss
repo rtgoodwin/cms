@@ -828,6 +828,8 @@ li.breadcrumb-toggle-wrapper {
     }
 
     .notification-main {
+      margin: -10px;
+      padding: 10px;
       overflow: hidden;
     }
 
@@ -845,10 +847,6 @@ li.breadcrumb-toggle-wrapper {
 
       .notification-details {
         margin-block-start: var(--xs);
-
-        .chip {
-          border: 1px solid mixins.$hairlineColor;
-        }
       }
     }
 
@@ -875,12 +873,9 @@ li.breadcrumb-toggle-wrapper {
       background: var(--white);
     }
 
-    .notification-main {
-      margin-block-end: -10px;
-    }
-
     .copied-elements {
       overflow: hidden;
+      margin-block-end: -10px;
       padding-block-end: 10px;
       position: relative;
       pointer-events: none;

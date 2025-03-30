@@ -1,3 +1,5 @@
+{% from '_includes/forms.twig' import button %}
+
 {% set entryType = entry.getType() %}
 {% set singleType = singleType ?? entryTypes|length == 1 %}
 {% set entryTypeName = entryType.name|t('site') %}
@@ -215,19 +217,26 @@
       </div>
 
       <div class="checkbox" title="{{ 'Select'|t('app') }}" aria-label="{{ 'Select'|t('app') }}" tabindex="0" role="checkbox" aria-checked="false"></div>
-      <div>
-        {{ disclosureMenu(actionMenuItems, {
-          hiddenLabel: 'Actions'|t('app'),
-          buttonAttributes: {
-            class: ['action-btn'],
-            title: 'Actions'|t('app'),
-            data: {
-              'disclosure-trigger': true,
-            },
+      {{ disclosureMenu(actionMenuItems, {
+        hiddenLabel: 'Actions'|t('app'),
+        buttonAttributes: {
+          class: ['action-btn', 'small'],
+          title: 'Actions'|t('app'),
+          data: {
+            'disclosure-trigger': true,
           },
-        }) }}
-      </div>
-      <a class="move icon" title="{{ 'Reorder'|t('app') }}"></a>
+        },
+      }) }}
+      {{ button({
+        class: ['chromeless', 'small', 'move-btn'],
+        icon: 'move',
+        attributes: {
+          title: 'Reorder'|t('app'),
+          aria: {label: 'Reorder'|t('app')},
+          role: 'none',
+          tabindex: '-1',
+        },
+      }) }}
     </div>
   {% endif %}
   <div class="fields">

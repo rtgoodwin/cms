@@ -1126,7 +1126,7 @@ JS, [
                 return static::disclosureMenu($actionMenuItems, [
                     'hiddenLabel' => Craft::t('app', 'Actions'),
                     'buttonAttributes' => [
-                        'class' => ['action-btn'],
+                        'class' => ['action-btn', 'small'],
                         'removeClass' => 'menubtn',
                         'data' => ['icon' => 'ellipsis'],
                     ],

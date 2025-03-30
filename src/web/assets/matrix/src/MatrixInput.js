@@ -69,7 +69,8 @@
         const collapsedEntries = Craft.MatrixInput.getCollapsedEntryIds();
 
         this.entrySort = new Garnish.DragSort($entries, {
-          handle: '> .actions > .move',
+          handle: '> .actions > .move-btn',
+          ignoreHandleSelector: null,
           axis: 'y',
           filter: () => {
             // Only return all the selected items if the target item is selected
@@ -627,7 +628,7 @@
         this.tabManager = Craft.MatrixInput.initTabs(this.$tabContainer);
       }
 
-      const $actionMenuBtn = this.$container.find('> .actions .action-btn');
+      const $actionMenuBtn = this.$container.find('> .actions > .action-btn');
       const actionDisclosure =
         $actionMenuBtn.data('disclosureMenu') ||
         new Garnish.DisclosureMenu($actionMenuBtn);
