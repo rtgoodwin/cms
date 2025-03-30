@@ -1032,7 +1032,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
 
       for (const {$inputElement} of elements) {
-        $inputElement.css('visibility', 'visible');
+        $inputElement.css('visibility', '');
       }
     },
 

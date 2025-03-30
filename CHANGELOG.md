@@ -12,6 +12,7 @@
 - Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
 - Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
+- Fixed a bug where newly-added elements within relational fields were getting shown twice when dragged.
 - Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
 
 ## 5.6.13 - 2025-03-19
