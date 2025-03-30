@@ -264,10 +264,11 @@ class Range extends Field implements InlineEditableFieldInterface, SortableField
     public function previewPlaceholderHtml(mixed $value, ?ElementInterface $element): string
     {
         if (!$value) {
-            if ($this->step !== 0) {
-                $value = mt_rand($this->min / $this->step, $this->max / $this->step) * $this->step;
+            if ($this->step === 0) {
+                // Zero is not really a valid HTML `step` attribute value, and we definitely can’t divide by it:
+                $value = mt_rand($this->min, $this->max);
             } else {
-                $value = 1234;
+                $value = mt_rand($this->min / $this->step, $this->max / $this->step) * $this->step;
             }
         }
 
