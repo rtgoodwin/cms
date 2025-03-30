@@ -729,7 +729,7 @@ JS, [
 
         $thumb = $element->getThumbHtml(120);
         $icon = $element instanceof Iconic ? $element->getIcon() : null;
-        $titlebarLabel = $element->getCardTitlebarLabel();
+        $title = $element->getCardTitle();
 
         $html = Html::beginTag('div', $attributes) .
             Html::beginTag('div', ['class' => 'card-titlebar']) .
@@ -744,7 +744,7 @@ JS, [
                 ]),
                 'aria' => ['hidden' => true],
             ]) : '') .
-            ($titlebarLabel ? Html::tag('div', Html::encode($titlebarLabel), ['class' => 'card-titlebar-label']) : '') .
+            ($title ? Html::tag('div', Html::encode($title), ['class' => 'card-titlebar-label']) : '') .
             Html::endTag('div') . // .flex
             ($status ?? '') .
             Html::beginTag('div', ['class' => 'card-actions-container']) .

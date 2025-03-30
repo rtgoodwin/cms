@@ -3561,7 +3561,7 @@ abstract class Element extends Component implements ElementInterface
     /**
      * @inheritdoc
      */
-    public function getCardTitlebarLabel(): ?string
+    public function getCardTitle(): ?string
     {
         return null;
     }

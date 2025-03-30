@@ -890,7 +890,7 @@ interface ElementInterface extends
      * @return string|null
      * @since 5.7.0
      */
-    public function getCardTitlebarLabel(): ?string;
+    public function getCardTitle(): ?string;
 
     /**
      * Returns the body HTML for element cards.
