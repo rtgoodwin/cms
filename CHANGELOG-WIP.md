@@ -8,7 +8,7 @@
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - The success notification displayed after an asset move now includes an “Undo” button, if less than 50 assets/50MB were involved in the move. ([#16908](https://github.com/craftcms/cms/pull/16908))
-- Plain Text fields no longer show the remaining charater counter when displayed statically.
+- Plain Text fields no longer show the remaining character counter when displayed statically.
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
 - User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
