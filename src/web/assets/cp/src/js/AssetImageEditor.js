@@ -2446,9 +2446,32 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleKeyDown: function (ev) {
       const {target} = ev;
 
-      const cropper = this.croppingCanvas && target.closest('#cropping-canvas');
+      if (!target.closest('#cropping-canvas')) return;
 
-      if (cropper) {
+      event.preventDefault();
+
+      if (this.focalPoint) {
+        // Find current focal point position
+        let x = this.focalPoint.left;
+        let y = this.focalPoint.top;
+
+        switch (ev.keyCode) {
+          case Garnish.LEFT_KEY:
+          case Garnish.UP_KEY:
+            const $prevTab = this._getPrevTab();
+            this.activateTab($prevTab);
+            break;
+          case Garnish.RIGHT_KEY:
+          case Garnish.DOWN_KEY:
+            break;
+        }
+        console.log()
+        const newFocalPoint = {
+          x: this.focalPoint.left,
+          y: this.focalPoint.top,
+        };
+
+      } else if (this.croppingCanvas) {
         console.log('move cropper');
       }
     },
@@ -2802,6 +2825,61 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           top: this.focalPoint.top + this._handleFocalDrag._.deltaY,
         });
       }
+    },
+
+    _handleFocalMove: function (coords) {
+
+      // if (typeof this._handleFocalDrag._ === 'undefined') {
+      //   this._handleFocalDrag._ = {};
+      // }
+      //
+      // if (this.focalPoint) {
+      //   this._handleFocalDrag._.deltaX = ev.pageX - this.previousMouseX;
+      //   this._handleFocalDrag._.deltaY = ev.pageY - this.previousMouseY;
+      //
+      //   if (
+      //     this._handleFocalDrag._.deltaX === 0 &&
+      //     this._handleFocalDrag._.deltaY === 0
+      //   ) {
+      //     return;
+      //   }
+      //
+      //   this._handleFocalDrag._.newX =
+      //     this.focalPoint.left + this._handleFocalDrag._.deltaX;
+      //   this._handleFocalDrag._.newY =
+      //     this.focalPoint.top + this._handleFocalDrag._.deltaY;
+      //
+      //   // Just make sure that the focal point stays inside the image
+      //   if (this.currentView === 'crop') {
+      //     if (
+      //       !this.arePointsInsideRectangle(
+      //         [
+      //           {
+      //             x: this._handleFocalDrag._.newX,
+      //             y: this._handleFocalDrag._.newY,
+      //           },
+      //         ],
+      //         this.imageVerticeCoords
+      //       )
+      //     ) {
+      //       return;
+      //     }
+      //   } else {
+      //     if (
+      //       !this.isPointInsideViewport({
+      //         x: this._handleFocalDrag._.newX,
+      //         y: this._handleFocalDrag._.newY,
+      //       })
+      //     ) {
+      //       return;
+      //     }
+      //   }
+      //
+      //   this.focalPoint.set({
+      //     left: this.focalPoint.left + this._handleFocalDrag._.deltaX,
+      //     top: this.focalPoint.top + this._handleFocalDrag._.deltaY,
+      //   });
+      // }
     },
 
     /**
