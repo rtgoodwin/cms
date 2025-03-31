@@ -1076,11 +1076,15 @@ JS, [
 
         // the inner span is needed for `text-overflow: ellipsis` (e.g. within breadcrumbs)
         if ($content !== '') {
-            if ($config['hyperlink'] ?? true) {
+            if (
+                ($config['hyperlink'] ?? true) &&
+                !$element->trashed &&
+                $config['context'] !== 'modal' &&
+                ($url = $attributes['data']['cp-url'] ?? null)
+            ) {
                 $content = Html::tag('a', Html::tag('span', $content), [
                     'class' => ['label-link'],
-                    'href' => !$element->trashed && $config['context'] !== 'modal'
-                        ? ($attributes['data']['cp-url'] ?? null) : null,
+                    'href' => $url,
                 ]);
             } else {
                 $content = Html::tag('span', $content, ['class' => 'label-link']);
