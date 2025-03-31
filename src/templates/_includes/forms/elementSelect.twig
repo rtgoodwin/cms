@@ -11,6 +11,7 @@
 {% set criteria = criteria ?? null -%}
 {% set sourceElementId = sourceElementId ?? null -%}
 {% set storageKey = storageKey ?? null -%}
+{% set defaultPlacement = defaultPlacement ?? 'end' %}
 {% set viewMode = viewMode ?? 'list' %}
 {% set prevalidate = prevalidate ?? false %}
 {% set fieldId = fieldId ?? null %}
@@ -110,6 +111,7 @@
         branchLimit: branchLimit ?? null,
         sourceElementId: sourceElementId,
         disabledElementIds: disabledElementIds ?? null,
+        defaultPlacement,
         viewMode: viewMode,
         single: single,
         limit: limit,

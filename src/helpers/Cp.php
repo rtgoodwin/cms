@@ -42,6 +42,7 @@ use craft\utilities\ProjectConfig as ProjectConfigUtility;
 use craft\utilities\Updates;
 use craft\web\twig\TemplateLoaderException;
 use craft\web\View;
+use DateTime;
 use Illuminate\Support\Collection;
 use yii\base\Event;
 use yii\base\InvalidArgumentException;
@@ -104,10 +105,10 @@ class Cp
     public const CHIP_SIZE_LARGE = 'large';
 
     /**
-     * @var Site|false
+     * @var Site|false|null
      * @see requestedSite()
      */
-    private static Site|false $_requestedSite;
+    private static Site|false|null $_requestedSite = null;
 
     /**
      * Renders a control panel template.
@@ -715,9 +716,8 @@ class Cp
             ($config['sortable'] ? Html::button('', [
                 'class' => ['move', 'icon'],
                 'title' => Craft::t('app', 'Reorder'),
-                'aria' => [
-                    'label' => Craft::t('app', 'Reorder'),
-                ],
+                'role' => 'none',
+                'tabindex' => '-1',
             ]) : '') .
             Html::endTag('div') . // .card-actions
             Html::endTag('div'); // .card-actions-container
@@ -941,9 +941,10 @@ class Cp
                     'level' => $element->level,
                     'trashed' => $element->trashed,
                     'editable' => $editable,
-                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element),
-                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element),
-                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element),
+                    'savable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canSave($element, $user),
+                    'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
+                    'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
+                    'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
                 ]),
             ],
         );
@@ -1041,7 +1042,8 @@ class Cp
                 foreach ($actionMenuItems as &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
                         $item['attributes']['data']['edit-action'] = true;
-                        break;
+                    } elseif (str_starts_with($item['id'] ?? '', 'action-copy-')) {
+                        $item['attributes']['data']['copy-action'] = true;
                     }
                 }
 
@@ -1262,6 +1264,7 @@ class Cp
             ])
             ->values()
             ->all();
+        $sortOptionsKey = 'baseSortOptions';
 
         $tableColumns = Craft::$app->getElementSources()->getAvailableTableAttributes($elementType);
 
@@ -1349,6 +1352,9 @@ class Cp
                         'defaultDir' => $option['defaultDir'],
                     ], $elementSourcesService->getSortOptionsForFieldLayouts($config['fieldLayouts'])),
                 );
+                // Don't let sources.twig merge sortOptions with anything else!
+                $sortOptionsKey = 'sortOptions';
+
                 $tableColumns = array_merge(
                     $tableColumns,
                     $elementSourcesService->getTableAttributesForFieldLayouts($config['fieldLayouts']),
@@ -1409,7 +1415,7 @@ JS, [
             Html::tag('nav', $view->renderTemplate('_elements/sources', [
                 'elementType' => $elementType,
                 'sources' => $sources,
-                'baseSortOptions' => $sortOptions,
+                $sortOptionsKey => $sortOptions,
                 'tableColumns' => $tableColumns,
                 'defaultTableColumns' => $config['defaultTableColumns'],
             ], View::TEMPLATE_MODE_CP)) .
@@ -1696,6 +1702,19 @@ JS, [
             ]) .
             Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
+    }
+
+    /**
+     * Renders a button’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException
+     * @since 5.7.0
+     */
+    public static function buttonHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/button.twig', $config);
     }
 
     /**
@@ -2545,6 +2564,7 @@ JS, [
         $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
 
         // get remaining attributes
+        /** @var class-string<ElementInterface> $elementType */
         $elementType = new ($fieldLayout['type']);
         $remainingItems = $elementType::cardAttributes();
         foreach ($remainingItems as $key => $cardAttributes) {
@@ -2805,7 +2825,18 @@ JS;
         // Don't call FieldLayout::getConfig() here because we want to include *all* tabs, not just non-empty ones
         $fieldLayoutConfig = [
             'uid' => $fieldLayout->uid,
-            'tabs' => array_map(fn(FieldLayoutTab $tab) => $tab->getConfig(), $tabs),
+            'tabs' => array_map(function(FieldLayoutTab $tab) {
+                $config = $tab->getConfig();
+                foreach ($config['elements'] as &$elementConfig) {
+                    if (!isset($elementConfig['dateAdded'])) {
+                        // Default `dateAdded` to a minute ago, so there’s no chance that an element that predated 5.3 would get
+                        // the same timestamp as a newly-added element, if the layout was saved within a minute of being edited,
+                        // after updating to Craft 5.3+.
+                        $elementConfig['dateAdded'] = DateTimeHelper::toIso8601((new DateTime())->modify('-1 minute'));
+                    }
+                }
+                return $config;
+            }, $tabs),
         ];
 
         if ($fieldLayout->id) {
@@ -3299,14 +3330,18 @@ JS;
      *
      * System icons can be found in `src/icons/solid/`.
      *
-     * @param string $icon
+     * @param string|null $icon
      * @param string|null $fallbackLabel
      * @param string|null $altText
-     * @return string
+     * @return string|null
      * @since 5.0.0
      */
-    public static function iconSvg(string $icon, ?string $fallbackLabel = null, ?string $altText = null): string
+    public static function iconSvg(?string $icon, ?string $fallbackLabel = null, ?string $altText = null): ?string
     {
+        if ($icon === null) {
+            return null;
+        }
+
         $locale = Craft::$app->getLocale();
         $orientation = $locale->getOrientation();
         $attributes = [
@@ -3378,7 +3413,7 @@ JS;
 
         try {
             // system icon name?
-            if (preg_match('/^[a-z\-]+(\d?)$/', $icon)) {
+            if (preg_match('/^[\da-z\-]+$/', $icon)) {
                 $path = match ($icon) {
                     'asterisk-slash',
                     'diamond-slash',
@@ -3527,5 +3562,15 @@ JS;
                 'Changes to these settings aren’t permitted in this environment.',
             )) .
             Html::endTag('div');
+    }
+
+    /**
+     * Resets [[requestedSite()]].
+     *
+     * @since 5.7.0
+     */
+    public static function reset(): void
+    {
+        self::$_requestedSite = null;
     }
 }

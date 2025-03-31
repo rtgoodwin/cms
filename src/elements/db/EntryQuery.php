@@ -950,6 +950,11 @@ class EntryQuery extends ElementQuery implements NestedElementQueryInterface
 
     private function loadAuthorIds(array $entries): void
     {
+        $entries = array_filter($entries, fn(Entry $entry) => isset($entry->sectionId));
+        if (empty($entries)) {
+            return;
+        }
+
         /** @var Entry[][] $indexedEntries */
         $indexedEntries = ArrayHelper::index($entries, null, [
             fn(Entry $entry) => $entry->id,

@@ -648,7 +648,7 @@ class Entries extends Component
             $sectionRecord->handle = $data['handle'];
             $sectionRecord->type = $data['type'];
             $sectionRecord->enableVersioning = (bool)$data['enableVersioning'];
-            $sectionRecord->maxAuthors = $data['maxAuthors'] ?? 1;
+            $sectionRecord->maxAuthors = $data['maxAuthors'] ?? null;
             $sectionRecord->propagationMethod = $data['propagationMethod'] ?? PropagationMethod::All->value;
             $sectionRecord->defaultPlacement = $data['defaultPlacement'] ?? Section::DEFAULT_PLACEMENT_END;
             $sectionRecord->previewTargets = isset($data['previewTargets']) && is_array($data['previewTargets'])

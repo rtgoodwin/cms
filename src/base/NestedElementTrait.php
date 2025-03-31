@@ -37,14 +37,9 @@ trait NestedElementTrait
         switch ($handle) {
             case 'owner':
             case 'primaryOwner':
-                /** @var array<NestedElementInterface&self> $sourceElements */
-                $ownerType = $sourceElements[0]->ownerType();
-                if (!$ownerType) {
-                    return false;
-                }
-
+                /** @phpstan-ignore-next-line */
                 return [
-                    'elementType' => $ownerType,
+                    /** @phpstan-ignore-next-line */
                     'map' => array_filter(array_map(function(NestedElementInterface $element) use ($handle) {
                         $ownerId = match ($handle) {
                             'owner' => $element->getOwnerId(),
