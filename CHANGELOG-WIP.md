@@ -9,6 +9,7 @@
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - The success notification displayed after an asset move now includes an “Undo” button, if less than 50 assets/50MB were involved in the move. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - Plain Text fields no longer show the remaining character counter when displayed statically.
+- Color field previews now show the selected color’s label if there is one, rather than the hex value. ([#16985](https://github.com/craftcms/cms/pull/16985))
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
 - Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
 - User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
@@ -42,6 +43,7 @@
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
+- Color previews within card attribute designers now show a value from the color palette. ([#16985](https://github.com/craftcms/cms/pull/16985))
 - Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
 - Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
