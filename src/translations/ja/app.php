@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'アセットがファイルシステムで保管される場所。',
     'Where assets should be stored when they are uploaded directly to the field.' => 'アセットがフィールドに直接アップロードされる場合に保存される場所。',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'ユーザーの写真を保存する場所はどこにしますか？サブフォルダーのパスには、<code>{username}</code> などの変数を含めることができます。',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'デフォルトでストラクチャーに新しい{type}を配置する場所。',
     'Where transforms should be stored on the filesystem.' => '変換がファイルシステムで保管される場所。',
     'Whether authors should be able to choose which time zone the time is in.' => '投稿者が使用するタイムゾーンを選ぶことかできるかどうか。',

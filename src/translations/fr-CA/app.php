@@ -2000,6 +2000,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Où les ressources doivent être stockées dans le système de fichiers.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Où les ressources doivent être stockées lorsqu’elles sont téléversées directement dans le champ.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Où souhaitez-vous stocker les photos des utilisateurs? Prenez note que le chemin d’accès au sous-dossier peut contenir des variables comme <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Où le nouveau {type} doit être placé par défaut dans la structure.',
     'Where transforms should be stored on the filesystem.' => 'Où les transformations doivent être stockées dans le système de fichiers.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Les auteurs doivent-ils pouvoir choisir le fuseau horaire?',

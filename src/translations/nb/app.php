@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Hvor aktiva skal lagres i filsystemet.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Hvor filer skal lagres når de lastes direkte til feltet.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Hvor ønsker du å lagre brukerbildene? Husk at filbanen til undermapper kan inneholde variabler som <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Hvor nye {type} skal plasseres som standard i strukturen.',
     'Where transforms should be stored on the filesystem.' => 'Hvor transformasjoner skal lagres i filsystemet.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Hvorvidt forfattere skal kunne velge hvilken tidssone de er i.',

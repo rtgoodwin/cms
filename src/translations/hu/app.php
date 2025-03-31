@@ -1999,6 +1999,7 @@ return [
     'Where assets should be stored on the filesystem.' => 'Hol tárolja a tartalmakat a fájlrendszerben.',
     'Where assets should be stored when they are uploaded directly to the field.' => 'Hol tárolja a tartalmakat, amelyeket közvetlenül a mezőbe töltenek fel.',
     'Where do you want to store user photos? Note that the subfolder path can contain variables like <code>{username}</code>.' => 'Hol szeretnéd tárolni a felhasználó fényképeit? Az almappa elérési útja a következőhöz hasonló változókat tartalmazhat: <code>{username}</code>.',
+    'Where new {type} should be placed by default in the field.' => 'Where new {type} should be placed by default in the field.',
     'Where new {type} should be placed by default in the structure.' => 'Meghatározza, hogy alapértelmezés szerint hol legyen elhelyezve az új {type}.',
     'Where transforms should be stored on the filesystem.' => 'Hol tárolja a transzformációkat a fájlrendszerben.',
     'Whether authors should be able to choose which time zone the time is in.' => 'Meghatározza, hogy a szerzők kiválaszthassák-e az időpont időzónáját.',
