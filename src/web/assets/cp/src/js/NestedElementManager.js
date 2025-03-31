@@ -865,6 +865,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
                     ui: 'card',
                     sortable: this.settings.sortable,
                     showActionMenu: true,
+                    hyperlink: false,
                   },
                 ],
               })),
