@@ -16,6 +16,7 @@ use craft\elements\Entry;
 use craft\gql\arguments\elements\Entry as EntryArguments;
 use craft\gql\interfaces\elements\Entry as EntryInterface;
 use craft\gql\resolvers\elements\Entry as EntryResolver;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Gql;
 use craft\helpers\Gql as GqlHelper;
@@ -32,6 +33,13 @@ use GraphQL\Type\Definition\Type;
  */
 class Entries extends BaseRelationField
 {
+
+    /**
+     * @var bool Whether to show Entries for Sections the user doesn’t have permission to view.
+     * @since 5.x
+     */
+    public bool $showUnpermittedSections = true;
+
     /**
      * @inheritdoc
      */
@@ -161,5 +169,39 @@ class Entries extends BaseRelationField
         $mockup->sectionId = $section->id;
 
         return Cp::chipHtml($mockup);
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    public function getInputSources(?ElementInterface $element = null): array|string|null
+    {
+        // Enforce the showUnpermittedSections setting
+        if (! $this->showUnpermittedSections) {
+            $userService = Craft::$app->getUser();
+            return ArrayHelper::where($this->sources, function(string $source) use ($userService) {
+                // Only show it if they have permission to view it
+                $sectionUid = explode(':', $source)[1];
+                if ($userService->checkPermission("viewEntries:$sectionUid")) {
+                    return true;
+                }
+                return false;
+            }, true, true, false);
+        }
+        return $this->sources;
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    public function getShowUnpermittedHtml(): string|null
+    {
+        return Cp::lightswitchFieldHtml([
+            'label'        => Craft::t('app', 'Show unpermitted sections'),
+            'instructions' => Craft::t('app', 'Whether to show sections that the user doesn’t have permission to view.'),
+            'id'           => 'showUnpermittedSections',
+            'name'         => 'showUnpermittedSections',
+            'on'           => $this->showUnpermittedSections,
+        ]);
     }
 }

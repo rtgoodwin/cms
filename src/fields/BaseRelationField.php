@@ -1373,11 +1373,16 @@ JS, [
             ]);
         }
 
+        if ($showUnpermitted = $this->getShowUnpermittedHtml()) {
+            $showUnpermittedHtml = $showUnpermitted;
+        }
+
         return [
             'field' => $this,
             'elementType' => $elementType::lowerDisplayName(),
             'pluralElementType' => $elementType::pluralLowerDisplayName(),
             'selectionCondition' => $selectionConditionHtml ?? null,
+            'showUnpermitted' => $showUnpermittedHtml ?? null,
         ];
     }
 
@@ -1545,6 +1550,17 @@ JS, [
      * @since 4.0.0
      */
     protected function createSelectionCondition(): ?ElementConditionInterface
+    {
+        return null;
+    }
+
+    /**
+     * Returns the field's config html that determines whether to show related Elements the user doesn’t have permission to view.
+     *
+     * @return string|null
+     * @since 5.x
+     */
+    public function getShowUnpermittedHtml(): string|null
     {
         return null;
     }

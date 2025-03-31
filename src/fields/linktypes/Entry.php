@@ -9,7 +9,9 @@ namespace craft\fields\linktypes;
 
 use Craft;
 use craft\elements\Entry as EntryElement;
+use craft\helpers\Cp;
 use craft\models\Section;
+use Illuminate\Support\Collection;
 
 /**
  * Entry link type.
@@ -19,9 +21,30 @@ use craft\models\Section;
  */
 class Entry extends BaseElementLinkType
 {
+
+    /**
+     * @var bool Whether to show Entries for Sections the user doesn’t have permission to view.
+     * @since 5.x
+     */
+    public bool $showUnpermittedSections = true;
+
     protected static function elementType(): string
     {
         return EntryElement::class;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getShowUnpermittedSettingHtml(): ?string
+    {
+        return Cp::lightswitchFieldHtml([
+            'label' => Craft::t('app', 'Show unpermitted sections'),
+            'instructions' => Craft::t('app', 'Whether to show sections that the user doesn’t have permission to view.'),
+            'id' => 'showUnpermittedSections',
+            'name' => 'showUnpermittedSections',
+            'on' => $this->showUnpermittedSections,
+        ]);
     }
 
     protected function availableSourceKeys(): array
@@ -56,5 +79,33 @@ class Entry extends BaseElementLinkType
         }
 
         return $sources;
+    }
+
+    /**
+     * @inerhitdoc
+     */
+    protected function elementSelectConfig(): array
+    {
+        $config = parent::elementSelectConfig();
+
+        if(! $this->showUnpermittedSections) {
+            $sourceKeys = $this->sources ?? Collection::make($this->availableSources())
+                ->map(fn(array $source) => $source['key'])
+                ->all();
+            $userService = Craft::$app->getUser();
+            $config['sources'] = Collection::make($sourceKeys)
+                ->filter(function(string $source) use ($userService) {
+                    // If it's the wildcard, let it through
+                    if ($source === '*') {
+                        return true;
+                    }
+                    // Only show it if they have permission to view it
+                    $sectionUid = explode(':', $source)[1];
+                    return $userService->checkPermission("viewEntries:$sectionUid");
+                })
+                ->all();
+        }
+
+        return $config;
     }
 }
