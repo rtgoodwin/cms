@@ -421,7 +421,10 @@ class Cp
         } elseif ($config['showLabel']) {
             $labelHtml = Html::encode($component->getUiLabel());
             if ($config['hyperlink'] && $component instanceof CpEditable) {
-                $labelHtml = Html::a($labelHtml, $component->getCpEditUrl());
+                $url = $component->getCpEditUrl();
+                if ($url) {
+                    $labelHtml = Html::a($labelHtml, $url);
+                }
             }
             $labelHtml = Html::tag('div', $labelHtml);
             if ($config['showHandle']) {
