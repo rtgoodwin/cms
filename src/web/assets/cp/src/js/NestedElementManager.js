@@ -585,6 +585,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
       setTimeout(() => {
         const actionDisclosure = $element
           .find('.action-btn')
+          .disclosureMenu()
           .data('disclosureMenu');
 
         if (actionDisclosure) {
