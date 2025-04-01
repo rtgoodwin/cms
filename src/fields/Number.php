@@ -399,7 +399,19 @@ JS;
     public function previewPlaceholderHtml(mixed $value, ?ElementInterface $element): string
     {
         if (!$value) {
-            $value = 1234;
+            if (isset($this->min, $this->max)) {
+                $min = $this->min * (10 ^ $this->decimals);
+                $max = $this->max * (10 ^ $this->decimals);
+                if ($this->step) {
+                    $step = $this->step * (10 ^ $this->decimals);
+                    $value = mt_rand($min / $step, $max / $step) * $step;
+                } else {
+                    $value = mt_rand($min, $max);
+                }
+                $value /= 10 ^ $this->decimals;
+            } else {
+                $value = 1234;
+            }
         }
 
         return $this->getPreviewHtml($value, $element ?? new Entry());
