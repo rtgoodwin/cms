@@ -657,6 +657,7 @@ return [
     'Emerald' => 'زمردي',
     'Emirate' => 'الإمارة',
     'Enable focal point' => 'تنشيط النقطة المحورية',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'تمكين عمل الإصدارات للإدخالات في هذا القسم',
     'Enable' => 'تمكين',
     'Enabled for all sites' => 'مفعَّل لكل المواقع',

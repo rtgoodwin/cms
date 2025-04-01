@@ -657,6 +657,7 @@ return [
     'Emerald' => 'สีมรกต',
     'Emirate' => 'เอมิเรตส์',
     'Enable focal point' => 'เปิดจุดโฟกัส',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'เปิดใช้การควบคุมเวอร์ชันสำหรับรายการในส่วนนี้',
     'Enable' => 'เปิดใช้งาน',
     'Enabled for all sites' => 'เปิดใช้งานสำหรับทุกเว็บไซต์',

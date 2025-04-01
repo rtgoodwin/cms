@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Emerald',
     'Emirate' => 'Emirate',
     'Enable focal point' => 'Virkja brennipunkt',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Virkja útgáfuútgáfu fyrir færslur í þessu svæði',
     'Enable' => 'Virkja',
     'Enabled for all sites' => 'Virkt fyrir allar síður',

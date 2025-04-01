@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Smaragd',
     'Emirate' => 'Emiraterne',
     'Enable focal point' => 'Aktiver fokuspunkt',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Aktiver versionering for indtastninger i denne sektion',
     'Enable' => 'Aktiver',
     'Enabled for all sites' => 'Aktiveret for alle sites',

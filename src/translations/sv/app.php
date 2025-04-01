@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Smaragd',
     'Emirate' => 'Emirat',
     'Enable focal point' => 'Aktivera fokuspunkt',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Aktivera versionshantering för inlägg i denna sektion',
     'Enable' => 'Aktivera',
     'Enabled for all sites' => 'Aktiverad för alla webbplatser',

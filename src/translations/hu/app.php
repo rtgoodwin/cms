@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Smaragd',
     'Emirate' => 'Emirátus',
     'Enable focal point' => 'Fókuszpont engedélyezése',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Verzióválasztás bekapcsolása a szekció bejegyzéseihez',
     'Enable' => 'Engedélyez',
     'Enabled for all sites' => 'Engedélyezve az összes webhelyhez',

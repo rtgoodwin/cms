@@ -657,6 +657,7 @@ return [
     'Emerald' => 'زمردی',
     'Emirate' => 'امارت',
     'Enable focal point' => 'فعال‌کردن نقاط کانونی',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'فعال کردن ایجاد نسخه برای محتواها در این بخش',
     'Enable' => 'فعال کردن',
     'Enabled for all sites' => 'فعال برای تمام سایت‌ها',
