@@ -657,6 +657,7 @@ return [
     'Emerald' => '에메랄드',
     'Emirate' => '에미레이트',
     'Enable focal point' => '초점 활성화',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => '이 섹션에서 항목의 버전 관리를 활성화하시겠습니까',
     'Enable' => '활성화',
     'Enabled for all sites' => '모든 사이트에 대해 활성화됨',
