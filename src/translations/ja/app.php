@@ -657,6 +657,7 @@ return [
     'Emerald' => 'エメラルド',
     'Emirate' => '首長国',
     'Enable focal point' => '焦点を有効にする',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'このセクションのエントリのバージョン管理を有効にする',
     'Enable' => '有効',
     'Enabled for all sites' => 'すべてのサイトに対して有効',
