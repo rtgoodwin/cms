@@ -18,7 +18,7 @@
 - Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
 - Fixed a bug where newly-added elements within relational fields were getting shown twice when dragged.
 - Fixed a bug where “Set status” bulk element actions could be activated for elements the logged-in user didn’t have permission to edit. ([#16995](https://github.com/craftcms/cms/issues/16995))
-- Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
+- Fixed styling issues. ([#16964](https://github.com/craftcms/cms/issues/16964), [#16993](https://github.com/craftcms/cms/issues/16993))
 
 ## 5.6.13 - 2025-03-19
 
