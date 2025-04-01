@@ -444,11 +444,20 @@ class Color extends Field implements InlineEditableFieldInterface, MergeableFiel
             return '';
         }
 
-        return Html::encodeParams(
-            '<div class="color noteditable"><div class="color-preview" style="background-color: {bgColor};"></div></div><div class="colorhex code">{bgColor}</div>',
-            [
-                'bgColor' => $value->getHex(),
-            ]);
+        $html = Html::beginTag('div', ['class' => ['color', 'noteditable']]) .
+            Html::tag('div', options: [
+                'class' => 'color-preview',
+                'style' => ['background-color' => $value->getHex()],
+            ]) .
+            Html::endTag('div');
+
+        if (isset($value->label)) {
+            $html .= Html::tag('div', Html::encode($value->label), ['class' => 'colorhex']);
+        } else {
+            $html .= Html::tag('div', $value->getHex(), ['class' => ['colorhex', 'code']]);
+        }
+
+        return $html;
     }
 
     /**
