@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Zümrüt',
     'Emirate' => 'Emirlik',
     'Enable focal point' => 'Odak noktasını etkinleştir',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Bu bölümdeki kayıtların sürümlendirilmesini etkinleştir',
     'Enable' => 'Etkinleştir',
     'Enabled for all sites' => 'Tüm siteler için etkinleştirildi',
