@@ -11,6 +11,7 @@
 - Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
 - Fixed a bug where `craft\elements\Asset::getSrcset()` could return malformed results if any sizes didn’t have corresponding image URLs. ([#16984](https://github.com/craftcms/cms/issues/16984))
 - Fixed an error that could occur when uploading images. ([#16977](https://github.com/craftcms/cms/issues/16977))
+- Fixed a bug where the “Save” button on user group edit pages was redirecting to the same page, rather than the User Groups index page. ([#16988](https://github.com/craftcms/cms/issues/16988))
 - Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
 
 ## 4.14.11.1 - 2025-03-19
