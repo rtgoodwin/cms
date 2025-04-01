@@ -9,6 +9,7 @@
 - Fixed a bug where some subdivisions weren’t available when creating addresses. ([#16951](https://github.com/craftcms/cms/issues/16951))
 - Fixed a bug where some older dates could be formatted incorrectly. ([#16953](https://github.com/craftcms/cms/issues/16953))
 - Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
+- Fixed a bug where `craft\elements\Asset::getSrcset()` could return malformed results if any sizes didn’t have corresponding image URLs. ([#16984](https://github.com/craftcms/cms/issues/16984))
 - Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
 
 ## 4.14.11.1 - 2025-03-19
