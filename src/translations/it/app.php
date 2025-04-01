@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Smeraldo',
     'Emirate' => 'Emirato',
     'Enable focal point' => 'Abilita punto focale',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Abilita versioni per gli articoli in questa sezione',
     'Enable' => 'Abilita',
     'Enabled for all sites' => 'Abilitato per tutti i siti',
