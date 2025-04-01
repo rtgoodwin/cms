@@ -657,6 +657,7 @@ return [
     'Emerald' => 'אמרלד',
     'Emirate' => 'אמירות',
     'Enable focal point' => 'הפעל את נקודת המוקד',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'הפעל ניהול גרסאות עבור רשומות בסקשן הזה',
     'Enable' => 'הפעל',
     'Enabled for all sites' => 'מאופשר עבור כל האתרים',
