@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Smaragdová',
     'Emirate' => 'Emirát',
     'Enable focal point' => 'Povolit ohniskový bod',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Zapnout verzování záznamů v této sekci',
     'Enable' => 'Zapnout',
     'Enabled for all sites' => 'Povoleno pro všechny weby',
