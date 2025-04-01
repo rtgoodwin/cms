@@ -3,7 +3,7 @@
 {% set enableFocalPoint = asset.mimeType != 'image/svg+xml' %}
 
 <div id="{{ containerId }}" class="button-fade asset-image-preview">
-    {% if enableFocalPoint %}
+    {% if enableFocalPoint and currentUser and currentUser.can('editImages:'~asset.volume.uid) %}
         <div class="buttons">
             <div class="btn" id="{{ toggleId }}">
             </div>
