@@ -12,6 +12,7 @@
 - Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
 - Fixed a bug where `craft\elements\Asset::getSrcset()` could return malformed results if any sizes didn’t have corresponding image URLs. ([#16984](https://github.com/craftcms/cms/issues/16984))
 - Fixed an error that could occur when uploading images. ([#16977](https://github.com/craftcms/cms/issues/16977))
+- Fixed a bug where the “Save” button on user group edit pages was redirecting to the same page, rather than the User Groups index page. ([#16988](https://github.com/craftcms/cms/issues/16988))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
 - Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
 - Fixed a bug where newly-added elements within relational fields were getting shown twice when dragged.
