@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.14 - 2025-04-01
 
 - Improved the styling of Markdown UI elements. ([#16973](https://github.com/craftcms/cms/pull/16973))
 - Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
