@@ -37,6 +37,7 @@
 - Added an optional “Download” advanced field to Link fields. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added the “SMS” link type for Link fields. ([#16850](https://github.com/craftcms/cms/discussions/16850))
 - Added the “Allow custom URL schemes” setting for Link fields with the “URL” link type enabled. ([#16850](https://github.com/craftcms/cms/discussions/16850))
+- Added the “Enable versioning for entries in this field” setting to Matrix fields. ([#17008](https://github.com/craftcms/cms/pull/17008))
 - Relational fields now have “Default [Type] Placement” settings, which control whether newly-related elements are placed before or after existing relations. ([#16989](https://github.com/craftcms/cms/pull/16989))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
@@ -97,6 +98,10 @@
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\BaseOptionsField::$optionIcons`, which can be set to `true` by subclasses to enable the “Icon” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
+- Added `craft\fields\BaseRelationField::$defaultPlacement`.
+- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_BEGINNING`.
+- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_END`.
+- Added `craft\fields\Matrix::$enableVersioning`.
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 - Added `craft\fields\data\JsonData`.
 - Added `craft\fields\data\LinkData::$download`.
@@ -119,9 +124,6 @@
 - Added `craft\web\CpScreenResponseBehavior::toolbarTemplate()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
-- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_BEGINNING`.
-- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_END`.
-- Added `craft\fields\BaseRelationField::$defaultPlacement`.
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\base\ElementInterface::eagerLoadingMap()` and `craft\base\EagerLoadingFieldInterface::eagerLoadingMap()` can now specify mappings for multiple target element types, or not specify the element types at all. ([#16972](https://github.com/craftcms/cms/pull/16972))
 - `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.  
