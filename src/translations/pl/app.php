@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Szmaragdowy',
     'Emirate' => 'Emirat',
     'Enable focal point' => 'Włącz punkt ogniskowania',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Włączyć wersjonowanie dla wpisów w tej sekcji',
     'Enable' => 'Włącz',
     'Enabled for all sites' => 'Włączone dla wszystkich witryn',
