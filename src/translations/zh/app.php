@@ -657,6 +657,7 @@ return [
     'Emerald' => '翠绿色',
     'Emirate' => '酋长国',
     'Enable focal point' => '启用焦点',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => '对此板块内的条目启用版本控制',
     'Enable' => '启用',
     'Enabled for all sites' => '已为所有站点启用',
