@@ -657,6 +657,7 @@ return [
     'Emerald' => 'Смарагдовий',
     'Emirate' => 'Емірат',
     'Enable focal point' => 'Увімкнути точку фокуса',
+    'Enable versioning for entries in this field' => 'Enable versioning for entries in this field',
     'Enable versioning for entries in this section' => 'Увімкнути керування версіями в цьому розділі',
     'Enable' => 'Увімкнути',
     'Enabled for all sites' => 'Активовано для всіх сайтів',
