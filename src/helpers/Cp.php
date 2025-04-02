@@ -737,7 +737,7 @@ JS, [
         $html = Html::beginTag('div', $attributes) .
             Html::beginTag('div', ['class' => 'card-titlebar']) .
             Html::beginTag('div', [
-                'class' => ['flex', 'flex-nowrap', 'flex-gap-xs'],
+                'class' => ['flex', 'flex-nowrap', 'flex-gap-s'],
             ]) .
             ($icon ? Html::tag('div', Cp::iconSvg($icon), [
                 'class' => array_filter([

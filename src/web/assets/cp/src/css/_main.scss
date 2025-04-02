@@ -3446,6 +3446,13 @@ table {
   color: var(--custom-text-color, var(--text-color));
   overflow: hidden; // needed for status indicators
 
+  --custom-border-color: initial;
+  --custom-titlebar-bg-color: initial;
+  --custom-bg-color: initial;
+  --custom-text-color: initial;
+  --custom-sel-titlebar-bg-color: null;
+  --custom-sel-bg-color: initial;
+
   &:not(.chromeless, .hairline) {
     background-color: var(--custom-bg-color, var(--gray-050));
   }
@@ -3678,11 +3685,6 @@ table {
 .chips,
 .cards {
   display: flex;
-
-  --custom-titlebar-bg-color: initial;
-  --custom-bg-color: initial;
-  --custom-text-color: initial;
-  --custom-sel-bg-color: initial;
 
   &:not(.inline-chips) {
     flex-direction: column;
@@ -9513,6 +9515,13 @@ body.licensing-issues {
 
           [role='tab'] {
             background-color: transparent;
+
+            &.sel {
+              background-color: var(
+                --custom-bg-color,
+                var(--gray-050)
+              ) !important;
+            }
 
             .tab-label {
               height: calc(var(--lh) + 10px);

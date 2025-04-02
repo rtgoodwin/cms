@@ -571,33 +571,33 @@ Craft.NestedElementManager = Garnish.Base.extend(
     },
 
     initElement($element) {
-      const editable = Garnish.hasAttr($element, 'data-editable');
+      setTimeout(() => {
+        const editable = Garnish.hasAttr($element, 'data-editable');
 
-      if (editable) {
-        // "Edit" button
-        const $editBtn = $element.find('.edit-btn');
-        if ($editBtn.length) {
-          // Override the default event listener
-          $editBtn.off('activate');
-          this.addListener($editBtn, 'activate', (ev) => {
-            const cpUrl = $element.data('cpUrl');
-            if (cpUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
-              window.open(cpUrl);
-            } else {
+        if (editable) {
+          // "Edit" button
+          const $editBtn = $element.find('.edit-btn');
+          if ($editBtn.length) {
+            // Override the default event listener
+            $editBtn.off('activate');
+            this.addListener($editBtn, 'activate', (ev) => {
+              const cpUrl = $element.data('cpUrl');
+              if (cpUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
+                window.open(cpUrl);
+              } else {
+                this.createElementEditor($element);
+              }
+            });
+          }
+
+          // Double-clicks
+          this.addListener($element, 'dblclick,taphold', (ev) => {
+            if (!$(ev.target).closest('a[href],button,[role=button]').length) {
               this.createElementEditor($element);
             }
           });
         }
 
-        // Double-clicks
-        this.addListener($element, 'dblclick,taphold', (ev) => {
-          if (!$(ev.target).closest('a[href],button,[role=button]').length) {
-            this.createElementEditor($element);
-          }
-        });
-      }
-
-      setTimeout(() => {
         const actionDisclosure = $element
           .find('.action-btn')
           .disclosureMenu()
