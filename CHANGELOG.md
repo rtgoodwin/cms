@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.14.12 - 2025-04-01
 
 - Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
 - Fixed a bug where Assets fields set to restrict assets to a single location were relocating assets on element propagation. ([#12767](https://github.com/craftcms/cms/issues/12767), [#16936](https://github.com/craftcms/cms/issues/16936))
@@ -12,6 +12,7 @@
 - Fixed a bug where `craft\elements\Asset::getSrcset()` could return malformed results if any sizes didn’t have corresponding image URLs. ([#16984](https://github.com/craftcms/cms/issues/16984))
 - Fixed an error that could occur when uploading images. ([#16977](https://github.com/craftcms/cms/issues/16977))
 - Fixed a bug where the “Save” button on user group edit pages was redirecting to the same page, rather than the User Groups index page. ([#16988](https://github.com/craftcms/cms/issues/16988))
+- Fixed a bug where asset previews had an “Enable focal point” button even if the logged-in user didn’t have permission to save the asset. ([#16997](https://github.com/craftcms/cms/issues/16997))
 - Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
 
 ## 4.14.11.1 - 2025-03-19
