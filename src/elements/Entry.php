@@ -1354,13 +1354,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     /**
      * @inheritdoc
      */
-    public function getCardBodyHtml(): ?string
+    public function getCardTitle(): ?string
     {
-        $html = parent::getCardBodyHtml();
-        if ($html === '') {
-            return Html::tag('div', Html::tag('em', Craft::t('site', $this->getType()->name)));
-        }
-        return $html;
+        return $this->getType()->getUiLabel();
     }
 
     /**
@@ -2120,18 +2116,19 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 return $html;
             case 'section':
                 $section = $this->getSection();
-                return $section ? Html::encode(Craft::t('site', $section->name)) : '';
+                if (!$section) {
+                    return '';
+                }
+                return Cp::chipHtml($section, [
+                    'class' => 'chromeless',
+                    'showThumb' => false,
+                ]);
             case 'type':
                 try {
-                    $config = [
-                        'attributes' => [
-                            'class' => ['chromeless'],
-                        ],
-                    ];
-                    if ($this->viewMode === 'cards') {
-                        $config['showThumb'] = false;
-                    }
-                    return Cp::chipHtml($this->getType(), $config);
+                    return Cp::chipHtml($this->getType(), [
+                        'class' => 'chromeless',
+                        'showThumb' => $this->viewMode !== 'cards',
+                    ]);
                 } catch (InvalidConfigException) {
                     return Craft::t('app', 'Unknown');
                 }

@@ -2515,7 +2515,7 @@ $.extend(Craft, {
           }
           const $actions = $element
             .find(
-              '> .chip-content .chip-actions,> .card-actions-container .card-actions'
+              '> .chip-content .chip-actions, > .card-titlebar > .card-actions-container .card-actions'
             )
             .detach();
           const $inputs = $element.find('input,button').detach();
@@ -2524,7 +2524,7 @@ $.extend(Craft, {
           if ($actions.length) {
             const $oldStatus = $actions.find('span.status');
             const $newStatus = $replacement.find(
-              '> .chip-content .chip-actions span.status,> .card-actions-container .card-actions span.status'
+              '> .chip-content .chip-actions span.status, > .card-titlebar > .card-actions-container .card-actions span.status'
             );
 
             if (
@@ -2537,7 +2537,7 @@ $.extend(Craft, {
 
             $element
               .find(
-                '> .chip-content .chip-actions,> .card-actions-container .card-actions'
+                '> .chip-content .chip-actions, > .card-titlebar > .card-actions-container .card-actions'
               )
               .replaceWith($actions);
           }
@@ -2605,7 +2605,7 @@ $.extend(Craft, {
     }
 
     const $actions = $(chip).find(
-      '> .chip-content > .chip-actions, > .card-actions-container > .card-actions'
+      '> .chip-content > .chip-actions, > .card-titlebar > .card-actions-container > .card-actions'
     );
     let $actionMenuBtn = $actions.find('.action-btn');
 

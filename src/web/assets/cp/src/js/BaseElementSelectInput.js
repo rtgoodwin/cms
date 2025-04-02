@@ -181,9 +181,9 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
             switch (this.settings.viewMode) {
               case 'list':
               case 'large':
-                return '> .element > .chip-content > .chip-actions > .move';
+                return '> .element > .chip-content > .chip-actions > .move-btn';
               case 'cards':
-                return '> .element > .card-actions-container > .card-actions > .move';
+                return '> .element > .card-titlebar > .card-actions-container > .card-actions > .move-btn';
               default:
                 return null;
             }
@@ -330,7 +330,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
           const disclosureMenu = $element
             .find(
-              '> .chip-content > .chip-actions .action-btn, > .card-actions-container > .card-actions .action-btn'
+              '> .chip-content > .chip-actions .action-btn, > .card-titlebar > .card-actions-container > .card-actions .action-btn'
             )
             .data('disclosureMenu');
           const moveForwardBtn = disclosureMenu.$container.find(
@@ -355,17 +355,21 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
         }
 
         if (this.settings.sortable) {
-          $('<button/>', {
-            type: 'button',
-            class: 'move icon',
-            title: Craft.t('app', 'Reorder'),
-            'aria-label': Craft.t('app', 'Reorder'),
-            'aria-describedby': $element.find('.label').attr('id'),
-          }).appendTo(
-            $element.find(
-              '> .chip-content > .chip-actions, > .card-actions-container > .card-actions'
-            )
-          );
+          Craft.ui
+            .createButton({
+              class: 'chromeless small move-btn',
+              icon: 'move',
+            })
+            .attr({
+              title: Craft.t('app', 'Reorder'),
+              'aria-label': Craft.t('app', 'Reorder'),
+              'aria-describedby': $element.find('.label').attr('id'),
+            })
+            .appendTo(
+              $element.find(
+                '> .chip-content > .chip-actions, > .card-titlebar > .card-actions-container > .card-actions'
+              )
+            );
         }
       }
 
