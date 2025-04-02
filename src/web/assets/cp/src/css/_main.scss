@@ -5836,6 +5836,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
     resize: none;
   }
 
+  .data {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+  }
+
   & > .field .heading,
   & > fieldset > legend {
     margin-block: 0 var(--s);

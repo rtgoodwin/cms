@@ -45,6 +45,7 @@ use craft\enums\PropagationMethod;
 use craft\events\DefineEntryTypesEvent;
 use craft\events\ElementCriteriaEvent;
 use craft\fieldlayoutelements\entries\EntryTitleField;
+use craft\fields\Matrix;
 use craft\gql\interfaces\elements\Entry as EntryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -2023,7 +2024,13 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function hasRevisions(): bool
     {
-        return $this->getSection()?->enableVersioning ?? false;
+        $section = $this->getSection();
+        if ($section) {
+            return $section->enableVersioning;
+        }
+
+        $field = $this->getField();
+        return $field instanceof Matrix && $field->enableVersioning;
     }
 
     /**
@@ -2574,31 +2581,35 @@ JS;
      */
     public function beforeSave(bool $isNew): bool
     {
-        $section = $this->getSection();
-        if ($section) {
-            // Make sure the entry has at least one revision if the section has versioning enabled
-            if ($this->_shouldSaveRevision()) {
-                $hasRevisions = self::find()
-                    ->revisionOf($this)
+        if ($this->_shouldSaveRevision()) {
+            // Make sure the entry has at least one revision
+            $hasRevisions = static::find()
+                ->revisionOf($this)
+                ->site('*')
+                ->status(null)
+                ->exists();
+
+            if (!$hasRevisions) {
+                /** @var self|null $current */
+                $current = static::find()
+                    ->id($this->id)
                     ->site('*')
                     ->status(null)
-                    ->exists();
-                if (!$hasRevisions) {
-                    /** @var self|null $currentEntry */
-                    $currentEntry = self::find()
-                        ->id($this->id)
-                        ->site('*')
-                        ->status(null)
-                        ->one();
+                    ->one();
 
-                    // May be null if the entry is currently stored as an unpublished draft
-                    if ($currentEntry) {
-                        $revisionNotes = 'Revision from ' . Craft::$app->getFormatter()->asDatetime($currentEntry->dateUpdated);
-                        Craft::$app->getRevisions()->createRevision($currentEntry, $currentEntry->getAuthorId(), $revisionNotes);
-                    }
+                // May be null if the entry is currently stored as an unpublished draft
+                if ($current) {
+                    Craft::$app->getRevisions()->createRevision(
+                        $current,
+                        $current->getAuthorId(),
+                        sprintf('Revision from %s', Craft::$app->getFormatter()->asDatetime($current->dateUpdated)),
+                    );
                 }
             }
+        }
 
+        $section = $this->getSection();
+        if ($section) {
             // Set the structure ID for Element::attributes() and afterSave()
             if ($section->type === Section::TYPE_STRUCTURE) {
                 $this->structureId = $section->structureId;
@@ -2923,7 +2934,7 @@ JS;
             !$this->resaving &&
             !$this->getIsDraft() &&
             !$this->getIsRevision() &&
-            $this->getSection()?->enableVersioning
+            $this->hasRevisions()
         );
     }
 

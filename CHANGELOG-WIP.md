@@ -8,9 +8,12 @@
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - The success notification displayed after an asset move now includes an “Undo” button, if less than 50 assets/50MB were involved in the move. ([#16908](https://github.com/craftcms/cms/pull/16908))
-- Plain Text fields no longer show the remaining character counter when displayed statically.
-- Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
+- Color field previews and static inputs now show the selected color’s label if there is one, rather than the hex value. ([#16985](https://github.com/craftcms/cms/pull/16985))
 - Lightswitch fields now show their on/off label for table cell previews. ([#16861](https://github.com/craftcms/cms/discussions/16861))
+- Number field previews now include their prefix and suffix text. ([#16986](https://github.com/craftcms/cms/pull/16986))
+- Plain Text fields no longer show the remaining character counter when displayed statically.
+- Range field previews now include their suffix text. ([#16986](https://github.com/craftcms/cms/pull/16986))
+- Removed the “Always show focus rings” user accessibility preference. ([#16585](https://github.com/craftcms/cms/pull/16585))
 - User index tables and cards can now show “Two-Step Verification” attributes. ([#16864](https://github.com/craftcms/cms/pull/16864))
 - Element index filters are now shown in a modal window on smaller screens. ([#16869](https://github.com/craftcms/cms/pull/16869))
 - <kbd>Command</kbd>/<kbd>Ctrl</kbd>-clicking on element index page sources now opens the source in a new window.
@@ -34,6 +37,7 @@
 - Added an optional “Download” advanced field to Link fields. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added the “SMS” link type for Link fields. ([#16850](https://github.com/craftcms/cms/discussions/16850))
 - Added the “Allow custom URL schemes” setting for Link fields with the “URL” link type enabled. ([#16850](https://github.com/craftcms/cms/discussions/16850))
+- Added the “Enable versioning for entries in this field” setting to Matrix fields. ([#17008](https://github.com/craftcms/cms/pull/17008))
 - Relational fields now have “Default [Type] Placement” settings, which control whether newly-related elements are placed before or after existing relations. ([#16989](https://github.com/craftcms/cms/pull/16989))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
@@ -42,6 +46,9 @@
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
+- Color previews within card attribute designers now show a value from the color palette. ([#16985](https://github.com/craftcms/cms/pull/16985))
+- Number previews within card attribute designers now show an in-range value, if the Min Value and Max Value settings are set. ([#16986](https://github.com/craftcms/cms/pull/16986))
+- Range previews within card attribute designers new shew an in-range value. ([#16986](https://github.com/craftcms/cms/pull/16986))
 - Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
 - Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
@@ -91,6 +98,10 @@
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
 - Added `craft\fields\BaseOptionsField::$optionIcons`, which can be set to `true` by subclasses to enable the “Icon” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
+- Added `craft\fields\BaseRelationField::$defaultPlacement`.
+- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_BEGINNING`.
+- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_END`.
+- Added `craft\fields\Matrix::$enableVersioning`.
 - Added `craft\fields\data\ColorData::$label`. ([#16492](https://github.com/craftcms/cms/pull/16492))
 - Added `craft\fields\data\JsonData`.
 - Added `craft\fields\data\LinkData::$download`.
@@ -113,9 +124,6 @@
 - Added `craft\web\CpScreenResponseBehavior::toolbarTemplate()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
-- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_BEGINNING`.
-- Added `craft\fields\BaseRelationField::DEFAULT_PLACEMENT_END`.
-- Added `craft\fields\BaseRelationField::$defaultPlacement`.
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\base\ElementInterface::eagerLoadingMap()` and `craft\base\EagerLoadingFieldInterface::eagerLoadingMap()` can now specify mappings for multiple target element types, or not specify the element types at all. ([#16972](https://github.com/craftcms/cms/pull/16972))
 - `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.  

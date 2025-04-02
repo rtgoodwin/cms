@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.14 - 2025-04-01
 
 - Improved the styling of Markdown UI elements. ([#16973](https://github.com/craftcms/cms/pull/16973))
 - Fixed a bug where relations weren’t always propagating to newly-added sites for sections correctly. ([#16924](https://github.com/craftcms/cms/pull/16924))
@@ -10,10 +10,15 @@
 - Fixed a bug where some subdivisions weren’t available when creating addresses. ([#16951](https://github.com/craftcms/cms/issues/16951))
 - Fixed a bug where some older dates could be formatted incorrectly. ([#16953](https://github.com/craftcms/cms/issues/16953))
 - Fixed a bug where the `folderPath` asset query param only accepted strings. ([#16981](https://github.com/craftcms/cms/issues/16981))
+- Fixed a bug where `craft\elements\Asset::getSrcset()` could return malformed results if any sizes didn’t have corresponding image URLs. ([#16984](https://github.com/craftcms/cms/issues/16984))
+- Fixed an error that could occur when uploading images. ([#16977](https://github.com/craftcms/cms/issues/16977))
+- Fixed a bug where the “Save” button on user group edit pages was redirecting to the same page, rather than the User Groups index page. ([#16988](https://github.com/craftcms/cms/issues/16988))
+- Fixed a bug where asset previews had an “Enable focal point” button even if the logged-in user didn’t have permission to save the asset. ([#16997](https://github.com/craftcms/cms/issues/16997))
 - Fixed a bug where provisional drafts created for nested elements weren’t being properly assigned to both the canonical owner element and the owner’s provisional draft, if it had one. ([#16933](https://github.com/craftcms/cms/pull/16933))
 - Fixed a bug where global sidebar tooltips were blank in Safari. ([#16959](https://github.com/craftcms/cms/issues/16959))
 - Fixed a bug where newly-added elements within relational fields were getting shown twice when dragged.
-- Fixed a styling issue. ([#16964](https://github.com/craftcms/cms/issues/16964))
+- Fixed a bug where “Set status” bulk element actions could be activated for elements the logged-in user didn’t have permission to edit. ([#16995](https://github.com/craftcms/cms/issues/16995))
+- Fixed styling issues. ([#16964](https://github.com/craftcms/cms/issues/16964), [#16993](https://github.com/craftcms/cms/issues/16993))
 
 ## 5.6.13 - 2025-03-19
 

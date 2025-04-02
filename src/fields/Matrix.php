@@ -207,6 +207,12 @@ class Matrix extends Field implements
     public ?int $maxEntries = null;
 
     /**
+     * @var bool Enable versioning
+     * @since 5.7.0
+     */
+    public bool $enableVersioning = false;
+
+    /**
      * @var string The view mode
      * @phpstan-var self::VIEW_MODE_*
      * @since 5.0.0
@@ -1557,7 +1563,6 @@ JS;
                 ->ownerId($element->id)
                 ->siteId($element->siteId)
                 ->drafts(null)
-                ->revisions(null)
                 ->status(null)
                 ->indexBy($uids ? 'uid' : 'id')
                 ->all();
