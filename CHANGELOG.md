@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where custom tips and warnings set on native fields (like Title) weren’t getting translated. ([#17016](https://github.com/craftcms/cms/issues/17016))
+
 ## 5.6.14 - 2025-04-01
 
 - Improved the styling of Markdown UI elements. ([#16973](https://github.com/craftcms/cms/pull/16973))
