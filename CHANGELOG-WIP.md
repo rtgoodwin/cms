@@ -1,6 +1,7 @@
 # Release Notes for Craft CMS 4.15 (WIP)
 
 ### Content Management
+- Condition rules for Checkboxes, Dropdown, Multi-select, and Radio Buttons fields now include “has a value” and “is empty” operators. ([#17015](https://github.com/craftcms/cms/pull/17015))
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - The success notification displayed after an asset move now includes an “Undo” button, if less than 50 assets/50MB were involved in the move. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - Window scrolling is now blocked when a modal window is open. ([#16768](https://github.com/craftcms/cms/pull/16768))
@@ -20,6 +21,7 @@
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
+- Added `craft\base\conditions\BaseMultiSelectConditionRule::$includeEmptyOperators`.
 - Added `craft\db\Connection::getIsMaria()`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
