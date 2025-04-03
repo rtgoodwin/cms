@@ -9,6 +9,7 @@
 - Nested entry cards within Matrix fields no longer link to their edit page. ([#16983](https://github.com/craftcms/cms/pull/16983))
 - Element editor slideouts now show other authors who are currently editing the same element. ([#16934](https://github.com/craftcms/cms/pull/16934))
 - Element edit pages no longer have a “View in a new tab” action, if they also have a “View” button. ([#16623](https://github.com/craftcms/cms/pull/16623))
+- Condition rules for Checkboxes, Dropdown, Multi-select, and Radio Buttons fields now include “has a value” and “is empty” operators. ([#17015](https://github.com/craftcms/cms/pull/17015))
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - The success notification displayed after an asset move now includes an “Undo” button, if less than 50 assets/50MB were involved in the move. ([#16908](https://github.com/craftcms/cms/pull/16908))
 - Color field previews and static inputs now show the selected color’s label if there is one, rather than the hex value. ([#16985](https://github.com/craftcms/cms/pull/16985))
@@ -84,6 +85,7 @@
 - Added `craft\base\ElementInterface::baseBulkDuplicateAttributes()`.
 - Added `craft\base\ElementInterface::baseGqlType()`.
 - Added `craft\base\ElementInterface::canCopy()`.
+- Added `craft\base\ElementInterface::getCardTitle()`.
 - Added `craft\base\ElementInterface::getSerializedFieldValuesForDb()`.
 - Added `craft\base\Field::EVENT_DEFINE_ACTION_MENU_ITEMS`. ([#16779](https://github.com/craftcms/cms/discussions/16779))
 - Added `craft\base\FieldInterface::serializeValueForDb()`.
@@ -91,6 +93,7 @@
 - Added `craft\base\FieldLayoutComponent::normalizeCondition()`.
 - Added `craft\base\FieldLayoutElement::alwaysRefresh()`.
 - Added `craft\base\FieldTrait::$static`.
+- Added `craft\base\conditions\BaseMultiSelectConditionRule::$includeEmptyOperators`.
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
@@ -129,7 +132,6 @@
 - Added `craft\web\CpScreenResponseBehavior::toolbarTemplate()`.
 - Added `craft\web\View::registerIcon()`.
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
-- Added `craft\base\ElementInterface::getCardTitle()`.
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\base\ElementInterface::eagerLoadingMap()` and `craft\base\EagerLoadingFieldInterface::eagerLoadingMap()` can now specify mappings for multiple target element types, or not specify the element types at all. ([#16972](https://github.com/craftcms/cms/pull/16972))
 - `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.  
@@ -164,7 +166,8 @@
 - Updated yii2-debug to 2.1.26.
 - Updated Axios to 1.8.4.
 - Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))
+- Fixed a bug where `CRAFT_WEB_URL` and `CRAFT_WEB_ROOT` environment variables could be overridden by `@web` and `@webroot` aliases define by the `aliases` config setting. ([#16980](https://github.com/craftcms/cms/pull/16980))
 - Fixed a bug where indicator icons within field layout element chips didn’t have alternative text. ([#16297](https://github.com/craftcms/cms/discussions/16297))
 - Fixed a bug where slide pickers within selected field layout elements didn’t have a label. ([#16696](https://github.com/craftcms/cms/pull/16696))
 - Fixed a bug where nested elements’ `getOwner()` and `getPrimaryOwner()` methods weren’t working properly if they had been queried alongside other elements that didn’t share the same owner type. ([#16960](https://github.com/craftcms/cms/pull/16960))
-- Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags. 
+- Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
