@@ -183,7 +183,7 @@ class ClearCaches extends Utility
                     }
 
                     $basePath = Craft::getAlias($basePath);
-                    if ($basePath !== false) {
+                    if ($basePath !== false && file_exists($basePath)) {
                         FileHelper::clearDirectory($basePath, [
                             'except' => ['.gitignore'],
                         ]);
