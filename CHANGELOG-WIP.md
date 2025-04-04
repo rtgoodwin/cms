@@ -54,8 +54,10 @@
 - Number previews within card attribute designers now show an in-range value, if the Min Value and Max Value settings are set. ([#16986](https://github.com/craftcms/cms/pull/16986))
 - Range previews within card attribute designers new shew an in-range value. ([#16986](https://github.com/craftcms/cms/pull/16986))
 - Section and entry type names are now linked to their edit pages from entry indexes, for admins.
+- Added the `staticStatuses` config setting, for opting into entry statuses being stored statically and only updated on save. ([#17024](https://github.com/craftcms/cms/pull/17024))
 - Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
 - Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
+- Added the `update-statuses` command. ([#17024](https://github.com/craftcms/cms/pull/17024))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
 - The `users/create` command now prompts to send an activation email, or outputs an activation URL. ([#16794](https://github.com/craftcms/cms/pull/16794))
 - Dragging headings within the Customize Sources modal now also drags any subsequent sources. ([#16737](https://github.com/craftcms/cms/issues/16737))
@@ -97,6 +99,7 @@
 - Added `craft\db\Table::BULKOPEVENTS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE_FIELDS`.
 - Added `craft\db\Table::SEARCHINDEXQUEUE`.
+- Added `craft\elements\Entry::$oldStatus`. ([#17024](https://github.com/craftcms/cms/pull/17024))
 - Added `craft\elements\Entry::$placeInStructure`.
 - Added `craft\elements\actions\Copy`.
 - Added `craft\elements\actions\MoveDown`.
