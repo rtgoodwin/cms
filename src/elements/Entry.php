@@ -1783,11 +1783,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return $status;
         }
 
-        if (isset($this->status)) {
-            return $this->status;
-        }
-
-        return $this->_status();
+        return $this->status ?? $this->_status();
     }
 
     /**
