@@ -849,6 +849,16 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public ?DateTime $expiryDate = null;
 
     /**
+     * @var self::STATUS_*|null The entry’s previous status, if it had one
+     */
+    public ?string $oldStatus = null;
+
+    /**
+     * @var self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED
+     */
+    private string $status;
+
+    /**
      * @var bool Whether the entry was deleted along with its entry type
      * @see beforeDelete()
      * @internal
@@ -912,6 +922,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public function init(): void
     {
         parent::init();
+        if (isset($this->id)) {
+            $this->oldStatus = $this->getStatus();
+        }
         $this->_oldTypeId = $this->_typeId;
     }
 
@@ -1766,23 +1779,39 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         $status = parent::getStatus();
 
-        if ($status == self::STATUS_ENABLED && $this->postDate) {
-            $currentTime = DateTimeHelper::currentTimeStamp();
-            $postDate = $this->postDate->getTimestamp();
-            $expiryDate = $this->expiryDate?->getTimestamp();
-
-            if ($postDate <= $currentTime && ($expiryDate === null || $expiryDate > $currentTime)) {
-                return self::STATUS_LIVE;
-            }
-
-            if ($postDate > $currentTime) {
-                return self::STATUS_PENDING;
-            }
-
-            return self::STATUS_EXPIRED;
+        if ($status !== self::STATUS_ENABLED) {
+            return $status;
         }
 
-        return $status;
+        if (isset($this->status)) {
+            return $this->status;
+        }
+
+        return $this->_status();
+    }
+
+    /**
+     * @return self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED
+     */
+    private function _status(): string
+    {
+        $now = DateTimeHelper::now();
+        return match (true) {
+            !$this->postDate || $this->postDate > $now => self::STATUS_PENDING,
+            $this->expiryDate && $this->expiryDate <= $now => self::STATUS_EXPIRED,
+            default => self::STATUS_LIVE,
+        };
+    }
+
+    /**
+     * Sets the status, if it’s stored statically.
+     *
+     * @param self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED $status
+     * @since 5.7.0
+     */
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
     }
 
     /**
@@ -2711,6 +2740,16 @@ JS;
             $record->typeId = $this->getTypeId();
             $record->postDate = Db::prepareDateForDb($this->postDate);
             $record->expiryDate = Db::prepareDateForDb($this->expiryDate);
+
+            // todo: update after the next breakpoint
+            if (Craft::$app->getDb()->columnExists(Table::ENTRIES, 'status')) {
+                $status = $this->_status();
+                $record->status = $status;
+                // only update $this->status if it's already set, indicating that staticStatuses is enabled
+                if (isset($this->status)) {
+                    $this->status = $status;
+                }
+            }
 
             // Capture the dirty attributes from the record
             $dirtyAttributes = array_keys($record->getDirtyAttributes());
