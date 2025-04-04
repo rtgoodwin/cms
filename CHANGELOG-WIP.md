@@ -45,6 +45,7 @@
 - Relational fields now have “Default [Type] Placement” settings, which control whether newly-related elements are placed before or after existing relations. ([#16989](https://github.com/craftcms/cms/pull/16989))
 - Added support for read-only custom fields, via new “Editability Conditions” on custom fields’ field layout settings. ([#16805](https://github.com/craftcms/cms/pull/16805))
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
+- “Horizontal Rule” and “Line Break” field layout UI elements can now have visibility conditions. ([#13169](https://github.com/craftcms/cms/discussions/13169))
 - Sections’ “Max Authors” settings are now optional, allowing unlimited authors when blank. ([#16898](https://github.com/craftcms/cms/pull/16898))
 - Sections’ “Max Authors” settings can now be set to `0`, preving the “Author” field from being displayed on Edit Entry screens. ([#16898](https://github.com/craftcms/cms/pull/16898))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
