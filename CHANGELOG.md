@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed an error that could occur when clearing control panel resources, if the `resourceBasePath` setting was set to a nonexistent folder path. ([#17021](https://github.com/craftcms/cms/pull/17021))
 - Fixed a bug where custom tips and warnings set on native fields (like Title) weren’t getting translated. ([#17016](https://github.com/craftcms/cms/issues/17016))
 
 ## 5.6.14 - 2025-04-01
