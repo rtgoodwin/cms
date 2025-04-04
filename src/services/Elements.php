@@ -1514,6 +1514,10 @@ class Elements extends Component
             'dirtyFields' => [],
         ];
 
+        if ($canonical instanceof Entry) {
+            $newAttributes['oldStatus'] = $canonical->oldStatus;
+        }
+
         foreach ($changedAttributes as $attribute) {
             $newAttributes['siteAttributes'][$attribute['siteId']]['dirtyAttributes'][] = $attribute['attribute'];
         }
