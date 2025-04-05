@@ -81,14 +81,23 @@ JS, [static::class]);
      */
     public function performAction(ElementQueryInterface $query): bool
     {
-        /** @var ElementInterface $elementType */
+        /** @var class-string<ElementInterface> $elementType */
         $elementType = $this->elementType;
         $isLocalized = $elementType::isLocalized() && Craft::$app->getIsMultiSite();
         $elementsService = Craft::$app->getElements();
 
         $elements = $query->all();
         $failCount = 0;
-        $permissionFailCount = 0;
+
+        // Make sure the user has permission to edit each of the elements
+        foreach ($elements as $element) {
+            if (!$elementsService->canSave($element)) {
+                $this->setMessage(Craft::t('app', 'Couldn’t save {type}.', [
+                    'type' => count($elements) === 1 ? $elementType::lowerDisplayName() : $elementType::pluralLowerDisplayName(),
+                ]));
+                return false;
+            }
+        }
 
         foreach ($elements as $element) {
             switch ($this->status) {
@@ -121,13 +130,9 @@ JS, [static::class]);
                     break;
             }
 
-            if ($elementsService->canSave($element)) {
-                if ($elementsService->saveElement($element) === false) {
-                    // Validation error
-                    $failCount++;
-                }
-            } else {
-                $permissionFailCount++;
+            if ($elementsService->saveElement($element) === false) {
+                // Validation error
+                $failCount++;
             }
         }
 
@@ -140,21 +145,6 @@ JS, [static::class]);
             }
 
             return false;
-        }
-
-        // Did all of them fail because of permissions?
-        if ($permissionFailCount === count($elements)) {
-            if (count($elements) === 1) {
-                $this->setMessage(Craft::t('app', 'Could not update status due to insufficient permissions.'));
-            } else {
-                $this->setMessage(Craft::t('app', 'Could not update statuses due to insufficient permissions.'));
-            }
-
-            return false;
-        }
-
-        if ($permissionFailCount !== 0) {
-            $this->setMessage(Craft::t('app', 'Status updated, with some failures due to insufficient permissions.'));
         }
 
         if ($failCount !== 0) {
