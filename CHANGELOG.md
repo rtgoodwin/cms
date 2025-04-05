@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.15 - 2025-04-04
 
 - Fixed an error that could occur when clearing control panel resources, if the `resourceBasePath` setting was set to a nonexistent folder path. ([#17021](https://github.com/craftcms/cms/pull/17021))
 - Fixed a bug where the `includeSubfolders` asset GraphQL query argument wasn’t working. ([#17023](https://github.com/craftcms/cms/issues/17023))
