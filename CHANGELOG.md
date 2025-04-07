@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
+- Fixed a bug where replacing a file via GraphQL could result in two assets referring to the same file. ([#17031](https://github.com/craftcms/cms/pull/17031))
+
 ## 4.14.13 - 2025-04-04
 
 - Fixed an error that could occur when clearing control panel resources, if the `resourceBasePath` setting was set to a nonexistent folder path. ([#17021](https://github.com/craftcms/cms/pull/17021))
