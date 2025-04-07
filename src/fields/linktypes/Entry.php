@@ -127,7 +127,7 @@ class Entry extends BaseElementLinkType
                 ->map(fn(array $source) => $source['key'])
                 ->all();
             $userService = Craft::$app->getUser();
-            $config['sources'] = Collection::make($sourceKeys)
+            $config['sources'] = Collection::make((array)$sourceKeys)
                 ->filter(function(string $source) use ($userService) {
                     // If it’s not a section, let it through
                     if (!str_starts_with($source, 'section:')) {
