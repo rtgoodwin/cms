@@ -4,9 +4,14 @@ import $ from 'jquery';
 
 /**
  * Select
+ * Selection interface
  */
 export default Base.extend(
   {
+    /**
+     * The jQuery object representing the container element.
+     * @type {jQuery}
+     */
     $container: null,
     $items: null,
     $selectedItems: null,
@@ -693,10 +698,15 @@ export default Base.extend(
      */
     onKeyDown: function (ev) {
       // Ignore if the focus isn't on one of our items or their handles
-      if (
-        ev.target !== ev.currentTarget &&
-        !$.data(ev.currentTarget, 'select-handle')?.filter(ev.target).length
-      ) {
+      const itemIsTarget = ev.target == ev.currentTarget;
+      const handleIsTarget = $.data(ev.currentTarget, 'select-handle')?.filter(
+        ev.target
+      ).length;
+      const checkboxIsTarget =
+        this.settings.checkboxClass &&
+        $(ev.target).hasClass(this.settings.checkboxClass);
+
+      if (!itemIsTarget && !handleIsTarget && !checkboxIsTarget) {
         return;
       }
 
@@ -945,8 +955,17 @@ export default Base.extend(
       allowEmpty: true,
       vertical: false,
       horizontal: false,
+      /**
+       * The handle for selecting items.
+       * Can be a string (selector), a function, or an object.
+       * @type {string|function|object|null}
+       */
       handle: null,
       filter: null,
+      /**
+       * Whether checkbox selection determines selected items
+       * @type {boolean}
+       */
       checkboxMode: false,
       makeFocusable: false,
       waitForDoubleClicks: false,
