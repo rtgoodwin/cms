@@ -11,6 +11,8 @@ use Craft;
 use craft\assetpreviews\Image as ImagePreview;
 use craft\base\Element;
 use craft\base\LocalFsInterface;
+use craft\db\Query;
+use craft\db\Table;
 use craft\elements\Asset;
 use craft\elements\conditions\ElementCondition;
 use craft\errors\AssetException;
@@ -883,6 +885,12 @@ class AssetsController extends Controller
         $flipData = $this->request->getBodyParam('flipData');
         $zoom = (float)$this->request->getBodyParam('zoom', 1);
 
+        // avoid a potential division by zero error (somehow)
+        // see https://github.com/craftcms/cms/issues/17019
+        if (!$imageDimensions['width'] || !$imageDimensions['height']) {
+            throw new BadRequestHttpException('Invalid imageDimensions param');
+        }
+
         $asset = $assets->getAssetById($assetId);
 
         if ($asset === null) {
@@ -1402,5 +1410,49 @@ class AssetsController extends Controller
         ]);
 
         return $this->redirect($url);
+    }
+
+    /**
+     * Returns the total number of assets, and their total file size, based on their IDs and/or folder IDs.
+     *
+     * @return Response
+     * @throws BadRequestHttpException
+     * @since 5.7.0
+     */
+    public function actionMoveInfo(): Response
+    {
+        $this->requireCpRequest();
+        $this->requirePostRequest();
+
+        $folderIds = Craft::$app->getRequest()->getBodyParam('folderIds', []);
+        $assetIds = Craft::$app->getRequest()->getBodyParam('assetIds', []);
+
+        if (!empty($folderIds)) {
+            // Add descendant folders
+            $assetsService = Craft::$app->getAssets();
+            foreach ($folderIds as $folderId) {
+                $folder = $assetsService->getFolderById($folderId);
+                if (!$folder) {
+                    throw new BadRequestHttpException("Invalid folder ID: $folderId");
+                }
+                $descendants = $assetsService->getAllDescendantFolders($folder);
+                array_push($folderIds, ...array_keys($descendants));
+            }
+        }
+
+        $query = (new Query())
+            ->from(Table::ASSETS)
+            ->where([
+                'or',
+                ['id' => $assetIds],
+                ['folderId' => array_unique($folderIds)],
+            ]);
+        $count = (int)$query->count();
+        $totalSize = (int)$query->sum('[[size]]');
+
+        return $this->asJson([
+            'count' => $count,
+            'totalSize' => $totalSize,
+        ]);
     }
 }

@@ -1,4 +1,5 @@
 @charset "UTF-8";
+@charset "UTF-8";
 @use 'sass:color';
 @use 'variables';
 @use '@craftcms/sass/mixins';
@@ -1388,17 +1389,22 @@ td.right {
   color: var(--error-color) !important;
 }
 
-.icon.move:not(.disabled) {
-  cursor: move;
+.icon.move,
+.move-btn {
+  &:not(.disabled) {
+    cursor: move !important;
+  }
 }
 
-.icon.move::before {
-  content: 'move';
-  color: var(--custom-text-color, var(--ui-control-color));
-}
+.icon.move {
+  &::before {
+    content: 'move';
+    color: var(--custom-text-color, var(--ui-control-color));
+  }
 
-.icon.move:not(.disabled):hover::before {
-  color: var(--link-color);
+  &:not(.disabled):hover::before {
+    color: var(--link-color);
+  }
 }
 
 .icon.delete {
@@ -1977,7 +1983,6 @@ ul.icons {
   &.link-btn {
     border: none;
     background: transparent;
-    box-shadow: none;
 
     &:focus-visible {
       box-shadow: var(--focus-ring);
@@ -2098,6 +2103,7 @@ ul.icons {
   &.loading {
     &::before,
     &::after,
+    .cp-icon,
     .label {
       visibility: hidden;
     }
@@ -2173,13 +2179,23 @@ ul.icons {
   position: relative;
 }
 
-.btn.small[data-icon]::before,
-.btn.small[data-icon-after]::after,
-.btn.icon.small::before {
-  font-size: 10px;
+.btn.small {
+  --icon-size: calc(12rem / 16);
+
+  &[data-icon]::before,
+  &[data-icon-after]::after,
+  &.icon::before {
+    font-size: 12px;
+  }
 }
 
 /* button groups */
+.btngroup-container {
+  margin: -3px;
+  padding: 3px;
+  overflow-x: auto;
+}
+
 .btngroup {
   position: relative;
   z-index: 1;
@@ -2465,8 +2481,7 @@ craft-copy-attribute {
 
     &:not(.disabled, .inactive, .loading) {
       &:hover,
-      &.hover,
-      &:focus {
+      &.hover {
         border: var(--primary-button-border--hover) !important;
         background: var(--primary-button-bg--hover) !important;
       }
@@ -2549,13 +2564,9 @@ div.btn.submit input {
     margin-inline-end: -1px;
   }
 
-  &:focus {
+  &:focus-visible {
     background-color: color.adjust(mixins.$grey200, $alpha: -0.9);
     border-color: transparent;
-
-    .reduce-focus-visibility &:not(:focus-visible) {
-      border: 1px dashed var(--medium-hairline-color);
-    }
   }
 
   &:not(.disabled) {
@@ -2601,7 +2612,7 @@ div.btn.submit input {
       @include mixins.light-focus-ring;
     }
 
-    &:focus {
+    &:focus-visible {
       z-index: 1;
       box-shadow: none;
 
@@ -2609,14 +2620,6 @@ div.btn.submit input {
         z-index: 1;
         box-shadow: var(--focus-ring);
       }
-
-      .reduce-focus-visibility &:not(:focus-visible) .label {
-        box-shadow: none;
-      }
-    }
-
-    .reduce-focus-visibility &:focus-visible .label {
-      box-shadow: var(--focus-ring);
     }
 
     &:not(.has-action-menu) {
@@ -2856,6 +2859,7 @@ div.btn.submit input {
   user-select: none;
   background-image: linear-gradient(to right, var(--gray-400), var(--gray-400));
   transition: background-image linear 100ms;
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 10%); // Ensures contrast with pane background is over 3:1
 
   &.on {
     background-image: linear-gradient(
@@ -2879,8 +2883,9 @@ div.btn.submit input {
 
     .handle {
       position: absolute;
-      inset-block-start: 1px;
+      inset-block-start: 2px;
       background-color: var(--white);
+      box-shadow: 0 0 0 1px rgb(0 0 0 / 10%); // Ensures contrast with pane background is over 3:1
     }
   }
 
@@ -2895,10 +2900,10 @@ div.btn.submit input {
       width: 46px;
 
       .handle {
-        border-radius: 10px;
-        width: 20px;
-        height: 20px;
-        inset-inline-start: calc(50% - 10px);
+        border-radius: 9px;
+        width: 18px;
+        height: 18px;
+        inset-inline-start: calc(50% - 9px);
       }
     }
   }
@@ -2914,9 +2919,9 @@ div.btn.submit input {
 
       .handle {
         border-radius: 8px;
-        width: 16px;
-        height: 16px;
-        inset-inline-start: calc(50% - 8px);
+        width: 14px;
+        height: 14px;
+        inset-inline-start: calc(50% - 7px);
       }
     }
   }
@@ -2990,7 +2995,7 @@ div.btn.submit input {
         }
       }
 
-      @include mixins.focus-styles {
+      &:focus-visible {
         box-shadow:
           inset 0 0 0 1px var(--hairline-color),
           var(--focus-ring);
@@ -3238,10 +3243,6 @@ table {
             th,
             td {
               background-color: var(--hover-bg-color);
-
-              .chip:not(.chromeless) {
-                background-color: var(--custom-bg-color, var(--gray-100));
-              }
             }
           }
 
@@ -3438,15 +3439,69 @@ table {
 }
 
 .chip,
-.card {
+.card,
+.matrixblock {
+  position: relative;
+  border-radius: var(--large-border-radius);
   color: var(--custom-text-color, var(--text-color));
+  overflow: hidden; // needed for status indicators
+
+  --custom-border-color: initial;
+  --custom-titlebar-bg-color: initial;
+  --custom-bg-color: initial;
+  --custom-text-color: initial;
+  --custom-sel-titlebar-bg-color: null;
+  --custom-sel-bg-color: initial;
 
   &:not(.chromeless, .hairline) {
     background-color: var(--custom-bg-color, var(--gray-050));
+    box-shadow: 0 2px 6px -1px rgb(0 0 0 / 5%);
   }
 
-  &.hairline {
-    border: 1px solid var(--medium-hairline-color);
+  &:not(.chromeless)::before {
+    position: absolute;
+    content: '';
+    inset: 0;
+    border-radius: var(--large-border-radius);
+    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-150));
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.chip,
+.card {
+  &.sel,
+  tr.sel &,
+  li.sel &,
+  li.active-drop-target &,
+  .card.sel & {
+    --text-color: var(--white);
+    --custom-text-color: var(--white) !important;
+    --medium-dark-text-color: var(--white);
+    --medium-text-color: var(--white);
+    --light-text-color: var(--white);
+    --link-color: var(--white);
+    --ui-control-color: var(--white);
+    --custom-border-color: rgb(0 0 0 / 10%) !important;
+    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
+    color: var(--white);
+    background-color: var(
+      --custom-sel-bg-color,
+      var(--dark-sel-color)
+    ) !important;
+
+    .icon,
+    .cp-icon,
+    [data-icon],
+    [data-icon-after] {
+      --icon-color: var(--white) !important;
+    }
+
+    .thumb {
+      filter: brightness(0.85);
+      opacity: 0.75;
+    }
   }
 }
 
@@ -3546,49 +3601,12 @@ table {
     }
   }
 
+  &:not(.large) .chip-content .chip-actions {
+    margin-inline-end: 4px;
+  }
+
   &:has(.thumb):not(.large) .chip-content {
     min-width: calc(100% - var(--thumb-size));
-  }
-
-  &.sel,
-  li.sel &,
-  li.active-drop-target &,
-  .card.sel & {
-    --text-color: var(--white);
-    --custom-text-color: var(--white) !important;
-    --medium-dark-text-color: var(--white);
-    --medium-text-color: var(--white);
-    --light-text-color: var(--white);
-    --link-color: var(--white);
-    --ui-control-color: var(--white);
-    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
-    color: var(--white);
-    background-color: var(
-      --custom-sel-bg-color,
-      var(--dark-sel-color)
-    ) !important;
-
-    .icon,
-    .cp-icon,
-    [data-icon],
-    [data-icon-after] {
-      --icon-color: var(--white) !important;
-    }
-  }
-
-  &.sel,
-  .sel & {
-    cursor: default;
-
-    .thumb {
-      filter: brightness(0.85);
-
-      img {
-        box-shadow:
-          0 0 0 1px color.adjust(mixins.$darkSelColor, $alpha: -0.9),
-          0 6px 4px -4px color.adjust(mixins.$darkSelColor, $alpha: -0.8);
-      }
-    }
   }
 
   .offset-drag-helper & {
@@ -3665,10 +3683,6 @@ table {
 .cards {
   display: flex;
 
-  --custom-bg-color: initial;
-  --custom-text-color: initial;
-  --custom-sel-bg-color: initial;
-
   &:not(.inline-chips) {
     flex-direction: column;
   }
@@ -3711,51 +3725,63 @@ table {
 
 /** cards */
 .card {
-  position: relative;
   display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  padding: var(--m);
-  gap: var(--s);
-  border-radius: var(--large-border-radius);
-  cursor: default;
-  user-select: none;
-  width: 100%;
-  overflow: hidden;
+  flex-direction: column;
 
   &::after {
     border-radius: var(--large-border-radius);
   }
 
-  &.sel,
-  li.sel & {
-    --text-color: var(--white);
-    --custom-text-color: var(--white) !important;
-    --medium-dark-text-color: var(--white);
-    --medium-text-color: var(--white);
-    --light-text-color: var(--white);
-    --link-color: var(--white);
-    --ui-control-color: var(--white);
-    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
-    color: var(--white);
-    background-color: var(
-      --custom-sel-bg-color,
-      var(--dark-sel-color)
-    ) !important;
+  & > .card-titlebar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-inline: var(--m);
+    background-color: var(--custom-titlebar-bg-color, var(--gray-100));
+    border-start-start-radius: var(--large-border-radius);
+    border-start-end-radius: var(--large-border-radius);
+    min-height: calc(var(--lh) + 10px);
+    user-select: none;
+
+    .card-titlebar-label {
+      font-size: 0.8em !important;
+    }
+
+    & > .card-actions-container {
+      display: flex;
+      align-items: flex-start !important;
+      position: relative;
+    }
+  }
+
+  & > .card-main {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    padding-block: var(--s);
+    padding-inline: var(--m);
+    gap: var(--s);
+    border-end-start-radius: var(--large-border-radius);
+    border-end-end-radius: var(--large-border-radius);
+    width: 100%;
+    overflow: hidden;
 
     & > .thumb {
-      filter: brightness(0.85);
-    }
+      display: flex;
+      justify-content: center;
+      flex: 0 0 120px;
+      width: 120px;
+      max-height: 120px;
+      overflow: hidden;
+      align-self: start;
 
-    .icon,
-    .cp-icon,
-    [data-icon],
-    [data-icon-after] {
-      --icon-color: var(--white) !important;
-    }
-
-    .status-label .status-label-text {
-      --status-label-text-color: var(--white) !important;
+      img,
+      svg {
+        max-width: 120px;
+        max-height: 120px;
+        border-radius: var(--small-border-radius);
+      }
     }
   }
 
@@ -3764,32 +3790,6 @@ table {
       padding-inline: 0 !important;
       list-style-type: none;
     }
-  }
-
-  & > .thumb {
-    display: flex;
-    flex: 0 0 128px;
-    width: 128px;
-    aspect-ratio: 1/1;
-    overflow: hidden;
-    align-self: start;
-    border-radius: var(--small-border-radius);
-
-    img,
-    svg {
-      width: 100%;
-      max-height: 128px;
-      object-fit: cover;
-    }
-
-    & + .card-content {
-      margin-inline-start: calc(var(--m) - var(--s));
-    }
-  }
-
-  & > .cp-icon {
-    margin-inline: -2px -4px;
-    margin-block: 3px 0;
   }
 
   .card-content,
@@ -3831,17 +3831,39 @@ table {
         overflow: hidden;
         text-wrap: pretty;
       }
-
-      .chip.small {
-        padding-inline: 0;
-      }
     }
   }
 
-  & > .card-actions-container {
-    display: flex;
-    align-items: flex-start !important;
-    position: relative;
+  &.sel,
+  li.sel & {
+    --text-color: var(--white);
+    --custom-text-color: var(--white) !important;
+    --medium-dark-text-color: var(--white);
+    --medium-text-color: var(--white);
+    --light-text-color: var(--white);
+    --link-color: var(--white);
+    --ui-control-color: var(--white);
+    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
+    color: var(--white);
+    background-color: var(
+      --custom-sel-bg-color,
+      var(--dark-sel-color)
+    ) !important;
+
+    & > .card-titlebar {
+      background-color: var(--custom-sel-titlebar-bg-color, var(--gray-600));
+
+      .icon,
+      .cp-icon,
+      [data-icon],
+      [data-icon-after] {
+        --icon-color: var(--white) !important;
+      }
+    }
+
+    .status-label .status-label-text {
+      --status-label-text-color: var(--white) !important;
+    }
   }
 }
 
@@ -3916,6 +3938,51 @@ table {
   border-radius: calc(var(--touch-target-size) / 2) !important;
 }
 
+.chip > .chip-content > .chip-actions,
+.card > .card-titlebar > .card-actions-container > .card-actions,
+.matrixblock > .actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--s);
+  min-height: calc(22rem / 16);
+
+  &:empty {
+    display: none;
+  }
+
+  & > .status {
+    margin: 0;
+  }
+
+  & > .btn.chromeless,
+  & > .action-btn {
+    padding-inline: 0 !important;
+    height: var(--touch-target-size);
+    width: var(--touch-target-size);
+    margin-block: 0;
+    margin-inline: -4px;
+
+    &::before {
+      color: var(--custom-text-color, var(--ui-control-color));
+    }
+  }
+
+  .action-btn {
+    background-color: transparent;
+
+    &::before {
+      margin-inline-end: 0 !important;
+    }
+
+    &:hover,
+    &:active,
+    &[aria-expanded='true'] {
+      backdrop-filter: brightness(90%);
+    }
+  }
+}
+
 .chip,
 .card {
   // prevent double focus ring (chip/card already gets it)
@@ -3956,53 +4023,6 @@ table {
       .sel & {
         @include mixins.angle(right, var(--white), calc(1rem / 16));
       }
-    }
-  }
-
-  & > .chip-content > .chip-actions,
-  & > .card-actions-container > .card-actions {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: var(--s);
-    min-height: calc(22rem / 16);
-
-    &:empty {
-      display: none;
-    }
-
-    & > .status {
-      margin: 0;
-    }
-
-    & > .action-btn,
-    & > .move {
-      height: var(--touch-target-size);
-      width: var(--touch-target-size);
-      margin-block: 0;
-      margin-inline: -4px;
-
-      &::before {
-        color: var(--custom-text-color, var(--ui-control-color));
-      }
-    }
-
-    .action-btn {
-      background-color: transparent;
-
-      &::before {
-        margin-inline-end: 0 !important;
-      }
-
-      &:hover,
-      &:active,
-      &[aria-expanded='true'] {
-        backdrop-filter: brightness(90%);
-      }
-    }
-
-    .move {
-      margin-block-start: -3px !important;
     }
   }
 
@@ -4283,7 +4303,7 @@ table {
   // thumbs views
   .thumbsview {
     display: grid;
-    gap: var(--xs);
+    gap: var(--s);
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 
     li {
@@ -4674,6 +4694,10 @@ table.editable {
             width: 16px;
             height: 16px;
           }
+        }
+
+        &.icon-cell {
+          padding-block: 6px;
         }
 
         &.error {
@@ -5501,7 +5525,8 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px dashed var(--medium-hairline-color) !important;
   }
 
-  &.hairline {
+  &.hairline,
+  &:is(fieldset) {
     background-color: transparent !important;
     box-shadow: none;
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
@@ -5540,6 +5565,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
       width: calc(100% + #{24 + 24}px);
       height: 100%;
     }
+  }
+
+  &:is(fieldset) > legend {
+    font-weight: 600;
+    color: var(--light-text-color);
   }
 
   hr {
@@ -5633,9 +5663,7 @@ table.data tbody tr:not(.disabled).active-drop-target {
         text-decoration: none;
       }
 
-      @include mixins.focus-styles {
-        box-shadow: none;
-
+      &:focus-visible {
         .tab-label {
           box-shadow: var(--inner-focus-ring);
         }
@@ -5805,6 +5833,11 @@ table.data tbody tr:not(.disabled).active-drop-target {
   .text {
     background-color: transparent !important;
     resize: none;
+  }
+
+  .data {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   & > .field .heading,
@@ -6426,6 +6459,11 @@ $min2ColWidth: 400px;
     background: var(--slideout-footer-bg);
     box-shadow: var(--slideout-footer-shadow);
     z-index: 3;
+
+    & > .so-notice {
+      display: flex;
+      align-items: center;
+    }
 
     & > .so-extra {
       flex: 0 0 100%;
@@ -7300,8 +7338,7 @@ $min2ColWidth: 400px;
   font-size: 1rem;
   position: relative;
 
-  @include mixins.focus-styles {
-    // Unset default
+  &:focus-visible {
     box-shadow: none;
     color: var(--white);
     background-color: var(--gray-800);
@@ -7555,14 +7592,26 @@ $min2ColWidth: 400px;
   }
 }
 
-.menu--disclosure ul li {
-  & > a:not(.crumb-link),
-  & > .menu-item,
-  & > .menu-option {
-    --focus-ring: var(--inner-focus-ring);
+.menu--disclosure {
+  & > .search-container {
+    margin-inline: calc(var(--m) * -1);
+    padding: var(--m);
+    border-block-end: 1px solid var(--hairline-color);
+  }
 
-    &:hover {
-      @include mixins.disclosure-link-hover-styles;
+  ul li {
+    &.filtered {
+      display: none;
+    }
+
+    & > a:not(.crumb-link),
+    & > .menu-item,
+    & > .menu-option {
+      --focus-ring: var(--inner-focus-ring);
+
+      &:hover {
+        @include mixins.disclosure-link-hover-styles;
+      }
     }
   }
 }
@@ -7580,7 +7629,7 @@ $min2ColWidth: 400px;
     margin-inline-end: 7px;
   }
 
-  .add {
+  .tagselect__input-wrapper {
     position: relative;
     z-index: 1;
     margin-inline: 0 7px;
@@ -7684,7 +7733,8 @@ table.editable {
 .passwordwrapper,
 .border-box,
 .selectize.multiselect .selectize-input,
-.multiselect > select {
+.multiselect > select,
+.CodeMirror {
   @include mixins.input-styles;
 }
 
@@ -7696,7 +7746,7 @@ table.editable {
     @include mixins.input-focused-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 }
@@ -7785,6 +7835,22 @@ textarea.text.fullwidth {
   .selectize.multiselect .selectize-input.focus {
     position: relative;
     z-index: 2;
+  }
+}
+
+.CodeMirror {
+  height: auto !important;
+  min-height: 70px;
+
+  &.CodeMirror-focused {
+    @include mixins.input-focused-styles;
+  }
+
+  &.cm-s-readonly {
+    &,
+    * {
+      cursor: not-allowed;
+    }
   }
 }
 
@@ -7889,6 +7955,7 @@ fieldset {
   height: 100%;
   content: '';
   cursor: help;
+  z-index: 1;
 
   &.modified {
     background-color: var(--blue-600);
@@ -8184,18 +8251,9 @@ div.checkbox.indeterminate::before {
   text-align: center;
 }
 
-body:not(.reduce-focus-visibility) {
-  input.checkbox:focus + label::before,
-  :focus div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.checkbox:focus-visible + label::before,
-  :focus-visible div.checkbox::before {
-    @include mixins.input-focused-styles;
-  }
+input.checkbox:focus-visible + label::before,
+:focus-visible div.checkbox::before {
+  @include mixins.input-focused-styles;
 }
 
 .checkbox-icon {
@@ -8219,7 +8277,7 @@ body.reduce-focus-visibility {
 }
 
 .monaco-mouse-cursor-text {
-  @include mixins.focus-styles {
+  &:focus-visible {
     box-shadow: none !important;
   }
 }
@@ -8318,18 +8376,9 @@ div.radio.checked::after,
   background: var(--gray-900);
 }
 
-body:not(.reduce-focus-visibility) {
-  input.radio:focus + label::before,
-  :focus div.radio::before {
-    @include mixins.input-focused-styles;
-  }
-}
-
-body.reduce-focus-visibility {
-  input.radio:focus-visible + label::before,
-  :focus-visible div.radio::before {
-    @include mixins.input-focused-styles;
-  }
+input.radio:focus-visible + label::before,
+:focus-visible div.radio::before {
+  @include mixins.input-focused-styles;
 }
 
 /* multiselect */
@@ -8338,7 +8387,7 @@ body.reduce-focus-visibility {
   font-size: 14px;
   appearance: none;
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.input-focused-styles;
   }
 
@@ -8401,6 +8450,7 @@ td.errors .text,
   border: 1px solid var(--error-color) !important;
 }
 
+.tagselect__input-wrapper,
 .texticon {
   position: relative;
   cursor: text;
@@ -8408,10 +8458,14 @@ td.errors .text,
 
   &.icon {
     &::before {
+      color: var(--ui-control-color);
+    }
+
+    svg,
+    &::before {
       position: absolute;
       inset-block-start: calc(50% - 7rem / 16);
       inset-inline-start: 9px;
-      color: var(--ui-control-color);
     }
   }
 
@@ -8486,6 +8540,18 @@ td.errors .text,
     .clear-btn {
       inset-inline-end: 30px;
     }
+  }
+}
+
+.tagselect__input-wrapper {
+  &.icon.add::before {
+    content: none;
+  }
+
+  svg {
+    width: calc(14rem / 16);
+    height: calc(14rem / 16);
+    fill: var(--ui-control-color);
   }
 }
 
@@ -8696,10 +8762,10 @@ tr.indexingSession td.progress div.progressContainer div.progressInfo {
 
 .select:not(.selectize) select {
   &:hover:not(:disabled) {
-    @include mixins.select-input-focused-styles;
+    @include mixins.select-input-hovered-styles;
   }
 
-  @include mixins.focus-styles {
+  &:focus-visible {
     @include mixins.select-input-focused-styles;
   }
 }
@@ -9116,6 +9182,16 @@ body {
     height: calc(20rem / 16);
     @include mixins.svg-mask(var(--ui-control-color));
   }
+
+  &.small {
+    width: calc(22rem / 16);
+    height: calc(22rem / 16);
+
+    svg {
+      width: calc(14rem / 16);
+      height: calc(14rem / 16);
+    }
+  }
 }
 
 .icon-picker-modal {
@@ -9315,13 +9391,9 @@ body.licensing-issues {
 }
 
 .matrixblock {
-  position: relative;
-  margin-block-end: 10px;
+  margin-block-end: var(--m);
   padding-block: 0 var(--m);
   padding-inline: var(--m);
-  border-radius: var(--large-border-radius);
-  border: 2px solid var(--gray-100);
-  background-color: var(--white);
 
   &.static {
     .titlebar {
@@ -9330,12 +9402,10 @@ body.licensing-issues {
     }
   }
 
-  & > .titlebar > .matrixblock-tabs .pane-tabs .menubtn:not(.action-btn),
-  & > .actions .action-btn {
+  & > .titlebar > .matrixblock-tabs .pane-tabs .menubtn:not(.action-btn) {
     padding: 0;
     width: var(--touch-target-size);
     height: var(--touch-target-size);
-    color: var(--custom-text-color, var(--ui-control-color));
     background-color: transparent;
 
     &:hover {
@@ -9366,11 +9436,9 @@ body.licensing-issues {
     margin-block: 0;
     margin-inline: calc(var(--m) * -1);
     box-sizing: border-box;
-    border-radius: calc(var(--large-border-radius) - 2px)
-      calc(var(--large-border-radius) - 2px) 0 0;
+    border-radius: var(--large-border-radius) var(--large-border-radius) 0 0;
     padding-inline: var(--m) calc(var(--m) + 70px);
     padding-block: 5px;
-    color: var(--custom-text-color, var(--light-text-color));
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -9378,8 +9446,13 @@ body.licensing-issues {
     cursor: default;
     user-select: none;
     position: relative;
-    background-color: var(--gray-050);
+    background-color: var(--custom-titlebar-bg-color, var(--gray-100));
     min-height: calc(var(--lh) + 10px);
+
+    & > .blocktype,
+    & > .preview {
+      font-size: 0.8em !important;
+    }
 
     & > .preview {
       flex-grow: 1;
@@ -9440,6 +9513,13 @@ body.licensing-issues {
           [role='tab'] {
             background-color: transparent;
 
+            &.sel {
+              background-color: var(
+                --custom-bg-color,
+                var(--gray-050)
+              ) !important;
+            }
+
             .tab-label {
               height: calc(var(--lh) + 10px);
               padding-block: 0;
@@ -9460,13 +9540,6 @@ body.licensing-issues {
 
     & > .preview:first-child:empty + .matrixblock-tabs {
       margin-inline-start: calc((var(--m) + 12px) * -1);
-
-      [role='tab']:first-child {
-        &,
-        .tab-label {
-          border-start-start-radius: calc(var(--large-border-radius) - 2px);
-        }
-      }
     }
   }
 
@@ -9486,7 +9559,7 @@ body.licensing-issues {
 
   &.collapsed {
     & > .titlebar {
-      border-radius: calc(var(--large-border-radius) - 2px);
+      border-radius: var(--large-border-radius);
 
       & > .preview {
         opacity: 1;
@@ -9497,36 +9570,16 @@ body.licensing-issues {
   & > .actions {
     display: flex;
     align-items: center;
-    gap: var(--xs);
+    gap: var(--s);
     position: absolute;
     inset-block-start: 0;
     inset-inline-end: var(--m);
     cursor: default;
     min-height: calc(var(--lh) + 10px);
 
-    & > * {
-      margin: 0 !important;
-    }
-
     & > .status {
       &.off {
         display: none;
-      }
-    }
-
-    a:not([data-action]) {
-      padding: 0;
-      height: var(--touch-target-size);
-      text-align: center;
-      color: var(--dark-hairline-color);
-      transform: color linear 100ms;
-
-      &:hover {
-        color: var(--link-color);
-
-        &.settings::after {
-          border-color: var(--link-color);
-        }
       }
     }
   }
@@ -9540,10 +9593,6 @@ body.licensing-issues {
   & > .fields > .flex-fields > .field {
     &::before {
       display: none;
-    }
-
-    & > .status-badge {
-      inset-inline-start: -2px;
     }
   }
 
