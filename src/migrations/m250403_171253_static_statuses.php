@@ -34,7 +34,7 @@ class m250403_171253_static_statuses extends Migration
         $this->update(Table::ENTRIES, ['status' => Entry::STATUS_EXPIRED], [
             'and',
             ['not', ['postDate' => null]],
-            ['<=', 'entries.expiryDate', $currentTimeDb],
+            ['<=', 'expiryDate', $currentTimeDb],
         ]);
 
         return true;
