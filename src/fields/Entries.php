@@ -215,10 +215,14 @@ class Entries extends BaseRelationField
      */
     public function getInputSources(?ElementInterface $element = null): array|string|null
     {
+        if ($this->sources === null) {
+            return $this->sources;
+        }
+
         // Enforce the showUnpermittedSections setting
         if (!$this->showUnpermittedSections) {
             $userService = Craft::$app->getUser();
-            return ArrayHelper::where($this->sources, function(string $source) use ($userService) {
+            return ArrayHelper::where((array)$this->sources, function(string $source) use ($userService) {
                 // If it’s not a section, let it through
                 if (!str_starts_with($source, 'section:')) {
                     return true;
