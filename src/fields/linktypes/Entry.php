@@ -28,23 +28,35 @@ class Entry extends BaseElementLinkType
      */
     public bool $showUnpermittedSections = true;
 
+    /**
+     * @var bool Whether to show Entries the user doesn’t have permission to view, per the "View other users' entries" permission.
+     * @since 5.x
+     */
+    public bool $showUnpermittedEntries = true;
+
     protected static function elementType(): string
     {
         return EntryElement::class;
     }
 
-    /**
-     * @inheritdoc
-     */
-    protected function getShowUnpermittedSettingHtml(): ?string
+    public function getSettingsHtml(): ?string
     {
-        return Cp::lightswitchFieldHtml([
-            'label' => Craft::t('app', 'Show unpermitted sections'),
-            'instructions' => Craft::t('app', 'Whether to show sections that the user doesn’t have permission to view.'),
-            'id' => 'showUnpermittedSections',
-            'name' => 'showUnpermittedSections',
-            'on' => $this->showUnpermittedSections,
-        ]);
+        return
+            parent::getSettingsHtml() .
+            Cp::lightswitchFieldHtml([
+                'label' => Craft::t('app', 'Show unpermitted sections'),
+                'instructions' => Craft::t('app', 'Whether to show sections that the user doesn’t have permission to view.'),
+                'id' => 'showUnpermittedSections',
+                'name' => 'showUnpermittedSections',
+                'on' => $this->showUnpermittedSections,
+            ]) .
+            Cp::lightswitchFieldHtml([
+                'label' => Craft::t('app', 'Show unpermitted entries'),
+                'instructions' => Craft::t('app', 'Whether to show Entries the user doesn’t have permission to view, per the "View other users\' entries" permission.'),
+                'id' => 'showUnpermittedEntries',
+                'name' => 'showUnpermittedEntries',
+                'on' => $this->showUnpermittedEntries,
+            ]);
     }
 
     protected function availableSourceKeys(): array
@@ -79,6 +91,18 @@ class Entry extends BaseElementLinkType
         }
 
         return $sources;
+    }
+
+    protected function selectionCriteria(): array
+    {
+        $criteria = [];
+
+        if ($this->showUnpermittedEntries) {
+            $userService = Craft::$app->getUser();
+            $criteria['authorId'] = $userService->id;
+        }
+
+        return $criteria;
     }
 
     /**

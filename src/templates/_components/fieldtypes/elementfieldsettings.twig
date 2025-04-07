@@ -36,8 +36,8 @@
         {% endif %}
     {% endblock %}
 
-    {% block showUnpermitted %}
-        {{ (showUnpermitted ?? false) ? showUnpermitted|raw }}
+    {% block showUnpermittedFields %}
+        {{ (showUnpermittedFields ?? false) ? showUnpermittedFields|raw }}
     {% endblock %}
 
     {% block selectionConditionField %}

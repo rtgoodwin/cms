@@ -41,6 +41,17 @@ class Entries extends BaseRelationField
     public bool $showUnpermittedSections = true;
 
     /**
+     * @var bool Whether to show Entries the user doesn’t have permission to view, per the "View other users' entries" permission.
+     * @since 5.x
+     */
+    public bool $showUnpermittedEntries = true;
+
+    /**
+     * @inheritdoc
+     */
+    protected string $settingsTemplate = '_components/fieldtypes/Entries/settings.twig';
+
+    /**
      * @inheritdoc
      */
     public static function displayName(): string
@@ -141,6 +152,21 @@ class Entries extends BaseRelationField
     /**
      * @inheritdoc
      */
+    public function getInputSelectionCriteria(): array
+    {
+        $criteria = parent::getInputSelectionCriteria();
+
+        if ($this->showUnpermittedEntries) {
+            $userService = Craft::$app->getUser();
+            $criteria['authorId'] = $userService->id;
+        }
+
+        return $criteria;
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function createSelectionCondition(): ?ElementCondition
     {
         $condition = Entry::createCondition();
@@ -189,19 +215,5 @@ class Entries extends BaseRelationField
             }, true, true, false);
         }
         return $this->sources;
-    }
-
-    /**
-     * @inerhitdoc
-     */
-    public function getShowUnpermittedHtml(): string|null
-    {
-        return Cp::lightswitchFieldHtml([
-            'label'        => Craft::t('app', 'Show unpermitted sections'),
-            'instructions' => Craft::t('app', 'Whether to show sections that the user doesn’t have permission to view.'),
-            'id'           => 'showUnpermittedSections',
-            'name'         => 'showUnpermittedSections',
-            'on'           => $this->showUnpermittedSections,
-        ]);
     }
 }

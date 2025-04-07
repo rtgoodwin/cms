@@ -68,8 +68,7 @@ abstract class BaseElementLinkType extends BaseLinkType
 
     public function getSettingsHtml(): ?string
     {
-        return $this->sourcesSettingHtml() .
-            $this->getShowUnpermittedSettingHtml();
+        return $this->sourcesSettingHtml();
     }
 
     /**
@@ -95,17 +94,6 @@ abstract class BaseElementLinkType extends BaseLinkType
             'values' => $this->sources ?? '*',
             'showAllOption' => true,
         ]);
-    }
-
-    /**
-     * Returns the HTML that determines whether to show related Elements the user doesn’t have permission to view.
-     *
-     * @return string|null
-     * @since 5.x
-     */
-    protected function getShowUnpermittedSettingHtml(): ?string
-    {
-        return null;
     }
 
     public function supports(string $value): bool
