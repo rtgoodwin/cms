@@ -3455,20 +3455,17 @@ table {
 
   &:not(.chromeless, .hairline) {
     background-color: var(--custom-bg-color, var(--gray-050));
+    box-shadow: 0 2px 6px -1px rgb(0 0 0 / 5%);
   }
 
-  &:not(.chromeless) {
-    box-shadow: 0 2px 6px -1px rgb(0 0 0 / 5%);
-
-    &::before {
-      position: absolute;
-      content: '';
-      inset: 0;
-      border-radius: var(--large-border-radius);
-      box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-150));
-      pointer-events: none;
-      z-index: 1;
-    }
+  &:not(.chromeless)::before {
+    position: absolute;
+    content: '';
+    inset: 0;
+    border-radius: var(--large-border-radius);
+    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-150));
+    pointer-events: none;
+    z-index: 1;
   }
 }
 
