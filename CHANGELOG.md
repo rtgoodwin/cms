@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where changes to multi-instance CKEditor fields weren’t persisting, if the first instance in the field layout hadn’t been modified. ([craftcms/ckeditor#391](https://github.com/craftcms/ckeditor/pull/391))
+- Fixed a bug where email templates weren’t always getting rendered with the correct site’s global variables.
 
 ## 5.6.15 - 2025-04-04
 
