@@ -38,10 +38,6 @@
         {% endif %}
     {% endblock %}
 
-    {% block showUnpermittedFields %}
-        {{ (showUnpermittedFields ?? false) ? showUnpermittedFields|raw }}
-    {% endblock %}
-
     {% block selectionConditionField %}
         {{ (selectionCondition ?? false) ? selectionCondition|raw }}
     {% endblock %}

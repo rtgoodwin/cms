@@ -21,22 +21,33 @@ use Illuminate\Support\Collection;
  */
 class Entry extends BaseElementLinkType
 {
+    /**
+     * @var bool Whether to show input sources for sections the user doesn’t have permission to view
+     * @since 5.7.0
+     */
+    public bool $showUnpermittedSections = false;
 
     /**
-     * @var bool Whether to show Entries for Sections the user doesn’t have permission to view.
-     * @since 5.x
+     * @var bool Whether to show entries the user doesn’t have permission to view,
+     * per the “View other users’ entries” permission.
+     * @since 5.7.0
      */
-    public bool $showUnpermittedSections = true;
-
-    /**
-     * @var bool Whether to show Entries the user doesn’t have permission to view, per the "View other users' entries" permission.
-     * @since 5.x
-     */
-    public bool $showUnpermittedEntries = true;
+    public bool $showUnpermittedEntries = false;
 
     protected static function elementType(): string
     {
         return EntryElement::class;
+    }
+
+    public function __construct(array $config = [])
+    {
+        // Default showUnpermittedSections and showUnpermittedEntries to true for existing Entries fields
+        if (!empty($config) && !isset($config['showUnpermittedSections'])) {
+            $config['showUnpermittedSections'] = true;
+            $config['showUnpermittedEntries'] = true;
+        }
+
+        parent::__construct($config);
     }
 
     public function getSettingsHtml(): ?string
@@ -52,7 +63,7 @@ class Entry extends BaseElementLinkType
             ]) .
             Cp::lightswitchFieldHtml([
                 'label' => Craft::t('app', 'Show unpermitted entries'),
-                'instructions' => Craft::t('app', 'Whether to show Entries the user doesn’t have permission to view, per the "View other users\' entries" permission.'),
+                'instructions' => Craft::t('app', 'Whether to show entries that the user doesn’t have permission to view, per the “View other users’ entries” permission.'),
                 'id' => 'showUnpermittedEntries',
                 'name' => 'showUnpermittedEntries',
                 'on' => $this->showUnpermittedEntries,
@@ -97,9 +108,8 @@ class Entry extends BaseElementLinkType
     {
         $criteria = [];
 
-        if ($this->showUnpermittedEntries) {
-            $userService = Craft::$app->getUser();
-            $criteria['authorId'] = $userService->id;
+        if (!$this->showUnpermittedEntries) {
+            $criteria['editable'] = true;
         }
 
         return $criteria;
@@ -112,15 +122,15 @@ class Entry extends BaseElementLinkType
     {
         $config = parent::elementSelectConfig();
 
-        if(! $this->showUnpermittedSections) {
+        if (!$this->showUnpermittedSections) {
             $sourceKeys = $this->sources ?? Collection::make($this->availableSources())
                 ->map(fn(array $source) => $source['key'])
                 ->all();
             $userService = Craft::$app->getUser();
             $config['sources'] = Collection::make($sourceKeys)
                 ->filter(function(string $source) use ($userService) {
-                    // If it's the wildcard, let it through
-                    if ($source === '*') {
+                    // If it’s not a section, let it through
+                    if (!str_starts_with($source, 'section:')) {
                         return true;
                     }
                     // Only show it if they have permission to view it

@@ -33,18 +33,18 @@ use GraphQL\Type\Definition\Type;
  */
 class Entries extends BaseRelationField
 {
+    /**
+     * @var bool Whether to show input sources for sections the user doesn’t have permission to view
+     * @since 5.7.0
+     */
+    public bool $showUnpermittedSections = false;
 
     /**
-     * @var bool Whether to show Entries for Sections the user doesn’t have permission to view.
-     * @since 5.x
+     * @var bool Whether to show entries the user doesn’t have permission to view,
+     * per the “View other users’ entries” permission.
+     * @since 5.7.0
      */
-    public bool $showUnpermittedSections = true;
-
-    /**
-     * @var bool Whether to show Entries the user doesn’t have permission to view, per the "View other users' entries" permission.
-     * @since 5.x
-     */
-    public bool $showUnpermittedEntries = true;
+    public bool $showUnpermittedEntries = false;
 
     /**
      * @inheritdoc
@@ -89,6 +89,20 @@ class Entries extends BaseRelationField
     public static function phpType(): string
     {
         return sprintf('\\%s|\\%s<\\%s>', EntryQuery::class, ElementCollection::class, Entry::class);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(array $config = [])
+    {
+        // Default showUnpermittedSections and showUnpermittedEntries to true for existing Entries fields
+        if (isset($config['id']) && !isset($config['showUnpermittedSections'])) {
+            $config['showUnpermittedSections'] = true;
+            $config['showUnpermittedEntries'] = true;
+        }
+
+        parent::__construct($config);
     }
 
     /**
@@ -156,9 +170,8 @@ class Entries extends BaseRelationField
     {
         $criteria = parent::getInputSelectionCriteria();
 
-        if ($this->showUnpermittedEntries) {
-            $userService = Craft::$app->getUser();
-            $criteria['authorId'] = $userService->id;
+        if (!$this->showUnpermittedEntries) {
+            $criteria['editable'] = true;
         }
 
         return $criteria;
@@ -203,15 +216,16 @@ class Entries extends BaseRelationField
     public function getInputSources(?ElementInterface $element = null): array|string|null
     {
         // Enforce the showUnpermittedSections setting
-        if (! $this->showUnpermittedSections) {
+        if (!$this->showUnpermittedSections) {
             $userService = Craft::$app->getUser();
             return ArrayHelper::where($this->sources, function(string $source) use ($userService) {
-                // Only show it if they have permission to view it
-                $sectionUid = explode(':', $source)[1];
-                if ($userService->checkPermission("viewEntries:$sectionUid")) {
+                // If it’s not a section, let it through
+                if (!str_starts_with($source, 'section:')) {
                     return true;
                 }
-                return false;
+                // Only show it if they have permission to view it
+                $sectionUid = explode(':', $source)[1];
+                return $userService->checkPermission("viewEntries:$sectionUid");
             }, true, true, false);
         }
         return $this->sources;
