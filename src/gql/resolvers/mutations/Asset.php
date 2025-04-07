@@ -225,7 +225,11 @@ class Asset extends ElementMutationResolver
         }
 
         $asset->tempFilePath = $tempPath;
-        $asset->setFilename($filename);
+        if ($asset->id !== null && $asset->getFilename() !== $filename) {
+            $asset->newFilename = $filename;
+        } else {
+            $asset->setFilename($filename);
+        }
         $asset->avoidFilenameConflicts = true;
 
         return true;
