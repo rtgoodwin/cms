@@ -106,8 +106,12 @@ class Asset extends ElementMutationResolver
         $asset->setVolumeId($volume->id);
 
         $asset = $this->populateElementWithData($asset, $arguments, $resolveInfo);
+        $triggerReplaceEvents = (
+            $asset->getScenario() === AssetElement::SCENARIO_REPLACE &&
+            $assetService->hasEventHandlers(Assets::EVENT_BEFORE_REPLACE_ASSET)
+        );
 
-        if ($asset->getScenario() === AssetElement::SCENARIO_REPLACE) {
+        if ($triggerReplaceEvents) {
             $assetService->trigger(Assets::EVENT_BEFORE_REPLACE_ASSET, new ReplaceAssetEvent([
                 'asset' => $asset,
                 'replaceWith' => $asset->tempFilePath,
@@ -117,7 +121,7 @@ class Asset extends ElementMutationResolver
 
         $asset = $this->saveElement($asset);
 
-        if ($asset->getScenario() === AssetElement::SCENARIO_REPLACE) {
+        if ($triggerReplaceEvents) {
             $assetService->trigger(Assets::EVENT_AFTER_REPLACE_ASSET, new ReplaceAssetEvent([
                 'asset' => $asset,
                 'filename' => $this->filename,
