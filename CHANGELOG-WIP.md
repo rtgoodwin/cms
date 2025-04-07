@@ -60,6 +60,8 @@
 - Added the `fields/delete` command. ([#16828](https://github.com/craftcms/cms/pull/16828))
 - Added the `update-statuses` command. ([#17024](https://github.com/craftcms/cms/pull/17024))
 - Added the `--batch-size` option for `resave/*` commands. ([#16586](https://github.com/craftcms/cms/issues/16586))
+- The `plugin/install` command now accepts an `edition` argument, and prompts for the default edition if none is specified. ([#17030](https://github.com/craftcms/cms/pull/17030))
+- The `plugin/uninstall` command now reports if no plugin is installed with the provided handle. ([#17030](https://github.com/craftcms/cms/pull/17030))
 - The `users/create` command now prompts to send an activation email, or outputs an activation URL. ([#16794](https://github.com/craftcms/cms/pull/16794))
 - Dragging headings within the Customize Sources modal now also drags any subsequent sources. ([#16737](https://github.com/craftcms/cms/issues/16737))
 - When switching field types, any field settings which are defined by the same base class are now preserved. ([#16783](https://github.com/craftcms/cms/pull/16783))
