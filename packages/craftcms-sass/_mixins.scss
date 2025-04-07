@@ -219,13 +219,6 @@ $menuBorderRadius: $mediumBorderRadius;
 
 // Other
 
-@mixin focus-styles {
-  body:not(.reduce-focus-visibility) &:focus,
-  body.reduce-focus-visibility &:focus-visible {
-    @content;
-  }
-}
-
 @mixin svg-mask($color) {
   rect,
   circle,
@@ -672,6 +665,11 @@ $menuBorderRadius: $mediumBorderRadius;
 
 @mixin select-input-fullwidth-styles {
   min-width: 100%;
+}
+
+@mixin select-input-hovered-styles {
+  outline-color: transparent;
+  background-color: hsl(212, 25%, 85%);
 }
 
 @mixin select-input-focused-styles {

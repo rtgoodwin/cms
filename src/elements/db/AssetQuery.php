@@ -930,6 +930,12 @@ class AssetQuery extends ElementQuery
         }
 
         if ($this->folderId) {
+            // [X] => X, so includeSubfolders works with GraphQL
+            // (see https://github.com/craftcms/cms/issues/17023)
+            if (is_array($this->folderId) && count($this->folderId) === 1 && ArrayHelper::isNumeric($this->folderId)) {
+                $this->folderId = reset($this->folderId);
+            }
+
             $folderCondition = Db::parseNumericParam('assets.folderId', $this->folderId);
             if (is_numeric($this->folderId) && $this->includeSubfolders) {
                 $assetsService = Craft::$app->getAssets();
