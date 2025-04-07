@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where changes to multi-instance CKEditor fields weren’t persisting, if the first instance in the field layout hadn’t been modified. ([craftcms/ckeditor#391](https://github.com/craftcms/ckeditor/pull/391))
+
 ## 5.6.15 - 2025-04-04
 
 - Fixed an error that could occur when clearing control panel resources, if the `resourceBasePath` setting was set to a nonexistent folder path. ([#17021](https://github.com/craftcms/cms/pull/17021))

@@ -30,6 +30,7 @@ use craft\helpers\ElementHelper;
 use craft\helpers\Html;
 use craft\helpers\StringHelper;
 use craft\models\Site;
+use Generator;
 use Throwable;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
@@ -697,7 +698,14 @@ JS, [
             return $owner->isAttributeDirty($this->attribute);
         }
 
-        return $owner->isFieldDirty($this->field->handle);
+        foreach ($this->fieldInstances($owner) as $instance) {
+            /** @var FieldInterface $instance */
+            if ($owner->isFieldDirty($instance->handle)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function isModified(ElementInterface $owner, bool $anySite = false): bool
@@ -706,13 +714,49 @@ JS, [
             return $owner->isAttributeModified($this->attribute);
         }
 
-        return $owner->isFieldModified($this->field->handle, $anySite);
+        foreach ($this->fieldInstances($owner) as $instance) {
+            /** @var FieldInterface $instance */
+            if ($owner->isFieldModified($instance->handle, $anySite)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function hasErrors(ElementInterface $owner): bool
     {
-        $attribute = $this->attribute ?? $this->field->handle;
-        return $owner->hasErrors("$attribute.*");
+        if (isset($this->attribute)) {
+            return $owner->hasErrors("$this->attribute.*");
+        }
+
+        foreach ($this->fieldInstances($owner) as $instance) {
+            /** @var FieldInterface $instance */
+            if ($owner->hasErrors("$instance->handle.*")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function fieldInstances(ElementInterface $owner): Generator
+    {
+        if (!isset($this->field)) {
+            return;
+        }
+
+        if (!$this->field::isMultiInstance()) {
+            yield $this->field;
+            return;
+        }
+
+        $customFields = $owner->getFieldLayout()?->getCustomFields() ?? [];
+        foreach ($customFields as $field) {
+            if ($field->id === $this->field->id) {
+                yield $field;
+            }
+        }
     }
 
     private function saveNestedElements(ElementInterface $owner): void
