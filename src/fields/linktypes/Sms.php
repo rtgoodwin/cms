@@ -7,7 +7,6 @@
 
 namespace craft\fields\linktypes;
 
-use Craft;
 use craft\fields\Link;
 
 /**
@@ -25,7 +24,7 @@ class Sms extends BaseTextLinkType
 
     public static function displayName(): string
     {
-        return Craft::t('app', 'SMS');
+        return 'SMS';
     }
 
     protected function urlPrefix(): string|array

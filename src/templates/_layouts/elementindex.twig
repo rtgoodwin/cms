@@ -38,7 +38,9 @@
         {{ tag('a', {
             class: 'btn skip-link',
             href: '#elements',
-            html: 'Skip to {title}'|t('app', {title: title}),
+            html: 'Skip to {name}'|t('app', {
+                name: elementPluralDisplayName|lower,
+            })|capitalize,
         }) }}
 
         <nav aria-labelledby="source-heading">

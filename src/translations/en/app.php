@@ -1556,6 +1556,7 @@ return [
     'Skip to main section' => 'Skip to main section',
     'Skip to right sidebar' => 'Skip to right sidebar',
     'Skip to top of preview' => 'Skip to top of preview',
+    'Skip to {name}' => 'Skip to {name}',
     'Sky' => 'Sky',
     'Slug' => 'Slug',
     'Some entries have been moved to the “{name}” section.' => 'Some entries have been moved to the “{name}” section.',
