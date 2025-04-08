@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Craft CMSをインストール中…',
     'Installing the plugin…' => 'プラグインをインストールしています…',
     'Installing {name}' => '{name} のインストール中',
-    'Instance settings' => 'インスタンス設定',
     'Instructions' => '説明',
     'Interlace' => 'インターレース',
     'Interlacing' => 'インターレース中',

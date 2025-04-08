@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => '正在安装 Craft CMS…',
     'Installing the plugin…' => '正在安装插件…',
     'Installing {name}' => '正在安装 {name}',
-    'Instance settings' => '实例设置',
     'Instructions' => '说明',
     'Interlace' => '交错',
     'Interlacing' => '交错',

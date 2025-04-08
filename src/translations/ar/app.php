@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'جارِ تثبيت Craft CMS…',
     'Installing the plugin…' => 'جاري تثبيت الملحق...',
     'Installing {name}' => 'تثبيت {name}',
-    'Instance settings' => 'إعدادات المثيل',
     'Instructions' => 'إرشادات',
     'Interlace' => 'يعرض بشكل متداخل',
     'Interlacing' => 'تداخل',

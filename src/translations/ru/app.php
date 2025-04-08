@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Установка Craft CMS…',
     'Installing the plugin…' => 'Установка плагина…',
     'Installing {name}' => 'Установка {name}',
-    'Instance settings' => 'Настройки экземпляра',
     'Instructions' => 'Инструкции',
     'Interlace' => 'Чересстрочная развертка',
     'Interlacing' => 'Чересстрочная развертка',

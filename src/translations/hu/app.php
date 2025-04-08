@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Craft CMS telepítése…',
     'Installing the plugin…' => 'A beépülő modul telepítése…',
     'Installing {name}' => '{name} telepítése',
-    'Instance settings' => 'Példánybeállítások',
     'Instructions' => 'Instrukciók',
     'Interlace' => 'Összekapcsolás',
     'Interlacing' => 'Összekapcsolás folyamatban',
