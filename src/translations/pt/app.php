@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Instalando Craft CMS…',
     'Installing the plugin…' => 'A instalar o plugin…',
     'Installing {name}' => 'A instalar {name}',
-    'Instance settings' => 'Definições da instância',
     'Instructions' => 'Instruções',
     'Interlace' => 'Entrelaçar',
     'Interlacing' => 'A entrelaçar',
