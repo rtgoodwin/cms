@@ -8005,8 +8005,6 @@ fieldset {
   // BC
 .field > .heading > .instructions,
 .checkboxfield .instructions {
-  color: var(--custom-text-color, var(--medium-text-color));
-
   img,
   video,
   embed,
@@ -8030,8 +8028,17 @@ fieldset {
   }
 }
 
+.field > .instructions,
+  // BC
+.field > .heading > .instructions,
+.checkboxfield .instructions {
+  color: var(--custom-text-color, var(--medium-text-color));
+}
+
 // Special adjustments for content formatted via Markdown
 .markdown {
+  color: var(--custom-text-color, var(--text-color));
+
   h1,
   h2,
   h3,
