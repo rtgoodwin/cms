@@ -1,12 +1,13 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
-
+## 5.6.16 - 2025-04-08
 
 - Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
 - Fixed a bug where replacing a file via GraphQL could result in two assets referring to the same file. ([#17031](https://github.com/craftcms/cms/pull/17031))
+- Fixed a bug where the window wasn’t automatically scrolling when dragging structure elements near its edges. ([#17036](https://github.com/craftcms/cms/issues/17036))
 - Fixed a bug where changes to multi-instance CKEditor fields weren’t persisting, if the first instance in the field layout hadn’t been modified. ([craftcms/ckeditor#391](https://github.com/craftcms/ckeditor/pull/391))
 - Fixed a bug where email templates weren’t always getting rendered with the correct site’s global variables.
+- Fixed a bug where Markdown field layout UI elements were styled with gray-colored text. ([#13513](https://github.com/craftcms/cms/discussions/13513))
 
 ## 5.6.15 - 2025-04-04
 

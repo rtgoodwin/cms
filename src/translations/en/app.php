@@ -860,7 +860,6 @@ return [
     'Installing Craft CMS…' => 'Installing Craft CMS…',
     'Installing the plugin…' => 'Installing the plugin…',
     'Installing {name}' => 'Installing {name}',
-    'Instance settings' => 'Instance settings',
     'Instructions' => 'Instructions',
     'Interlace' => 'Interlace',
     'Interlacing' => 'Interlacing',
