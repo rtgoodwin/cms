@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Craft CMS yükleniyor...',
     'Installing the plugin…' => 'Eklenti yükleniyor…',
     'Installing {name}' => '{name} yükleniyor',
-    'Instance settings' => 'Örnek ayarları',
     'Instructions' => 'Talimatlar',
     'Interlace' => 'Binişmeli',
     'Interlacing' => 'Örgülü tarama',
