@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Inštaluje sa Craft CMS…',
     'Installing the plugin…' => 'Inštaluje sa doplnok…',
     'Installing {name}' => 'Inštaluje sa program {name}',
-    'Instance settings' => 'Nastavenia inštancie',
     'Instructions' => 'Inštrukcie',
     'Interlace' => 'Prekladať',
     'Interlacing' => 'Prekladanie',
