@@ -145,19 +145,23 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
       }
     },
 
+    /**
+     * Update the view to reflect which elements are selectable
+     * @param $elements
+     * @returns {*}
+     */
     filterSelectableElements: function ($elements) {
       const selectable = [];
 
       for (let i = 0; i < $elements.length; i++) {
         const $element = $elements.eq(i);
         if ($element.hasClass('disabled')) {
-          // remove checkbox from tab order and mark as checked
-          $element.find('.checkbox').attr({
-            tabindex: '-1',
-            'aria-checked': 'true',
-          });
+          this.disableElementSelection($element);
           continue;
+        } else {
+          this.enableElementSelection($element);
         }
+
         if (this.canSelectElement($element)) {
           selectable.push($element[0]);
         } else {
@@ -167,6 +171,29 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
       }
 
       return $(selectable);
+    },
+
+    disableElementSelection: function ($element) {
+      // remove checkbox from tab order and mark as checked
+      $element.find('.checkbox').attr({
+        'aria-checked': 'true',
+      });
+
+      // Disable all focusable elements inside the disabled elements
+      const $focusable = Garnish.getKeyboardFocusableElements($elements);
+
+      $focusable.attr({
+        tabindex: '-1',
+      });
+    },
+
+    enableElementSelection: function ($element) {
+      $element.find('.checkbox').attr({
+        'aria-checked': 'true',
+      });
+
+      const $makeFocusable = $element.find('[tabindex="-1"]');
+      console.log($makeFocusable);
     },
 
     canSelectElement: function ($element) {
