@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'در حال نصب Craft CMS...',
     'Installing the plugin…' => 'در حال نصب پلاگین...',
     'Installing {name}' => 'در حال نصب {name}',
-    'Instance settings' => 'تنظیمات نمونه',
     'Instructions' => 'دستورالعمل ها',
     'Interlace' => 'درهم‌آمیختن',
     'Interlacing' => 'درهم‌آمیخته',
