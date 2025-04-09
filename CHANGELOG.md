@@ -1,8 +1,8 @@
 # Release Notes for Craft CMS 5
 
 ## Unreleased
-
 - Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
+- Fixed a bug where editor slideouts would open when dragging structured elements. ([#17044](https://github.com/craftcms/cms/issues/17044))
 
 ## 5.7.0-beta.1 - 2025-04-08
 
