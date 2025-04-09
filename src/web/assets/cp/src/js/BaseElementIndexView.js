@@ -69,14 +69,26 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
           }
         );
 
+        this.updateInitialViewForSelectedElements($elements);
+
         this._handleEnableElements = (ev) => {
           this.elementSelect.addItems(
             this.filterSelectableElements($(ev.elements))
           );
+
+          for (let i = 0; i < $(ev.elements).length; i++) {
+            const $element = $(ev.elements).eq(i);
+            this.enableWidgets($element);
+          }
         };
 
         this._handleDisableElements = (ev) => {
           this.elementSelect.removeItems(ev.elements);
+
+          for (let i = 0; i < $(ev.elements).length; i++) {
+            const $element = $(ev.elements).eq(i);
+            this.disableWidgets($element);
+          }
         };
 
         this.elementIndex.on('enableElements', this._handleEnableElements);
@@ -146,54 +158,77 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
     },
 
     /**
-     * Update the view to reflect which elements are selectable
+     * Updates the initial view for selected elements
      * @param $elements
-     * @returns {*}
+     */
+    updateInitialViewForSelectedElements: function ($elements) {
+      for (let i = 0; i < $elements.length; i++) {
+        const $element = $elements.eq(i);
+        if ($element.hasClass('disabled')) {
+          // mark as checked
+          this.getElementCheckbox($element).attr({
+            'aria-checked': 'true',
+          });
+
+          // remove checkbox other widgets from tab order
+          this.disableWidgets($element);
+          continue;
+        }
+
+        if (!this.canSelectElement($element)) {
+          $element.find('.checkbox').remove();
+        }
+      }
+    },
+
+    /**
+     * Returns selectable elements
+     * @param $elements Elements to filter
+     * @returns {jQuery} A jQuery object containing the selectable elements
      */
     filterSelectableElements: function ($elements) {
       const selectable = [];
 
       for (let i = 0; i < $elements.length; i++) {
         const $element = $elements.eq(i);
-        if ($element.hasClass('disabled')) {
-          this.disableElementSelection($element);
-          continue;
-        } else {
-          this.enableElementSelection($element);
-        }
 
         if (this.canSelectElement($element)) {
           selectable.push($element[0]);
-        } else {
-          // make sure it doesn't have a checkbox
-          $element.find('.checkbox').remove();
         }
       }
 
       return $(selectable);
     },
 
-    disableElementSelection: function ($element) {
-      // remove checkbox from tab order and mark as checked
-      $element.find('.checkbox').attr({
-        'aria-checked': 'true',
-      });
-
-      // Disable all focusable elements inside the disabled elements
-      const $focusable = Garnish.getKeyboardFocusableElements($elements);
-
-      $focusable.attr({
+    /**
+     * Removes all interactive widgets inside the element from the focus order
+     * @param $element
+     */
+    disableWidgets: function ($element) {
+      const disabledAttributes = {
         tabindex: '-1',
-      });
+        'data-widget': true,
+      };
+      // Disable all focusable elements inside the disabled elements
+      const $focusable = Garnish.getKeyboardFocusableElements($element);
+
+      if ($focusable.length) {
+        $focusable.attr(disabledAttributes);
+      }
+      this.getElementCheckbox($element).attr(disabledAttributes);
     },
 
-    enableElementSelection: function ($element) {
-      $element.find('.checkbox').attr({
-        'aria-checked': 'true',
-      });
+    /**
+     * Moves all interactive widgets inside the element into the default focus order
+     * @param $element
+     */
+    enableWidgets: function ($element) {
+      const $disabledWidgets = $element.find('[data-widget]');
 
-      const $makeFocusable = $element.find('[tabindex="-1"]');
-      console.log($makeFocusable);
+      if (!$disabledWidgets.length) return;
+
+      $disabledWidgets.removeAttr('tabindex data-widget');
+      this.getElementCheckbox($element).attr('tabindex', '0');
     },
 
     canSelectElement: function ($element) {
