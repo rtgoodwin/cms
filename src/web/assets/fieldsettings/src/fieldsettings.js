@@ -35,9 +35,6 @@
           .append(this.$container.clone())
           .serialize();
 
-        // Detach the current settings
-        this.$container.children().detach();
-
         this.currentType = this.$toggle.val();
 
         // Show a spinner
