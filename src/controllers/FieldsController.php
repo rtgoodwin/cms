@@ -21,6 +21,7 @@ use craft\web\assets\fieldsettings\FieldSettingsAsset;
 use craft\web\Controller;
 use ReflectionException;
 use ReflectionProperty;
+use TypeError;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -327,7 +328,12 @@ JS;
                 }
             });
 
-            Craft::configure($field, $settings);
+            try {
+                Craft::configure($field, $settings);
+            } catch (TypeError $e) {
+                ;
+                // ignore and carry on without maintaining old settings
+            }
         }
 
         $view = Craft::$app->getView();
