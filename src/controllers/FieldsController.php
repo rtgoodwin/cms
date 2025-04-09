@@ -318,6 +318,15 @@ JS;
                 }
             }, ARRAY_FILTER_USE_KEY);
 
+            // ensure the empty values are set to null if that's accepted by the attribute
+            array_walk($settings, function(&$value, $attribute) use ($type) {
+                $r1 = new ReflectionProperty($type, $attribute);
+                $attributeType = $r1->getType();
+                if (empty($value) && $attributeType->allowsNull()) {
+                    $value = null;
+                }
+            });
+
             Craft::configure($field, $settings);
         }
 
