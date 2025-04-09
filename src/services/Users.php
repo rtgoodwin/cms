@@ -1640,7 +1640,7 @@ class Users extends Component
             ($generalConfig->headlessMode && !UrlHelper::isAbsoluteUrl($fePath))
         );
         $scheme = UrlHelper::getSchemeForTokenizedUrl($cp);
-        $siteId = !$isCpRequest ? $user->affiliatedSiteId : null;
+        $siteId = $isCpRequest ? $user->affiliatedSiteId : null;
 
         if (!$cp) {
             return UrlHelper::siteUrl($fePath, $params, $scheme, siteId: $siteId);
