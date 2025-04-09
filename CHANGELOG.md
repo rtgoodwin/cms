@@ -1,5 +1,8 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+- Fixes a bug in element index views where focusable elements in disabled elements remained in the focus order. ([#17053](https://github.com/craftcms/cms/pull/17053))
+
 ## 5.6.16 - 2025-04-08
 
 - Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
