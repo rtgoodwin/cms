@@ -6305,8 +6305,8 @@ $min2ColWidth: 400px;
   }
 
   &.so-mobile {
-    --padding: 14px;
-    --neg-padding: -14px;
+    --padding: var(--m);
+    --neg-padding: calc(var(--m) * -1);
   }
 
   &.so-lp {
@@ -8154,6 +8154,10 @@ fieldset {
   display: flex;
   flex-direction: column;
   gap: calc(5rem / 16);
+
+  .btn.add {
+    max-width: calc(200rem / 16);
+  }
 }
 
 input.checkbox {
@@ -9428,6 +9432,7 @@ body.licensing-issues {
   .flex-fields {
     --row-gap: var(--m) !important;
     --padding: var(--m);
+    --neg-padding: calc(var(--m) * -1);
   }
 
   // no margin when a .field comes after a hidden item.

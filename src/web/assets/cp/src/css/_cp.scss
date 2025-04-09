@@ -22,7 +22,7 @@ $badgeColor: var(--gray-800);
   --l: 18px;
   --xl: 24px;
   --padding: var(--xl);
-  --neg-padding: calc(var(--padding) * -1);
+  --neg-padding: calc(var(--xl) * -1);
   --sidebar-width: #{$sidebarWidth};
   --global-sidebar-width: #{$sidebarWidth};
   --details-width: #{$detailsWidth};

@@ -7,6 +7,7 @@
 - Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
 - Fixed a bug where editor slideouts would open when dragging structured elements. ([#17044](https://github.com/craftcms/cms/issues/17044))
 - Fixed a bug where the “Edit [type]” action menu item wasn’t working for newly-added elements within relation fields with “Maintain hierarchy” enabled. ([#17052](https://github.com/craftcms/cms/pull/17052))
+- Fixed styling issues.
 
 ## 5.7.0-beta.1 - 2025-04-08
 
