@@ -14,6 +14,7 @@ use craft\fields\MissingField;
 use craft\fields\PlainText;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Component;
+use craft\helpers\Typecast;
 use craft\helpers\UrlHelper;
 use craft\models\FieldGroup;
 use craft\models\FieldLayoutTab;
@@ -21,7 +22,6 @@ use craft\web\assets\fieldsettings\FieldSettingsAsset;
 use craft\web\Controller;
 use ReflectionException;
 use ReflectionProperty;
-use TypeError;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
@@ -319,21 +319,8 @@ JS;
                 }
             }, ARRAY_FILTER_USE_KEY);
 
-            // ensure the empty values are set to null if that's accepted by the attribute
-            array_walk($settings, function(&$value, $attribute) use ($type) {
-                $r1 = new ReflectionProperty($type, $attribute);
-                $attributeType = $r1->getType();
-                if (empty($value) && $attributeType->allowsNull()) {
-                    $value = null;
-                }
-            });
-
-            try {
-                Craft::configure($field, $settings);
-            } catch (TypeError $e) {
-                ;
-                // ignore and carry on without maintaining old settings
-            }
+            Typecast::properties($type, $settings);
+            Craft::configure($field, $settings);
         }
 
         $view = Craft::$app->getView();
