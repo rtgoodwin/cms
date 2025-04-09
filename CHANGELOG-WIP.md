@@ -180,3 +180,4 @@
 - Fixed a bug where slide pickers within selected field layout elements didn’t have a label. ([#16696](https://github.com/craftcms/cms/pull/16696))
 - Fixed a bug where nested elements’ `getOwner()` and `getPrimaryOwner()` methods weren’t working properly if they had been queried alongside other elements that didn’t share the same owner type. ([#16960](https://github.com/craftcms/cms/pull/16960))
 - Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
+- Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
