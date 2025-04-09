@@ -1640,9 +1640,10 @@ class Users extends Component
             ($generalConfig->headlessMode && !UrlHelper::isAbsoluteUrl($fePath))
         );
         $scheme = UrlHelper::getSchemeForTokenizedUrl($cp);
+        $siteId = $isCpRequest ? $user->affiliatedSiteId : null;
 
         if (!$cp) {
-            return UrlHelper::siteUrl($fePath, $params, $scheme);
+            return UrlHelper::siteUrl($fePath, $params, $scheme, siteId: $siteId);
         }
 
         // Only use cpUrl() if this is a control panel request, or the base control panel URL has been explicitly set,
@@ -1651,7 +1652,7 @@ class Users extends Component
             $url = UrlHelper::cpUrl($cpPath, $params, $scheme);
         } else {
             $path = UrlHelper::prependCpTrigger($cpPath);
-            $url = UrlHelper::siteUrl($path, $params, $scheme);
+            $url = UrlHelper::siteUrl($path, $params, $scheme, siteId: $siteId);
         }
 
         if (UrlHelper::isRootRelativeUrl($url)) {
