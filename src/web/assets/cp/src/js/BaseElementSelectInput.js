@@ -946,6 +946,10 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
       this.$elementsContainer.replaceWith($newElementsContainer);
       this.$elementsContainer = $newElementsContainer;
+
+      await Craft.appendHeadHtml(response.data.headHtml);
+      await Craft.appendBodyHtml(response.data.bodyHtml);
+
       this.resetElements();
 
       const filteredElements = [];
