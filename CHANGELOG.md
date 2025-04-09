@@ -1,6 +1,9 @@
 # Release Notes for Craft CMS 5
 
 ## Unreleased
+
+- Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
+- Fixed a bug where field settings weren’t being retained when changing a field’s type to a preselected value. ([#17045](https://github.com/craftcms/cms/issues/17045))
 - Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
 - Fixed a bug where editor slideouts would open when dragging structured elements. ([#17044](https://github.com/craftcms/cms/issues/17044))
 
