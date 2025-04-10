@@ -696,7 +696,7 @@ return [
     'Field Limit' => 'מגבלת שדה',
     'Field Type' => 'סוג השדה',
     'Field saved.' => 'השדה נשמר',
-    'Field settings' => 'הגדרות שדה',
+    'Field settings' => 'הגדרות שדות',
     'Field value copied.' => 'ערך השדה הועתק.',
     'Field' => 'שדה',
     'Fields' => 'שדות',
