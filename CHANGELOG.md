@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.6.17 - 2025-04-10 [CRITICAL]
 
 - Fixed an RCE vulnerability.
 
