@@ -852,7 +852,7 @@ JS, [
 (() => {
   $('#' + $copyAllId).on('activate', () => {
     const elementInfo = [];
-    $('#' + $fieldId + ' .matrixblock').each((i, element) => {
+    $('#' + $fieldId + ' > .blocks > .matrixblock').each((i, element) => {
       element = $(element);
       elementInfo.push(Object.assign({
           id: element.data('id'),

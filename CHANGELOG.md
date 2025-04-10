@@ -9,6 +9,7 @@
 - Fixed a bug where editor slideouts would open when dragging structured elements. ([#17044](https://github.com/craftcms/cms/issues/17044))
 - Fixed a bug where the “Edit [type]” action menu item wasn’t working for newly-added elements within relation fields with “Maintain hierarchy” enabled. ([#17052](https://github.com/craftcms/cms/pull/17052))
 - Fixed a bug where “Show cards in a grid” relation field settings weren’t getting hidden when “Maintain hierarchy” was enabled.
+- Fixed a bug where the “Copy all entries” field action for Matrix fields set to inline-editable blocks was copying recursively-nested entries as well. ([#17060](https://github.com/craftcms/cms/issues/17060))
 - Fixed styling issues.
 
 ## 5.7.0-beta.1 - 2025-04-08
