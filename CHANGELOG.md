@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.14.15 - 2025-04-10 [CRITICAL]
 
 - Fixed an RCE vulnerability.
 
