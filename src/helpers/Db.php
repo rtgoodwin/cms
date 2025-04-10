@@ -51,7 +51,7 @@ class Db
     /**
      * @var array
      */
-    private static array $_operators = ['not ', '!=', '<=', '>=', '<', '>', '='];
+    private static array $_operators = ['not ', '!=', '<=', '>=', '<', '>', '=', 'or', 'and'];
 
     /**
      * @var string[] Numeric column types
