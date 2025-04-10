@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'מתקין את Craft CMS...',
     'Installing the plugin…' => 'מתקין את התוסף...',
     'Installing {name}' => 'מתקין את {name}',
-    'Instance settings' => 'הגדרות מופע',
     'Instructions' => 'הסבר',
     'Interlace' => 'שלב',
     'Interlacing' => 'משלב',

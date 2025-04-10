@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Craft CMS 설치 중...',
     'Installing the plugin…' => '플러그인 설치 중...',
     'Installing {name}' => '{name} 설치 중',
-    'Instance settings' => '인스턴스 설정',
     'Instructions' => '설명',
     'Interlace' => '인터레이스',
     'Interlacing' => '인터레이스 중',

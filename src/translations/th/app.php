@@ -850,7 +850,6 @@ return [
     'Installing Craft CMS…' => 'กำลังติดตั้ง Craft CMS...',
     'Installing the plugin…' => 'กำลังติดตั้งปลั๊กอิน...',
     'Installing {name}' => 'กำลังติดตั้ง {name}',
-    'Instance settings' => 'การตั้งค่าอินสแตนซ์',
     'Instructions' => 'คำแนะนำ',
     'Interlace' => 'ประสานกัน',
     'Interlacing' => 'การประสานกัน',

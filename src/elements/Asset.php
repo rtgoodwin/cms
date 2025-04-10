@@ -1871,7 +1871,7 @@ JS,[
      */
     public function getSrcset(array $sizes, mixed $transform = null): string|false
     {
-        $urls = $this->getUrlsBySize($sizes, $transform);
+        $urls = array_filter($this->getUrlsBySize($sizes, $transform));
 
         if (empty($urls)) {
             return false;
