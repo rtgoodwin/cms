@@ -166,7 +166,7 @@ return [
     'Are you sure you want to remove {name} verification?' => 'Tem a certeza de que deseja remover a verificação de {name}?',
     'Are you sure you want to restart the job “{description}”? Any progress could be lost.' => 'Tem a certeza de que pretende reiniciar o trabalho "{description}"? Qualquer progresso pode ser perdido.',
     'Are you sure you want to transfer your license to this domain?' => 'Tem certeza de que deseja transferir sua licença para este domínio?',
-    'Are you sure you want to undo the move?' => 'Tem a certeza de que pretende anular o movimento?',
+    'Are you sure you want to undo the move?' => 'Tem a certeza de que deseja anular o movimento?',
     'Are you sure you want to uninstall {plugin}? You will lose all of its associated data.' => 'Tem certeza de que deseja desinstalar {plugin}? Vai perder todos os dados associados.',
     'Area' => 'Área',
     'As an element index' => 'Como um índice de elemento',
