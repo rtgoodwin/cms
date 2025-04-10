@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
+- Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.
+
 ## 5.7.0-beta.2 - 2025-04-10
 
 - Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))

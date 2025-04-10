@@ -11,6 +11,7 @@ Craft.AssetSelectInput = Craft.BaseElementSelectInput.extend({
 
   init: function () {
     this.base.apply(this, arguments);
+    console.log(this.settings);
     if (this.settings.canUpload) {
       this._attachUploader();
     }
