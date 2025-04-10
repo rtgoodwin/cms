@@ -12,6 +12,7 @@ use craft\base\Batchable;
 use craft\helpers\ConfigHelper;
 use craft\helpers\Queue as QueueHelper;
 use craft\i18n\Translation;
+use yii\queue\RetryableJobInterface;
 
 /**
  * BaseBatchedJob is the base class for large jobs that may need to spawn
@@ -60,6 +61,18 @@ abstract class BaseBatchedJob extends BaseJob
 
     private ?Batchable $_data = null;
     private ?int $_totalItems = null;
+
+    /**
+     * @inheritdoc
+     */
+    public function init(): void
+    {
+        parent::init();
+
+        $this->ttr = $this->ttr ??
+            ($this instanceof RetryableJobInterface ? $this->getTtr() : null) ??
+            Craft::$app->getQueue()->ttr;
+    }
 
     public function __sleep(): array
     {
@@ -142,10 +155,10 @@ abstract class BaseBatchedJob extends BaseJob
                 }
             }
 
-            // Make sure we don't hit the TTL, even if the next item takes twice as long as the average
+            // Make sure we don't hit the TTR, even if the next item takes twice as long as the average
             $runningTime = microtime(true) - $start;
             $avgRunningTime = $runningTime / $i;
-            if ($runningTime + ($avgRunningTime * 2) > $this->ttr) {
+            if ($this->ttr !== null && $runningTime + ($avgRunningTime * 2) > $this->ttr) {
                 break;
             }
 
