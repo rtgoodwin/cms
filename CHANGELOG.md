@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.0-beta.2 - 2025-04-10
 
 - Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
 - Fixed a bug where field settings weren’t being retained when changing a field’s type to a preselected value. ([#17045](https://github.com/craftcms/cms/issues/17045))
