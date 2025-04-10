@@ -69,9 +69,8 @@ abstract class BaseBatchedJob extends BaseJob
     {
         parent::init();
 
-        $this->ttr = $this->ttr ??
-            ($this instanceof RetryableJobInterface ? $this->getTtr() : null) ??
-            Craft::$app->getQueue()->ttr;
+        $this->ttr ??= ($this instanceof RetryableJobInterface ? $this->getTtr() : null)
+            ?? Craft::$app->getQueue()->ttr;
     }
 
     public function __sleep(): array
