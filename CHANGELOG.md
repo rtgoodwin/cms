@@ -4,6 +4,7 @@
 
 - Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
 - Fixed a bug where field settings weren’t being retained when changing a field’s type to a preselected value. ([#17045](https://github.com/craftcms/cms/issues/17045))
+- Fixed a bug where batched jobs that were pushed without an explicit TTR were getting new jobs spawned after each item processed. ([#17058](https://github.com/craftcms/cms/pull/17058))
 
 ## 4.15.0-beta.1 - 2025-04-08
 
