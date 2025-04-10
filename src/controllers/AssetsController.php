@@ -1197,6 +1197,9 @@ class AssetsController extends Controller
         } else {
             $assetId = $this->request->getRequiredBodyParam('assetId');
             $handle = $this->request->getRequiredBodyParam('handle');
+            if (!is_string($handle)) {
+                throw new BadRequestHttpException('Invalid transform handle.');
+            }
             $assetModel = Craft::$app->getAssets()->getAssetById($assetId);
             if ($assetModel === null) {
                 throw new BadRequestHttpException('Invalid asset ID: ' . $assetId);
