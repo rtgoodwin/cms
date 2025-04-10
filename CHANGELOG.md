@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed an RCE vulnerability.
+
 ## 5.6.16 - 2025-04-08
 
 - Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
