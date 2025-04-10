@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 3.x
 
-## Unreleased
+## 3.9.15 - 2025-04-10 [CRITICAL]
 
 - Fixed an RCE vulnerability.
 
