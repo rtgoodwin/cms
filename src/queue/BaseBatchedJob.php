@@ -145,7 +145,7 @@ abstract class BaseBatchedJob extends BaseJob
             // Make sure we don't hit the TTL, even if the next item takes twice as long as the average
             $runningTime = microtime(true) - $start;
             $avgRunningTime = $runningTime / $i;
-            if ($runningTime + ($avgRunningTime * 2) > $this->ttr) {
+            if ($this->ttr !== null && $runningTime + ($avgRunningTime * 2) > $this->ttr) {
                 break;
             }
 
