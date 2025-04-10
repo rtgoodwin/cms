@@ -1964,7 +1964,7 @@ return [
     'Viewable' => 'Доступно для перегляду',
     'Village/Township' => 'Село/селище',
     'Violet' => 'Фіолетовий',
-    'Visibility Conditions' => 'Visibility Conditions',
+    'Visibility Conditions' => 'Умови видимості',
     'Visit webpage' => 'Відвідати вебсторінку',
     'Volume - {volume}' => 'Том — {volume}',
     'Volume path' => 'Шлях до тому',
