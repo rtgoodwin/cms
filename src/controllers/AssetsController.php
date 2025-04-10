@@ -1126,6 +1126,9 @@ class AssetsController extends Controller
             } else {
                 $assetId = $this->request->getRequiredBodyParam('assetId');
                 $handle = $this->request->getRequiredBodyParam('handle');
+                if (!is_string($handle)) {
+                    throw new BadRequestHttpException('Invalid transform handle.');
+                }
                 $transform = ImageTransforms::normalizeTransform($handle);
                 $transformer = $transform?->getImageTransformer();
             }
