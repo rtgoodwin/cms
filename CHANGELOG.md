@@ -200,6 +200,10 @@
 - Fixed a bug where nested elements’ `getOwner()` and `getPrimaryOwner()` methods weren’t working properly if they had been queried alongside other elements that didn’t share the same owner type. ([#16960](https://github.com/craftcms/cms/pull/16960))
 - Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
 
+## 5.6.17 - 2025-04-10 [CRITICAL]
+
+- Fixed an RCE vulnerability.
+
 ## 5.6.16 - 2025-04-08
 
 - Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
