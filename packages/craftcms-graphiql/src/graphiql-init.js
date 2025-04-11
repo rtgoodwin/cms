@@ -28,7 +28,7 @@ const CraftGraphiQL = ({endpoint, selectedSchema}) => {
       });
   }
 
-  return <GraphiQL fetcher={graphQLFetcher} />;
+  return <GraphiQL fetcher={graphQLFetcher} forcedTheme="light" />;
 };
 
 export function init(domTarget) {
