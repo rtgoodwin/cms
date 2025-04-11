@@ -1928,9 +1928,7 @@ SQL)->execute();
                     ]),
                 ]),
                 'handle' => $entryType->handle,
-                'usages' => Cp::componentPreviewHtml($usages[$entryType->id] ?? [], [
-                    'hyperlink' => true,
-                ]),
+                'usages' => Cp::componentPreviewHtml($usages[$entryType->id] ?? []),
             ];
         }
 

@@ -292,6 +292,13 @@ Craft::setAlias('@appicons/upgrade.svg', "$solidIconsPath/square-arrow-up.svg");
 Craft::setAlias('@appicons/wand.svg', "$solidIconsPath/wand-magic-sparkles.svg");
 Craft::setAlias('@appicons/world.svg', "$solidIconsPath/earth-americas.svg");
 
+// Set any custom aliases
+foreach ($generalConfig->aliases as $name => $value) {
+    if (is_string($value)) {
+        Craft::setAlias($name, $value);
+    }
+}
+
 $webUrl = App::env('CRAFT_WEB_URL');
 if ($webUrl) {
     Craft::setAlias('@web', $webUrl);
@@ -300,13 +307,6 @@ if ($webUrl) {
 $webRoot = App::env('CRAFT_WEB_ROOT');
 if ($webRoot) {
     Craft::setAlias('@webroot', $webRoot);
-}
-
-// Set any custom aliases
-foreach ($generalConfig->aliases as $name => $value) {
-    if (is_string($value)) {
-        Craft::setAlias($name, $value);
-    }
 }
 
 // Load the config

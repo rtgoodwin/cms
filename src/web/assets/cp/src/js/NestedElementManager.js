@@ -162,7 +162,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
         this.elementSort = new Garnish.DragSort({
           container: this.$elements,
           handle:
-            '> .element > .card-actions-container > .card-actions > .move',
+            '> .element > .card-titlebar > .card-actions-container > .card-actions > .move-btn',
           ignoreHandleSelector: null,
           collapseDraggees: true,
           magnetStrength: 4,
@@ -571,36 +571,40 @@ Craft.NestedElementManager = Garnish.Base.extend(
     },
 
     initElement($element) {
-      const editable = Garnish.hasAttr($element, 'data-editable');
-
-      if (editable) {
-        // Double-clicks
-        this.addListener($element, 'dblclick,taphold', (ev) => {
-          if (!$(ev.target).closest('a[href],button,[role=button]').length) {
-            this.createElementEditor($element);
-          }
-        });
-      }
-
       setTimeout(() => {
+        const editable = Garnish.hasAttr($element, 'data-editable');
+
+        if (editable) {
+          // "Edit" button
+          const $editBtn = $element.find('.edit-btn');
+          if ($editBtn.length) {
+            // Override the default event listener
+            $editBtn.off('activate');
+            this.addListener($editBtn, 'activate', (ev) => {
+              const cpUrl = $element.data('cpUrl');
+              if (cpUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
+                window.open(cpUrl);
+              } else {
+                this.createElementEditor($element);
+              }
+            });
+          }
+
+          // Double-clicks
+          this.addListener($element, 'dblclick,taphold', (ev) => {
+            if (!$(ev.target).closest('a[href],button,[role=button]').length) {
+              this.createElementEditor($element);
+            }
+          });
+        }
+
         const actionDisclosure = $element
           .find('.action-btn')
+          .disclosureMenu()
           .data('disclosureMenu');
 
         if (actionDisclosure) {
           const $actionMenu = actionDisclosure.$container;
-
-          if (editable) {
-            // "Edit" action menu item
-            const $editBtn = $actionMenu.find('[data-edit-action]');
-            if ($editBtn?.length) {
-              // Override the default event listener
-              $editBtn.off('activate');
-              this.addListener($editBtn, 'activate', () => {
-                this.createElementEditor($element);
-              });
-            }
-          }
 
           const destructiveGroup = actionDisclosure.getFirstDestructiveGroup();
           let moveUpButton, moveDownButton, duplicateButton;
@@ -861,6 +865,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
                     ui: 'card',
                     sortable: this.settings.sortable,
                     showActionMenu: true,
+                    hyperlink: false,
                   },
                 ],
               })),

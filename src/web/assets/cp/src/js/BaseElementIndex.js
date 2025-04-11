@@ -17,7 +17,6 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     sourceStatesStorageKey: null,
 
     searchTimeout: null,
-    sourceSelect: null,
     sourceNav: null,
 
     $container: null,
@@ -688,6 +687,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       if (!this.sourceNav) {
         this.sourceNav = new SourceNav(this.$sidebar.find('nav'), {
           onSelectionChange: this._handleSourceSelectionChange.bind(this),
+          handleCtrlClicks: this.settings.context === 'index',
         });
       }
 
@@ -1574,6 +1574,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         source: this.sourceKey,
         condition: this.settings.condition,
         referenceElementId: this.settings.referenceElementId,
+        referenceElementOwnerId: this.settings.referenceElementOwnerId,
         referenceElementSiteId: this.settings.referenceElementSiteId,
         baseCriteria,
         criteria,
@@ -3893,6 +3894,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       storageKey: null,
       condition: null,
       referenceElementId: null,
+      referenceElementOwnerId: null,
       referenceElementSiteId: null,
       allowedViewModes: null,
       showHeaderColumn: true,
@@ -3960,23 +3962,18 @@ const SourceNav = Garnish.Base.extend(
 
     init: function (container, settings) {
       this.$container = $(container);
-
-      const items = this.$container.find('[data-source-item]');
-
       this.setSettings(settings, SourceNav.defaults);
-
       this.$items = $();
-      this.addItems(items);
     },
 
     addItems: function (items) {
       const $items = $(items);
 
-      for (var i = 0; i < $items.length; i++) {
+      for (let i = 0; i < $items.length; i++) {
         const item = $items[i];
 
-        this.addListener(item, 'click', this.handleClick.bind(this));
-        this.addListener(item, 'keydown', this.handleKeypress.bind(this));
+        this.addListener(item, 'click', 'handleClick');
+        this.addListener(item, 'keydown', 'handleKeypress');
       }
 
       this.$items = this.$items.add($items);
@@ -3986,7 +3983,7 @@ const SourceNav = Garnish.Base.extend(
      * Remove All Items
      */
     removeAllItems: function () {
-      for (var i = 0; i < this.$items.length; i++) {
+      for (let i = 0; i < this.$items.length; i++) {
         this._deinitItem(this.$items[i]);
       }
 
@@ -4009,6 +4006,16 @@ const SourceNav = Garnish.Base.extend(
 
     handleClick: function (event) {
       const $item = this.getClosestItem(event.target);
+
+      if (this.settings.handleCtrlClicks && Garnish.isCtrlKeyPressed(event)) {
+        const sourceKey = $item.data('key');
+        if (sourceKey) {
+          const urlParams = Craft.getQueryParams();
+          urlParams.source = sourceKey;
+          window.open(Craft.getUrl(Craft.path, urlParams));
+          return;
+        }
+      }
 
       this.selectItem($item);
     },
@@ -4100,6 +4107,7 @@ const SourceNav = Garnish.Base.extend(
     defaults: {
       selectedClass: 'sel',
       onSelectionChange: $.noop,
+      handleCtrlClicks: false,
     },
   }
 );

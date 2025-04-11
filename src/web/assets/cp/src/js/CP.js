@@ -605,7 +605,9 @@ Craft.CP = Garnish.Base.extend(
         return;
       }
 
-      this.tabManager = new Craft.Tabs($tabs);
+      this.tabManager = new Craft.Tabs($tabs, {
+        handleCtrlClicks: true,
+      });
 
       this.tabManager.on('selectTab', (ev) => {
         const href = ev.$tab.attr('href');
@@ -2263,7 +2265,12 @@ Craft.CP.ElementCopyNotification = Craft.CP.Notification.extend({
             type: e.type,
             id: e.id,
             siteId: e.siteId,
-            instances: [{ui: 'chip'}],
+            instances: [
+              {
+                ui: 'chip',
+                hyperlink: false,
+              },
+            ],
           })),
         },
       }

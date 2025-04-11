@@ -120,7 +120,7 @@ class Section extends Model implements Chippable, CpEditable, Iconic
 
     /**
      * @var string Default placement
-     * @phpstan-var self::DEFAULT_PLACEMENT_BEGINNING|self::DEFAULT_PLACEMENT_END
+     * @phpstan-var self::DEFAULT_PLACEMENT_*
      * @since 3.7.0
      */
     public string $defaultPlacement = self::DEFAULT_PLACEMENT_END;
@@ -404,7 +404,10 @@ class Section extends Model implements Chippable, CpEditable, Iconic
      */
     public function getCpEditUrl(): ?string
     {
-        return $this->id ? UrlHelper::cpUrl("settings/sections/$this->id") : null;
+        if (!$this->id || !Craft::$app->getUser()->getIsAdmin()) {
+            return null;
+        }
+        return UrlHelper::cpUrl("settings/sections/$this->id");
     }
 
     /**

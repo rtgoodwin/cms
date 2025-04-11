@@ -729,7 +729,10 @@ JS, [
         return [
             ...$crumbs,
             [
-                'html' => Cp::elementChipHtml($element, ['showDraftName' => !$current]),
+                'html' => Cp::elementChipHtml($element, [
+                    'showDraftName' => !$current,
+                    'class' => 'chromeless',
+                ]),
                 'current' => $current,
             ],
         ];

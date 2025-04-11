@@ -45,6 +45,7 @@ use craft\enums\PropagationMethod;
 use craft\events\DefineEntryTypesEvent;
 use craft\events\ElementCriteriaEvent;
 use craft\fieldlayoutelements\entries\EntryTitleField;
+use craft\fields\Matrix;
 use craft\gql\interfaces\elements\Entry as EntryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
@@ -740,6 +741,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     }
                 }
 
+                /** @phpstan-ignore-next-line */
                 return [
                     'elementType' => User::class,
                     'map' => $map,
@@ -847,6 +849,16 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public ?DateTime $expiryDate = null;
 
     /**
+     * @var self::STATUS_*|null The entry’s previous status, if it had one
+     */
+    public ?string $oldStatus = null;
+
+    /**
+     * @var self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED
+     */
+    private string $status;
+
+    /**
      * @var bool Whether the entry was deleted along with its entry type
      * @see beforeDelete()
      * @internal
@@ -910,6 +922,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     public function init(): void
     {
         parent::init();
+        if (isset($this->id)) {
+            $this->oldStatus = $this->getStatus();
+        }
         $this->_oldTypeId = $this->_typeId;
     }
 
@@ -1283,7 +1298,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
 
             foreach ($ancestors->all() as $ancestor) {
                 if ($elementsService->canView($ancestor, $user)) {
-                    $crumbs[] = ['html' => Cp::elementChipHtml($ancestor)];
+                    $crumbs[] = [
+                        'html' => Cp::elementChipHtml($ancestor, ['class' => 'chromeless']),
+                    ];
                 }
             }
         }
@@ -1350,13 +1367,9 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     /**
      * @inheritdoc
      */
-    public function getCardBodyHtml(): ?string
+    public function getCardTitle(): ?string
     {
-        $html = parent::getCardBodyHtml();
-        if ($html === '') {
-            return Html::tag('div', Html::tag('em', Craft::t('site', $this->getType()->name)));
-        }
-        return $html;
+        return $this->getType()->getUiLabel();
     }
 
     /**
@@ -1766,23 +1779,35 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         $status = parent::getStatus();
 
-        if ($status == self::STATUS_ENABLED && $this->postDate) {
-            $currentTime = DateTimeHelper::currentTimeStamp();
-            $postDate = $this->postDate->getTimestamp();
-            $expiryDate = $this->expiryDate?->getTimestamp();
-
-            if ($postDate <= $currentTime && ($expiryDate === null || $expiryDate > $currentTime)) {
-                return self::STATUS_LIVE;
-            }
-
-            if ($postDate > $currentTime) {
-                return self::STATUS_PENDING;
-            }
-
-            return self::STATUS_EXPIRED;
+        if ($status !== self::STATUS_ENABLED) {
+            return $status;
         }
 
-        return $status;
+        return $this->status ?? $this->_status();
+    }
+
+    /**
+     * @return self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED
+     */
+    private function _status(): string
+    {
+        $now = DateTimeHelper::now();
+        return match (true) {
+            !$this->postDate || $this->postDate > $now => self::STATUS_PENDING,
+            $this->expiryDate && $this->expiryDate <= $now => self::STATUS_EXPIRED,
+            default => self::STATUS_LIVE,
+        };
+    }
+
+    /**
+     * Sets the status, if it’s stored statically.
+     *
+     * @param self::STATUS_LIVE|self::STATUS_PENDING|self::STATUS_EXPIRED $status
+     * @since 5.7.0
+     */
+    public function setStatus(string $status): void
+    {
+        $this->status = $status;
     }
 
     /**
@@ -2024,7 +2049,13 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function hasRevisions(): bool
     {
-        return $this->getSection()?->enableVersioning ?? false;
+        $section = $this->getSection();
+        if ($section) {
+            return $section->enableVersioning;
+        }
+
+        $field = $this->getField();
+        return $field instanceof Matrix && $field->enableVersioning;
     }
 
     /**
@@ -2110,18 +2141,19 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 return $html;
             case 'section':
                 $section = $this->getSection();
-                return $section ? Html::encode(Craft::t('site', $section->name)) : '';
+                if (!$section) {
+                    return '';
+                }
+                return Cp::chipHtml($section, [
+                    'class' => 'chromeless',
+                    'showThumb' => false,
+                ]);
             case 'type':
                 try {
-                    $config = [
-                        'attributes' => [
-                            'class' => ['chromeless'],
-                        ],
-                    ];
-                    if ($this->viewMode === 'cards') {
-                        $config['showThumb'] = false;
-                    }
-                    return Cp::chipHtml($this->getType(), $config);
+                    return Cp::chipHtml($this->getType(), [
+                        'class' => 'chromeless',
+                        'showThumb' => $this->viewMode !== 'cards',
+                    ]);
                 } catch (InvalidConfigException) {
                     return Craft::t('app', 'Unknown');
                 }
@@ -2574,31 +2606,35 @@ JS;
      */
     public function beforeSave(bool $isNew): bool
     {
-        $section = $this->getSection();
-        if ($section) {
-            // Make sure the entry has at least one revision if the section has versioning enabled
-            if ($this->_shouldSaveRevision()) {
-                $hasRevisions = self::find()
-                    ->revisionOf($this)
+        if ($this->_shouldSaveRevision()) {
+            // Make sure the entry has at least one revision
+            $hasRevisions = static::find()
+                ->revisionOf($this)
+                ->site('*')
+                ->status(null)
+                ->exists();
+
+            if (!$hasRevisions) {
+                /** @var self|null $current */
+                $current = static::find()
+                    ->id($this->id)
                     ->site('*')
                     ->status(null)
-                    ->exists();
-                if (!$hasRevisions) {
-                    /** @var self|null $currentEntry */
-                    $currentEntry = self::find()
-                        ->id($this->id)
-                        ->site('*')
-                        ->status(null)
-                        ->one();
+                    ->one();
 
-                    // May be null if the entry is currently stored as an unpublished draft
-                    if ($currentEntry) {
-                        $revisionNotes = 'Revision from ' . Craft::$app->getFormatter()->asDatetime($currentEntry->dateUpdated);
-                        Craft::$app->getRevisions()->createRevision($currentEntry, $currentEntry->getAuthorId(), $revisionNotes);
-                    }
+                // May be null if the entry is currently stored as an unpublished draft
+                if ($current) {
+                    Craft::$app->getRevisions()->createRevision(
+                        $current,
+                        $current->getAuthorId(),
+                        sprintf('Revision from %s', Craft::$app->getFormatter()->asDatetime($current->dateUpdated)),
+                    );
                 }
             }
+        }
 
+        $section = $this->getSection();
+        if ($section) {
             // Set the structure ID for Element::attributes() and afterSave()
             if ($section->type === Section::TYPE_STRUCTURE) {
                 $this->structureId = $section->structureId;
@@ -2700,6 +2736,16 @@ JS;
             $record->typeId = $this->getTypeId();
             $record->postDate = Db::prepareDateForDb($this->postDate);
             $record->expiryDate = Db::prepareDateForDb($this->expiryDate);
+
+            // todo: update after the next breakpoint
+            if (Craft::$app->getDb()->columnExists(Table::ENTRIES, 'status')) {
+                $status = $this->_status();
+                $record->status = $status;
+                // only update $this->status if it's already set, indicating that staticStatuses is enabled
+                if (isset($this->status)) {
+                    $this->status = $status;
+                }
+            }
 
             // Capture the dirty attributes from the record
             $dirtyAttributes = array_keys($record->getDirtyAttributes());
@@ -2923,7 +2969,7 @@ JS;
             !$this->resaving &&
             !$this->getIsDraft() &&
             !$this->getIsRevision() &&
-            $this->getSection()?->enableVersioning
+            $this->hasRevisions()
         );
     }
 

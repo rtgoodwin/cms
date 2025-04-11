@@ -1318,8 +1318,8 @@ abstract class Element extends Component implements ElementInterface
             }
         }
 
-        // Only cache if there's no search term
-        if ($elementQuery instanceof ElementQuery && !$elementQuery->search) {
+        // Only cache if there's no search term or relation param
+        if ($elementQuery instanceof ElementQuery && !$elementQuery->search && !$elementQuery->relatedTo) {
             $elementQuery->cache(dependency: new ElementQueryTagDependency($elementQuery, [
                 'tags' => [
                     'element-index-query',
@@ -1643,7 +1643,6 @@ abstract class Element extends Component implements ElementInterface
             $attributes = array_merge($attributes, [
                 'link' => [
                     'label' => Craft::t('app', 'Link'),
-                    'icon' => 'world',
                     'placeholder' => fn() => ElementHelper::linkAttributeHtml('#'),
                 ],
                 'slug' => [
@@ -3479,6 +3478,7 @@ abstract class Element extends Component implements ElementInterface
                     [
                         'html' => Cp::elementChipHtml($owner, [
                             'showDraftName' => false,
+                            'class' => 'chromeless',
                         ]),
                     ],
                 ];
@@ -3557,6 +3557,14 @@ abstract class Element extends Component implements ElementInterface
     public function showStatusIndicator(): bool
     {
         return static::hasStatuses();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getCardTitle(): ?string
+    {
+        return null;
     }
 
     /**
@@ -6277,7 +6285,7 @@ JS, [
     public function afterSave(bool $isNew): void
     {
         // Update the element’s relation data
-        $this->updateRelations();
+        $this->updateRelations($isNew);
 
         // Tell the fields about it
         foreach ($this->fieldLayoutFields() as $field) {
@@ -6292,7 +6300,7 @@ JS, [
         }
     }
 
-    private function updateRelations(): void
+    private function updateRelations(bool $isNew): void
     {
         if (!$this->hasFieldLayout()) {
             return;
@@ -6314,8 +6322,10 @@ JS, [
             foreach ($instances as $field) {
                 // Skip if nothing changed, or the element is just propagating and we're not localizing relations
                 if (
-                    ($this->duplicateOf || $this->isFieldDirty($field->handle) || $field->forceUpdateRelations($this)) &&
-                    (!$this->propagating || $localizeRelations)
+                    $isNew || (
+                        ($this->duplicateOf || $this->isFieldDirty($field->handle) || $field->forceUpdateRelations($this)) &&
+                        (!$this->propagating || $localizeRelations)
+                    )
                 ) {
                     $include = true;
                     break;

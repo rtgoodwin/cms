@@ -532,7 +532,10 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
      */
     public function getCpEditUrl(): ?string
     {
-        return $this->id ? UrlHelper::cpUrl("settings/fields/edit/$this->id") : null;
+        if (!$this->id || !Craft::$app->getUser()->getIsAdmin()) {
+            return null;
+        }
+        return UrlHelper::cpUrl("settings/fields/edit/$this->id");
     }
 
     /**
