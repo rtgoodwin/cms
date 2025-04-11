@@ -3,6 +3,7 @@
 
 /**
  * Asset image editor class
+ * @property {fabric.Rect|null} croppingRectangle The rectangle representing the cropping area on the image within the image editor
  * @property {Object} imageVerticeCoords - The corner coordinates of the image being edited
  */
 
@@ -347,9 +348,15 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         // Add keyboard event listeners
         this.addListener(
           this.$croppingCanvas,
-          'keydown',
-          this._handleKeyDown
-        )
+          'focus',
+          this._handleCroppingCanvasFocus
+        );
+        this.addListener(
+          this.$croppingCanvas,
+          'blur',
+          this._handleCroppingCanvasBlur
+        );
+        this.addListener(this.$croppingCanvas, 'keydown', this._handleKeyDown);
 
         this._hideSpinner();
 
@@ -2443,6 +2450,20 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.canvas.renderAll();
     },
 
+    _handleCroppingCanvasFocus: function (ev) {
+      // Update focus style
+      this.croppingRectangle.set({
+        strokeWidth: 4,
+        stroke: 'rgba(255,255,255,1)',
+      });
+
+      this.croppingCanvas.renderAll();
+    },
+
+    _handleCroppingCanvasBlur: function (ev) {
+      this._redrawCropperElements();
+    },
+
     _handleKeyDown: function (ev) {
       const {target} = ev;
 
@@ -2465,12 +2486,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           case Garnish.DOWN_KEY:
             break;
         }
-        console.log()
         const newFocalPoint = {
           x: this.focalPoint.left,
           y: this.focalPoint.top,
         };
-
       } else if (this.croppingCanvas) {
         console.log('move cropper');
       }
@@ -2828,7 +2847,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     _handleFocalMove: function (coords) {
-
       // if (typeof this._handleFocalDrag._ === 'undefined') {
       //   this._handleFocalDrag._ = {};
       // }
