@@ -45,6 +45,7 @@
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - User caches are no longer invalidated on login attempts or when user management actions are taken. ([#16937](https://github.com/craftcms/cms/pull/16937))
 - Batchable queue jobs now spawn new batches when their execution time is getting uncomfortably close to their TTR duration. ([#16947](https://github.com/craftcms/cms/pull/16947))
+- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated Axios to 1.8.4.

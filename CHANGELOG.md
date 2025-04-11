@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
+
 ## 4.15.0-beta.2 - 2025-04-10
 
 - Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
