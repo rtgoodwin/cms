@@ -58,6 +58,10 @@
 - Updated Axios to 1.8.4.
 - Fixed a bug where `CRAFT_WEB_URL` and `CRAFT_WEB_ROOT` environment variables could be overridden by `@web` and `@webroot` aliases define by the `aliases` config setting. ([#16980](https://github.com/craftcms/cms/pull/16980))
 
+## 4.14.15 - 2025-04-10 [CRITICAL]
+
+- Fixed an RCE vulnerability.
+
 ## 4.14.14 - 2025-04-08
 
 - Fixed a bug where `craft\services\Assets::EVENT_BEFORE_REPLACE_ASSET` and `EVENT_BEFORE_REPLACE_ASSET` events weren’t getting triggered when replacing an asset file via GraphQL. ([#17005](https://github.com/craftcms/cms/issues/17005))
