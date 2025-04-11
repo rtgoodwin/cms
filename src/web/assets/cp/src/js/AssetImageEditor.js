@@ -2467,7 +2467,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleKeyDown: function (ev) {
       const {target} = ev;
 
-      if (!target.closest('#cropping-canvas')) return;
+      const isDirectionalKey = [
+        Garnish.LEFT_KEY,
+        Garnish.RIGHT_KEY,
+        Garnish.UP_KEY,
+        Garnish.DOWN_KEY,
+      ].includes(ev.keyCode);
+
+      if (!target.closest('#cropping-canvas') || !isDirectionalKey) return;
 
       event.preventDefault();
 
