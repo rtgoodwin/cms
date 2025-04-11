@@ -171,6 +171,7 @@
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
 - Field layout elements no longer get new `dateAdded` values each time the project config is rebuilt, for field layouts that haven’t been explicitly saved since updating to Craft 5.3.0+. ([#16899](https://github.com/craftcms/cms/discussions/16899))
 - The user and address field layouts are no longer stored in the project config if they haven’t been explicitly saved yet.
+- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated Axios to 1.8.4.
