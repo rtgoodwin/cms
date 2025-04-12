@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+- 
+- Added the `db/repair` CLI command to repair and optimize database tables.
+
 ## 4.14.15 - 2025-04-10 [CRITICAL]
 
 - Fixed an RCE vulnerability.

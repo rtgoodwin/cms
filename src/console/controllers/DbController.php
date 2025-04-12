@@ -529,4 +529,42 @@ MD);
             array_combine($possiblePrefixes, $possiblePrefixes),
         );
     }
+
+    /**
+     * Runs either `ANALYZE VERBOSE` (Postgres) or `OPTIMIZE TABLE` (MySQL) SQL
+     * against each table in the database.
+     *
+     * Note that this command can cause table locking and might interfere with
+     * site traffic while it is running.
+     *
+     *  Example:
+     *  ```
+     *  php craft db/repair
+     *  ```
+     * @return int
+     * @throws Exception
+     * @throws NotSupportedException
+     */
+    public function actionRepair(): int
+    {
+        $db = Craft::$app->getDb();
+        $schema = $db->getSchema();
+        if ($db->getIsPgsql()) {
+            $sql = 'ANALYZE VERBOSE';
+        } else {
+            $sql = 'OPTIMIZE TABLE';
+        }
+
+        foreach ($schema->getTableNames() as $tableName) {
+            $tableName = $schema->quoteTableName($schema->getRawTableName($tableName));
+            $this->stdout('Repairing ');
+            $this->stdout($tableName, Console::FG_CYAN);
+            $this->stdout(' ... ');
+            $db->createCommand("$sql $tableName;")->execute();
+            $this->stdout('done' . PHP_EOL, Console::FG_GREEN);
+        }
+
+        $this->stdout("Finished repairing database tables." . PHP_EOL, Console::FG_GREEN);
+        return ExitCode::OK;
+    }
 }
