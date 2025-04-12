@@ -7,6 +7,7 @@
 - Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
 - Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.
 - Fixed a bug where GraphiQL was using a partial dark mode theme when the system was set to dark mode.
+- Fixed a styling issue.
 
 ## 5.7.0-beta.2 - 2025-04-10
 

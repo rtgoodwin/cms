@@ -796,14 +796,16 @@ li.breadcrumb-toggle-wrapper {
       0 0 0 1px color.adjust(mixins.$grey1000, $alpha: -0.85),
       0 2px 12px color.adjust(mixins.$grey1000, $alpha: -0.85);
 
-    --icon-color: var(--notice-color);
-
     &[data-type='success'] {
-      --icon-color: var(--success-color);
+      .notification-icon {
+        --icon-color: var(--success-color);
+      }
     }
 
     &[data-type='error'] {
-      --icon-color: var(--error-color);
+      .notification-icon {
+        --icon-color: var(--error-color);
+      }
     }
 
     & + .notification {
@@ -817,6 +819,7 @@ li.breadcrumb-toggle-wrapper {
     }
 
     .notification-icon {
+      --icon-color: var(--notice-color);
       margin-block-start: 2px;
     }
 
