@@ -388,7 +388,7 @@
           $entry.css(this.getHiddenEntryCss($entry)).velocity(
             {
               opacity: 1,
-              'margin-bottom': 10,
+              'margin-bottom': 8,
             },
             'fast',
             async () => {
