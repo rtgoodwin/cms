@@ -2473,7 +2473,7 @@ if (typeof BroadcastChannel !== 'undefined') {
   });
 
   Craft.messageReceiver.addEventListener('message', (ev) => {
-    if (ev.data.event === 'saveElement') {
+    if (ev.data.event === 'saveElement' || ev.data.event === 'replaceFile') {
       // Are there any instances of the same element on the page?
       const $elements = $(
         `div.element[data-id="${ev.data.id}"][data-settings]`
