@@ -5032,37 +5032,23 @@ $statusLabelBgShade: '500';
 .status-label {
   position: relative;
   display: inline-flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   gap: var(--xs);
-  height: calc(22rem / 16);
-  padding-block: 0;
-  padding-inline: var(--s);
-
-  &::before {
-    position: absolute;
-    display: block;
-    inset: 0;
-    background-color: var(--status-label-bg-color);
-    border-radius: calc(11rem / 16);
-    content: '';
-    opacity: 0.15;
-    user-select: none;
-    pointer-events: none;
-  }
+  padding-block: var(--xs);
+  padding-inline: var(--xs) var(--s);
+  line-height: 1.1;
+  font-size: calc(11rem / 16);
+  background-color: rgb(from var(--status-label-bg-color) r g b / 15%);
+  border-radius: calc(11rem / 16);
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--status-label-text-color);
 
   .status,
   .cp-icon {
-    margin-inline: -3px 0;
-    margin-block: 0;
-  }
-
-  .status-label-text {
     position: relative;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: var(--status-label-text-color);
+    margin: 0;
   }
 
   &.red {
