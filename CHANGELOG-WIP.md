@@ -188,4 +188,4 @@
 - Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
 - Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
 - Fixed a bug where “Show cards in a grid” relation field settings weren’t getting hidden when “Maintain hierarchy” was enabled.
-- Fixed styling issues.
+- Fixed styling issues. ([#17078](https://github.com/craftcms/cms/issues/17078))
