@@ -2712,20 +2712,17 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (
         !this.arePointsInsideRectangle(newVertices, this.imageVerticeCoords)
       ) {
-        this._handleCropperKeyboardMove._ = {
-          ...this._handleCropperKeyboardMove._,
-          ...this.getFurthestPointInDirection(
-            this._handleCropperKeyboardMove._
-          ),
-        };
+        const calculatedMove = this.getFurthestPossibleMove(
+          this._handleCropperKeyboardMove._
+        );
 
-        if (this._handleCropperKeyboardMove._.furthest == 0) {
+        if (calculatedMove.furthest == 0) {
           return;
         } else {
           this._handleCropperKeyboardMove._.deltaX =
-            this._handleCropperKeyboardMove._.furthestDeltas.x;
+            calculatedMove.furthestDeltas.x;
           this._handleCropperKeyboardMove._.deltaY =
-            this._handleCropperKeyboardMove._.furthestDeltas.y;
+            calculatedMove.furthestDeltas.y;
         }
       }
 
@@ -2740,57 +2737,49 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Try to find the furthest point in the same general direction where we can drag it
+     * Try to find the furthest possible placement based on the proposed move.
      * @param moveObj
      */
-    getFurthestPointInDirection: function (proposedMoveObj) {
+    getFurthestPossibleMove: function (proposedMove) {
       // Delta iterator setup
-      const deltaIterator = {
-        dxi: 0,
-        dyi: 0,
-        xStep: proposedMoveObj.deltaX > 0 ? -1 : 1,
-        yStep: proposedMoveObj.deltaY > 0 ? -1 : 1,
+      let dxi = 0;
+      let dyi = 0;
+      let xStep = proposedMove.deltaX > 0 ? -1 : 1;
+      let yStep = proposedMove.deltaY > 0 ? -1 : 1;
+
+      const calculatedMove = {
         furthest: 0,
         furthestDeltas: {},
       };
 
-      const moveInfo = {...proposedMoveObj, ...deltaIterator};
-
       // Loop through every combination of dragging it not so far
-      for (
-        moveInfo.dxi = Math.min(Math.abs(moveInfo.deltaX), 10);
-        moveInfo.dxi >= 0;
-        moveInfo.dxi--
-      ) {
+      for (dxi = Math.min(Math.abs(proposedMove.deltaX), 10); dxi >= 0; dxi--) {
         for (
-          moveInfo.dyi = Math.min(Math.abs(moveInfo.deltaY), 10);
-          moveInfo.dyi >= 0;
-          moveInfo.dyi--
+          dyi = Math.min(Math.abs(proposedMove.deltaY), 10);
+          dyi >= 0;
+          dyi--
         ) {
-          moveInfo.vertices = this._getRectangleVertices(
-            moveInfo.rectangle,
-            moveInfo.dxi * (moveInfo.deltaX > 0 ? 1 : -1),
-            moveInfo.dyi * (moveInfo.deltaY > 0 ? 1 : -1)
+          const vertices = this._getRectangleVertices(
+            proposedMove.rectangle,
+            dxi * (proposedMove.deltaX > 0 ? 1 : -1),
+            dyi * (proposedMove.deltaY > 0 ? 1 : -1)
           );
 
           if (
-            this.arePointsInsideRectangle(
-              moveInfo.vertices,
-              this.imageVerticeCoords
-            )
+            this.arePointsInsideRectangle(vertices, this.imageVerticeCoords)
           ) {
-            if (moveInfo.dxi + moveInfo.dyi > moveInfo.furthest) {
-              moveInfo.furthest = moveInfo.dxi + moveInfo.dyi;
-              moveInfo.furthestDeltas = {
-                x: moveInfo.dxi * (moveInfo.deltaX > 0 ? 1 : -1),
-                y: moveInfo.dyi * (moveInfo.deltaY > 0 ? 1 : -1),
+            if (dxi + dyi > calculatedMove.furthest) {
+              calculatedMove.furthest = dxi + dyi;
+              calculatedMove.furthestDeltas = {
+                x: dxi * (proposedMove.deltaX > 0 ? 1 : -1),
+                y: dyi * (proposedMove.deltaY > 0 ? 1 : -1),
               };
             }
           }
         }
       }
 
-      return moveInfo;
+      return {...proposedMove, ...calculatedMove};
     },
 
     /**
@@ -2828,78 +2817,16 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.imageVerticeCoords
         )
       ) {
-        // Try to find the furthest point in the same general direction where we can drag it
-
-        // Delta iterator setup
-        this._handleCropperDrag._.dxi = 0;
-        this._handleCropperDrag._.dyi = 0;
-        this._handleCropperDrag._.xStep =
-          this._handleCropperDrag._.deltaX > 0 ? -1 : 1;
-        this._handleCropperDrag._.yStep =
-          this._handleCropperDrag._.deltaY > 0 ? -1 : 1;
-
-        // The furthest we can move
-        this._handleCropperDrag._.furthest = 0;
-        this._handleCropperDrag._.furthestDeltas = {};
-
-        // Loop through every combination of dragging it not so far
-        for (
-          this._handleCropperDrag._.dxi = Math.min(
-            Math.abs(this._handleCropperDrag._.deltaX),
-            10
-          );
-          this._handleCropperDrag._.dxi >= 0;
-          this._handleCropperDrag._.dxi--
-        ) {
-          for (
-            this._handleCropperDrag._.dyi = Math.min(
-              Math.abs(this._handleCropperDrag._.deltaY),
-              10
-            );
-            this._handleCropperDrag._.dyi >= 0;
-            this._handleCropperDrag._.dyi--
-          ) {
-            this._handleCropperDrag._.vertices = this._getRectangleVertices(
-              this._handleCropperDrag._.rectangle,
-              this._handleCropperDrag._.dxi *
-                (this._handleCropperDrag._.deltaX > 0 ? 1 : -1),
-              this._handleCropperDrag._.dyi *
-                (this._handleCropperDrag._.deltaY > 0 ? 1 : -1)
-            );
-
-            if (
-              this.arePointsInsideRectangle(
-                this._handleCropperDrag._.vertices,
-                this.imageVerticeCoords
-              )
-            ) {
-              if (
-                this._handleCropperDrag._.dxi + this._handleCropperDrag._.dyi >
-                this._handleCropperDrag._.furthest
-              ) {
-                this._handleCropperDrag._.furthest =
-                  this._handleCropperDrag._.dxi + this._handleCropperDrag._.dyi;
-                this._handleCropperDrag._.furthestDeltas = {
-                  x:
-                    this._handleCropperDrag._.dxi *
-                    (this._handleCropperDrag._.deltaX > 0 ? 1 : -1),
-                  y:
-                    this._handleCropperDrag._.dyi *
-                    (this._handleCropperDrag._.deltaY > 0 ? 1 : -1),
-                };
-              }
-            }
-          }
-        }
+        const calculatedMove = this.getFurthestPossibleMove(
+          this._handleCropperDrag._
+        );
 
         // REALLY can't drag along the cursor movement
-        if (this._handleCropperDrag._.furthest == 0) {
+        if (calculatedMove.furthest == 0) {
           return;
         } else {
-          this._handleCropperDrag._.deltaX =
-            this._handleCropperDrag._.furthestDeltas.x;
-          this._handleCropperDrag._.deltaY =
-            this._handleCropperDrag._.furthestDeltas.y;
+          this._handleCropperDrag._.deltaX = calculatedMove.furthestDeltas.x;
+          this._handleCropperDrag._.deltaY = calculatedMove.furthestDeltas.y;
         }
       }
 
