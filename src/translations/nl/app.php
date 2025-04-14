@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Craft CMS aan het installeren...',
     'Installing the plugin…' => 'Invoegtoepassing installeren…',
     'Installing {name}' => '{name} installeren',
-    'Instance settings' => 'Instantie-instellingen',
     'Instructions' => 'Handleiding',
     'Interlace' => 'Geïnterlinieerd',
     'Interlacing' => 'Interliniëring',

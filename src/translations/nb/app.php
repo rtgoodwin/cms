@@ -849,7 +849,6 @@ return [
     'Installing Craft CMS…' => 'Installerer Craft CMS …',
     'Installing the plugin…' => 'Installerer programtillegget …',
     'Installing {name}' => 'Installerer {name}',
-    'Instance settings' => 'Øktinnstillinger',
     'Instructions' => 'Instruksjoner',
     'Interlace' => 'Bruk sammenfletting',
     'Interlacing' => 'Bruker sammenfletting',
