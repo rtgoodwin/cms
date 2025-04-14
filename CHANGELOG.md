@@ -4,6 +4,7 @@
 
 - `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
+- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
 
 ## 4.15.0-beta.2 - 2025-04-10
 
