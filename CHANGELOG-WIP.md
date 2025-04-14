@@ -77,6 +77,7 @@
 
 ### Development
 - Added the `canonicalsOnly` element query param.
+- Lightswitch fields’ element query params now support passing in an array with `value` and `strict` keys. ([#17083](https://github.com/craftcms/cms/pull/17083))
 - Added the `defaultLabel` nested field to Link fields’ GraphQL data. ([#16637](https://github.com/craftcms/cms/issues/16637))
 - Added the `download` and `filename` nested fields to Link fields’ GraphQL data. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added `element`, `asset`, `entry`, etc., nested fields to Link fields’ GraphQL data. ([#16698](https://github.com/craftcms/cms/pull/16698))
