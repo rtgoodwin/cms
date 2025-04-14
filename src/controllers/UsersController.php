@@ -1483,6 +1483,7 @@ JS,
 
         // Manually validate the user so we can pass $clearErrors=false
         $success = $user->validate(null, false) && Craft::$app->getElements()->saveElement($user, false);
+        $existingEmailUser = null;
 
         if (!$success) {
             Craft::info('User not saved due to validation error.', __METHOD__);
@@ -1493,111 +1494,126 @@ JS,
                 $user->clearErrors('newPassword');
             }
 
-            // Copy any 'unverifiedEmail' errors to 'email'
-            if (!$user->hasErrors('email')) {
+            if ($user->hasErrors('email')) {
+                $existingEmailUser = $isPublicRegistration && $user->email ? User::find()
+                    ->email(Db::escapeParam($user->email))
+                    ->status(null)
+                    ->one() : null;
+
+                if ($existingEmailUser) {
+                    $user->clearErrors('email');
+                }
+            } else {
+                // Copy any 'unverifiedEmail' errors to 'email'
                 $user->addErrors(['email' => $user->getErrors('unverifiedEmail')]);
                 $user->clearErrors('unverifiedEmail');
             }
 
-            return $this->asModelFailure(
-                $user,
-                StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
-                    'type' => User::lowerDisplayName(),
-                ])),
-                $userVariable
-            );
-        }
-
-        // If this is a new user and email verification isn't required,
-        // go ahead and activate them now.
-        if ($isNewUser && !$requireEmailVerification && !$deactivateByDefault) {
-            Craft::$app->getUsers()->activateUser($user);
-        }
-
-        if ($isCurrentUser) {
-            // Save their preferences too
-            $preferredLocale = $this->request->getBodyParam('preferredLocale', $user->getPreference('locale')) ?: null;
-            if ($preferredLocale === '__blank__') {
-                $preferredLocale = null;
+            if ($user->hasErrors()) {
+                return $this->asModelFailure(
+                    $user,
+                    StringHelper::upperCaseFirst(Craft::t('app', 'Couldn’t save {type}.', [
+                        'type' => User::lowerDisplayName(),
+                    ])),
+                    $userVariable
+                );
             }
-            $preferences = [
-                'language' => $this->request->getBodyParam('preferredLanguage', $user->getPreference('language')),
-                'locale' => $preferredLocale,
-                'weekStartDay' => $this->request->getBodyParam('weekStartDay', $user->getPreference('weekStartDay')),
-                'alwaysShowFocusRings' => (bool)$this->request->getBodyParam('alwaysShowFocusRings', $user->getPreference('alwaysShowFocusRings')),
-                'useShapes' => (bool)$this->request->getBodyParam('useShapes', $user->getPreference('useShapes')),
-                'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
-                'notificationDuration' => $this->request->getBodyParam('notificationDuration', $user->getPreference('notificationDuration')),
-            ];
+        }
 
-            if ($user->admin) {
-                $preferences = array_merge($preferences, [
-                    'showFieldHandles' => (bool)$this->request->getBodyParam('showFieldHandles', $user->getPreference('showFieldHandles')),
-                    'enableDebugToolbarForSite' => (bool)$this->request->getBodyParam('enableDebugToolbarForSite', $user->getPreference('enableDebugToolbarForSite')),
-                    'enableDebugToolbarForCp' => (bool)$this->request->getBodyParam('enableDebugToolbarForCp', $user->getPreference('enableDebugToolbarForCp')),
-                    'showExceptionView' => (bool)$this->request->getBodyParam('showExceptionView', $user->getPreference('showExceptionView')),
-                    'profileTemplates' => (bool)$this->request->getBodyParam('profileTemplates', $user->getPreference('profileTemplates')),
-                ]);
+        if ($existingEmailUser) {
+            Craft::$app->getUsers()->sendNewEmailVerifyEmail($existingEmailUser);
+        } else {
+            // If this is a new user and email verification isn't required,
+            // go ahead and activate them now.
+            if ($isNewUser && !$requireEmailVerification && !$deactivateByDefault) {
+                Craft::$app->getUsers()->activateUser($user);
             }
 
-            Craft::$app->getUsers()->saveUserPreferences($user, $preferences);
-            Craft::$app->updateTargetLanguage();
-        }
+            if ($isCurrentUser) {
+                // Save their preferences too
+                $preferredLocale = $this->request->getBodyParam('preferredLocale', $user->getPreference('locale')) ?: null;
+                if ($preferredLocale === '__blank__') {
+                    $preferredLocale = null;
+                }
+                $preferences = [
+                    'language' => $this->request->getBodyParam('preferredLanguage', $user->getPreference('language')),
+                    'locale' => $preferredLocale,
+                    'weekStartDay' => $this->request->getBodyParam('weekStartDay', $user->getPreference('weekStartDay')),
+                    'alwaysShowFocusRings' => (bool)$this->request->getBodyParam('alwaysShowFocusRings', $user->getPreference('alwaysShowFocusRings')),
+                    'useShapes' => (bool)$this->request->getBodyParam('useShapes', $user->getPreference('useShapes')),
+                    'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
+                    'notificationDuration' => $this->request->getBodyParam('notificationDuration', $user->getPreference('notificationDuration')),
+                ];
 
-        // Is this the current user, and did their username just change?
-        // todo: remove comment when WI-51866 is fixed
-        /** @noinspection PhpUndefinedVariableInspection */
-        if ($isCurrentUser && $user->username !== $oldUsername) {
-            // Update the username cookie
-            $userSession->sendUsernameCookie($user);
-        }
-
-        // Save the user’s photo, if it was submitted
-        $this->_processUserPhoto($user);
-
-        if (Craft::$app->getEdition() === Craft::Pro) {
-            // If this is public registration, assign the user to the default user group
-            if ($isPublicRegistration) {
-                // Assign them to the default user group
-                Craft::$app->getUsers()->assignUserToDefaultGroup($user);
-            } elseif ($currentUser) {
-                // Fire an 'afterBeforeGroupsAndPermissions' event
-                if ($this->hasEventHandlers(self::EVENT_BEFORE_ASSIGN_GROUPS_AND_PERMISSIONS)) {
-                    $this->trigger(self::EVENT_BEFORE_ASSIGN_GROUPS_AND_PERMISSIONS, new UserEvent([
-                        'user' => $user,
-                    ]));
+                if ($user->admin) {
+                    $preferences = array_merge($preferences, [
+                        'showFieldHandles' => (bool)$this->request->getBodyParam('showFieldHandles', $user->getPreference('showFieldHandles')),
+                        'enableDebugToolbarForSite' => (bool)$this->request->getBodyParam('enableDebugToolbarForSite', $user->getPreference('enableDebugToolbarForSite')),
+                        'enableDebugToolbarForCp' => (bool)$this->request->getBodyParam('enableDebugToolbarForCp', $user->getPreference('enableDebugToolbarForCp')),
+                        'showExceptionView' => (bool)$this->request->getBodyParam('showExceptionView', $user->getPreference('showExceptionView')),
+                        'profileTemplates' => (bool)$this->request->getBodyParam('profileTemplates', $user->getPreference('profileTemplates')),
+                    ]);
                 }
 
-                // Assign user groups and permissions if the current user is allowed to do that
-                $this->_saveUserGroups($user, $currentUser);
-                $this->_saveUserPermissions($user, $currentUser);
+                Craft::$app->getUsers()->saveUserPreferences($user, $preferences);
+                Craft::$app->updateTargetLanguage();
+            }
 
-                // Fire an 'afterAssignGroupsAndPermissions' event
-                if ($this->hasEventHandlers(self::EVENT_AFTER_ASSIGN_GROUPS_AND_PERMISSIONS)) {
-                    $this->trigger(self::EVENT_AFTER_ASSIGN_GROUPS_AND_PERMISSIONS, new UserEvent([
-                        'user' => $user,
-                    ]));
+            // Is this the current user, and did their username just change?
+            // todo: remove comment when WI-51866 is fixed
+            /** @noinspection PhpUndefinedVariableInspection */
+            if ($isCurrentUser && $user->username !== $oldUsername) {
+                // Update the username cookie
+                $userSession->sendUsernameCookie($user);
+            }
+
+            // Save the user’s photo, if it was submitted
+            $this->_processUserPhoto($user);
+
+            if (Craft::$app->getEdition() === Craft::Pro) {
+                // If this is public registration, assign the user to the default user group
+                if ($isPublicRegistration) {
+                    // Assign them to the default user group
+                    Craft::$app->getUsers()->assignUserToDefaultGroup($user);
+                } elseif ($currentUser) {
+                    // Fire an 'afterBeforeGroupsAndPermissions' event
+                    if ($this->hasEventHandlers(self::EVENT_BEFORE_ASSIGN_GROUPS_AND_PERMISSIONS)) {
+                        $this->trigger(self::EVENT_BEFORE_ASSIGN_GROUPS_AND_PERMISSIONS, new UserEvent([
+                            'user' => $user,
+                        ]));
+                    }
+
+                    // Assign user groups and permissions if the current user is allowed to do that
+                    $this->_saveUserGroups($user, $currentUser);
+                    $this->_saveUserPermissions($user, $currentUser);
+
+                    // Fire an 'afterAssignGroupsAndPermissions' event
+                    if ($this->hasEventHandlers(self::EVENT_AFTER_ASSIGN_GROUPS_AND_PERMISSIONS)) {
+                        $this->trigger(self::EVENT_AFTER_ASSIGN_GROUPS_AND_PERMISSIONS, new UserEvent([
+                            'user' => $user,
+                        ]));
+                    }
                 }
             }
-        }
 
-        // Do we need to send a verification email out?
-        if ($sendActivationEmail) {
-            // Temporarily set the unverified email on the User so the verification email goes to the
-            // right place
-            $originalEmail = $user->email;
-            $user->email = $user->unverifiedEmail;
+            // Do we need to send a verification email out?
+            if ($sendActivationEmail) {
+                // Temporarily set the unverified email on the User so the verification email goes to the
+                // right place
+                $originalEmail = $user->email;
+                $user->email = $user->unverifiedEmail;
 
-            if ($isNewUser) {
-                // Send the activation email
-                Craft::$app->getUsers()->sendActivationEmail($user);
-            } else {
-                // Send the standard verification email
-                Craft::$app->getUsers()->sendNewEmailVerifyEmail($user);
+                if ($isNewUser) {
+                    // Send the activation email
+                    Craft::$app->getUsers()->sendActivationEmail($user);
+                } else {
+                    // Send the standard verification email
+                    Craft::$app->getUsers()->sendNewEmailVerifyEmail($user);
+                }
+
+                // Put the original email back into place
+                $user->email = $originalEmail;
             }
-
-            // Put the original email back into place
-            $user->email = $originalEmail;
         }
 
         // Is this public registration, and was the user going to be activated automatically?
