@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 
 ## 4.15.0-beta.2 - 2025-04-10
