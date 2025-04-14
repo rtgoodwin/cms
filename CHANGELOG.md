@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Link fields marked as translatable now swap the selected element with the localized version when their value is getting propagated to a new site for the element. ([#17072](https://github.com/craftcms/cms/issues/17072))
+- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 - Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
 - Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.

@@ -147,6 +147,7 @@
 - `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
 - `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
 - `craft\services\Fields::getLayoutByType()` now has a `create` argument.
+- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
 - Added `Craft.cp.clearCopiedElements()`.
 - Added `Craft.cp.getCopiedElements()`.
