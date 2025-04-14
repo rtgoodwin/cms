@@ -243,11 +243,11 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
             return false;
         }
 
+        $caseInsensitive = false;
+
         if (is_array($value) && isset($value['value'])) {
-            $caseInsensitive = $value['caseInsensitive'] ?? false;
+            $caseInsensitive = $value['caseInsensitive'] ?? $caseInsensitive;
             $value = $value['value'];
-        } else {
-            $caseInsensitive = false;
         }
 
         return Db::parseParam($valueSql, $value, caseInsensitive: $caseInsensitive, columnType: Schema::TYPE_JSON);
