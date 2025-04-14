@@ -13,7 +13,8 @@ test.beforeEach(async ({page}) => {
 test('Check customizing view', async ({page, baseURL}) => {
 
   const viewBtnSelector = '#toolbar button:has-text("View")'
-  const viewBtn = await page.waitForSelector(viewBtnSelector);
+  const viewBtn = page.locator(viewBtnSelector);
+  await viewBtn.waitFor();
   await page.click(viewBtnSelector);
 
   let menuId = await viewBtn.getAttribute('aria-controls');
@@ -27,13 +28,15 @@ test('Check customizing view', async ({page, baseURL}) => {
   ];
 
   for (let i = 0; i < cols.length; i++) {
-    const itemSelector = '#' + menuId + ' .table-columns-field label:has-text("' + cols[i] + '")';
-    await page.waitForSelector(itemSelector);
+    const itemSelector = '#' + menuId + ' .table-columns-field label:text-is("' + cols[i] + '")';
+    const item = page.locator(itemSelector);
+    await item.waitFor();
     await page.click(itemSelector);
   }
 
   const closeSelector = '#' + menuId + ' button:has-text("Close")';
-  await page.waitForSelector(closeSelector);
+  const close = page.locator(closeSelector);
+  await close.waitFor();
   await page.click(closeSelector);
 
   for (let i = 0; i < cols.length; i++) {
@@ -66,10 +69,11 @@ test.describe('Sorting', () => {
   test('Check sort asc', async ({page, baseURL}) => {
     // test sort ascending
     for (let i = 0; i < cols.length; i++) {
-      const viewBtn = await page.waitForSelector(viewBtnSelector);
+      const viewBtn2 = page.locator(viewBtnSelector);
+      await viewBtn2.waitFor();
       await page.click(viewBtnSelector);
 
-      let menuId = await viewBtn.getAttribute('aria-controls');
+      let menuId = await viewBtn2.getAttribute('aria-controls');
       menuId = menuId.replace('.', '\\.');
 
       const sortDropdownSelector = '#' + menuId + ' .sort-field select';
@@ -90,10 +94,11 @@ test.describe('Sorting', () => {
   test('Check sort desc', async ({page, baseURL}) => {
     // test sort descending
     for (let i = 0; i < cols.length; i++) {
-      const viewBtn = await page.waitForSelector(viewBtnSelector);
+      const viewBtn3 = page.locator(viewBtnSelector);
+      await viewBtn3.waitFor();
       await page.click(viewBtnSelector);
 
-      let menuId = await viewBtn.getAttribute('aria-controls');
+      let menuId = await viewBtn3.getAttribute('aria-controls');
       menuId = menuId.replace('.', '\\.');
 
       const sortDropdownSelector = '#' + menuId + ' .sort-field select';

@@ -45,7 +45,8 @@ test.describe('Plugin Actions', () => {
 
     // Uninstall the plugin
     const menuBtnSelector = 'tr[data-handle="seomatic"] button.menubtn';
-    const menuBtn = await page.waitForSelector(menuBtnSelector);
+    const menuBtn = page.locator(menuBtnSelector);
+    await menuBtn.waitFor();
 
     await page.click(menuBtnSelector);
 
@@ -55,18 +56,21 @@ test.describe('Plugin Actions', () => {
     page.on('dialog', (dialog) => dialog.accept());
 
     const uninstallBtnSelector = '#' + menuId + ' button:has-text("Uninstall")';
-    await page.waitForSelector(uninstallBtnSelector);
+    const uninstallBtn = page.locator(uninstallBtnSelector);
+    await uninstallBtn.waitFor();
     await page.click(uninstallBtnSelector);
 
     // Remove the plugin
-    const menuBtn2 = await page.waitForSelector(menuBtnSelector);
+    const menuBtn2 = page.locator(menuBtnSelector);
+    await menuBtn2.waitFor();
     await page.click(menuBtnSelector);
 
     let menuId2 = await menuBtn2.getAttribute('aria-controls');
     menuId2 = menuId2.replace('.', '\\.');
 
     const removeBtnSelector = '#' + menuId2 + ' button:has-text("Remove")';
-    await page.waitForSelector(removeBtnSelector);
+    const removeBtn = page.locator(removeBtnSelector);
+    await removeBtn.waitFor();
     await page.click(removeBtnSelector);
 
     const status = page.locator('#status');
