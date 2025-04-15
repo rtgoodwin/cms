@@ -862,7 +862,9 @@ li.breadcrumb-toggle-wrapper {
       var(--indigo-600)
     );
 
-    --icon-color: var(--fuchsia-500);
+    .notification-icon {
+      --icon-color: var(--fuchsia-500);
+    }
 
     .notification-inner {
       border-radius: var(--small-border-radius);
