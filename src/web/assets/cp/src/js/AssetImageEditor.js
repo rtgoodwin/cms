@@ -21,6 +21,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $editorContainer: null,
     $straighten: null,
     $croppingCanvas: null,
+    $croppingActionsContainer: null,
+    $cropperMoveBtn: null,
     $spinner: null,
     $constraintContainer: null,
     $constraintRadioInputs: null,
@@ -60,6 +62,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     scalingCropper: false,
     handleClicked: false,
     draggingFocal: false,
+    cropperPickedUp: false,
     focalPickedUp: false,
     focalClicked: false,
     cropperClicked: false,
@@ -193,6 +196,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.$focalPointBtn = $('.focal-point', this.$body);
       this.editorHeight = this.$editorContainer.innerHeight();
       this.editorWidth = this.$editorContainer.innerWidth();
+
+      // Keyboard accessibility
+      this.$croppingActionsContainer = $('#cropper-actions', this.$body);
+      this.$cropperMoveBtn = $('#cropper-handle', this.$body);
 
       this._showSpinner();
 
@@ -1944,6 +1951,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         };
 
         this._showCropper(cropperData);
+        this.$croppingActionsContainer.removeClass('hidden');
 
         if (this.focalPoint) {
           sizeFactor =
@@ -1969,6 +1977,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       var viewportProperties = {};
 
       this._hideCropper();
+      this.$croppingActionsContainer.addClass('hidden');
       var imageDimensions = this.getScaledImageDimensions();
       var targetZoom =
         this.getZoomToCoverRatio(imageDimensions) * this.scaleFactor;
@@ -2136,7 +2145,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         left: 0,
       });
 
-      $('#cropping-canvas', this.$editorContainer).attr('tabindex', 0);
+      //$('#cropping-canvas', this.$editorContainer).attr('tabindex', 0);
 
       this.croppingShade = new fabric.Rect({
         left: this.editorWidth / 2,

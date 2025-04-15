@@ -63,6 +63,11 @@
     </div>
 </div>
 <div class="image-container">
+    <div id="cropper-actions" class="hidden">
+        <button id="cropper-handle" class="btn" aria-pressed="false" type="button" aria-label="{{ 'Move cropper'|t('app') }}">
+            <div class="cp-icon xl">{{ iconSvg('move') }}</div>
+        </button>
+    </div>
     <div class="image">
         <canvas id="image-canvas">
         </canvas>
