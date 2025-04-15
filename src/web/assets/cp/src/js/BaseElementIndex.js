@@ -2333,9 +2333,11 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       }
     },
 
-    setIndexBusy: function () {
+    setIndexBusy: function (showSpinner = true) {
       this.$elements.addClass('busy');
-      this.$updateSpinner.appendTo(this.$elements);
+      if (showSpinner) {
+        this.$updateSpinner.appendTo(this.$elements);
+      }
       this.isIndexBusy = true;
 
       // Blur the active element, if it's within the element listing pane

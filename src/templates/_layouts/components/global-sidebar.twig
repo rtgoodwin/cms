@@ -32,6 +32,7 @@
                     class: item.sel ? 'sel',
                     aria: {
                         current: item.sel and not item.subnav ? 'page' : false,
+                        label: item.ariaLabel ?? false,
                     },
                 } %}
                 <li {{ attr(itemAttributes) }}>
@@ -77,6 +78,7 @@
                                     target: (item.external ?? false) ? '_blank',
                                     aria: {
                                         current: itemIsSelected ? 'page' : false,
+                                        label: item.ariaLabel ?? false,
                                     },
                                 } %}
 

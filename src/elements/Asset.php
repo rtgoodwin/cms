@@ -1450,6 +1450,7 @@ class Asset extends Element
                 'target' => '_blank',
                 'data' => [
                     'icon' => 'preview',
+                    'view' => true,
                 ],
             ]);
         }
@@ -1559,6 +1560,18 @@ $('#replace-btn').on('click', () => {
                     alert(result.error);
                 } else {
                   Craft.cp.displayNotice(Craft.t('app', 'New file uploaded.'));
+                  // update the View button link
+                  let viewBtn = $('#action-buttons .btn[data-view]');
+                  if (viewBtn && result.resultingUrl) {
+                    viewBtn.attr('href', result.resultingUrl)
+                  }
+                  // broadcast a message
+                  if (Craft.broadcaster) {
+                    Craft.broadcaster.postMessage({
+                      event: 'replaceFile',
+                      id: result.assetId,
+                    });
+                  }
                 }
             },
             fileuploadfail: (event, data = null) => {

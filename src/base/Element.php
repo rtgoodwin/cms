@@ -12,6 +12,7 @@ use Craft;
 use craft\behaviors\CustomFieldBehavior;
 use craft\behaviors\DraftBehavior;
 use craft\behaviors\RevisionBehavior;
+use craft\cache\ElementQueryTagDependency;
 use craft\db\Connection;
 use craft\db\ExcludeDescendantIdsExpression;
 use craft\db\Query;
@@ -73,6 +74,7 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use DateTime;
 use Illuminate\Support\Collection;
 use Throwable;
 use Traversable;
@@ -1186,8 +1188,13 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Only cache if there's no search term or relation param
-        if (!$elementQuery->search && !$elementQuery->relatedTo) {
-            $elementQuery->cache();
+        if ($elementQuery instanceof ElementQuery && !$elementQuery->search && !$elementQuery->relatedTo) {
+            $elementQuery->cache(dependency: new ElementQueryTagDependency($elementQuery, [
+                'tags' => [
+                    'element-index-query',
+                    sprintf('element-index-query::%s', static::class),
+                ],
+            ]));
         }
 
         $variables['elements'] = static::indexElements($elementQuery, $sourceKey);
@@ -2540,7 +2547,7 @@ abstract class Element extends Component implements ElementInterface
 
                 if ($field::hasContentColumn()) {
                     $columnType = $field->getContentColumnType();
-                    $value = $field->serializeValue($this->getFieldValue($field->handle), $this);
+                    $value = $field->serializeValueForDb($this->getFieldValue($field->handle), $this);
 
                     if (is_array($columnType)) {
                         foreach ($columnType as $key => $type) {
@@ -4208,6 +4215,23 @@ abstract class Element extends Component implements ElementInterface
             if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
                 $value = $this->getFieldValue($field->handle);
                 $serializedValues[$field->handle] = $field->serializeValue($value, $this);
+            }
+        }
+
+        return $serializedValues;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array
+    {
+        $serializedValues = [];
+
+        foreach ($this->fieldLayoutFields() as $field) {
+            if ($fieldHandles === null || in_array($field->handle, $fieldHandles, true)) {
+                $value = $this->getFieldValue($field->handle);
+                $serializedValues[$field->handle] = $field->serializeValueForDb($value, $this);
             }
         }
 
