@@ -991,7 +991,9 @@ JS, [
             return Db::prepareDateForDb($value);
         }
 
-        return $this->serializeValue($value, $element);
+        // specifically calling `self::…` here rather than `$this->…`
+        // see https://github.com/craftcms/cms/pull/17091
+        return self::serializeValue($value, $element);
     }
 
     /**
