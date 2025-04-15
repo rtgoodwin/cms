@@ -25,8 +25,8 @@ module.exports = {
     testDir,
     ignoreHTTPSErrors: true,
     storageState: path.join(testDir, storageStateFilename),
+    actionTimeout: 10 * 1000,
   },
-  actionTimeout: 10 * 1000,
   timeout: 30 * 1000,
   expect: {
     timeout: 10 * 1000,

@@ -12,3 +12,7 @@ All commands should be run from the cms repo’s location
   - After which you can run `npx playwright test` to run tests.
   - You can add the `--ui` flag to tun tests in interactive UI mode
   - To shut down the testing environment, use `npx craft-playwright down`.
+
+- to start test generator
+  - run `npx craft-playwright boot`
+  - run `npx playwright codegen 127.0.0.1:8089/admin`
