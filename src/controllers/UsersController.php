@@ -1495,13 +1495,15 @@ JS,
             }
 
             if ($user->hasErrors('email')) {
-                $existingEmailUser = $isPublicRegistration && $user->email ? User::find()
-                    ->email(Db::escapeParam($user->email))
-                    ->status(null)
-                    ->one() : null;
+                if (Craft::$app->getConfig()->getGeneral()->preventUserEnumeration && $isPublicRegistration && $user->email) {
+                    $existingEmailUser = User::find()
+                        ->email(Db::escapeParam($user->email))
+                        ->status(null)
+                        ->one();
 
-                if ($existingEmailUser) {
-                    $user->clearErrors('email');
+                    if ($existingEmailUser) {
+                        $user->clearErrors('email');
+                    }
                 }
             } else {
                 // Copy any 'unverifiedEmail' errors to 'email'
