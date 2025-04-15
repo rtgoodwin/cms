@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.0 - 2025-04-15
 
 ### Content Management
 - Condition rules for Checkboxes, Dropdown, Multi-select, and Radio Buttons fields now include “has a value” and “is empty” operators. ([#17015](https://github.com/craftcms/cms/pull/17015))
