@@ -113,6 +113,7 @@
 - Added `craft\elements\actions\MoveDown`.
 - Added `craft\elements\actions\MoveUp`.
 - Added `craft\events\BulkOpEvent::defer()`. ([#16655](https://github.com/craftcms/cms/pull/16655))
+- Added `craft\events\UpdateReleaseEvent`.
 - Added `craft\fieldlayoutelements\CustomField::getEditCondition()`.
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
@@ -131,6 +132,8 @@
 - Added `craft\helpers\Cp::reset()`. ([#16848](https://github.com/craftcms/cms/pull/16848))
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
+- Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
+- Added `craft\models\UpdateRelease::isCritical()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\records\User::haveIndexAttributesChanged()`.
 - Added `craft\services\Elements::EVENT_AUTHORIZE_COPY`.
