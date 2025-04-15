@@ -659,7 +659,7 @@ abstract class Field extends SavableComponent implements FieldInterface
             return Db::prepareDateForDb($value);
         }
 
-        return $this->serializeValue($value, $element);
+        return self::serializeValue($value, $element);
     }
 
     /**
