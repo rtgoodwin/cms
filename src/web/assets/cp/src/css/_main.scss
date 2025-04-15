@@ -3486,10 +3486,13 @@ table {
     --custom-border-color: rgb(0 0 0 / 10%) !important;
     @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
     color: var(--white);
-    background-color: var(
-      --custom-sel-bg-color,
-      var(--dark-sel-color)
-    ) !important;
+
+    &:not(.chromeless) {
+      background-color: var(
+        --custom-sel-bg-color,
+        var(--dark-sel-color)
+      ) !important;
+    }
 
     .icon,
     .cp-icon,
