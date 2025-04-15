@@ -8,7 +8,7 @@ module.exports = async (config) => {
   const {baseURL, db, password, projectPath, storageState, testDir, username} =
     config.projects[0].use;
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({slowMo: 1000});
   const context = await browser.newContext();
   const page = await context.newPage();
 
