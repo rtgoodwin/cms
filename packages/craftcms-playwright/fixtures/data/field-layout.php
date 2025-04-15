@@ -167,7 +167,7 @@ return [
                     // PLAIN TEXT FIELD
                     [
                         'uid' => 'field-1006-----------------------uid',
-                        'name' => 'Plain Text Field',
+                        'name' => 'Plain Text Field 2',
                         'handle' => 'plainTextField2',
                         'type' => PlainText::class,
                         'required' => false,
@@ -175,8 +175,8 @@ return [
 
                     // PLAIN TEXT FIELD2
                     [
-                        'uid' => 'field-1006-----------------------uid',
-                        'name' => 'Plain Text Field 2',
+                        'uid' => 'field-1007-----------------------uid',
+                        'name' => 'Plain Text Field 3',
                         'handle' => 'plainTextField3',
                         'type' => PlainText::class,
                         'required' => false,
