@@ -99,7 +99,7 @@ return [
                         'viewMode' => Matrix::VIEW_MODE_CARDS,
                         'entryTypes' => [
                             [
-                                'uid' => 'entry-type-1000------------------uid',
+                                'uid' => 'entry-type-1004------------------uid',
                             ],
                         ],
                     ],
@@ -124,7 +124,7 @@ return [
                         'viewMode' => Matrix::VIEW_MODE_INDEX,
                         'entryTypes' => [
                             [
-                                'uid' => 'entry-type-1000------------------uid',
+                                'uid' => 'entry-type-1004------------------uid',
                             ],
                         ],
                     ],
@@ -149,9 +149,37 @@ return [
                         'viewMode' => Matrix::VIEW_MODE_BLOCKS,
                         'entryTypes' => [
                             [
-                                'uid' => 'entry-type-1000------------------uid',
+                                'uid' => 'entry-type-1004------------------uid',
                             ],
                         ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+    [
+        'uid' => 'field-layout-1006----------------uid',
+        'type' => Entry::class,
+        'tabs' => [
+            [
+                'name' => 'Tab 1',
+                'fields' => [
+                    // PLAIN TEXT FIELD
+                    [
+                        'uid' => 'field-1006-----------------------uid',
+                        'name' => 'Plain Text Field',
+                        'handle' => 'plainTextField2',
+                        'type' => PlainText::class,
+                        'required' => false,
+                    ],
+
+                    // PLAIN TEXT FIELD2
+                    [
+                        'uid' => 'field-1006-----------------------uid',
+                        'name' => 'Plain Text Field 2',
+                        'handle' => 'plainTextField3',
+                        'type' => PlainText::class,
+                        'required' => false,
                     ],
                 ],
             ],

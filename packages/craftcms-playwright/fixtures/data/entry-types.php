@@ -42,4 +42,14 @@ return [
         'fieldLayoutUid' => 'field-layout-1005----------------uid',
         'uid' => 'entry-type-1003------------------uid',
     ],
+    [
+        'id' => '1004',
+        'fieldLayoutId' => null,
+        'name' => 'With Plain Text as Title',
+        'handle' => 'withPlainTextAsTitle',
+        'hasTitleField' => false,
+        'titleFormat' => '{plainTextField2}',
+        'fieldLayoutUid' => 'field-layout-1006----------------uid',
+        'uid' => 'entry-type-1004------------------uid',
+    ],
 ];
