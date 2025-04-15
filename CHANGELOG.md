@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added `craft\events\UpdateReleaseEvent`.
 - Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
 - Added `craft\models\UpdateRelease::isCritical()`.
 - `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
