@@ -463,6 +463,7 @@ class AssetsController extends Controller
             'formattedDateUpdated' => Craft::$app->getFormatter()->asDatetime($resultingAsset->dateUpdated, Formatter::FORMAT_WIDTH_SHORT),
             'dimensions' => $resultingAsset->getDimensions(),
             'updatedTimestamp' => $resultingAsset->dateUpdated->getTimestamp(),
+            'resultingUrl' => $resultingAsset->getUrl(),
         ]);
     }
 

@@ -8,6 +8,7 @@
 - `craft\helpers\Db::parseBooleanParam()` now accepts `null` and `array<string|bool|null>` values.
 - `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
+- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
 - Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
 - Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.
 - Fixed a bug where GraphiQL was using a partial dark mode theme when the system was set to dark mode.
