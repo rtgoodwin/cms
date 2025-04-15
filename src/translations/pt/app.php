@@ -592,7 +592,7 @@ return [
     'Email' => 'E-mail',
     'Emirate' => 'Emirato',
     'Enable focal point' => 'Ativar ponto de foco',
-    'Enable versioning for entries in this section' => 'Ativar o controle de versão para as entradas nesta seção',
+    'Enable versioning for entries in this section' => 'Ativar o controlo de versão para as entradas neste campo',
     'Enable' => 'Ativar',
     'Enabled for all sites' => 'Ativado para todos os sites',
     'Enabled' => 'Habilitado',
