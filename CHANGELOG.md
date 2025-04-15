@@ -2,22 +2,6 @@
 
 ## Unreleased
 
-- Added `craft\events\UpdateReleaseEvent`.
-- Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
-- Added `craft\models\UpdateRelease::isCritical()`.
-- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
-- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
-- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
-- Fixed a bug where Table fields weren’t saving their values properly. ([#17091](https://github.com/craftcms/cms/pull/17091))
-
-## 4.15.0-beta.2 - 2025-04-10
-
-- Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
-- Fixed a bug where field settings weren’t being retained when changing a field’s type to a preselected value. ([#17045](https://github.com/craftcms/cms/issues/17045))
-- Fixed a bug where batched jobs that were pushed without an explicit TTR were getting new jobs spawned after each item processed. ([#17058](https://github.com/craftcms/cms/pull/17058))
-
-## 4.15.0-beta.1 - 2025-04-08
-
 ### Content Management
 - Condition rules for Checkboxes, Dropdown, Multi-select, and Radio Buttons fields now include “has a value” and “is empty” operators. ([#17015](https://github.com/craftcms/cms/pull/17015))
 - The Assets index page now prompts for confirmation when moving more than 50 assets, or assets totalling more than 50MB, at once. ([#16908](https://github.com/craftcms/cms/pull/16908))
@@ -49,11 +33,15 @@
 - Added `craft\db\mysql\QueryBuilder::jsonExtract()`.
 - Added `craft\db\pgsql\QueryBuilder::jsonContains()`.
 - Added `craft\db\pgsql\QueryBuilder::jsonExtract()`.
+- Added `craft\events\UpdateReleaseEvent`.
+- Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
+- Added `craft\models\UpdateRelease::isCritical()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\records\User::haveIndexAttributesChanged()`.
 - Added `craft\services\Search::indexElementIfQueued()`.
 - Added `craft\services\Search::queueIndexElement()`.
-- `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.  
+- `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.
+- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 
 ### System
 - `craft\queue\Queue::release()` and `releaseAll()` now call `release()` and `releaseAll()` on the proxied queue if it implements `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
@@ -63,10 +51,12 @@
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - User caches are no longer invalidated on login attempts or when user management actions are taken. ([#16937](https://github.com/craftcms/cms/pull/16937))
 - Batchable queue jobs now spawn new batches when their execution time is getting uncomfortably close to their TTR duration. ([#16947](https://github.com/craftcms/cms/pull/16947))
+- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated Axios to 1.8.4.
 - Fixed a bug where `CRAFT_WEB_URL` and `CRAFT_WEB_ROOT` environment variables could be overridden by `@web` and `@webroot` aliases define by the `aliases` config setting. ([#16980](https://github.com/craftcms/cms/pull/16980))
+- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
 
 ## 4.14.15 - 2025-04-10 [CRITICAL]
 
