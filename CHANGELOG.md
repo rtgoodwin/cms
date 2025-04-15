@@ -2,37 +2,6 @@
 
 ## Unreleased
 
-- Lightswitch fields’ element query params now support passing in an array with `value` and `strict` keys. ([#17083](https://github.com/craftcms/cms/pull/17083))
-- Element queries are no longer aborted if an unresolvable custom field param is set, if the param is set to an array that includes `null`. ([#17084](https://github.com/craftcms/cms/pull/17084))
-- Link fields marked as translatable now swap the selected element with the localized version when their value is getting propagated to a new site for the element. ([#17072](https://github.com/craftcms/cms/issues/17072)) 
-- Added `craft\events\UpdateReleaseEvent`.
-- Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
-- Added `craft\models\UpdateRelease::isCritical()`.
-- `craft\helpers\Db::parseBooleanParam()` now accepts `null` and `array<string|bool|null>` values.
-- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
-- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
-- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
-- Fixed a bug where Table fields weren’t saving their values properly. ([#17091](https://github.com/craftcms/cms/pull/17091))
-- Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
-- Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.
-- Fixed a bug where GraphiQL was using a partial dark mode theme when the system was set to dark mode.
-- Fixed a bug where `craft\mail\Mailer::send()` wasn’t always setting the template mode back to the original. ([#17089](https://github.com/craftcms/cms/issues/17089))
-- Fixed styling issues. ([#17078](https://github.com/craftcms/cms/issues/17078))
-
-## 5.7.0-beta.2 - 2025-04-10
-
-- Fixed an error that could occur when changing a field’s type. ([#17045](https://github.com/craftcms/cms/issues/17045))
-- Fixed a bug where field settings weren’t being retained when changing a field’s type to a preselected value. ([#17045](https://github.com/craftcms/cms/issues/17045))
-- Fixed a bug where batched jobs that were pushed without an explicit TTR were getting new jobs spawned after each item processed. ([#17058](https://github.com/craftcms/cms/pull/17058))
-- Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
-- Fixed a bug where editor slideouts would open when dragging structured elements. ([#17044](https://github.com/craftcms/cms/issues/17044))
-- Fixed a bug where the “Edit [type]” action menu item wasn’t working for newly-added elements within relation fields with “Maintain hierarchy” enabled. ([#17052](https://github.com/craftcms/cms/pull/17052))
-- Fixed a bug where “Show cards in a grid” relation field settings weren’t getting hidden when “Maintain hierarchy” was enabled.
-- Fixed a bug where the “Copy all entries” field action for Matrix fields set to inline-editable blocks was copying recursively-nested entries as well. ([#17060](https://github.com/craftcms/cms/issues/17060))
-- Fixed styling issues.
-
-## 5.7.0-beta.1 - 2025-04-08
-
 ### Content Management
 - Added a “Duplicate” action to nested element cards and inline-editable Matrix blocks. ([#16819](https://github.com/craftcms/cms/pull/16819))
 - Added a “Copy” action to element indexes, nested element cards, and inline-editable Matrix blocks, for entries and addresses. ([#16888](https://github.com/craftcms/cms/pull/16888))
@@ -110,6 +79,8 @@
 
 ### Development
 - Added the `canonicalsOnly` element query param.
+- Lightswitch fields’ element query params now support passing in an array with `value` and `strict` keys. ([#17083](https://github.com/craftcms/cms/pull/17083))
+- Element queries are no longer aborted if an unresolvable custom field param is set, if the param is set to an array that includes `null`. ([#17084](https://github.com/craftcms/cms/pull/17084))
 - Added the `defaultLabel` nested field to Link fields’ GraphQL data. ([#16637](https://github.com/craftcms/cms/issues/16637))
 - Added the `download` and `filename` nested fields to Link fields’ GraphQL data. ([#16844](https://github.com/craftcms/cms/pull/16844))
 - Added `element`, `asset`, `entry`, etc., nested fields to Link fields’ GraphQL data. ([#16698](https://github.com/craftcms/cms/pull/16698))
@@ -144,6 +115,7 @@
 - Added `craft\elements\actions\MoveDown`.
 - Added `craft\elements\actions\MoveUp`.
 - Added `craft\events\BulkOpEvent::defer()`. ([#16655](https://github.com/craftcms/cms/pull/16655))
+- Added `craft\events\UpdateReleaseEvent`.
 - Added `craft\fieldlayoutelements\CustomField::getEditCondition()`.
 - Added `craft\fieldlayoutelements\CustomField::setEditCondition()`.
 - Added `craft\fields\BaseOptionsField::$optionColors`, which can be set to `true` by subclasses to enable the “Color” setting for field options. ([#16645](https://github.com/craftcms/cms/pull/16645))
@@ -162,6 +134,8 @@
 - Added `craft\helpers\Cp::reset()`. ([#16848](https://github.com/craftcms/cms/pull/16848))
 - Added `craft\helpers\Json::reindent()`.
 - Added `craft\models\FieldLayout::getEditableCustomFields()`.
+- Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
+- Added `craft\models\UpdateRelease::isCritical()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
 - Added `craft\records\User::haveIndexAttributesChanged()`.
 - Added `craft\services\Elements::EVENT_AUTHORIZE_COPY`.
@@ -176,10 +150,12 @@
 - Added `craft\web\assets\codemirror\CodeMirrorAsset`.
 - `craft\base\Element::fieldLayoutFields()` now has an `editableOnly` argument.
 - `craft\base\ElementInterface::eagerLoadingMap()` and `craft\base\EagerLoadingFieldInterface::eagerLoadingMap()` can now specify mappings for multiple target element types, or not specify the element types at all. ([#16972](https://github.com/craftcms/cms/pull/16972))
-- `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.  
+- `craft\cache\ElementQueryTagDependency` now merges cache tags provided by the element query with any tags already set on its `$tags` property.
 - `craft\elements\NestedElementManager::getCardsHtml()` and `getIndexHtml()` now accept `canPaste` config options, which can be set to `true`, `false`, or a JavaScript function. 
+- `craft\helpers\Db::parseBooleanParam()` now accepts `null` and `array<string|bool|null>` values.
 - `craft\services\Elements::duplicateElement()` now has a `checkAuthorization` argument.
 - `craft\services\Fields::getLayoutByType()` now has a `create` argument.
+- `craft\services\Users::ensureUserByEmail()` now prioritizes credentialed users.
 - Added `Craft.animate()` and `Craft.animateAll()`. ([#16849](https://github.com/craftcms/cms/pull/16849))
 - Added `Craft.cp.clearCopiedElements()`.
 - Added `Craft.cp.getCopiedElements()`.
@@ -198,21 +174,28 @@
 - The `changedattributes` and `changedfields` tables are now cleaned up during garbage collection. ([#16531](https://github.com/craftcms/cms/pull/16531))
 - The `resourcepaths` table is now truncated when clearing control panel resources, via the Caches utility or the `clear-caches/cp-resources` command. ([#16514](https://github.com/craftcms/cms/issues/16514))
 - Date values for custom fields are now represented as ISO-8601 date strings (with time zones) within element exports. ([#16629](https://github.com/craftcms/cms/pull/16629))
+- Link fields marked as translatable now swap the selected element with the localized version when their value is getting propagated to a new site for the element. ([#17072](https://github.com/craftcms/cms/issues/17072))
 - “Updating search indexes” queue jobs no longer do anything if search indexes were already updated for the element since the job was created. ([#16644](https://github.com/craftcms/cms/pull/16644))
 - User caches are no longer invalidated on login attempts or when user management actions are taken. ([#16937](https://github.com/craftcms/cms/pull/16937))
 - Batchable queue jobs now spawn new batches when their execution time is getting uncomfortably close to their TTR duration. ([#16947](https://github.com/craftcms/cms/pull/16947))
 - Matrix and relational fields now eager-load their nested/related elements when displaying and validating their inputs.
 - Field layout elements no longer get new `dateAdded` values each time the project config is rebuilt, for field layouts that haven’t been explicitly saved since updating to Craft 5.3.0+. ([#16899](https://github.com/craftcms/cms/discussions/16899))
 - The user and address field layouts are no longer stored in the project config if they haven’t been explicitly saved yet.
+- Added compatibility with Symfony HTTP Client 7. ([#17065](https://github.com/craftcms/cms/pull/17065))
 - Updated Yii to 2.0.52.
 - Updated yii2-debug to 2.1.26.
 - Updated Axios to 1.8.4.
 - Updated GraphiQL to 3.8.3. ([#16836](https://github.com/craftcms/cms/pull/16836))
 - Fixed a bug where `CRAFT_WEB_URL` and `CRAFT_WEB_ROOT` environment variables could be overridden by `@web` and `@webroot` aliases define by the `aliases` config setting. ([#16980](https://github.com/craftcms/cms/pull/16980))
+- Fixed a bug where assets’ “View” buttons/links had outdated URLs after replacing the file. ([#17063](https://github.com/craftcms/cms/issues/17063))
 - Fixed a bug where indicator icons within field layout element chips didn’t have alternative text. ([#16297](https://github.com/craftcms/cms/discussions/16297))
 - Fixed a bug where slide pickers within selected field layout elements didn’t have a label. ([#16696](https://github.com/craftcms/cms/pull/16696))
 - Fixed a bug where nested elements’ `getOwner()` and `getPrimaryOwner()` methods weren’t working properly if they had been queried alongside other elements that didn’t share the same owner type. ([#16960](https://github.com/craftcms/cms/pull/16960))
 - Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
+- Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
+- Fixed a bug where “Show cards in a grid” relation field settings weren’t getting hidden when “Maintain hierarchy” was enabled.
+- Fixed a bug where `craft\mail\Mailer::send()` wasn’t always setting the template mode back to the original. ([#17089](https://github.com/craftcms/cms/issues/17089))
+- Fixed styling issues. ([#17078](https://github.com/craftcms/cms/issues/17078))
 
 ## 5.6.17 - 2025-04-10 [CRITICAL]
 
