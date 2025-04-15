@@ -192,4 +192,5 @@
 - Fixed a bug where non-editable element chips displayed their titles within `href`-less `<a>` tags.
 - Fixed a bug where verification URLs in user activation emails sent from the control panel weren’t always linking to the user’s affiliated site.
 - Fixed a bug where “Show cards in a grid” relation field settings weren’t getting hidden when “Maintain hierarchy” was enabled.
+- Fixed a bug where `craft\mail\Mailer::send()` wasn’t always setting the template mode back to the original. ([#17089](https://github.com/craftcms/cms/issues/17089))
 - Fixed styling issues. ([#17078](https://github.com/craftcms/cms/issues/17078))

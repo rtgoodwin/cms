@@ -16,6 +16,7 @@
 - Fixed a bug where Assets fields weren’t respecting their “Default Asset Placement” setting.
 - Fixed a bug where Tags fields weren’t respecting their “Default Tag Placement” setting.
 - Fixed a bug where GraphiQL was using a partial dark mode theme when the system was set to dark mode.
+- Fixed a bug where `craft\mail\Mailer::send()` wasn’t always setting the template mode back to the original. ([#17089](https://github.com/craftcms/cms/issues/17089))
 - Fixed styling issues. ([#17078](https://github.com/craftcms/cms/issues/17078))
 
 ## 5.7.0-beta.2 - 2025-04-10
