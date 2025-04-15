@@ -659,9 +659,7 @@ abstract class Field extends SavableComponent implements FieldInterface
             return Db::prepareDateForDb($value);
         }
 
-        // specifically calling `self::…` here rather than `$this->…`
-        // see https://github.com/craftcms/cms/pull/17091
-        return self::serializeValue($value, $element);
+        return $this->serializeValue($value, $element);
     }
 
     /**
