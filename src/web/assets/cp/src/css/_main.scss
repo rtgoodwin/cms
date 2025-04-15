@@ -3450,7 +3450,7 @@ table {
   --custom-titlebar-bg-color: initial;
   --custom-bg-color: initial;
   --custom-text-color: initial;
-  --custom-sel-titlebar-bg-color: null;
+  --custom-sel-titlebar-bg-color: initial;
   --custom-sel-bg-color: initial;
 
   &:not(.chromeless, .hairline) {
@@ -5046,12 +5046,15 @@ $statusLabelBgShade: '500';
   border-radius: calc(11rem / 16);
   font-weight: 500;
   text-transform: uppercase;
-  color: var(--status-label-text-color);
 
   .status,
   .cp-icon {
     position: relative;
     margin: 0;
+  }
+
+  .status-label-text {
+    color: var(--status-label-text-color);
   }
 
   &.red {
