@@ -352,13 +352,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this._handleMouseOut
         );
 
-        // Add keyboard event listeners
-        this.addListener(this.$croppingCanvas, 'focus,blur', () => {
-          this._redrawCropperElements();
-          this.renderCropper();
+        this.addListener(this.$cropperMoveBtn, 'activate', () => {
+          this._toggleCropperMove();
         });
-
-        this.addListener(this.$croppingCanvas, 'keydown', this._handleKeyDown);
 
         this._hideSpinner();
 
@@ -2145,8 +2141,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         left: 0,
       });
 
-      //$('#cropping-canvas', this.$editorContainer).attr('tabindex', 0);
-
       this.croppingShade = new fabric.Rect({
         left: this.editorWidth / 2,
         top: this.editorHeight / 2,
@@ -2193,10 +2187,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.clipper.globalCompositeOperation = 'destination-out';
       this.croppingCanvas.add(this.croppingShade);
       this.croppingCanvas.add(this.clipper);
-    },
-
-    cropperIsFocused: function () {
-      return document.activeElement.closest('#cropping-canvas');
     },
 
     /**
@@ -2288,8 +2278,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         originY: 'center',
       });
 
-      // If cropper is focused, adjust rectangle styles
-      if (this.cropperIsFocused()) {
+      // If cropper is picked up, add focus styles
+      if (this.cropperPickedUp) {
         this.croppingRectangle.set({
           strokeWidth: 4,
           stroke: 'rgba(255,255,255,1)',
@@ -2444,6 +2434,23 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
     },
 
+    _toggleCropperMove: function () {
+      if (!this.$cropperMoveBtn.length) return;
+
+      if (this.$cropperMoveBtn.attr('aria-pressed') === 'true') {
+        this.cropperPickedUp = false;
+        this.$cropperMoveBtn.attr('aria-pressed', 'false');
+        this.removeListener(this.$cropperMoveBtn, 'keydown');
+      } else {
+        this.cropperPickedUp = true;
+        this.$cropperMoveBtn.attr('aria-pressed', 'true');
+        this.addListener(this.$cropperMoveBtn, 'keydown', this._handleKeyDown);
+      }
+
+      this._redrawCropperElements();
+      this.renderCropper();
+    },
+
     _toggleFocalModeStyles: function () {
       let indicatorStrokeWidth;
       let indicatorFill;
@@ -2476,7 +2483,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         Garnish.DOWN_KEY,
       ].includes(ev.keyCode);
 
-      if (!target.closest('#cropping-canvas') || !isDirectionalKey) return;
+      if (!isDirectionalKey) return;
 
       event.preventDefault();
 
