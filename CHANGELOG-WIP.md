@@ -31,6 +31,7 @@
 - Added `craft\db\mysql\QueryBuilder::jsonExtract()`.
 - Added `craft\db\pgsql\QueryBuilder::jsonContains()`.
 - Added `craft\db\pgsql\QueryBuilder::jsonExtract()`.
+- Added `craft\events\UpdateReleaseEvent`.
 - Added `craft\models\UpdateRelease::EVENT_IS_CRITICAL`.
 - Added `craft\models\UpdateRelease::isCritical()`.
 - Added `craft\queue\ReleasableQueueInterface`. ([#16672](https://github.com/craftcms/cms/pull/16672))
