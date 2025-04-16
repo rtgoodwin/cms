@@ -352,7 +352,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this._handleMouseOut
         );
 
-        this.addListener(this.$cropperMoveBtn, 'activate', () => {
+        this.addListener(this.$cropperMoveBtn, 'click', () => {
           this._toggleCropperMove();
         });
 
@@ -2446,7 +2446,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.$cropperMoveBtn.attr('aria-pressed', 'false');
         this.removeListener(this.$cropperMoveBtn, 'keydown');
 
-        stateMessage = Craft.t('app', 'Cropper dropped.');
+        stateMessage = Craft.t('app', '{item} dropped.', {
+          item: Craft.t('app', 'Cropping Rectangle'),
+        });
         positionMessage = this.getCropperPositionMessage();
       } else {
         // Pick it up
@@ -2454,7 +2456,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.$cropperMoveBtn.attr('aria-pressed', 'true');
         this.addListener(this.$cropperMoveBtn, 'keydown', this._handleKeyDown);
 
-        stateMessage = Craft.t('app', 'Cropper picked up.');
+        stateMessage = Craft.t('app', '{item} picked up.', {
+          item: Craft.t('app', 'Cropping Rectangle'),
+        });
         positionMessage = this.getCropperPositionMessage();
         instructionMessage += Craft.t(
           'app',

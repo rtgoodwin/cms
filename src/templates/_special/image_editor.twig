@@ -61,6 +61,13 @@
             value: 'none',
             options: constraintOptions,
         }) }}
+
+        <div class="btngroup">
+            <button id="cropper-handle" class="btn flex flex-nowrap gap-s" aria-pressed="false" type="button">
+                <div class="cp-icon large">{{ iconSvg('move') }}</div>
+                <div>{{ 'Cropping Rectangle'|t('app') }}</div>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -80,9 +87,6 @@
 ] %}
 <div class="image-container">
     <div id="cropper-actions" class="hidden">
-        <button id="cropper-handle" class="btn" aria-pressed="false" type="button" aria-label="{{ 'Move cropper'|t('app') }}">
-            <div class="cp-icon xl">{{ iconSvg('move') }}</div>
-        </button>
         {% for button in cropHandleBtns %}
             {{ tag ('button', {
                 type: 'button',
