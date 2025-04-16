@@ -63,7 +63,7 @@
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Color previews within card attribute designers now show a value from the color palette. ([#16985](https://github.com/craftcms/cms/pull/16985))
 - Number previews within card attribute designers now show an in-range value, if the Min Value and Max Value settings are set. ([#16986](https://github.com/craftcms/cms/pull/16986))
-- Range previews within card attribute designers new shew an in-range value. ([#16986](https://github.com/craftcms/cms/pull/16986))
+- Range previews within card attribute designers now show an in-range value. ([#16986](https://github.com/craftcms/cms/pull/16986))
 - Section and entry type names are now linked to their edit pages from entry indexes, for admins.
 - Added the `staticStatuses` config setting, for opting into entry statuses being stored statically and only updated on save. ([#17024](https://github.com/craftcms/cms/pull/17024))
 - Added the `db/repair` command. ([#16812](https://github.com/craftcms/cms/pull/16812))
