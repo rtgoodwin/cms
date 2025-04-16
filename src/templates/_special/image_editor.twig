@@ -1,4 +1,5 @@
 {% import "_includes/forms" as forms %}
+{% set orientation = craft.app.locale.getOrientation() -%}
 {% do view.registerTranslations('app', [
   'Original',
   'Square',
@@ -62,11 +63,33 @@
         }) }}
     </div>
 </div>
+
+{% set cropHandleBtns = [
+    {
+        label: orientation == 'ltr' ? 'Move top left handle'|t('app') : 'Move top right handle'|t('app'),
+    },
+    {
+        label: orientation == 'ltr' ? 'Move top right handle'|t('app') : 'Move top left handle'|t('app'),
+    },
+    {
+        label: orientation == 'ltr' ? 'Move bottom left handle'|t('app') : 'Move bottom right handle'|t('app'),
+    },
+    {
+        label: orientation == 'ltr' ? 'Move bottom right handle'|t('app') : 'Move bottom left handle'|t('app'),
+    },
+] %}
 <div class="image-container">
     <div id="cropper-actions" class="hidden">
         <button id="cropper-handle" class="btn" aria-pressed="false" type="button" aria-label="{{ 'Move cropper'|t('app') }}">
             <div class="cp-icon xl">{{ iconSvg('move') }}</div>
         </button>
+        {% for button in cropHandleBtns %}
+            {{ tag ('button', {
+                type: 'button',
+                text: button.label,
+                class: 'visually-hidden',
+            }) }}
+        {% endfor %}
     </div>
     <div class="image">
         <canvas id="image-canvas">

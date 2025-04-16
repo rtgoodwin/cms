@@ -2436,19 +2436,45 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
     _toggleCropperMove: function () {
       if (!this.$cropperMoveBtn.length) return;
+      let stateMessage = '';
+      let positionMessage = '';
+      let instructionMessage = '';
 
       if (this.$cropperMoveBtn.attr('aria-pressed') === 'true') {
+        // Drop it
         this.cropperPickedUp = false;
         this.$cropperMoveBtn.attr('aria-pressed', 'false');
         this.removeListener(this.$cropperMoveBtn, 'keydown');
+
+        stateMessage = Craft.t('app', 'Cropper dropped.');
+        positionMessage = this.getCropperPositionMessage();
       } else {
+        // Pick it up
         this.cropperPickedUp = true;
         this.$cropperMoveBtn.attr('aria-pressed', 'true');
         this.addListener(this.$cropperMoveBtn, 'keydown', this._handleKeyDown);
+
+        stateMessage = Craft.t('app', 'Cropper picked up.');
+        positionMessage = this.getCropperPositionMessage();
+        instructionMessage += Craft.t(
+          'app',
+          'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.'
+        );
       }
 
+      this._tempAnnounce(
+        `${stateMessage} ${positionMessage} ${instructionMessage}`
+      );
       this._redrawCropperElements();
       this.renderCropper();
+    },
+
+    getCropperPositionMessage: function () {
+      return 'X axis: some percent. Y axis: some percent.';
+    },
+
+    _tempAnnounce: function (message) {
+      console.log(message);
     },
 
     _toggleFocalModeStyles: function () {
@@ -2746,6 +2772,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         left: this.clipper.left + this._handleCropperKeyboardMove._.deltaX,
         top: this.clipper.top + this._handleCropperKeyboardMove._.deltaY,
       });
+
+      this._tempAnnounce(this.getCropperPositionMessage());
 
       this._redrawCropperElements();
       this.storeCropperState();
