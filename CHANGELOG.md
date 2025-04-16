@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a styling issue. ([#17100](https://github.com/craftcms/cms/pull/17100))
+
 ## 5.7.0 - 2025-04-15
 
 ### Content Management
