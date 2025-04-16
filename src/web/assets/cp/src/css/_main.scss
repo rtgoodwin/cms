@@ -3444,7 +3444,6 @@ table {
   position: relative;
   border-radius: var(--large-border-radius);
   color: var(--custom-text-color, var(--text-color));
-  overflow: hidden; // needed for status indicators
 
   --custom-border-color: initial;
   --custom-titlebar-bg-color: initial;
@@ -3471,6 +3470,8 @@ table {
 
 .chip,
 .card {
+  overflow: hidden; // needed for status indicators
+
   &.sel,
   tr.sel &,
   li.sel &,
