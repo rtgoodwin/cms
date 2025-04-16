@@ -4,7 +4,7 @@
 
 - Fixed a SQL error that could occur when executing an element query, if the `orderBy` param contained unexpected syntax.
 - Fixed a bug where nested element cards could be missing their action menus if their “Max” setting had been reached. ([#17103](https://github.com/craftcms/cms/issues/17103))
-- Fixed a styling issue. ([#17100](https://github.com/craftcms/cms/pull/17100))
+- Fixed styling issues. ([#17100](https://github.com/craftcms/cms/pull/17100), [#17098](https://github.com/craftcms/cms/issues/17098))
 
 ## 5.7.0 - 2025-04-15
 
