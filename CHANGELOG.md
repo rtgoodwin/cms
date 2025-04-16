@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed an error that could occur when running “Updating search indexes” jobs.
+
 ## 4.15.0 - 2025-04-15
 
 ### Content Management
