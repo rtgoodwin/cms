@@ -3645,7 +3645,7 @@ class ElementQuery extends Query implements ElementQueryInterface
             return $this->_columnMappingSql($str) ?? $str;
         }
 
-        return preg_replace_callback('/\[\[(\w+(?:\.\w+)?)]]/', function(array $match) {
+        return preg_replace_callback('/(?<!\.)\[\[(\w+(?:\.\w+)?)]]/', function(array $match) {
             $mapping = $this->_columnMappingSql($match[1]);
             if ($mapping === null) {
                 return $match[0];

@@ -602,6 +602,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
         const actionDisclosure = $element
           .find('.action-btn')
+          .removeClass('hidden')
           .disclosureMenu()
           .data('disclosureMenu');
 

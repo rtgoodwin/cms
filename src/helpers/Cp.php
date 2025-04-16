@@ -1120,10 +1120,6 @@ JS, [
                     fn(array $item) => $item['showInChips'] ?? !($item['destructive'] ?? false)
                 );
 
-                if (empty($actionMenuItems)) {
-                    return '';
-                }
-
                 foreach ($actionMenuItems as $i => &$item) {
                     if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
                         if (!$withEdit) {
@@ -1139,10 +1135,15 @@ JS, [
                 return static::disclosureMenu($actionMenuItems, [
                     'hiddenLabel' => Craft::t('app', 'Actions'),
                     'buttonAttributes' => [
-                        'class' => ['action-btn', 'small'],
+                        'class' => array_keys(array_filter([
+                            'action-btn' => true,
+                            'small' => true,
+                            'hidden' => empty($actionMenuItems),
+                        ])),
                         'removeClass' => 'menubtn',
                         'data' => ['icon' => 'ellipsis'],
                     ],
+                    'omitIfEmpty' => false,
                 ]);
             },
             sprintf('action-menu-%s', mt_rand()),
