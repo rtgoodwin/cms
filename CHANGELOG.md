@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed a SQL error that could occur when executing an element query, if the `orderBy` param contained unexpected syntax.
 - Fixed a styling issue. ([#17100](https://github.com/craftcms/cms/pull/17100))
 
 ## 5.7.0 - 2025-04-15
