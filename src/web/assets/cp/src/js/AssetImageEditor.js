@@ -2470,7 +2470,22 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     getCropperPositionMessage: function () {
-      return 'X axis: some percent. Y axis: some percent.';
+      const rectProperties = this._getClipperRectProperties();
+
+      const clipperCenterRelativeToImage = {
+        xPercent: (
+          ((this.clipper.left - this.image.left + this.image.width / 2) /
+            this.image.width) *
+          100
+        ).toFixed(1),
+        yPercent: (
+          ((this.clipper.top - this.image.top + this.image.height / 2) /
+            this.image.height) *
+          100
+        ).toFixed(1),
+      };
+
+      return `X axis: ${clipperCenterRelativeToImage.xPercent}%. Y axis: ${clipperCenterRelativeToImage.yPercent}%.`;
     },
 
     _tempAnnounce: function (message) {
