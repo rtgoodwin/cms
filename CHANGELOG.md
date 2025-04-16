@@ -52,7 +52,7 @@
 - “Template” field layout UI elements are now re-rendered on each autosave. ([#16837](https://github.com/craftcms/cms/discussions/16837))
 - “Horizontal Rule” and “Line Break” field layout UI elements can now have visibility conditions. ([#13169](https://github.com/craftcms/cms/discussions/13169))
 - Sections’ “Max Authors” settings are now optional, allowing unlimited authors when blank. ([#16898](https://github.com/craftcms/cms/pull/16898))
-- Sections’ “Max Authors” settings can now be set to `0`, preving the “Author” field from being displayed on Edit Entry screens. ([#16898](https://github.com/craftcms/cms/pull/16898))
+- Sections’ “Max Authors” settings can now be set to `0`, preventing the “Author” field from being displayed on Edit Entry screens. ([#16898](https://github.com/craftcms/cms/pull/16898))
 - The email settings page now shows a “Test” button when `allowAdminChanges` is disabled. ([#16508](https://github.com/craftcms/cms/discussions/16508))
 - Entry type chips within entry type select inputs now link to their full settings pages. ([#16838](https://github.com/craftcms/cms/pull/16838))
 - Double-clicking on entry type chips within entry type select inputs now opens the entry type’s settings in a slideout, rather than its override settings. ([#16838](https://github.com/craftcms/cms/pull/16838))
@@ -92,7 +92,7 @@
 ### Extensibility
 - Global nav items and breadcrumbs can now have `aria-label` attributes via an `ariaLabel` property.
 - Editable tables now support `icon` columns.
-- Chips and cards are new hyperlinked by default. 
+- Chips and cards are now hyperlinked by default. 
 - Added `craft\base\Element::couldHaveAnimatedThumb()`.
 - Added `craft\base\ElementInterface::baseBulkDuplicateAttributes()`.
 - Added `craft\base\ElementInterface::baseGqlType()`.
