@@ -581,6 +581,8 @@ Craft.NestedElementManager = Garnish.Base.extend(
             // Override the default event listener
             $editBtn.off('activate');
             this.addListener($editBtn, 'activate', (ev) => {
+              // focus on the button so that when the slideout is closed, it's returned to the button
+              $editBtn.focus();
               const cpUrl = $element.data('cpUrl');
               if (cpUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
                 window.open(cpUrl);

@@ -629,6 +629,8 @@ $('#' + $id).on('activate', (ev) => {
   if ($cpEditUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
     window.open($cpEditUrl);
   } else {
+    // focus on the button so that when the slideout is closed, it's returned to the button
+    $(ev.currentTarget).focus();
     Craft.createElementEditor($elementType, $settings);
   }
 });
