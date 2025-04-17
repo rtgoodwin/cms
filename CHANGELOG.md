@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where Time field values weren’t saving properly. ([#17114](https://github.com/craftcms/cms/issues/17114))
+
 ## 4.15.0.1 - 2025-04-16
 
 - Fixed an error that could occur when running “Updating search indexes” jobs.
