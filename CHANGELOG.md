@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where Time field values weren’t saving properly. ([#17114](https://github.com/craftcms/cms/issues/17114))
+
 ## 5.7.1 - 2025-04-16
 
 - Fixed a SQL error that could occur when executing an element query, if the `orderBy` param contained unexpected syntax.
