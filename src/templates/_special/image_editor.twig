@@ -9,6 +9,22 @@
     class: 'visually-hidden',
     text: 'Edit Image'|t('app'),
 }) }}
+
+{% macro iconButton(config) %}
+    {% set id = config.id ?? null %}
+    {% tag 'button' with {
+        id: id,
+        class: ['btn', 'flex', 'flex-nowrap', 'gap-s'],
+        type: 'button',
+        aria: {
+            pressed: 'false',
+        },
+    } %}
+        <div class="cp-icon puny">{{ iconSvg(config.icon) }}</div>
+        <div>{{ config.label }}</div>
+    {% endtag %}
+{% endmacro %}
+
 <div class="tabs">
     <ul role="tablist">
         <li id="rotate-tab" data-view="rotate" role="tab" tabindex="0" aria-selected="true"><i></i>{{ 'Rotate'|t('app') }}</li>
@@ -62,29 +78,42 @@
             options: constraintOptions,
         }) }}
 
-        <div class="btngroup">
-            <button id="cropper-handle" class="btn flex flex-nowrap gap-s" aria-pressed="false" type="button">
-                <div class="cp-icon large">{{ iconSvg('move') }}</div>
-                <div>{{ 'Cropping Rectangle'|t('app') }}</div>
-            </button>
+        {% set cropHandleBtns = [
+            {
+                label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
+                'data-corner-handle': 'tl',
+            },
+            {
+                label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
+                'data-corner-handle': 'tr',
+            },
+            {
+                label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
+                'data-corner-handle': 'bl',
+            },
+            {
+                label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
+                'data-corner-handle': 'br',
+            },
+        ] %}
+        <div style="display: grid;">
+            {{ _self.iconButton({
+                icon: 'up-down-left-right',
+                label: 'Cropping Rectangle'|t('app'),
+                id: 'cropper-handle'
+            }) }}
+
+            {% for button in cropHandleBtns %}
+                {{ _self.iconButton({
+                    icon: 'expand',
+                    label: button.label
+                }) }}
+            {% endfor %}
         </div>
     </div>
 </div>
 
-{% set cropHandleBtns = [
-    {
-        label: orientation == 'ltr' ? 'Move top left handle'|t('app') : 'Move top right handle'|t('app'),
-    },
-    {
-        label: orientation == 'ltr' ? 'Move top right handle'|t('app') : 'Move top left handle'|t('app'),
-    },
-    {
-        label: orientation == 'ltr' ? 'Move bottom left handle'|t('app') : 'Move bottom right handle'|t('app'),
-    },
-    {
-        label: orientation == 'ltr' ? 'Move bottom right handle'|t('app') : 'Move bottom left handle'|t('app'),
-    },
-] %}
+
 <div class="image-container">
     <div id="cropper-actions" class="hidden">
         {% for button in cropHandleBtns %}
