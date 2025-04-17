@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.1 - 2025-04-16
 
 - Fixed a SQL error that could occur when executing an element query, if the `orderBy` param contained unexpected syntax.
 - Fixed a bug where nested element cards could be missing their action menus if their “Max” setting had been reached. ([#17103](https://github.com/craftcms/cms/issues/17103))
