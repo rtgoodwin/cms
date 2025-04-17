@@ -217,6 +217,7 @@ class Time extends Field implements PreviewableFieldInterface, SortableFieldInte
      */
     public function serializeValueForDb(mixed $value, ?ElementInterface $element): mixed
     {
+        // Bypass Db::prepareDateForDb()
         return $this->serializeValue($value, $element);
     }
 
