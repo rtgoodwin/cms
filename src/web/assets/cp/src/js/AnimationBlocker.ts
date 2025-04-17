@@ -7,6 +7,27 @@ export class AnimationBlocker {
   }
 
   /**
+   * Checks a given image's src and srcset for common animation extensions
+   * @param image
+   */
+  static couldBeAnimated(image: HTMLImageElement): boolean {
+    const src = image.src;
+    const srcset = image.srcset;
+
+    const hasExpectedExtension = this.extensions.some(
+      (extension) => src.includes(extension) || srcset.includes(extension)
+    );
+
+    return hasExpectedExtension || image.hasAttribute('data-animated');
+  }
+
+  static getAllPotentiallyAnimated(): HTMLImageElement[] {
+    const allImages: NodeListOf<HTMLImageElement> =
+      document.querySelectorAll('img');
+    return this.filterImages(allImages);
+  }
+
+  /**
    * Creates a MutationObserver to watch for added images
    * @private
    */
@@ -190,26 +211,5 @@ export class AnimationBlocker {
     images: NodeListOf<HTMLImageElement>
   ): HTMLImageElement[] {
     return Array.from(images).filter((image) => this.couldBeAnimated(image));
-  }
-
-  /**
-   * Checks a given image's src and srcset for common animation extensions
-   * @param image
-   */
-  static couldBeAnimated(image: HTMLImageElement): boolean {
-    const src = image.src;
-    const srcset = image.srcset;
-
-    const hasExpectedExtension = this.extensions.some(
-      (extension) => src.includes(extension) || srcset.includes(extension)
-    );
-
-    return hasExpectedExtension || image.hasAttribute('data-animated');
-  }
-
-  static getAllPotentiallyAnimated(): HTMLImageElement[] {
-    const allImages: NodeListOf<HTMLImageElement> =
-      document.querySelectorAll('img');
-    return this.filterImages(allImages);
   }
 }

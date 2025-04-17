@@ -1,7 +1,8 @@
-/** global: Craft */
+/** global: Craft *
 /** global: Garnish */
 /** global: $ */
 /** global: jQuery */
+import {AnimationBlocker} from './AnimationBlocker';
 
 /**
  * CP class
@@ -149,7 +150,7 @@ Craft.CP = Garnish.Base.extend(
       }
 
       // Global Animation Blocker
-      this.animationBlocker = new Craft.AnimationBlocker();
+      this.animationBlocker = new AnimationBlocker();
 
       // Toggles
       this.addListener(this.$navToggle, 'click', 'toggleNav');
