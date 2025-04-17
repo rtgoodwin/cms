@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.1.1 - 2025-04-17
 
 - Fixed a bug where Time field values weren’t saving properly. ([#17114](https://github.com/craftcms/cms/issues/17114))
 - Fixed a styling issue. ([#17110](https://github.com/craftcms/cms/issues/17110))
