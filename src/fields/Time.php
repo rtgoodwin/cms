@@ -215,6 +215,15 @@ class Time extends Field implements PreviewableFieldInterface, SortableFieldInte
     /**
      * @inheritdoc
      */
+    public function serializeValueForDb(mixed $value, ?ElementInterface $element): mixed
+    {
+        // Bypass Db::prepareDateForDb()
+        return $this->serializeValue($value, $element);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getElementConditionRuleType(): array|string|null
     {
         return EmptyFieldConditionRule::class;
