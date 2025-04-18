@@ -194,7 +194,7 @@ Craft.ElementEditor = Garnish.Base.extend(
         throw 'Element editors may only be used with forms.';
       }
 
-      if (this.isFullPage && Craft.edition !== Craft.Solo) {
+      if (Craft.edition !== Craft.Solo) {
         this.$activityContainer = this.$container.find('.activity-container');
         this._checkActivity();
       }
@@ -953,7 +953,7 @@ Craft.ElementEditor = Garnish.Base.extend(
       const button = menu.addItem(
         {
           type: 'button',
-          icon: 'edit',
+          icon: async () => await Craft.ui.icon('edit'),
           label: Craft.t('app', 'Edit draft settings'),
         },
         group
