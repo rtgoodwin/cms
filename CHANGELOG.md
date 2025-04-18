@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
+
 ## 5.7.1.1 - 2025-04-17
 
 - Fixed a bug where Time field values weren’t saving properly. ([#17114](https://github.com/craftcms/cms/issues/17114))
