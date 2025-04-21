@@ -1,6 +1,11 @@
 @charset "UTF-8";
 @import '@craftcms/sass/mixins';
 
+:root {
+  --input-color: var(--input-color, hsl(212deg 25% 50%));
+  --graphiql-header-height: calc(42rem / 16);
+}
+
 body,
 .cp-graphiql {
   width: 100vw;
@@ -33,6 +38,7 @@ body,
 }
 
 .cp-graphiql-header {
+  height: var(--graphiql-header-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -42,7 +48,11 @@ body,
 
   .select select {
     color: var(--text-color);
-    background-color: transparentize($inputColor, 0.75);
+    background-color: color-mix(
+      in oklch,
+      var(--input-color, hsl(212deg 25% 50%)) 25%,
+      transparent
+    );
   }
 }
 
@@ -67,6 +77,7 @@ body,
 }
 
 .graphiql-editor {
+  max-height: calc(100vh - var(--graphiql-header-height));
   font-size: 14px;
   line-height: 20px;
   color: var(--text-color);
