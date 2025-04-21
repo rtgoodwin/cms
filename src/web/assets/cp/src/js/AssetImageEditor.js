@@ -23,6 +23,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $croppingCanvas: null,
     $croppingActionsContainer: null,
     $cropperMoveBtn: null,
+    $cropperScaleBtns: null,
     $spinner: null,
     $constraintContainer: null,
     $constraintRadioInputs: null,
@@ -66,6 +67,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     focalPickedUp: false,
     focalClicked: false,
     cropperClicked: false,
+    handlePickedUp: false,
     previousMouseX: 0,
     previousMouseY: 0,
     shiftKeyHeld: false,
@@ -200,6 +202,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$croppingActionsContainer = $('#cropper-actions', this.$body);
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
+      // this.$cropperScaleBtns = $('[')
 
       this._showSpinner();
 
