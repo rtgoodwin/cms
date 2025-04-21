@@ -3444,13 +3444,12 @@ table {
   position: relative;
   border-radius: var(--large-border-radius);
   color: var(--custom-text-color, var(--text-color));
-  overflow: hidden; // needed for status indicators
 
   --custom-border-color: initial;
   --custom-titlebar-bg-color: initial;
   --custom-bg-color: initial;
   --custom-text-color: initial;
-  --custom-sel-titlebar-bg-color: null;
+  --custom-sel-titlebar-bg-color: initial;
   --custom-sel-bg-color: initial;
 
   &:not(.chromeless, .hairline) {
@@ -3471,6 +3470,8 @@ table {
 
 .chip,
 .card {
+  overflow: hidden; // needed for status indicators
+
   &.sel,
   tr.sel &,
   li.sel &,
@@ -3486,10 +3487,13 @@ table {
     --custom-border-color: rgb(0 0 0 / 10%) !important;
     @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
     color: var(--white);
-    background-color: var(
-      --custom-sel-bg-color,
-      var(--dark-sel-color)
-    ) !important;
+
+    &:not(.chromeless) {
+      background-color: var(
+        --custom-sel-bg-color,
+        var(--dark-sel-color)
+      ) !important;
+    }
 
     .icon,
     .cp-icon,
@@ -5036,36 +5040,25 @@ $statusLabelBgShade: '500';
 .status-label {
   position: relative;
   display: inline-flex;
-  align-items: center;
+  align-items: start;
   justify-content: center;
   gap: var(--xs);
-  height: calc(22rem / 16);
-  padding-block: 0;
-  padding-inline: var(--s);
-
-  &::before {
-    position: absolute;
-    display: block;
-    inset: 0;
-    background-color: var(--status-label-bg-color);
-    border-radius: calc(11rem / 16);
-    content: '';
-    opacity: 0.15;
-    user-select: none;
-    pointer-events: none;
-  }
+  padding-block: var(--xs);
+  padding-inline: var(--xs) var(--s);
+  line-height: 1.1;
+  font-size: calc(11rem / 16);
+  background-color: rgb(from var(--status-label-bg-color) r g b / 15%);
+  border-radius: calc(11rem / 16);
+  font-weight: 500;
+  text-transform: uppercase;
 
   .status,
   .cp-icon {
-    margin-inline: -3px 0;
-    margin-block: 0;
+    position: relative;
+    margin: 0;
   }
 
   .status-label-text {
-    position: relative;
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
     color: var(--status-label-text-color);
   }
 
@@ -8218,7 +8211,8 @@ div.checkbox {
   }
 
   .info {
-    height: 16px;
+    height: 17px;
+    margin-block-start: -1px;
   }
 }
 
@@ -9406,7 +9400,7 @@ body.licensing-issues {
 }
 
 .matrixblock {
-  margin-block-end: var(--m);
+  margin-block-end: var(--s);
   padding-block: 0 var(--m);
   padding-inline: var(--m);
 

@@ -3964,6 +3964,9 @@ abstract class Element extends Component implements ElementInterface
                 'url' => $url,
                 'attributes' => [
                     'target' => '_blank',
+                    'data' => [
+                        'view' => true,
+                    ],
                 ],
             ];
         }

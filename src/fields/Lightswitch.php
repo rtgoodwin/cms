@@ -78,7 +78,15 @@ class Lightswitch extends Field implements InlineEditableFieldInterface, Sortabl
     public static function queryCondition(array $instances, mixed $value, array &$params): array
     {
         $valueSql = static::valueSql($instances);
-        return Db::parseBooleanParam($valueSql, $value, $instances[0]->default, Schema::TYPE_JSON);
+        $strict = false;
+
+        if (is_array($value) && isset($value['value'])) {
+            $strict = $value['strict'] ?? $strict;
+            $value = $value['value'];
+        }
+
+        $defaultValue = $strict ? null : $instances[0]->default;
+        return Db::parseBooleanParam($valueSql, $value, $defaultValue, Schema::TYPE_JSON);
     }
 
     /**

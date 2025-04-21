@@ -1735,6 +1735,11 @@ $('#' + $id).on('activate', () => {
           alert(result.error);
         } else {
           Craft.cp.displayNotice(Craft.t('app', 'New file uploaded.'));
+          // update the View menu item link
+          let viewBtn = $('#action-menu .menu-item[data-view]');
+          if (viewBtn && result.resultingUrl) {
+            viewBtn.attr('href', result.resultingUrl)
+          }
         }
       },
       fileuploadfail: (event, data) => {
