@@ -227,6 +227,10 @@ Craft::setAlias('@appicons/grip-dots.svg', "$customIconsPath/grip-dots.svg");
 Craft::setAlias('@appicons/list-flip.svg', "$customIconsPath/list-flip.svg");
 Craft::setAlias('@appicons/list-tree-flip.svg', "$customIconsPath/list-tree-flip.svg");
 Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/share-flip.svg");
+Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/slideout-left.svg");
+Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/slideout-right.svg");
+Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/thumb-left.svg");
+Craft::setAlias('@appicons/share-flip.svg', "$customIconsPath/thumb-right.svg");
 
 // Brands
 Craft::setAlias('@appicons/amazon.svg', "$brandIconsPath/amazon.svg");
