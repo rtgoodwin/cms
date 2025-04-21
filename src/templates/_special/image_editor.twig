@@ -96,25 +96,35 @@
                 corner: 'br',
             },
         ] %}
-        <div style="display: grid;">
-            {{ _self.iconButton({
-                icon: 'up-down-left-right',
-                label: 'Cropping Rectangle'|t('app'),
-                id: 'cropper-handle'
-            }) }}
-
-            {% for button in cropHandleBtns %}
+        <fieldset class="cropper-edit">
+            <legend>Edit Cropper</legend>
+            <div class="cropper-edit__btns">
                 {{ _self.iconButton({
-                    icon: 'expand',
-                    label: button.label,
+                    icon: 'up-down-left-right',
+                    label: 'Cropping Rectangle'|t('app'),
+                    id: 'cropper-handle',
                     buttonAttributes: {
                         data: {
-                            'corner-handle': button.corner,
+                            'crop-editor': 'rectangle',
                         },
+                        class: ['cropper-edit__btn']
                     }
                 }) }}
-            {% endfor %}
-        </div>
+                {% for button in cropHandleBtns %}
+                    {{ _self.iconButton({
+                        icon: 'expand',
+                        label: button.label,
+                        buttonAttributes: {
+                            data: {
+                                'crop-editor': 'corner',
+                                'corner-handle': button.corner,
+                            },
+                            class: ['cropper-edit__btn']
+                        }
+                    }) }}
+                {% endfor %}
+            </div>
+        </fieldset>
     </div>
 </div>
 

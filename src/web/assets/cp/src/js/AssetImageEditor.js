@@ -23,6 +23,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $croppingCanvas: null,
     $croppingActionsContainer: null,
     $cropperMoveBtn: null,
+    $cropperEditBtn: null,
     $cropperScaleBtns: null,
     $spinner: null,
     $constraintContainer: null,
@@ -202,7 +203,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$croppingActionsContainer = $('#cropper-actions', this.$body);
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
-      // this.$cropperScaleBtns = $('[')
+      this.$cropperEditBtn = $('.cropper-edit__btn', this.$body);
 
       this._showSpinner();
 
@@ -354,10 +355,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           'mouseout,touchcancel',
           this._handleMouseOut
         );
-
-        this.addListener(this.$cropperMoveBtn, 'click', () => {
-          this._toggleCropperMove();
-        });
 
         this._hideSpinner();
 
@@ -868,6 +865,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
       this.addListener($('.flip-horizontal'), 'click', function () {
         this.flipImage('x');
+      });
+
+      // Cropper
+      this.addListener(this.$cropperEditBtn, 'click', (ev) => {
+        this._handleCropperEdit(ev);
       });
 
       // Straighten slider
@@ -2437,41 +2439,63 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
     },
 
-    _toggleCropperMove: function () {
-      if (!this.$cropperMoveBtn.length) return;
+    _handleCropperEdit: function (ev) {
+      const $btn = $(ev.target.closest('button'));
+      const pickingUp = $btn.attr('aria-pressed') === 'false';
+      const itemPicked = $btn.attr('data-crop-editor');
+
+      // Messages
       let stateMessage = '';
       let positionMessage = '';
       let instructionMessage = '';
 
-      if (this.$cropperMoveBtn.attr('aria-pressed') === 'true') {
-        // Drop it
-        this.cropperPickedUp = false;
-        this.$cropperMoveBtn.attr('aria-pressed', 'false');
-        this.removeListener(this.$cropperMoveBtn, 'keydown');
+      // Defaults
+      this.cropperPickedUp = false;
+      this.cornerPickedUp = false;
 
+      // Grab button text for state message
+      let item = $btn.text().trim();
+
+      if (!pickingUp) {
+        $btn.attr('aria-pressed', 'false');
         stateMessage = Craft.t('app', '{item} dropped.', {
-          item: Craft.t('app', 'Cropping Rectangle'),
+          item: item,
         });
-        positionMessage = this.getCropperPositionMessage();
+        // Remove listeners
+        this.removeListener(this.$cropperMoveBtn, 'keydown');
       } else {
-        // Pick it up
-        this.cropperPickedUp = true;
-        this.$cropperMoveBtn.attr('aria-pressed', 'true');
-        this.addListener(this.$cropperMoveBtn, 'keydown', this._handleKeyDown);
+        $btn.attr('aria-pressed', 'true');
+
+        if (itemPicked === 'rectangle') {
+          this.cropperPickedUp = true;
+          this.addListener(
+            this.$cropperMoveBtn,
+            'keydown',
+            this._handleKeyDown
+          );
+        } else {
+          this.cornerPickedUp = true;
+        }
 
         stateMessage = Craft.t('app', '{item} picked up.', {
-          item: Craft.t('app', 'Cropping Rectangle'),
+          item: item,
         });
-        positionMessage = this.getCropperPositionMessage();
+
         instructionMessage += Craft.t(
           'app',
           'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.'
         );
       }
 
+      if (itemPicked === 'rectangle') {
+        positionMessage = this.getCropperPositionMessage();
+      }
+
+      // Announce
       this._tempAnnounce(
         `${stateMessage} ${positionMessage} ${instructionMessage}`
       );
+
       this._redrawCropperElements();
       this.renderCropper();
     },
