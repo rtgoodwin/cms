@@ -74,6 +74,7 @@ class GeneralConfig extends BaseConfig
      *
      * - `useShapes` – Whether shapes should be used to represent statuses.
      * - `underlineLinks` – Whether links should be underlined.
+     * - `disableAutofocus` – Whether inputs should make use of the `autofocus` attribute.
      * - `notificationDuration` – How long notifications should be shown before they disappear automatically (in
      *   milliseconds). Set to `0` to show them indefinitely.
      *
