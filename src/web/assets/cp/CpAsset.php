@@ -573,7 +573,11 @@ JS;
             'canAccessQueueManager' => Craft::$app->getUtilities()->checkAuthorization(QueueManager::class),
             'dataAttributes' => Html::$dataAttributes,
             'defaultIndexCriteria' => [],
-            'disableAutofocus' => (bool)($currentUser->getPreference('disableAutofocus') ?? false),
+            'disableAutofocus' => (bool)(
+                $currentUser->getPreference('disableAutofocus')
+                ?? $generalConfig->accessibilityDefaults['disableAutofocus']
+                ?? false
+            ),
             'editableCategoryGroups' => $upToDate ? $this->_editableCategoryGroups() : [],
             'edition' => Craft::$app->edition->value,
             'elementTypeNames' => $elementTypeNames,

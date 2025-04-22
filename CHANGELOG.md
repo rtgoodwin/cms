@@ -4,7 +4,7 @@
 
 - Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
 - Fixed a bug where some system screens shown on the front end were sent without no-cache headers. ([#17129](https://github.com/craftcms/cms/issues/17129))
-- Fixed a bug where the default `notificationDuration` value per the `accessibilityDefaults` config setting wasn’t being respected for users who hadn’t saved their preferences yet.
+- Fixed a bug where the default `disableAutofocus` and `notificationDuration` values per the `accessibilityDefaults` config setting weren’t being respected for users who hadn’t saved their preferences yet.
 - Fixed a bug where multiple authentication method setup slideouts could open simultaneously.
 - Fixed a bug where deselected Button Group buttons’ labels were showing up in collapsed Matrix block preview text. ([#17138](https://github.com/craftcms/cms/issues/17138))
 - Fixed a bug where the GraphiQL Documentation Explorer height was expanding the whole window’s height. ([#17121]https://github.com/craftcms/cms/issues/17121)
