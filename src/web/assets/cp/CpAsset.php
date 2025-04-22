@@ -594,6 +594,9 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['notificationDuration']
                 ?? 5000
             ),
+            'notificationPosition' => $currentUser->getPreference('notificationPosition')
+                ?? $generalConfig->accessibilityDefaults['notificationPosition']
+                ?? 'end-start',
             'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
                 ?? $generalConfig->accessibilityDefaults['slideoutPosition']
                 ?? 'end',
