@@ -578,9 +578,6 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['disableAutofocus']
                 ?? false
             ),
-            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
-                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
-                ?? 'end',
             'editableCategoryGroups' => $upToDate ? $this->_editableCategoryGroups() : [],
             'edition' => Craft::$app->edition->value,
             'elementTypeNames' => $elementTypeNames,
@@ -597,6 +594,9 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['notificationDuration']
                 ?? 5000
             ),
+            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
+                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
+                ?? 'end',
             'previewIframeResizerOptions' => $this->_previewIframeResizerOptions($generalConfig),
             'primarySiteId' => $primarySite ? (int)$primarySite->id : null,
             'primarySiteLanguage' => $primarySite->language ?? null,

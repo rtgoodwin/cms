@@ -91,22 +91,22 @@
         icon: orientation == 'ltr' ? 'slideout-left' : 'slideout-right',
         value: 'start',
         attributes: {
-        title: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
-        aria: {
-          label: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+          title: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+          aria: {
+            label: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+          },
         },
-      },
       },
       {
         icon: orientation == 'ltr' ? 'slideout-right' : 'slideout-left',
         value: 'end',
         attributes: {
-        title: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
-        aria: {
-          label: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+          title: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+          aria: {
+            label: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+          },
         },
       },
-      }
     ],
     value: currentUser.getPreference('slideoutPosition') ?? a11yDefaults['slideoutPosition'] ?? 'end',
   }) }}

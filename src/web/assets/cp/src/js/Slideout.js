@@ -112,12 +112,12 @@ import $ from 'jquery';
         if (this.useMobileStyles) {
           this.$container.css({
             top: '100vh',
-            [Craft.Slideout.positionAttr()]: '',
+            [Craft.Slideout.positionProp()]: '',
           });
         } else {
           this.$container.css({
             top: '',
-            [Craft.Slideout.positionAttr()]: '100vw',
+            [Craft.Slideout.positionProp()]: '100vw',
           });
         }
 
@@ -263,7 +263,7 @@ import $ from 'jquery';
       },
       instances: {},
       openPanels: [],
-      positionAttr: function () {
+      positionProp: function () {
         // go with the opposite of the setting, b/c of the way we animate it
         return `inset-inline-${
           Craft.slideoutPosition === 'start' ? 'end' : 'start'
@@ -287,7 +287,7 @@ import $ from 'jquery';
         if (panel.useMobileStyles) {
           panel.$container.css('top', '100vh');
         } else {
-          panel.$container.css(Craft.Slideout.positionAttr(), '100vw');
+          panel.$container.css(Craft.Slideout.positionProp(), '100vw');
           Craft.Slideout.updateStyles();
         }
       },
@@ -295,7 +295,7 @@ import $ from 'jquery';
         const totalPanels = Craft.Slideout.totalPanels();
         Craft.Slideout.openPanels.forEach((panel, i) => {
           panel.$container.css(
-            Craft.Slideout.positionAttr(),
+            Craft.Slideout.positionProp(),
             `${45 * ((totalPanels - i) / totalPanels)}vw`
           );
         });
