@@ -10,7 +10,7 @@
 - Fixed a bug where deselected Button Group buttons’ labels were showing up in collapsed Matrix block preview text. ([#17138](https://github.com/craftcms/cms/issues/17138))
 - Fixed a bug where the GraphiQL Documentation Explorer height was expanding the whole window’s height. ([#17121]https://github.com/craftcms/cms/issues/17121)
 - Fixed a bug where Matrix fields set to the “element index” view mode didn’t have the “Copy” bulk element action. ([#17142](https://github.com/craftcms/cms/issues/17142))
-- Fixed a bug where passing `not 1` to a Lightswitch field’s element query param wasn’t yielding expected results. ([#17149(https://github.com/craftcms/cms/issues/17149)])
+- Fixed a bug where passing `not 1` to a Lightswitch field’s element query param wasn’t yielding expected results. ([#17149](https://github.com/craftcms/cms/issues/17149))
 - Fixed styling issues. ([#17145](https://github.com/craftcms/cms/issues/17145))
 
 ## 5.7.1.1 - 2025-04-17
