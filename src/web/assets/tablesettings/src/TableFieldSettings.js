@@ -19,6 +19,9 @@
     columnsTable: null,
     defaultsTable: null,
 
+    staticRows: false,
+    maxRowId: null,
+
     init: function (
       columnsTableName,
       defaultsTableName,
@@ -26,11 +29,15 @@
       defaults,
       columnSettings,
       dropdownSettingsHtml,
-      dropdownSettingsCols
+      dropdownSettingsCols,
+      staticRows,
+      maxRowId
     ) {
       this.columnsTableName = columnsTableName;
       this.defaultsTableName = defaultsTableName;
       this.columnsData = columnsData;
+      this.staticRows = staticRows ?? false;
+      this.maxRowId = maxRowId ?? null;
 
       this.columnsTableId = Craft.formatInputId(this.columnsTableName);
       this.defaultsTableId = Craft.formatInputId(this.defaultsTableName);
@@ -83,6 +90,9 @@
           allowAdd: true,
           allowReorder: true,
           allowDelete: true,
+          staticRows: this.staticRows,
+          includeRowId: true,
+          maxRowId: this.maxRowId,
         }
       );
     },

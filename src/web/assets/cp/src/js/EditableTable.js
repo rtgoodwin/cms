@@ -263,12 +263,19 @@ Craft.EditableTable = Garnish.Base.extend(
         return;
       }
 
+      let newStaticRowId = null;
+      if (this.settings.maxRowId !== null) {
+        newStaticRowId = parseInt(this.settings.maxRowId);
+        newStaticRowId++;
+      }
+
       var rowId = this.settings.rowIdPrefix + (this.biggestId + 1),
         $tr = this.createRow(
           rowId,
           this.columns,
           this.baseName,
-          $.extend({}, this.settings.defaultValues)
+          $.extend({}, this.settings.defaultValues),
+          newStaticRowId
         );
 
       if (prepend) {
@@ -299,14 +306,17 @@ Craft.EditableTable = Garnish.Base.extend(
       return row;
     },
 
-    createRow: function (rowId, columns, baseName, values) {
+    createRow: function (rowId, columns, baseName, values, newStaticRowId) {
       return Craft.EditableTable.createRow(
         rowId,
         columns,
         baseName,
         values,
         this.settings.allowReorder,
-        this.settings.allowDelete
+        this.settings.allowDelete,
+        this.settings.staticRows,
+        this.settings.includeRowId,
+        newStaticRowId
       );
     },
 
@@ -436,6 +446,9 @@ Craft.EditableTable = Garnish.Base.extend(
       lazyInitRows: true,
       onAddRow: $.noop,
       onDeleteRow: $.noop,
+      staticRows: false,
+      includeRowId: false,
+      maxRowId: null,
     },
 
     createRow: function (
@@ -444,7 +457,10 @@ Craft.EditableTable = Garnish.Base.extend(
       baseName,
       values,
       allowReorder,
-      allowDelete
+      allowDelete,
+      staticRows = false,
+      includeRowId = false,
+      newStaticRowId = null
     ) {
       var $tr = $('<tr/>', {
         'data-id': rowId,
@@ -612,6 +628,20 @@ Craft.EditableTable = Garnish.Base.extend(
           .appendTo($tr);
       }
 
+      if (staticRows && includeRowId) {
+        $('<td/>', {
+          class: 'hidden',
+        })
+          .append(
+            $('<input/>', {
+              type: 'hidden',
+              name: baseName + '[' + rowId + '][rowId]',
+              value: newStaticRowId ?? null,
+            })
+          )
+          .appendTo($tr);
+      }
+
       return $tr;
     },
   }
@@ -774,7 +804,7 @@ Craft.EditableTable.Row = Garnish.Base.extend(
         }
       }
 
-      var $deleteBtn = this.$tr.children().last().find('.delete');
+      var $deleteBtn = this.$tr.children().find('.delete').last();
       this.addListener($deleteBtn, 'click', 'deleteRow');
 
       var $inputs = this.$tr.find('input,textarea,select,.lightswitch');

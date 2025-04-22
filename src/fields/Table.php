@@ -14,6 +14,7 @@ use craft\fields\data\ColorData;
 use craft\gql\GqlEntityRegistry;
 use craft\gql\types\generators\TableRowType;
 use craft\gql\types\TableRow;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
@@ -90,6 +91,11 @@ class Table extends Field
      * @var array|null The default row values that new elements should have
      */
     public ?array $defaults = [[]];
+
+    /**
+     * @var int|null The highest rowId used by the field's default rows so far
+     */
+    public ?int $maxRowId = null;
 
     /**
      * @var string The type of database column the field should have in the content table
@@ -338,7 +344,9 @@ class Table extends Field
             Json::encode($this->defaults ?? []) . ', ' .
             Json::encode($columnSettings) . ', ' .
             Json::encode($dropdownSettingsHtml) . ', ' .
-            Json::encode($dropdownSettingsCols) .
+            Json::encode($dropdownSettingsCols) . ', ' .
+            Json::encode($this->staticRows) . ', ' .
+            Json::encode($this->maxRowId) .
             ');');
 
         $columnsField = $view->renderTemplate('_components/fieldtypes/Table/columntable.twig', [
@@ -358,6 +366,7 @@ class Table extends Field
             'cols' => $columns,
             'rows' => $this->defaults,
             'initJs' => false,
+            'includeRowId' => true,
         ]);
 
         return $view->renderTemplate('_components/fieldtypes/Table/settings.twig', [
@@ -365,6 +374,34 @@ class Table extends Field
             'columnsField' => $columnsField,
             'defaultsField' => $defaultsField,
         ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function beforeSave(bool $isNew): bool
+    {
+        if (!$this->staticRows || empty($this->defaults)) {
+            return true;
+        }
+
+        // if we don't have rowIds - assign them
+        foreach ($this->defaults as $key => $value) {
+            if (!isset($this->defaults[$key]['rowId'])) {
+                $this->defaults[$key]['rowId'] = $key;
+            }
+        }
+
+        // store the highest used rowId
+        $rowIds = ArrayHelper::getColumn($this->defaults, 'rowId');
+        rsort($rowIds, SORT_NUMERIC);
+        $maxKey = (int)reset($rowIds);
+        if ($this->maxRowId != $maxKey) {
+            $this->maxRowId = $maxKey;
+        }
+
+
+        return parent::beforeSave($isNew);
     }
 
     /**
@@ -464,11 +501,65 @@ class Table extends Field
         $value = array_values($value);
 
         if ($this->staticRows) {
+            // if there's no rowIds, add them using row index
+            if (ArrayHelper::containsRecursive($value, 'rowId') === false) {
+                foreach ($value as $key => &$row) {
+                    $row['rowId'] = $key;
+                }
+            }
+
+            // get the order of the default rows & filter out anything that's not numeric
+            $order = array_filter(ArrayHelper::getColumn($this->defaults, 'rowId'), function($value): bool {
+                return is_numeric($value);
+            });
+            // the rowIds present in the $value array
+            $usedValueRowIds = ArrayHelper::getColumn($value, 'rowId');
+
+            // if the field has a set order
+            if (!empty($order)) {
+                $missingValueRowIds = array_values(array_diff($order, $usedValueRowIds));
+                $leftoverValueRowIds = array_diff($usedValueRowIds, $order);
+
+                // if the rowId is missing from the defaults - remove it from the $value array
+                if (!empty($leftoverValueRowIds)) {
+                    foreach ($leftoverValueRowIds as $key => $rowId) {
+                        unset($value[$key]);
+                    }
+                }
+            }
+
             $valueRows = count($value);
             $totalRows = count($defaults);
+
+            // if we have too few rows
             if ($valueRows < $totalRows) {
-                $value = array_pad($value, $totalRows, []);
-            } elseif ($valueRows > $totalRows) {
+                if (!isset($missingValueRowIds)) {
+                    $value = array_pad($value, $totalRows, []);
+                } else {
+                    // if we have the missing value rowIds - add them in places where settings rowId doesn't exist in the $value array
+                    while (count($value) < $totalRows) {
+                        $value[] = ['rowId' => reset($missingValueRowIds)];
+                        array_shift($missingValueRowIds);
+                    }
+                }
+            }
+
+            if (!empty($order)) {
+                // sort as per the field's settings
+                usort($value, function($a, $b) use ($order) {
+                    foreach ($order as $orderValue) {
+                        if (isset($a['rowId']) && $a['rowId'] == $orderValue) {
+                            return 0;
+                        }
+                        if (isset($b['rowId']) && $b['rowId'] == $orderValue) {
+                            return 1;
+                        }
+                    }
+                });
+            }
+
+            // now that we've sorted the rows, if we have too many rows - splice
+            if ($valueRows > $totalRows) {
                 array_splice($value, $totalRows);
             }
         }
@@ -564,6 +655,12 @@ class Table extends Field
                     $serializedRow[$colId] = Db::prepareDateForDb($value);
                 } else {
                     $serializedRow[$colId] = parent::serializeValue($value, $element);
+                }
+            }
+            // if the table has static rows, store the rowId too
+            if ($this->staticRows) {
+                if (isset($row['rowId'])) {
+                    $serializedRow['rowId'] = $row['rowId'];
                 }
             }
             $serialized[] = $serializedRow;
@@ -778,6 +875,7 @@ class Table extends Field
             'allowReorder' => true,
             'addRowLabel' => Craft::t('site', $this->addRowLabel),
             'describedBy' => $this->describedBy,
+            'includeRowId' => $this->staticRows,
         ]);
     }
 }
