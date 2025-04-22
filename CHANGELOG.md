@@ -4,6 +4,7 @@
 
 - Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
 - Fixed a bug where some system screens shown on the front end were sent without no-cache headers. ([#17129](https://github.com/craftcms/cms/issues/17129))
+- Fixed a bug where the default `notificationDuration` value per the `accessibilityDefaults` config setting wasn’t being respected for users who hadn’t saved their preferences yet.
 
 ## 4.15.0.2 - 2025-04-17
 
