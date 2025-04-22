@@ -3610,7 +3610,7 @@ table {
   }
 
   &:has(.thumb):not(.large) .chip-content {
-    min-width: calc(100% - var(--thumb-size));
+    min-width: calc(100% - var(--thumb-size) - var(--s));
   }
 
   .offset-drag-helper & {
