@@ -512,6 +512,9 @@ class Table extends Field
             $order = array_filter(ArrayHelper::getColumn($this->defaults, 'rowId'), function($value): bool {
                 return is_numeric($value);
             });
+
+            $order = array_map('intval', $order);
+
             // the rowIds present in the $value array
             $usedValueRowIds = ArrayHelper::getColumn($value, 'rowId');
 
@@ -538,7 +541,7 @@ class Table extends Field
                 } else {
                     // if we have the missing value rowIds - add them in places where settings rowId doesn't exist in the $value array
                     while (count($value) < $totalRows) {
-                        $value[] = ['rowId' => reset($missingValueRowIds)];
+                        $value[] = ['rowId' => (int)reset($missingValueRowIds)];
                         array_shift($missingValueRowIds);
                     }
                 }
@@ -547,14 +550,9 @@ class Table extends Field
             if (!empty($order)) {
                 // sort as per the field's settings
                 usort($value, function($a, $b) use ($order) {
-                    foreach ($order as $orderValue) {
-                        if (isset($a['rowId']) && $a['rowId'] == $orderValue) {
-                            return 0;
-                        }
-                        if (isset($b['rowId']) && $b['rowId'] == $orderValue) {
-                            return 1;
-                        }
-                    }
+                    $posA = array_search($a['rowId'], $order);
+                    $posB = array_search($b['rowId'], $order);
+                    return $posA - $posB;
                 });
             }
 
