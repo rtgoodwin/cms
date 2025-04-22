@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.2 - 2025-04-22
 
 - Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
 - Fixed a bug where some system screens shown on the front end were sent without no-cache headers. ([#17129](https://github.com/craftcms/cms/issues/17129))
