@@ -857,6 +857,19 @@ JS, [
      */
     protected function inputHtml(mixed $value, ?ElementInterface $element, bool $inline): string
     {
+        return $this->_inputHtml($value, $element, $inline, false);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getStaticHtml(mixed $value, ElementInterface $element): string
+    {
+        return $this->_inputHtml($value, $element, false, true);
+    }
+
+    private function _inputHtml(mixed $value, ?ElementInterface $element, bool $inline, bool $static): string
+    {
         if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         } else {
@@ -881,7 +894,15 @@ JS, [
             $variables['viewMode'] = 'list';
         }
 
-        return Craft::$app->getView()->renderTemplate($this->inputTemplate, $variables);
+        if ($static) {
+            $variables['disabled'] = true;
+            $variables['allowAdd'] = false;
+            $template = '_includes/forms/elementSelect.twig';
+        } else {
+            $template = $this->inputTemplate;
+        }
+
+        return Craft::$app->getView()->renderTemplate($template, $variables);
     }
 
     /**
@@ -903,54 +924,6 @@ JS, [
         }
 
         return parent::searchKeywords($titles, $element);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getStaticHtml(mixed $value, ElementInterface $element): string
-    {
-        /** @var ElementQueryInterface|ElementCollection $value */
-        if ($value instanceof ElementCollection) {
-            $value = $value->all();
-        } else {
-            $value = $this->_all($value, $element)->all();
-        }
-
-        if (empty($value)) {
-            return '<p class="light">' . Craft::t('app', 'Nothing selected.') . '</p>';
-        }
-
-        if ($this->maintainHierarchy) {
-            $structuresService = Craft::$app->getStructures();
-            // Fill in any gaps
-            $structuresService->fillGapsInElements($value);
-
-            return Html::beginTag('div', ['class' => 'elementselect']) .
-                Craft::$app->getView()->renderTemplate('_elements/structurelist.twig', [
-                    'elements' => $value,
-                ]) .
-                Html::endTag('div');
-        }
-
-        $size = Cp::CHIP_SIZE_SMALL;
-        $viewMode = $this->viewMode();
-        if ($viewMode == 'large') {
-            $size = Cp::CHIP_SIZE_LARGE;
-        }
-
-        $id = $this->getInputId();
-        $html = "<div id='$id' class='elementselect noteditable'>" .
-            "<div class='elements chips" . ($size === Cp::CHIP_SIZE_LARGE ? ' inline-chips' : '') . "'>";
-
-        foreach ($value as $relatedElement) {
-            $html .= Cp::elementChipHtml($relatedElement, [
-                'size' => $size,
-            ]);
-        }
-
-        $html .= '</div></div>';
-        return $html;
     }
 
     /**
