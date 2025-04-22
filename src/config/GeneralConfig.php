@@ -90,6 +90,7 @@ class GeneralConfig extends BaseConfig
     public array $accessibilityDefaults = [
         'useShapes' => false,
         'underlineLinks' => false,
+        'disableAutofocus' => false,
         'notificationDuration' => 5000,
     ];
 
