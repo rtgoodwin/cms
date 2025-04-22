@@ -585,7 +585,11 @@ JS;
             'isMultiSite' => Craft::$app->getIsMultiSite(),
             'limitAutoSlugsToAscii' => $generalConfig->limitAutoSlugsToAscii,
             'maxUploadSize' => Assets::getMaxUploadSize(),
-            'notificationDuration' => (int)($currentUser->getPreference('notificationDuration') ?? 5000),
+            'notificationDuration' => (int)(
+                $currentUser->getPreference('notificationDuration')
+                ?? $generalConfig->accessibilityDefaults['notificationDuration']
+                ?? 5000
+            ),
             'previewIframeResizerOptions' => $this->_previewIframeResizerOptions($generalConfig),
             'primarySiteId' => $primarySite ? (int)$primarySite->id : null,
             'primarySiteLanguage' => $primarySite->language ?? null,
