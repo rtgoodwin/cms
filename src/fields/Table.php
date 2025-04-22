@@ -382,7 +382,7 @@ class Table extends Field
     public function beforeSave(bool $isNew): bool
     {
         if (!$this->staticRows || empty($this->defaults)) {
-            return true;
+            parent::beforeSave($isNew);
         }
 
         // if we don't have rowIds - assign them
