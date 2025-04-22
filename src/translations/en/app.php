@@ -1560,6 +1560,7 @@ return [
     'Skip to top of preview' => 'Skip to top of preview',
     'Skip to {name}' => 'Skip to {name}',
     'Sky' => 'Sky',
+    'Slideout Position' => 'Slideout Position',
     'Slug' => 'Slug',
     'Some entries have been moved to the “{name}” section.' => 'Some entries have been moved to the “{name}” section.',
     'Some {type} restored.' => 'Some {type} restored.',

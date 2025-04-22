@@ -77,6 +77,8 @@ class GeneralConfig extends BaseConfig
      * - `disableAutofocus` – Whether inputs should make use of the `autofocus` attribute.
      * - `notificationDuration` – How long notifications should be shown before they disappear automatically (in
      *   milliseconds). Set to `0` to show them indefinitely.
+     * - `slideoutPosition` – Whether slideouts should be shown at the `start` (left on LTR) or `end` (right on LTR)
+     *   of the screen.
      *
      * ```php
      * ->accessibilityDefaults([
@@ -92,6 +94,7 @@ class GeneralConfig extends BaseConfig
         'underlineLinks' => false,
         'disableAutofocus' => false,
         'notificationDuration' => 5000,
+        'slideoutPosition' => 'end',
     ];
 
     /**

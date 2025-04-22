@@ -1,4 +1,5 @@
 {% import '_includes/forms.twig' as forms %}
+{% set orientation = craft.app.locale.getOrientation() -%}
 
 <div>
   <h2>{{ 'General'|t('app') }}</h2>
@@ -80,6 +81,36 @@
     ],
     value: currentUser.getPreference('notificationDuration') ?? a11yDefaults['notificationDuration'] ?? 5000,
   }) }}
+
+  {{ forms.buttonGroupField({
+    id: 'slideout-position',
+    name: 'slideoutPosition',
+    label: 'Slideout Position'|t('app'),
+    options: [
+      {
+        icon: orientation == 'ltr' ? 'slideout-left' : 'slideout-right',
+        value: 'start',
+        attributes: {
+        title: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+        aria: {
+          label: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+        },
+      },
+      },
+      {
+        icon: orientation == 'ltr' ? 'slideout-right' : 'slideout-left',
+        value: 'end',
+        attributes: {
+        title: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+        aria: {
+          label: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+        },
+      },
+      }
+    ],
+    value: currentUser.getPreference('slideoutPosition') ?? a11yDefaults['slideoutPosition'] ?? 'end',
+  }) }}
+
 </div>
 
 {% if currentUser.admin %}

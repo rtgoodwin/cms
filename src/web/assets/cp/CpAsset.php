@@ -578,6 +578,9 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['disableAutofocus']
                 ?? false
             ),
+            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
+                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
+                ?? 'end',
             'editableCategoryGroups' => $upToDate ? $this->_editableCategoryGroups() : [],
             'edition' => Craft::$app->edition->value,
             'elementTypeNames' => $elementTypeNames,
