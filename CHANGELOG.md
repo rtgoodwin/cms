@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where “View” links for entry drafts were 404ing. ([#17157](https://github.com/craftcms/cms/issues/17157))
+
 ## 5.7.2 - 2025-04-22
 
 - Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
