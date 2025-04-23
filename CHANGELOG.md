@@ -1,9 +1,11 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.2 - 2025-04-23
 
-- Fixed a bug where “View” links for entry drafts were 404ing. ([#17157](https://github.com/craftcms/cms/issues/17157))
+- Fixed a bug where control panel-generated URLs could be malformed. ([#17157](https://github.com/craftcms/cms/issues/17157), [#17161](https://github.com/craftcms/cms/issues/17161))
 - Fixed a bug where the `forms.checkboxField` macro wasn’t respecting `fieldset` and `checkboxLabel` keys passed into its config.
+- Fixed an error that could occur when backing up the database, if the database password contained special characters. ([#17158](https://github.com/craftcms/cms/issues/17158))
+- Fixed a PHP deprecation error that could occur when applying the `replace` Twig filter to a `null` variable. ([#17159](https://github.com/craftcms/cms/issues/17159))
 
 ## 4.15.1 - 2025-04-22
 
