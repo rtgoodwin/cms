@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where “View” links for entry drafts were 404ing. ([#17157](https://github.com/craftcms/cms/issues/17157))
+- Fixed a bug where the `forms.checkboxField` macro wasn’t respecting `fieldset` and `checkboxLabel` keys passed into its config.
 
 ## 4.15.1 - 2025-04-22
 
