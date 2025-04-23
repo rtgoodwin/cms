@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Improved the styling of editabe tables, Link fields, and select inputs. ([#17164](https://github.com/craftcms/cms/discussions/17164))
+
 ## 5.7.3 - 2025-04-23
 
 - Fixed a bug where control panel-generated URLs could be malformed. ([#17157](https://github.com/craftcms/cms/issues/17157), [#17161](https://github.com/craftcms/cms/issues/17161))

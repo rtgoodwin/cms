@@ -378,6 +378,7 @@ li.crumb .btn.menubtn,
   &:not(.m) {
     width: var(--touch-target-size);
     height: var(--touch-target-size);
+    min-height: auto;
   }
 
   &.m {
