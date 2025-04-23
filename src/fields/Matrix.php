@@ -860,12 +860,14 @@ class Matrix extends Field implements
     });
   });
 
-  const menu = expandAllBtn.closest('.menu').data('disclosureMenu'); 
-  menu.on('show', () => {
-    const blocks = getBlocks();
-    menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
-    menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
-  });
+  setTimeout(() => {
+    const menu = expandAllBtn.closest('.menu').data('disclosureMenu');
+    menu.on('show', () => {
+      const blocks = getBlocks();
+      menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
+      menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
+    });
+  }, 1);
 })();
 JS, [
                 $view->namespaceInputId($expandAllId),
