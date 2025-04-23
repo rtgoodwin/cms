@@ -451,9 +451,7 @@ $.extend(Craft, {
     if (path.search('://') !== -1 || path[0] === '/') {
       return (
         path +
-        (!$.isEmptyObject(params)
-          ? `?${decodeURIComponent($.param(params))}`
-          : '') +
+        (!$.isEmptyObject(params) ? `?${$.param(params)}` : '') +
         (anchor ? `#${anchor}` : '')
       );
     }
@@ -516,7 +514,7 @@ $.extend(Craft, {
     }
 
     if (!$.isEmptyObject(params)) {
-      url += `?${decodeURIComponent($.param(params))}`;
+      url += `?${$.param(params)}`;
     }
 
     if (anchor) {
@@ -633,7 +631,7 @@ $.extend(Craft, {
       if (document.location.search) {
         const params = Object.fromEntries(new URLSearchParams(qs).entries());
         delete params[pageParam];
-        qs = decodeURIComponent($.param(params));
+        qs = $.param(params);
       }
       if (page !== 1) {
         qs += (qs !== '' ? '&' : '') + `${pageParam}=${page}`;
