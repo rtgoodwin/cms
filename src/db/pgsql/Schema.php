@@ -378,7 +378,7 @@ ORDER BY i.relname, k';
      */
     private function _pgpasswordCommand(): string
     {
-        return Platform::isWindows() ? 'set PGPASSWORD="{password}" && ' : 'PGPASSWORD="{password}" ';
+        return Platform::isWindows() ? "set PGPASSWORD='{password}' && " : "PGPASSWORD='{password}' ";
     }
 
     /**
