@@ -88,6 +88,16 @@ abstract class BaseRelationField extends Field implements PreviewableFieldInterf
     abstract public static function elementType(): string;
 
     /**
+     * Returns whether the “Show the site menu” setting should be shown for the field.
+     *
+     * @since 4.16.0
+     */
+    protected static function canShowSiteMenu(): bool
+    {
+        return static::elementType()::isLocalized();
+    }
+
+    /**
      * Returns the default [[selectionLabel]] value.
      *
      * @return string The default selection label
@@ -1104,7 +1114,7 @@ JS, [
             ];
         }
 
-        return
+        $html =
             Cp::checkboxFieldHtml([
                 'checkboxLabel' => Craft::t('app', 'Relate {type} from a specific site?', ['type' => $pluralType]),
                 'name' => 'useTargetSite',
@@ -1119,8 +1129,10 @@ JS, [
                 'name' => 'targetSiteId',
                 'options' => $siteOptions,
                 'value' => $this->targetSiteId,
-            ]) .
-            Cp::checkboxFieldHtml([
+            ]);
+
+        if (static::canShowSiteMenu()) {
+            $html .= Cp::checkboxFieldHtml([
                 'fieldset' => true,
                 'fieldClass' => $showTargetSite ? ['hidden'] : null,
                 'checkboxLabel' => Craft::t('app', 'Show the site menu'),
@@ -1134,6 +1146,9 @@ JS, [
                 'name' => 'showSiteMenu',
                 'checked' => $this->showSiteMenu,
             ]);
+        }
+
+        return $html;
     }
 
     /**
@@ -1274,7 +1289,7 @@ JS, [
             'condition' => $selectionCondition,
             'referenceElement' => $element,
             'criteria' => $selectionCriteria,
-            'showSiteMenu' => ($this->targetSiteId || !$this->showSiteMenu) ? false : 'auto',
+            'showSiteMenu' => ($this->targetSiteId || !$this->showSiteMenu || !static::canShowSiteMenu()) ? false : 'auto',
             'allowSelfRelations' => (bool)$this->allowSelfRelations,
             'maintainHierarchy' => (bool)$this->maintainHierarchy,
             'branchLimit' => $this->branchLimit,
