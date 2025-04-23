@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.2 - 2025-04-23
 
 - Fixed a bug where control panel-generated URLs could be malformed. ([#17157](https://github.com/craftcms/cms/issues/17157), [#17161](https://github.com/craftcms/cms/issues/17161))
 - Fixed a bug where the `forms.checkboxField` macro wasn’t respecting `fieldset` and `checkboxLabel` keys passed into its config.
