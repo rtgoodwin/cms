@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Improved the styling of editabe tables, Link fields, and select inputs. ([#17164](https://github.com/craftcms/cms/discussions/17164))
+- Fixed a bug where tooltips could show and hide repeatedly. ([#16922](https://github.com/craftcms/cms/issues/16922))
 
 ## 5.7.3 - 2025-04-23
 
