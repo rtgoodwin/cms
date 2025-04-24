@@ -2209,19 +2209,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.croppingRectangle);
       }
 
-      if (this.cornerPickedUp) {
+      if (this.cropperCornerFocusRing) {
         this.croppingCanvas.remove(this.cropperCornerFocusRing);
       }
 
       this._redrawCropperElements._.lineOptions = {
         strokeWidth: 4,
         stroke: 'rgb(255,255,255)',
-        fill: false,
-      };
-
-      this._redrawCropperElements._.lineOptionsActive = {
-        strokeWidth: 4,
-        stroke: 'red',
         fill: false,
       };
 
@@ -2234,9 +2228,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this._redrawCropperElements._.pathGroup = [
         new fabric.Path(
           'M 0,10 L 0,0 L 10,0',
-          this.cornerPickedUp === 'tl'
-            ? this._redrawCropperElements._.lineOptionsActive
-            : this._redrawCropperElements._.lineOptions
+          this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M ' +
@@ -2246,9 +2238,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             ',0 L ' +
             (this.clipper.width + 4) +
             ',10',
-          this.cornerPickedUp === 'tr'
-            ? this._redrawCropperElements._.lineOptionsActive
-            : this._redrawCropperElements._.lineOptions
+          this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M ' +
@@ -2263,9 +2253,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             (this.clipper.width - 8) +
             ',' +
             (this.clipper.height + 4),
-          this.cornerPickedUp === 'br'
-            ? this._redrawCropperElements._.lineOptionsActive
-            : this._redrawCropperElements._.lineOptions
+          this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M 10,' +
@@ -2274,9 +2262,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             (this.clipper.height + 4) +
             ' L 0,' +
             (this.clipper.height - 8),
-          this.cornerPickedUp === 'bl'
-            ? this._redrawCropperElements._.lineOptionsActive
-            : this._redrawCropperElements._.lineOptions
+          this._redrawCropperElements._.lineOptions
         ),
       ];
 
@@ -2312,40 +2298,20 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (this.cornerPickedUp) {
-        let leftPos;
-        let topPos;
-
-        switch (this.cornerPickedUp) {
-          case 'tl':
-            leftPos = this.clipper.left - this.clipper.width / 2;
-            topPos = this.clipper.top - this.clipper.height / 2;
-            break;
-          case 'tr':
-            leftPos = this.clipper.left + this.clipper.width / 2;
-            topPos = this.clipper.top - this.clipper.height / 2;
-            break;
-          case 'br':
-            leftPos = this.clipper.left + this.clipper.width / 2;
-            topPos = this.clipper.top + this.clipper.height / 2;
-            break;
-          case 'bl':
-            leftPos = this.clipper.left - this.clipper.width / 2;
-            topPos = this.clipper.top + this.clipper.height / 2;
-            break;
-        }
+        let cornerCoordinates = this.getClipperCornerPosition(
+          this.cornerPickedUp
+        );
 
         this.cropperCornerFocusRing = new fabric.Circle({
-          radius: 8,
-          fill: 'rgba(0,0,0,0.5)',
-          strokeWidth: 2,
+          radius: 12,
+          fill: 'rgba(255,255,255,0.5)',
+          strokeWidth: 4,
           stroke: 'rgba(255,255,255,0.8)',
-          left: leftPos,
-          top: topPos,
+          left: cornerCoordinates.x,
+          top: cornerCoordinates.y,
           originX: 'center',
           originY: 'center',
         });
-
-        this.croppingCanvas.add(this.cropperCornerFocusRing);
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2411,6 +2377,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperHandles);
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
+
+      if (this.cornerPickedUp) {
+        this.croppingCanvas.add(this.cropperCornerFocusRing);
+      }
     },
 
     /**
@@ -2818,6 +2788,39 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         width: this.clipper.width,
         height: this.clipper.height,
       };
+    },
+
+    /**
+     * Returns the x and y coordinates of the clipper corners.
+     *
+     * @param {'top-left'|'top-right'|'bottom-right'|'bottom-left'} corner
+     */
+    getClipperCornerPosition: function (corner) {
+      let position = {
+        x: null,
+        y: null,
+      };
+
+      switch (corner) {
+        case 'top-left':
+          position.x = this.clipper.left - this.clipper.width / 2;
+          position.y = this.clipper.top - this.clipper.height / 2;
+          break;
+        case 'top-right':
+          position.x = this.clipper.left + this.clipper.width / 2;
+          position.y = this.clipper.top - this.clipper.height / 2;
+          break;
+        case 'bottom-right':
+          position.x = this.clipper.left + this.clipper.width / 2;
+          position.y = this.clipper.top + this.clipper.height / 2;
+          break;
+        case 'bottom-left':
+          position.x = this.clipper.left - this.clipper.width / 2;
+          position.y = this.clipper.top + this.clipper.height / 2;
+          break;
+      }
+
+      return position;
     },
 
     _handleCropperKeyboardMove: function (ev) {

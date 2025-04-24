@@ -81,19 +81,19 @@
         {% set cropHandleBtns = [
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
-                corner: 'tl',
+                corner: 'top-left',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
-                corner: 'tr',
+                corner: 'top-right',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
-                corner: 'bl',
+                corner: 'bottom-left',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
-                corner: 'br',
+                corner: 'bottom-right',
             },
         ] %}
         <fieldset class="cropper-edit">
