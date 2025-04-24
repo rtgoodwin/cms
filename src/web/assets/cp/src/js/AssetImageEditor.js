@@ -41,6 +41,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     grid: null,
     croppingCanvas: null,
     clipper: null,
+    cropperCornerFocusRing: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
@@ -2207,6 +2208,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.cropperGrid);
         this.croppingCanvas.remove(this.croppingRectangle);
       }
+
+      if (this.cornerPickedUp) {
+        this.croppingCanvas.remove(this.cropperCornerFocusRing);
+      }
+
       this._redrawCropperElements._.lineOptions = {
         strokeWidth: 4,
         stroke: 'rgb(255,255,255)',
@@ -2306,18 +2312,40 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (this.cornerPickedUp) {
-        this.handleFocusIndicator = new fabric.Circle({
+        let leftPos;
+        let topPos;
+
+        switch (this.cornerPickedUp) {
+          case 'tl':
+            leftPos = this.clipper.left - this.clipper.width / 2;
+            topPos = this.clipper.top - this.clipper.height / 2;
+            break;
+          case 'tr':
+            leftPos = this.clipper.left + this.clipper.width / 2;
+            topPos = this.clipper.top - this.clipper.height / 2;
+            break;
+          case 'br':
+            leftPos = this.clipper.left + this.clipper.width / 2;
+            topPos = this.clipper.top + this.clipper.height / 2;
+            break;
+          case 'bl':
+            leftPos = this.clipper.left - this.clipper.width / 2;
+            topPos = this.clipper.top + this.clipper.height / 2;
+            break;
+        }
+
+        this.cropperCornerFocusRing = new fabric.Circle({
           radius: 8,
           fill: 'rgba(0,0,0,0.5)',
           strokeWidth: 2,
           stroke: 'rgba(255,255,255,0.8)',
-          left: this.clipper.left,
-          top: this.clipper.top,
+          left: leftPos,
+          top: topPos,
           originX: 'center',
           originY: 'center',
         });
 
-        this.croppingCanvas.add(this.handleFocusIndicator);
+        this.croppingCanvas.add(this.cropperCornerFocusRing);
       }
 
       this.cropperGrid = new fabric.Group(
