@@ -2515,7 +2515,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (itemPicked === 'rectangle') {
-        positionMessage = this.getCropperPositionMessage();
+        positionMessage = this.getRelativePositionMessage(this.clipper);
       }
 
       // Announce
@@ -2527,23 +2527,25 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.renderCropper();
     },
 
-    getCropperPositionMessage: function () {
-      const rectProperties = this._getClipperRectProperties();
+    /**
+     * Get the position of an item relative to the image.
+     * @param item
+     */
+    getRelativePositionMessage: function (item) {
+      if (!item.left || !item.top) return;
 
-      const clipperCenterRelativeToImage = {
-        xPercent: (
-          ((this.clipper.left - this.image.left + this.image.width / 2) /
-            this.image.width) *
-          100
-        ).toFixed(1),
-        yPercent: (
-          ((this.clipper.top - this.image.top + this.image.height / 2) /
-            this.image.height) *
-          100
-        ).toFixed(1),
-      };
+      const xPercent = (
+        ((item.left - this.image.left + this.image.width / 2) /
+          this.image.width) *
+        100
+      ).toFixed(1);
+      const yPercent = (
+        ((item.top - this.image.top + this.image.height / 2) /
+          this.image.height) *
+        100
+      ).toFixed(1);
 
-      return `X axis: ${clipperCenterRelativeToImage.xPercent}%. Y axis: ${clipperCenterRelativeToImage.yPercent}%.`;
+      return `X axis: ${xPercent}%. Y axis: ${yPercent}%.`;
     },
 
     _tempAnnounce: function (message) {
@@ -2879,7 +2881,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         top: this.clipper.top + this._handleCropperKeyboardMove._.deltaY,
       });
 
-      this._tempAnnounce(this.getCropperPositionMessage());
+      this._tempAnnounce(this.getRelativePositionMessage(this.clipper));
 
       this._redrawCropperElements();
       this.storeCropperState();
