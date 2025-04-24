@@ -4651,7 +4651,8 @@ table.editable {
     tr {
       th {
         border-block-end: 1px solid var(--hairline-color);
-        font-size: 0.8em;
+        font-family: inherit; // for .code
+        font-size: 0.8em !important; // ! for .code
         font-weight: 500;
         line-height: 1.4;
 
