@@ -97,7 +97,11 @@
             },
         ] %}
         <fieldset class="cropper-edit">
-            <legend>Edit Cropper</legend>
+            <legend>
+                {{ 'Edit {type}'|t('app', {
+                    type: 'Cropping Rectangle'|t('app'),
+                }) }}
+            </legend>
             <div class="cropper-edit__btns">
                 {{ _self.iconButton({
                     icon: 'up-down-left-right',

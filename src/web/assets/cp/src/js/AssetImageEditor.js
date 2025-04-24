@@ -2213,6 +2213,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         fill: false,
       };
 
+      this._redrawCropperElements._.lineOptionsActive = {
+        strokeWidth: 4,
+        stroke: 'red',
+        fill: false,
+      };
+
       this._redrawCropperElements._.gridOptions = {
         strokeWidth: 2,
         stroke: 'rgba(255,255,255,0.5)',
@@ -2222,7 +2228,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this._redrawCropperElements._.pathGroup = [
         new fabric.Path(
           'M 0,10 L 0,0 L 10,0',
-          this._redrawCropperElements._.lineOptions
+          this.cornerPickedUp === 'tl'
+            ? this._redrawCropperElements._.lineOptionsActive
+            : this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M ' +
@@ -2232,7 +2240,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             ',0 L ' +
             (this.clipper.width + 4) +
             ',10',
-          this._redrawCropperElements._.lineOptions
+          this.cornerPickedUp === 'tr'
+            ? this._redrawCropperElements._.lineOptionsActive
+            : this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M ' +
@@ -2247,7 +2257,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             (this.clipper.width - 8) +
             ',' +
             (this.clipper.height + 4),
-          this._redrawCropperElements._.lineOptions
+          this.cornerPickedUp === 'br'
+            ? this._redrawCropperElements._.lineOptionsActive
+            : this._redrawCropperElements._.lineOptions
         ),
         new fabric.Path(
           'M 10,' +
@@ -2256,7 +2268,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             (this.clipper.height + 4) +
             ' L 0,' +
             (this.clipper.height - 8),
-          this._redrawCropperElements._.lineOptions
+          this.cornerPickedUp === 'bl'
+            ? this._redrawCropperElements._.lineOptionsActive
+            : this._redrawCropperElements._.lineOptions
         ),
       ];
 
@@ -2289,6 +2303,21 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           strokeWidth: 4,
           stroke: 'rgba(255,255,255,1)',
         });
+      }
+
+      if (this.cornerPickedUp) {
+        this.handleFocusIndicator = new fabric.Circle({
+          radius: 8,
+          fill: 'rgba(0,0,0,0.5)',
+          strokeWidth: 2,
+          stroke: 'rgba(255,255,255,0.8)',
+          left: this.clipper.left,
+          top: this.clipper.top,
+          originX: 'center',
+          originY: 'center',
+        });
+
+        this.croppingCanvas.add(this.handleFocusIndicator);
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2474,7 +2503,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
             this._handleKeyDown
           );
         } else {
-          this.cornerPickedUp = true;
+          this.cornerPickedUp = $btn.attr('data-corner-handle');
         }
 
         stateMessage = Craft.t('app', '{item} picked up.', {
