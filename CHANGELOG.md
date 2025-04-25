@@ -4,6 +4,11 @@
 
 - Improved the styling of editabe tables, Link fields, and select inputs. ([#17164](https://github.com/craftcms/cms/discussions/17164))
 - Fixed a bug where tooltips could show and hide repeatedly. ([#16922](https://github.com/craftcms/cms/issues/16922))
+- Fixed a JavaScript error that occurred when viewing an element index with no visible sources. ([#17170](https://github.com/craftcms/cms/issues/17170))
+- Fixed a bug where “This entry has been updated.” notifications could be shown when editing nested elements in a slideout. ([#17176](https://github.com/craftcms/cms/issues/17176))
+- Fixed a bug where elements listed within relational field inputs weren’t showing their provisional draft labels on page load. ([#17177](https://github.com/craftcms/cms/issues/17177))
+- Fixed a bug where card view designers weren’t showing card attribute options for fields that were added to tabs by clicking on them. ([#17180](https://github.com/craftcms/cms/pull/17180))
+- Fixed styling issues. ([#17173](https://github.com/craftcms/cms/pull/17173), [#17183](https://github.com/craftcms/cms/pull/17183))
 
 ## 5.7.3 - 2025-04-23
 

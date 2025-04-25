@@ -1410,10 +1410,11 @@ JS, [
     {
         if ($value instanceof ElementQueryInterface) {
             $value = $value->eagerly()->all();
-            ElementHelper::swapInProvisionalDrafts($value);
         } elseif (!is_array($value)) {
             $value = [];
         }
+
+        ElementHelper::swapInProvisionalDrafts($value);
 
         if ($this->validateRelatedElements && $element !== null) {
             // Pre-validate related elements
