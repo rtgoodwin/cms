@@ -8,7 +8,7 @@
 - Improved the wording of validation errors caused by relational fields’ “Validate related [type]” settings. ([#9960](https://github.com/craftcms/cms/discussions/9960))
 
 ### Administration
-- Assets and Categries fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
+- Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
 
 ### Extensibility
