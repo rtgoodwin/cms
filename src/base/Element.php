@@ -4294,6 +4294,14 @@ JS, [
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getThumbPosition(): string
+    {
+        return $this->getFieldLayout()?->getCardThumbPosition() ?? 'end';
+    }
+
+    /**
      * Returns the URL to the element’s thumbnail, if it has one.
      *
      * @param int $size The maximum width and height the thumbnail should have.

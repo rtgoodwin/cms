@@ -254,6 +254,13 @@ class FieldLayout extends Model
     private array $_cardView;
 
     /**
+     * @var string
+     * @see getCardThumbPosition()
+     * @see setCardThumbPosition()
+     */
+    private string $_cardThumbPosition;
+
+    /**
      * @inheritdoc
      */
     public function init(): void
@@ -275,6 +282,10 @@ class FieldLayout extends Model
             } else {
                 $this->setCardView([]);
             }
+        }
+
+        if (!isset($this->_cardThumbPosition)) {
+            $this->setCardThumbPosition();
         }
     }
 
@@ -420,6 +431,38 @@ class FieldLayout extends Model
 
         // Clear caches
         $this->reset();
+    }
+
+    /**
+     * Returns the layout’s card view thumbnail position.
+     *
+     * @return string The layout’s card view thumbnail position.
+     * @since 5.8.0
+     */
+    public function getCardThumbPosition(): string
+    {
+        if (!isset($this->_cardThumbPosition)) {
+            $this->setCardThumbPosition();
+        }
+
+        return $this->_cardThumbPosition;
+    }
+
+    /**
+     * Sets the layout’s card view thumbnail position.
+     *
+     * @param string|null $position The position of the card view thumbnail.
+     * @since 5.8.0
+     */
+    public function setCardThumbPosition(?string $position = null): void
+    {
+        $validPositions = ['start', 'end'];
+
+        if (!in_array($position, $validPositions)) {
+            $position = null;
+        }
+
+        $this->_cardThumbPosition = $position ?? 'end';
     }
 
     /**
@@ -587,14 +630,17 @@ class FieldLayout extends Model
         ));
 
         $cardViewConfig = $this->getCardView();
+        $cardThumbPosition = $this->getCardThumbPosition();
 
         if (empty($tabConfigs) && empty($cardViewConfig)) {
+            // no point bothering with the thumb position if we don't have the card view
             return null;
         }
 
         return [
             'tabs' => $tabConfigs,
             'cardView' => $cardViewConfig,
+            'cardThumbPosition' => $cardThumbPosition,
         ];
     }
 

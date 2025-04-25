@@ -611,6 +611,7 @@ JS, [
         $fieldLayoutConfig = $this->request->getRequiredBodyParam('fieldLayoutConfig');
         $cardElements = $this->request->getRequiredBodyParam('cardElements');
         $showThumb = $this->request->getBodyParam('showThumb', false);
+        $thumbPosition = $this->request->getBodyParam('thumbPosition', false);
 
         if (!isset($fieldLayoutConfig['id'])) {
             $fieldLayout = Craft::createObject([
@@ -629,6 +630,8 @@ JS, [
         $fieldLayout->setCardView(
             array_column($cardElements, 'value')
         ); // this fully takes care of attributes, but not fields
+
+        $fieldLayout->setCardThumbPosition($thumbPosition);
 
         return $this->asJson([
             'previewHtml' => Cp::cardPreviewHtml($fieldLayout, $cardElements, $showThumb),

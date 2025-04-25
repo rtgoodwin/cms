@@ -3792,6 +3792,10 @@ table {
     }
   }
 
+  &.thumb-start > .card-main {
+    flex-direction: row-reverse;
+  }
+
   .ck-content & {
     ul {
       padding-inline: 0 !important;
