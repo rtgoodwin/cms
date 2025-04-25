@@ -1,5 +1,4 @@
 @charset "UTF-8";
-@charset "UTF-8";
 @use 'sass:color';
 @use 'variables';
 @use '@craftcms/sass/mixins';
@@ -1338,8 +1337,7 @@ td.right {
 
 .notice,
 .warning {
-  &.with-icon,
-  .icon {
+  &.with-icon {
     &::before {
       margin-inline: 0 2px;
       margin-block: -2px 0;
@@ -1349,12 +1347,14 @@ td.right {
   }
 
   &.has-icon {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px;
+    align-items: start;
 
     .icon {
-      flex-shrink: 1;
+      position: relative;
+      inset-block-start: 0.2em;
     }
   }
 }
@@ -1366,8 +1366,7 @@ td.right {
     text-decoration: underline;
   }
 
-  &.with-icon,
-  .icon {
+  &.with-icon {
     &::before {
       content: 'lightbulb';
     }
@@ -1377,8 +1376,7 @@ td.right {
 .warning {
   color: var(--warning-color) !important;
 
-  &.with-icon,
-  .icon {
+  &.with-icon {
     &::before {
       content: 'alert';
     }

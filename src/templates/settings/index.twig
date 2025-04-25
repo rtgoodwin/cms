@@ -20,7 +20,7 @@
                     <a href="{% if item.url is defined %}{{ url(item.url) }}{% else %}{{ url('settings/'~handle) }}{% endif %}">
                         {% if item.iconName ?? null %}
                             <div class="icon" style="font-size: calc(40rem / 16)">
-                                <craft-icon name="{{ icon ?? 'nope' }}"></craft-icon>
+                                <craft-icon name="{{ icon ?? 'nope' }}" aria-hidden="true"></craft-icon>
                             </div>
                         {% else %}
                             <div class="icon{% if item.iconMask is defined %} icon-mask{% endif %}" aria-hidden="true">

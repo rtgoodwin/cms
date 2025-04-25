@@ -1,4 +1,3 @@
-import '@shoelace-style/shoelace/dist/themes/light.css';
 import { registerIconLibrary } from "@shoelace-style/shoelace/dist/utilities/icon-library.js";
 import { setBasePath, getBasePath } from "@shoelace-style/shoelace";
 

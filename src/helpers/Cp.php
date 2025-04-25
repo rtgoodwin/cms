@@ -1781,14 +1781,13 @@ JS, [
                 'id' => $id,
                 'class' => [$class, 'has-icon'],
             ]) .
-            Html::tag('span', '', [
+            Html::tag('craft-icon', '', [
                 'class' => 'icon',
+                'name' => 'lightbulb',
+                'label' => $label,
                 'aria' => [
                     'hidden' => 'true',
                 ],
-            ]) .
-            Html::tag('span', "$label ", [
-                'class' => 'visually-hidden',
             ]) .
             Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
