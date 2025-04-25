@@ -81,28 +81,48 @@
         {% set cropHandleBtns = [
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
-                corner: 'top-left',
+                corner: orientation == 'ltr' ? 'top-left' : 'top-right',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
-                corner: 'top-right',
+                corner: orientation == 'ltr' ? 'top-right' : 'top-left',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
-                corner: 'bottom-left',
+                corner: orientation == 'ltr' ? 'bottom-left' : 'bottom-right',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
-                corner: 'bottom-right',
+                corner: orientation == 'ltr' ? 'bottom-right' : 'bottom-left',
+            },
+        ] %}
+
+        {% set directionalButtons = [
+            {
+                label: 'Up'|t('app'),
+                direction: 'up',
+            },
+            {
+                label: orientation == 'ltr' ? 'Left'|t('app') : 'Right'|t('app'),
+                direction: orientation == 'ltr' ? 'left' : 'right',
+            },
+            {
+                label: 'Down'|t('app'),
+                direction: 'down',
+            },
+            {
+                label: orientation == 'ltr' ? 'Right'|t('app') : 'Left'|t('app'),
+                direction: orientation == 'ltr' ? 'right' : 'left',
             },
         ] %}
         <fieldset class="cropper-edit">
-            <legend>
+            <legend class="cropper-edit__legend">
                 {{ 'Edit {type}'|t('app', {
                     type: 'Cropping Rectangle'|t('app'),
                 }) }}
             </legend>
-            <div class="cropper-edit__btns">
+
+            <div class="cropper-edit__wrapper">
                 {{ _self.iconButton({
                     icon: 'up-down-left-right',
                     label: 'Cropping Rectangle'|t('app'),
@@ -114,6 +134,9 @@
                         class: ['cropper-edit__btn']
                     }
                 }) }}
+            </div>
+
+            <div class="cropper-edit__wrapper cropper-edit__wrapper--corners">
                 {% for button in cropHandleBtns %}
                     {{ _self.iconButton({
                         icon: 'expand',
@@ -128,21 +151,30 @@
                     }) }}
                 {% endfor %}
             </div>
+
+            <div class="cropper-edit__wrapper cropper-edit__wrapper--arrows directional-buttons">
+                {% for button in directionalButtons %}
+                    {% tag 'button' with {
+                        class: ['btn'],
+                        type: 'button',
+                        aria: {
+                            label: button.label,
+                        },
+                        data: {
+                            direction: button.direction,
+                        }
+                    } %}
+                        <div class="cp-icon puny">{{ iconSvg(button.direction) }}</div>
+                    {% endtag %}
+                {% endfor %}
+            </div>
+
         </fieldset>
     </div>
 </div>
 
 
 <div class="image-container">
-    <div id="cropper-actions" class="hidden">
-        {% for button in cropHandleBtns %}
-            {{ tag ('button', {
-                type: 'button',
-                text: button.label,
-                class: 'visually-hidden',
-            }) }}
-        {% endfor %}
-    </div>
     <div class="image">
         <canvas id="image-canvas">
         </canvas>

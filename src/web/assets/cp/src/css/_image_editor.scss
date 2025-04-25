@@ -18,6 +18,40 @@ html.noscroll body {
   @include mixins.light-focus-ring;
   opacity: 0;
   user-select: none;
+
+  .cropper-edit {
+    display: grid;
+    max-width: 400px;
+    grid-gap: var(--s);
+  }
+
+  .cropper-edit__wrapper--corners {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cropper-edit__wrapper--corners,
+  .cropper-edit__wrapper--arrows {
+    grid-gap: var(--xs);
+  }
+
+  .cropper-edit__wrapper--arrows {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-areas:
+      '. up .'
+      'dir dir dir';
+
+    [data-direction='up'] {
+      grid-area: up;
+    }
+
+    [data-direction='down'],
+    [data-direction='left'],
+    [data-direction='right'] {
+      grid-row-start: 2;
+    }
+  }
 }
 
 .modal.imageeditor.modal {
@@ -543,7 +577,6 @@ html.noscroll body {
 }
 
 .cropper-edit__btns {
-  max-width: 400px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;

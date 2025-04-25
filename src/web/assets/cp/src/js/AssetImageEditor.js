@@ -204,7 +204,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$croppingActionsContainer = $('#cropper-actions', this.$body);
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
-      this.$cropperEditBtn = $('.cropper-edit__btn', this.$body);
+      this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
 
       this._showSpinner();
 
