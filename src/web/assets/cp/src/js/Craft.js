@@ -483,14 +483,13 @@ $.extend(Craft, {
 
     // Does the base URL already have a query string?
     qsPos = url.indexOf('?');
+    let baseParams;
     if (qsPos !== -1) {
-      params = $.extend(
-        Object.fromEntries(
-          new URLSearchParams(url.substring(qsPos + 1)).entries()
-        ),
-        params
+      baseParams = Object.fromEntries(
+        new URLSearchParams(url.substring(qsPos + 1)).entries()
       );
       url = url.substring(0, qsPos);
+      params = Object.assign({}, baseParams, params);
     }
 
     if (!Craft.omitScriptNameInUrls && path) {
@@ -501,13 +500,10 @@ $.extend(Craft, {
         }
       } else {
         // Move the path into the query string params
-
-        // Is the path param already set?
-        if (typeof params[Craft.pathParam] !== 'undefined') {
-          let basePath = params[Craft.pathParam].trimEnd();
-          path = basePath + (path ? '/' + path : '');
+        if (baseParams && baseParams[Craft.pathParam] !== undefined) {
+          path =
+            baseParams[Craft.pathParam].trimEnd() + (path ? '/' + path : '');
         }
-
         params[Craft.pathParam] = path;
         path = null;
       }
@@ -2473,7 +2469,7 @@ if (typeof BroadcastChannel !== 'undefined') {
   });
 
   Craft.messageReceiver.addEventListener('message', (ev) => {
-    if (ev.data.event === 'saveElement') {
+    if (ev.data.event === 'saveElement' || ev.data.event === 'replaceFile') {
       // Are there any instances of the same element on the page?
       const $elements = $(
         `div.element[data-id="${ev.data.id}"][data-settings]`

@@ -16,6 +16,7 @@ use craft\gql\types\generators\TableRowType;
 use craft\gql\types\TableRow;
 use craft\helpers\Cp;
 use craft\helpers\DateTimeHelper;
+use craft\helpers\Db;
 use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\validators\ColorValidator;
@@ -557,7 +558,13 @@ class Table extends Field
                     $value = StringHelper::emojiToShortcodes(StringHelper::escapeShortcodes($value));
                 }
 
-                $serializedRow[$colId] = parent::serializeValueForDb($value ?? null, $element);
+                // can't call parent::serializeValueForDb() here because that calls $this->serializeValue()
+                // see https://github.com/craftcms/cms/pull/17091
+                if ($value instanceof DateTime || DateTimeHelper::isIso8601($value)) {
+                    $serializedRow[$colId] = Db::prepareDateForDb($value);
+                } else {
+                    $serializedRow[$colId] = parent::serializeValue($value, $element);
+                }
             }
             $serialized[] = $serializedRow;
         }

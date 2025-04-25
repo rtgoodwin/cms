@@ -11,6 +11,7 @@ use Craft;
 use craft\db\Query;
 use craft\db\Table;
 use craft\elements\Asset;
+use craft\elements\db\UserQuery;
 use craft\elements\User;
 use craft\errors\ImageException;
 use craft\errors\InvalidElementException;
@@ -204,18 +205,32 @@ class Users extends Component
         /** @var User|null $user */
         $user = User::find()
             ->email($email)
-            ->status(null)
+            ->status([UserQuery::STATUS_CREDENTIALED])
             ->one();
 
-        if (!$user) {
-            $user = new User();
-            $user->email = $email;
-            if (!$user->validate(['email'])) {
-                throw new InvalidArgumentException($user->getFirstError('email'));
-            }
-            if (!Craft::$app->getElements()->saveElement($user, false)) {
-                throw new Exception('Unable to save user: ' . implode(', ', $user->getFirstErrors()));
-            }
+        if ($user) {
+            return $user;
+        }
+
+        /** @var User|null $user */
+        $user = User::find()
+            ->email($email)
+            ->status([User::STATUS_INACTIVE])
+            ->one();
+
+        if ($user) {
+            return $user;
+        }
+
+        $user = new User();
+        $user->email = $email;
+
+        if (!$user->validate(['email'])) {
+            throw new InvalidArgumentException($user->getFirstError('email'));
+        }
+
+        if (!Craft::$app->getElements()->saveElement($user, false)) {
+            throw new Exception('Unable to save user: ' . implode(', ', $user->getFirstErrors()));
         }
 
         return $user;
