@@ -23,8 +23,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $croppingCanvas: null,
     $cropperMoveBtn: null,
     $cropperEditBtn: null,
-    $cropperDirectionalControls: null,
-    $cropperScaleBtns: null,
+    $directionalArrowContainer: null,
+    $directionalArrowBtn: null,
     $spinner: null,
     $constraintContainer: null,
     $constraintRadioInputs: null,
@@ -204,8 +204,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
       this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
-      this.$cropperDirectionalControls = $(
+      this.$directionalArrowContainer = $(
         '.cropper-edit__wrapper--arrows',
+        this.$body
+      );
+      this.$directionalArrowBtn = $(
+        '.cropper-edit__wrapper--arrows button',
         this.$body
       );
 
@@ -874,6 +878,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Cropper
       this.addListener(this.$cropperEditBtn, 'click', (ev) => {
         this._handleCropperEdit(ev);
+      });
+      this.addListener(this.$directionalArrowBtn, 'click', (ev) => {
+        this._handleDirectionalArrowPress(ev);
       });
 
       // Straighten slider
@@ -2480,12 +2487,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Defaults
       this.cropperPickedUp = false;
       this.cornerPickedUp = false;
+      this.$cropperEditBtn.attr('aria-pressed', 'false');
 
       // Grab button text for state message
       let item = $btn.text().trim();
 
       if (!pickingUp) {
-        $btn.attr('aria-pressed', 'false');
         stateMessage = Craft.t('app', '{item} dropped.', {
           item: item,
         });
@@ -2493,12 +2500,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.removeListener(this.$cropperMoveBtn, 'keydown');
 
         // Hide directional buttons
-        this.$cropperDirectionalControls.addClass('hidden');
+        this.$directionalArrowContainer.addClass('hidden');
       } else {
         $btn.attr('aria-pressed', 'true');
 
         // Show directional buttons
-        this.$cropperDirectionalControls.removeClass('hidden');
+        this.$directionalArrowContainer.removeClass('hidden');
 
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
@@ -2832,37 +2839,80 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return position;
     },
 
-    _handleCropperKeyboardMove: function (ev) {
-      if (typeof this._handleCropperKeyboardMove._ === 'undefined') {
-        this._handleCropperKeyboardMove._ = {};
-      }
+    _handleDirectionalArrowPress: function (ev) {
+      const direction = $(ev.target).attr('data-direction');
 
-      this._handleCropperKeyboardMove._.deltaX = 0;
-      this._handleCropperKeyboardMove._.deltaY = 0;
-      this._handleCropperKeyboardMove._.rectangle =
-        this._getClipperRectProperties();
-      let delta = 5;
+      const deltaValues = this._getDeltaValuesFromDirection(direction);
+
+      // TODO: Implement directional arrow press
+
+      if (this.cropperPickedUp) {
+        this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
+      }
+    },
+
+    _handleCropperKeyboardMove: function (ev) {
+      let direction;
 
       // Figure out which direction to move the cropper
       switch (ev.keyCode) {
         case Garnish.LEFT_KEY:
-          this._handleCropperKeyboardMove._.deltaX = delta * -1;
+          direction = 'left';
           break;
         case Garnish.RIGHT_KEY:
-          this._handleCropperKeyboardMove._.deltaX = delta;
+          direction = 'right';
           break;
         case Garnish.UP_KEY:
-          this._handleCropperKeyboardMove._.deltaY = delta * -1;
+          direction = 'up';
           break;
         case Garnish.DOWN_KEY:
-          this._handleCropperKeyboardMove._.deltaY = delta;
+          direction = 'down';
           break;
       }
 
+      const deltaValues = this._getDeltaValuesFromDirection(direction);
+      this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
+    },
+
+    _getDeltaValuesFromDirection: function (direction) {
+      const base = 5;
+
+      let values = {
+        deltaX: 0,
+        deltaY: 0,
+      };
+
+      switch (direction) {
+        case 'up':
+          values.deltaY = base * -1;
+          break;
+        case 'down':
+          values.deltaY = base;
+          break;
+        case 'left':
+          values.deltaX = base * -1;
+          break;
+        case 'right':
+          values.deltaX = base;
+          break;
+      }
+
+      return values;
+    },
+
+    _moveCropperByDelta: function (deltaX, deltaY) {
+      if (typeof this._moveCropperByDelta._ === 'undefined') {
+        this._moveCropperByDelta._ = {};
+      }
+
+      this._moveCropperByDelta._.deltaX = deltaX;
+      this._moveCropperByDelta._.deltaY = deltaY;
+      this._moveCropperByDelta._.rectangle = this._getClipperRectProperties();
+
       const newVertices = this._getRectangleVertices(
-        this._handleCropperKeyboardMove._.rectangle,
-        this._handleCropperKeyboardMove._.deltaX,
-        this._handleCropperKeyboardMove._.deltaY
+        this._moveCropperByDelta._.rectangle,
+        this._moveCropperByDelta._.deltaX,
+        this._moveCropperByDelta._.deltaY
       );
 
       // // If this would drag it outside of the image
@@ -2870,22 +2920,21 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         !this.arePointsInsideRectangle(newVertices, this.imageVerticeCoords)
       ) {
         const calculatedMove = this.getFurthestPossibleMove(
-          this._handleCropperKeyboardMove._
+          this._moveCropperByDelta._
         );
 
         if (calculatedMove.furthest == 0) {
+          console.log('cannot move');
           return;
         } else {
-          this._handleCropperKeyboardMove._.deltaX =
-            calculatedMove.furthestDeltas.x;
-          this._handleCropperKeyboardMove._.deltaY =
-            calculatedMove.furthestDeltas.y;
+          this._moveCropperByDelta._.deltaX = calculatedMove.furthestDeltas.x;
+          this._moveCropperByDelta._.deltaY = calculatedMove.furthestDeltas.y;
         }
       }
 
       this.clipper.set({
-        left: this.clipper.left + this._handleCropperKeyboardMove._.deltaX,
-        top: this.clipper.top + this._handleCropperKeyboardMove._.deltaY,
+        left: this.clipper.left + this._moveCropperByDelta._.deltaX,
+        top: this.clipper.top + this._moveCropperByDelta._.deltaY,
       });
 
       this._tempAnnounce(this.getRelativePositionMessage(this.clipper));
