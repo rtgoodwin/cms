@@ -415,8 +415,7 @@ class Cp extends Component
             'label' => Craft::t('app', 'General'),
         ];
         $settings[$label]['sites'] = [
-            // 'iconName' => 'light/earth',
-            'iconMask' => sprintf('@app/icons/light/%s.svg', CpHelper::earthIcon()),
+            'iconName' => sprintf('light/%s', CpHelper::earthIcon()),
             'label' => Craft::t('app', 'Sites'),
         ];
 
