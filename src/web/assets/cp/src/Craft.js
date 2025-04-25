@@ -111,3 +111,8 @@ import './js/CraftTooltip.js';
 import './js/CraftElementLabel';
 import './js/CraftProxyScrollbar';
 import './js/CraftCopyAttribute.js';
+
+import '@craftcms/craftcms/components';
+import {setBasePath} from '@craftcms/craftcms';
+setBasePath(Craft.baseIconPath);
+

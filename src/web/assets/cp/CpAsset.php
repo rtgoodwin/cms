@@ -511,6 +511,7 @@ JS;
             'baseApiUrl' => Craft::$app->baseApiUrl,
             'baseCpUrl' => UrlHelper::cpUrl(),
             'baseSiteUrl' => UrlHelper::siteUrl(),
+            'baseIconPath' => Craft::$app->getAssetManager()->getPublishedUrl('@app/icons', true),
             'baseUrl' => UrlHelper::url(),
             'clientOs' => $request->getClientOs(),
             'cpTrigger' => $generalConfig->cpTrigger,

@@ -1,0 +1,49 @@
+{
+  "name": "@craftcms/craftcms",
+  "version": "1.0.0",
+  "description": "Javascript for Craft CMS",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/craft-cms.cjs",
+  "module": "./dist/craft-cms.js",
+  "exports": {
+    ".": {
+      "import": "./dist/craft-cms.js",
+      "require": "./dist/craft-cms.cjs"
+    },
+    "./components": {
+      "import": "./dist/components.js",
+      "require": "./dist/components.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.17.4",
+    "@shoelace-style/shoelace": "^2.20.1",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "lit": "^3.3.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.3",
+    "vite-plugin-dts": "^4.5.3"
+  },
+  "scripts": {
+    "dev": "vite build --mode=development -w",
+    "postbuild": "npm run check-exports",
+    "build": "vite build",
+    "check-exports": "attw --pack . --profile esm-only",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craftcms/cms.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/craftcms/cms/issues"
+  },
+  "homepage": "https://github.com/craftcms/cms#readme"
+}

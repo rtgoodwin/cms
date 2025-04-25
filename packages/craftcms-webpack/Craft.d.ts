@@ -46,6 +46,7 @@ declare var Craft: {
   sites: Site[];
   Preview: any;
   cp: any;
+  baseIconPath: string;
 };
 
 declare var Garnish: any;

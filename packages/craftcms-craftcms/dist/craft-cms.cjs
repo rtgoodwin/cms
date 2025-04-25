@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,Symbol.toStringTag,{value:"Module"});const e=require("./chunk.JQBT7BOV-CqmLlkuS.cjs");e.registerIconLibrary("craft",{resolver:r=>(r.includes("/")||(r=`solid/${r}`),`${e.getBasePath()}/${r}.svg`),mutator:r=>r.setAttribute("fill","currentColor")});exports.registerIconLibrary=e.registerIconLibrary;exports.setBasePath=e.setBasePath;
