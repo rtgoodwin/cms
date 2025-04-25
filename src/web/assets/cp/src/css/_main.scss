@@ -3670,10 +3670,6 @@ table {
     @include mixins.svg-mask(var(--icon-color, var(--ui-control-color)));
   }
 
-  &.xl {
-    --icon-size: calc(24rem / 16);
-  }
-
   &.large {
     --icon-size: calc(20rem / 16);
   }

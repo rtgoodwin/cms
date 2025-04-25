@@ -21,9 +21,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $editorContainer: null,
     $straighten: null,
     $croppingCanvas: null,
-    $croppingActionsContainer: null,
     $cropperMoveBtn: null,
     $cropperEditBtn: null,
+    $cropperDirectionalControls: null,
     $cropperScaleBtns: null,
     $spinner: null,
     $constraintContainer: null,
@@ -202,9 +202,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.editorWidth = this.$editorContainer.innerWidth();
 
       // Keyboard accessibility
-      this.$croppingActionsContainer = $('#cropper-actions', this.$body);
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
       this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
+      this.$cropperDirectionalControls = $(
+        '.cropper-edit__wrapper--arrows',
+        this.$body
+      );
 
       this._showSpinner();
 
@@ -1953,7 +1956,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         };
 
         this._showCropper(cropperData);
-        this.$croppingActionsContainer.removeClass('hidden');
 
         if (this.focalPoint) {
           sizeFactor =
@@ -1979,7 +1981,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       var viewportProperties = {};
 
       this._hideCropper();
-      this.$croppingActionsContainer.addClass('hidden');
       var imageDimensions = this.getScaledImageDimensions();
       var targetZoom =
         this.getZoomToCoverRatio(imageDimensions) * this.scaleFactor;
@@ -2490,8 +2491,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         });
         // Remove listeners
         this.removeListener(this.$cropperMoveBtn, 'keydown');
+
+        // Hide directional buttons
+        this.$cropperDirectionalControls.addClass('hidden');
       } else {
         $btn.attr('aria-pressed', 'true');
+
+        // Show directional buttons
+        this.$cropperDirectionalControls.removeClass('hidden');
 
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
