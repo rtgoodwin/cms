@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where relational fields weren’t enforcing their “Maintain hierarchy” and “Branch Limit” settings on save.
+
 ## 5.7.4 - 2025-04-25
 
 - Improved the styling of editabe tables, Link fields, and select inputs. ([#17164](https://github.com/craftcms/cms/discussions/17164))
