@@ -17,6 +17,7 @@ use craft\config\GeneralConfig;
 use craft\db\Query;
 use craft\db\Table;
 use craft\errors\OperationAbortedException;
+use craft\events\BeforeRenderElementEvent;
 use craft\fieldlayoutelements\CustomField;
 use craft\i18n\Locale;
 use craft\services\ElementSources;
@@ -24,6 +25,7 @@ use craft\web\View;
 use DateTime;
 use Throwable;
 use Twig\Markup;
+use yii\base\Event;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
@@ -37,6 +39,27 @@ use yii\base\NotSupportedException;
 class ElementHelper
 {
     private const URI_MAX_LENGTH = 255;
+
+    /**
+     * @event BeforeRenderElementEvent The event that is triggered before an element is rendered.
+     * @since 5.7.5
+     *
+     *  ```php
+     *  use craft\events\AuthorizationCheckEvent;
+     *  use craft\services\Elements;
+     *  use yii\base\Event;
+     *
+     *  Event::on(
+     *      craft\helpers\ElementHelper::class,
+     *      craft\helpers\ElementHelper::EVENT_BEFORE_RENDER_ELEMENT,
+     *      function(craft\events\BeforeRenderElementEvent $event) {
+     *         $event->output = '…';
+     *      }
+     *  );
+     *  ```
+     */
+    public const EVENT_BEFORE_RENDER_ELEMENT = 'beforeRenderElement';
+
 
     /**
      * Generates a new temporary slug.
@@ -1017,6 +1040,17 @@ class ElementHelper
         $providerHandle = $element->getFieldLayout()?->provider?->getHandle();
         if ($providerHandle !== null) {
             array_unshift($templates, sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $providerHandle));
+        }
+
+        if (Event::hasHandlers(static::class, self::EVENT_BEFORE_RENDER_ELEMENT)) {
+            $event = new BeforeRenderElementEvent([
+                'element' => $element,
+                'variables' => $variables,
+                'templates' => $templates,
+                'output' => '',
+            ]);
+            Event::trigger(static::class, self::EVENT_BEFORE_RENDER_ELEMENT, $event);
+            return $event->output;
         }
 
         foreach ($templates as $template) {
