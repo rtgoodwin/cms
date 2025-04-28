@@ -93,11 +93,6 @@ class Table extends Field
     public ?array $defaults = [[]];
 
     /**
-     * @var int|null The highest rowId used by the field's default rows so far
-     */
-    public ?int $maxRowId = null;
-
-    /**
      * @var string The type of database column the field should have in the content table
      * @phpstan-var 'auto'|Schema::TYPE_STRING|Schema::TYPE_TEXT|'mediumtext'
      */
@@ -346,7 +341,6 @@ class Table extends Field
             Json::encode($dropdownSettingsHtml) . ', ' .
             Json::encode($dropdownSettingsCols) . ', ' .
             Json::encode($this->staticRows) . ', ' .
-            Json::encode($this->maxRowId) .
             ');');
 
         $columnsField = $view->renderTemplate('_components/fieldtypes/Table/columntable.twig', [
@@ -391,15 +385,6 @@ class Table extends Field
                 $this->defaults[$key]['rowId'] = $key;
             }
         }
-
-        // store the highest used rowId
-        $rowIds = ArrayHelper::getColumn($this->defaults, 'rowId');
-        rsort($rowIds, SORT_NUMERIC);
-        $maxKey = (int)reset($rowIds);
-        if ($this->maxRowId != $maxKey) {
-            $this->maxRowId = $maxKey;
-        }
-
 
         return parent::beforeSave($isNew);
     }
@@ -501,25 +486,22 @@ class Table extends Field
         $value = array_values($value);
 
         if ($this->staticRows) {
-            // if there's no rowIds, add them using row index
-            if (ArrayHelper::containsRecursive($value, 'rowId') === false) {
-                foreach ($value as $key => &$row) {
-                    $row['rowId'] = $key;
-                }
-            }
+            // get the order of the default rows
+            $order = ArrayHelper::getColumn($this->defaults, 'rowId');
+            $missingValueRowIds = null;
 
-            // get the order of the default rows & filter out anything that's not numeric
-            $order = array_filter(ArrayHelper::getColumn($this->defaults, 'rowId'), function($value): bool {
-                return is_numeric($value);
-            });
-
-            $order = array_map('intval', $order);
-
-            // the rowIds present in the $value array
-            $usedValueRowIds = ArrayHelper::getColumn($value, 'rowId');
-
-            // if the field has a set order
             if (!empty($order)) {
+                // if there's no rowIds, add them
+                if (ArrayHelper::containsRecursive($value, 'rowId') === false) {
+                    foreach ($value as $key => &$row) {
+                        $row['rowId'] = $order[$key];
+                    }
+                }
+
+                // the rowIds present in the $value array
+                $usedValueRowIds = ArrayHelper::getColumn($value, 'rowId');
+
+                // if the field has a set order
                 $missingValueRowIds = array_values(array_diff($order, $usedValueRowIds));
                 $leftoverValueRowIds = array_diff($usedValueRowIds, $order);
 
@@ -536,12 +518,12 @@ class Table extends Field
 
             // if we have too few rows
             if ($valueRows < $totalRows) {
-                if (!isset($missingValueRowIds)) {
+                if ($missingValueRowIds === null) {
                     $value = array_pad($value, $totalRows, []);
                 } else {
                     // if we have the missing value rowIds - add them in places where settings rowId doesn't exist in the $value array
                     while (count($value) < $totalRows) {
-                        $value[] = ['rowId' => (int)reset($missingValueRowIds)];
+                        $value[] = ['rowId' => reset($missingValueRowIds)];
                         array_shift($missingValueRowIds);
                     }
                 }

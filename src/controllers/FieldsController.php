@@ -361,9 +361,6 @@ JS;
         }
 
         $settings = $this->request->getBodyParam('types.' . $type);
-        if (isset($oldField) && property_exists($oldField, 'maxRowId')) {
-            $settings['maxRowId'] = $oldField->maxRowId;
-        }
 
         $field = $fieldsService->createField([
             'type' => $type,
@@ -377,7 +374,7 @@ JS;
             'searchable' => (bool)$this->request->getBodyParam('searchable', true),
             'translationMethod' => $this->request->getBodyParam('translationMethod', Field::TRANSLATION_METHOD_NONE),
             'translationKeyFormat' => $this->request->getBodyParam('translationKeyFormat'),
-            'settings' => $settings,
+            'settings' => $this->request->getBodyParam('types.' . $type),
         ]);
 
         if (!$fieldsService->saveField($field)) {

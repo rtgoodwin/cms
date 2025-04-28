@@ -263,19 +263,12 @@ Craft.EditableTable = Garnish.Base.extend(
         return;
       }
 
-      let newStaticRowId = null;
-      if (this.settings.maxRowId !== null) {
-        newStaticRowId = parseInt(this.settings.maxRowId);
-        newStaticRowId++;
-      }
-
       var rowId = this.settings.rowIdPrefix + (this.biggestId + 1),
         $tr = this.createRow(
           rowId,
           this.columns,
           this.baseName,
-          $.extend({}, this.settings.defaultValues),
-          newStaticRowId
+          $.extend({}, this.settings.defaultValues)
         );
 
       if (prepend) {
@@ -306,7 +299,7 @@ Craft.EditableTable = Garnish.Base.extend(
       return row;
     },
 
-    createRow: function (rowId, columns, baseName, values, newStaticRowId) {
+    createRow: function (rowId, columns, baseName, values) {
       return Craft.EditableTable.createRow(
         rowId,
         columns,
@@ -315,8 +308,7 @@ Craft.EditableTable = Garnish.Base.extend(
         this.settings.allowReorder,
         this.settings.allowDelete,
         this.settings.staticRows,
-        this.settings.includeRowId,
-        newStaticRowId
+        this.settings.includeRowId
       );
     },
 
@@ -459,8 +451,7 @@ Craft.EditableTable = Garnish.Base.extend(
       allowReorder,
       allowDelete,
       staticRows = false,
-      includeRowId = false,
-      newStaticRowId = null
+      includeRowId = false
     ) {
       var $tr = $('<tr/>', {
         'data-id': rowId,
@@ -636,7 +627,7 @@ Craft.EditableTable = Garnish.Base.extend(
             $('<input/>', {
               type: 'hidden',
               name: baseName + '[' + rowId + '][rowId]',
-              value: newStaticRowId ?? null,
+              value: Craft.uuid(),
             })
           )
           .appendTo($tr);
