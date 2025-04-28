@@ -1954,7 +1954,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     });
 
     let $thumbSelectDropdown = this.$thumbManagementContainer.find(
-      'select[name="thumbSource"]'
+      'select[id$="thumb-source"]'
     );
     this.addListener($thumbSelectDropdown, 'change', (ev) => {
       this.manageThumbnails(ev.target);
@@ -2214,7 +2214,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
 
   updateThumbnailsDropdown: function (element, action) {
     let $select = this.$thumbManagementContainer.find(
-      'select[name="thumbSource"]'
+      'select[id$="thumb-source"]'
     );
 
     if (action == 'add') {
@@ -2253,7 +2253,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
   updateThumbnailsDropdownOptionLabel: function ($container) {
     let uid = $container.data('uid');
     let $select = this.$thumbManagementContainer.find(
-      'select[name="thumbSource"]'
+      'select[id$="thumb-source"]'
     );
     let $option = $select.find('option[value="' + uid + '"]');
 
