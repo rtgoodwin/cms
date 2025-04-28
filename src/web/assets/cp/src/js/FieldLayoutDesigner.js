@@ -1408,6 +1408,10 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     ) {
       let cvd = this.tab.designer.$cvd?.data('cvd');
       cvd.showThumb = false;
+
+      cvd.removeCheckbox(this);
+      cvd.updateThumbnailsDropdown(this, 'remove');
+
       cvd.updatePreview();
     }
 
@@ -1440,11 +1444,6 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
         );
       }
     }
-
-    this.tab.designer.$cvd?.data('cvd').removeCheckbox(this);
-    this.tab.designer.$cvd
-      ?.data('cvd')
-      .updateThumbnailsDropdown(this, 'remove');
 
     this.base();
   },
