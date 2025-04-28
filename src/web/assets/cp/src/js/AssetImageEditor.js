@@ -879,6 +879,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.addListener(this.$cropperEditBtn, 'click', (ev) => {
         this._handleCropperEdit(ev);
       });
+      this.addListener(this.$cropperEditBtn, 'keydown', (ev) => {
+        this._handleKeyDown(ev);
+      });
       this.addListener(this.$directionalArrowBtn, 'click', (ev) => {
         this._handleDirectionalArrowPress(ev);
       });
@@ -2492,12 +2495,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Grab button text for state message
       let item = $btn.text().trim();
 
+      console.log('hello');
+
       if (!pickingUp) {
         stateMessage = Craft.t('app', '{item} dropped.', {
           item: item,
         });
-        // Remove listeners
-        this.removeListener(this.$cropperMoveBtn, 'keydown');
 
         // Hide directional buttons
         this.$directionalArrowContainer.addClass('hidden');
@@ -2509,11 +2512,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
-          this.addListener(
-            this.$cropperMoveBtn,
-            'keydown',
-            this._handleKeyDown
-          );
         } else {
           this.cornerPickedUp = $btn.attr('data-corner-handle');
         }
@@ -2591,6 +2589,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleKeyDown: function (ev) {
       const {target} = ev;
 
+      if (!this.focalPoint && !this.cropperPickedUp && !this.cornerPickedUp)
+        return;
+
       const isDirectionalKey = [
         Garnish.LEFT_KEY,
         Garnish.RIGHT_KEY,
@@ -2622,7 +2623,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           y: this.focalPoint.top,
         };
       } else if (this.croppingCanvas) {
-        this._handleCropperKeyboardMove(ev);
+        this._handleCropperKeyboardEdit(ev);
       }
     },
 
@@ -2809,7 +2810,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     /**
      * Returns the x and y coordinates of the clipper corners.
      *
-     * @param {'top-left'|'top-right'|'bottom-right'|'bottom-left'} corner
+     * @param {'tl'|'tr'|'br'|'bl'} corner
      */
     getClipperCornerPosition: function (corner) {
       let position = {
@@ -2818,19 +2819,19 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
 
       switch (corner) {
-        case 'top-left':
+        case 'tl':
           position.x = this.clipper.left - this.clipper.width / 2;
           position.y = this.clipper.top - this.clipper.height / 2;
           break;
-        case 'top-right':
+        case 'tr':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top - this.clipper.height / 2;
           break;
-        case 'bottom-right':
+        case 'br':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
           break;
-        case 'bottom-left':
+        case 'bl':
           position.x = this.clipper.left - this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
           break;
@@ -2848,10 +2849,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
+      } else if (this.cornerPickedUp) {
+        //this._handleCropperKeyboardResize(ev);
       }
     },
 
-    _handleCropperKeyboardMove: function (ev) {
+    _handleCropperKeyboardEdit: function (ev) {
       let direction;
 
       // Figure out which direction to move the cropper
@@ -2871,7 +2874,136 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       const deltaValues = this._getDeltaValuesFromDirection(direction);
-      this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
+
+      if (this.cropperPickedUp) {
+        this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
+      } else if (this.cornerPickedUp) {
+        this._resizeCropperByCornerAndDelta(
+          this.cornerPickedUp,
+          deltaValues.deltaX,
+          deltaValues.deltaY
+        );
+      }
+    },
+
+    _resizeCropperByCornerAndDelta: function (corner, deltaX, deltaY) {
+      if (typeof this._handleCropperResize._ === 'undefined') {
+        this._handleCropperResize._ = {};
+      }
+
+      // Translate from center-center origin to absolute coords
+      this._handleCropperResize._.startingRectangle = {
+        left: this.clipper.left - this.clipper.width / 2,
+        top: this.clipper.top - this.clipper.height / 2,
+        width: this.clipper.width,
+        height: this.clipper.height,
+      };
+
+      this._handleCropperResize._.rectangle =
+        this._calculateNewCropperSizeByDeltas(
+          this._handleCropperResize._.startingRectangle,
+          deltaX,
+          deltaY,
+          corner
+        );
+
+      if (
+        this._handleCropperResize._.rectangle.height < 30 ||
+        this._handleCropperResize._.rectangle.width < 30
+      ) {
+        return;
+      }
+
+      if (
+        !this.arePointsInsideRectangle(
+          this._getRectangleVertices(this._handleCropperResize._.rectangle),
+          this.imageVerticeCoords
+        )
+      ) {
+        return;
+      }
+
+      // Translate back to center-center origin.
+      this.clipper.set({
+        top:
+          this._handleCropperResize._.rectangle.top +
+          this._handleCropperResize._.rectangle.height / 2,
+        left:
+          this._handleCropperResize._.rectangle.left +
+          this._handleCropperResize._.rectangle.width / 2,
+        width: this._handleCropperResize._.rectangle.width,
+        height: this._handleCropperResize._.rectangle.height,
+      });
+
+      this._redrawCropperElements();
+      // if (typeof this._handleCropperResize._ === 'undefined') {
+      //   this._handleCropperResize._ = {};
+      // }
+      //
+      // // Size deltas
+      // this._handleCropperResize._.deltaX = ev.pageX - this.previousMouseX;
+      // this._handleCropperResize._.deltaY = ev.pageY - this.previousMouseY;
+      //
+      // if (this.handleClicked === 'b' || this.handleClicked === 't') {
+      //   this._handleCropperResize._.deltaX = 0;
+      // }
+      //
+      // if (this.handleClicked === 'l' || this.handleClicked === 'r') {
+      //   this._handleCropperResize._.deltaY = 0;
+      // }
+      //
+      // if (
+      //   this._handleCropperResize._.deltaX === 0 &&
+      //   this._handleCropperResize._.deltaY === 0
+      // ) {
+      //   return;
+      // }
+      //
+      // // Translate from center-center origin to absolute coords
+      // this._handleCropperResize._.startingRectangle = {
+      //   left: this.clipper.left - this.clipper.width / 2,
+      //   top: this.clipper.top - this.clipper.height / 2,
+      //   width: this.clipper.width,
+      //   height: this.clipper.height,
+      // };
+      //
+      // this._handleCropperResize._.rectangle =
+      //   this._calculateNewCropperSizeByDeltas(
+      //     this._handleCropperResize._.startingRectangle,
+      //     this._handleCropperResize._.deltaX,
+      //     this._handleCropperResize._.deltaY,
+      //     this.handleClicked
+      //   );
+      //
+      // if (
+      //   this._handleCropperResize._.rectangle.height < 30 ||
+      //   this._handleCropperResize._.rectangle.width < 30
+      // ) {
+      //   return;
+      // }
+      //
+      // if (
+      //   !this.arePointsInsideRectangle(
+      //     this._getRectangleVertices(this._handleCropperResize._.rectangle),
+      //     this.imageVerticeCoords
+      //   )
+      // ) {
+      //   return;
+      // }
+      //
+      // // Translate back to center-center origin.
+      // this.clipper.set({
+      //   top:
+      //     this._handleCropperResize._.rectangle.top +
+      //     this._handleCropperResize._.rectangle.height / 2,
+      //   left:
+      //     this._handleCropperResize._.rectangle.left +
+      //     this._handleCropperResize._.rectangle.width / 2,
+      //   width: this._handleCropperResize._.rectangle.width,
+      //   height: this._handleCropperResize._.rectangle.height,
+      // });
+      //
+      // this._redrawCropperElements();
     },
 
     _getDeltaValuesFromDirection: function (direction) {
@@ -2924,7 +3056,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         );
 
         if (calculatedMove.furthest == 0) {
-          console.log('cannot move');
           return;
         } else {
           this._moveCropperByDelta._.deltaX = calculatedMove.furthestDeltas.x;
@@ -3295,6 +3426,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this._handleCropperResize._.deltaY,
           this.handleClicked
         );
+
+      console.log(this.handleClicked);
 
       if (
         this._handleCropperResize._.rectangle.height < 30 ||

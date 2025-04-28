@@ -81,19 +81,19 @@
         {% set cropHandleBtns = [
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'top-left' : 'top-right',
+                corner: orientation == 'ltr' ? 'tl' : 'tr',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'top-right' : 'top-left',
+                corner: orientation == 'ltr' ? 'tr' : 'tl',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'bottom-left' : 'bottom-right',
+                corner: orientation == 'ltr' ? 'bl' : 'br',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'bottom-right' : 'bottom-left',
+                corner: orientation == 'ltr' ? 'br' : 'bl',
             },
         ] %}
 
