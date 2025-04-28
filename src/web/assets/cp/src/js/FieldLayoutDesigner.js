@@ -2161,7 +2161,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
 
     if ($select.val() == '__none__' || $select.val() == '__default__') {
 
-      if ($select.val() == '__none__') {
+      if ($select.val() == '__none__' && !this.designer.settings.alwaysShowThumbAlignmentBtns) {
         // hide the alignment buttons
         this.$thumbManagementContainer.find('[data-attribute="thumb-alignment"]').addClass('hidden');
       }
