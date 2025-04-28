@@ -1947,15 +1947,16 @@ ul.icons {
   justify-content: center;
   border: var(--button-border);
   border-radius: var(--button-border-radius);
-  padding: var(--button-padding);
+  padding-inline: var(--button-padding);
   text-align: center;
   user-select: none;
   box-sizing: border-box;
   appearance: none;
-  color: currentcolor;
+  color: var(--text-color);
   font-size: inherit;
   text-wrap: nowrap;
   background-color: var(--button-bg);
+  min-height: calc(34rem / 16);
 
   &:hover {
     border: var(--button-border--hover);
@@ -1992,7 +1993,7 @@ ul.icons {
   &.chromeless {
     height: auto;
     min-height: var(--touch-target-size);
-    padding: 0;
+    padding-inline: 0;
 
     &:hover,
     &:active,
@@ -2050,7 +2051,7 @@ ul.icons {
 
   &.wrap {
     height: auto;
-    min-height: 34px;
+    min-height: calc(34rem / 16);
     white-space: initial;
     text-align: start;
   }
@@ -2070,7 +2071,7 @@ ul.icons {
   }
 
   &[type='color'] {
-    padding: 6px !important;
+    padding-inline: 6px !important;
     width: 36px;
   }
 
@@ -2164,6 +2165,7 @@ ul.icons {
 .btn,
 .spinner {
   height: var(--input-height);
+  min-height: var(--input-height);
 }
 
 .btn[data-icon-after]:not(:empty, .btn-empty)::after,
@@ -2426,7 +2428,7 @@ craft-copy-attribute {
   padding-inline: var(--s) !important;
   font-size: 12px;
   line-height: calc(22rem / 16);
-  height: calc(22rem / 16) !important;
+  min-height: calc(22rem / 16) !important;
 }
 
 .btngroup.small,
@@ -2460,7 +2462,7 @@ craft-copy-attribute {
 
 /* huge buttons */
 .btn.huge {
-  padding: var(--l);
+  padding-inline: var(--l);
   line-height: calc(48rem / 16);
   height: calc(48rem / 16);
 }
@@ -2556,7 +2558,7 @@ div.btn.submit input {
 
 /* dashed buttons */
 .btn.dashed {
-  border: 1px dashed var(--medium-hairline-color);
+  border: 1px dashed #{color.adjust(mixins.$inputColor, $alpha: -0.5)};
   background-color: transparent;
 
   .btngroup &:not(:last-child, .btngroup-btn-last) {
@@ -2585,10 +2587,11 @@ div.btn.submit input {
 
   .btn {
     position: relative;
-    padding: 0;
+    padding-inline: 0;
     border-radius: 0;
     background-color: transparent;
     height: var(--ui-control-height);
+    min-height: auto;
 
     &.current-step,
     &.active-drop-target {
@@ -3610,7 +3613,7 @@ table {
   }
 
   &:has(.thumb):not(.large) .chip-content {
-    min-width: calc(100% - var(--thumb-size));
+    min-width: calc(100% - var(--thumb-size) - var(--s));
   }
 
   .offset-drag-helper & {
@@ -4544,14 +4547,14 @@ table {
 /* editable tables */
 table.editable {
   border-radius: var(--large-border-radius);
-  border: 1px solid var(--gray-200);
+  border: var(--input-border);
+  color: var(--text-color);
 
   th,
   td.heading,
   td.action {
     color: var(--medium-text-color);
     font-weight: normal;
-    background-color: var(--gray-050);
 
     button:not(.lightswitch),
     a {
@@ -4590,10 +4593,68 @@ table.editable {
     }
   }
 
+  thead:first-child,
+  tbody:first-child,
+  colgroup + thead,
+  colgroup + tbody {
+    tr:first-child {
+      th,
+      td {
+        &:first-child {
+          border-start-start-radius: var(--large-border-radius);
+
+          textarea,
+          input.text {
+            border-start-start-radius: calc(var(--large-border-radius) - 1px);
+          }
+        }
+
+        &:last-child {
+          border-start-end-radius: var(--large-border-radius);
+
+          textarea,
+          input.text {
+            border-start-end-radius: calc(var(--large-border-radius) - 1px);
+          }
+        }
+      }
+    }
+  }
+
+  thead,
+  tbody {
+    &:last-child tr:last-child {
+      th,
+      td {
+        &:first-child {
+          border-end-start-radius: var(--large-border-radius);
+
+          textarea,
+          input.text {
+            border-end-start-radius: calc(var(--large-border-radius) - 1px);
+          }
+        }
+
+        &:last-child {
+          border-end-end-radius: var(--large-border-radius);
+
+          textarea,
+          input.text {
+            border-end-end-radius: calc(var(--large-border-radius) - 1px);
+          }
+        }
+      }
+    }
+  }
+
   thead {
     tr {
       th {
         border-block-end: 1px solid var(--hairline-color);
+        font-family: inherit; // for .code
+        font-size: 0.8em !important; // ! for .code
+        font-weight: 500;
+        line-height: 1.4;
 
         &.has-info {
           padding-inline-end: calc(15px + 1em);
@@ -4616,23 +4677,14 @@ table.editable {
         }
       }
 
-      &:last-child {
-        td:first-child {
-          border-end-start-radius: var(--large-border-radius);
-
-          textarea,
-          input.text {
-            border-end-start-radius: calc(var(--large-border-radius) - 1px);
-          }
-        }
-      }
-
       td:not(:first-child),
       th ~ td:not(.hidden) ~ td {
         border-inline-start: 1px solid var(--hairline-color);
       }
 
       th {
+        font-weight: 500;
+
         // Set a dark border-left for the first <td> that follows a <th>, if there is one.
         // This is a ridiculous CSS hack since there's no operator/pseudo-class that mimics jQuery's next(selector) function.
         // If there was it could have been as simple as: th ??? td:not(.hidden) { dark left border }
@@ -4644,7 +4696,7 @@ table.editable {
 
       td {
         vertical-align: top;
-        background-color: var(--white);
+        background-color: var(--input-bg);
         padding-block: 4px;
         padding-inline: 10px;
 
@@ -7853,8 +7905,9 @@ textarea.text.fullwidth {
   & > .flex {
     & > div {
       &.text-link {
-        border: 1px solid color.adjust(mixins.$inputColor, $alpha: -0.75);
+        border: var(--input-border);
         border-radius: var(--large-border-radius);
+        background-color: var(--input-bg);
         cursor: text;
 
         &:has(.text:focus) {
@@ -7880,9 +7933,14 @@ textarea.text.fullwidth {
           }
         }
 
-        .chip-content {
-          a {
-            word-break: break-word;
+        .chip {
+          height: calc(34rem / 16);
+          padding-inline: var(--s);
+
+          .chip-content {
+            a {
+              word-break: break-word;
+            }
           }
         }
       }
@@ -9458,6 +9516,10 @@ body.licensing-issues {
     & > .blocktype,
     & > .preview {
       font-size: 0.8em !important;
+    }
+
+    & > .blocktype {
+      font-weight: 500;
     }
 
     & > .preview {

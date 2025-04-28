@@ -509,7 +509,7 @@ class Link extends Field implements InlineEditableFieldInterface, RelationalFiel
         if (
             $value instanceof LinkData &&
             $element?->propagating &&
-            ($element->propagateAll || $element->isNewForSite) &&
+            ($element->propagateAll || ($element->isNewForSite && !isset($element->duplicateOf))) &&
             isset($element->propagatingFrom) &&
             $this->getTranslationKey($element) !== $this->getTranslationKey($element->propagatingFrom)
         ) {

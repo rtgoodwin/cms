@@ -40,6 +40,7 @@ use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
+use craft\helpers\Html;
 use craft\helpers\Queue;
 use craft\helpers\StringHelper;
 use craft\queue\jobs\LocalizeRelations;
@@ -920,6 +921,18 @@ JS, [
             return '<p class="light">' . Craft::t('app', 'Nothing selected.') . '</p>';
         }
 
+        if ($this->maintainHierarchy) {
+            $structuresService = Craft::$app->getStructures();
+            // Fill in any gaps
+            $structuresService->fillGapsInElements($value);
+
+            return Html::beginTag('div', ['class' => 'elementselect']) .
+                Craft::$app->getView()->renderTemplate('_elements/structurelist.twig', [
+                    'elements' => $value,
+                ]) .
+                Html::endTag('div');
+        }
+
         $size = Cp::CHIP_SIZE_SMALL;
         $viewMode = $this->viewMode();
         if ($viewMode == 'large') {
@@ -1409,10 +1422,11 @@ JS, [
     {
         if ($value instanceof ElementQueryInterface) {
             $value = $value->eagerly()->all();
-            ElementHelper::swapInProvisionalDrafts($value);
         } elseif (!is_array($value)) {
             $value = [];
         }
+
+        ElementHelper::swapInProvisionalDrafts($value);
 
         if ($this->validateRelatedElements && $element !== null) {
             // Pre-validate related elements
