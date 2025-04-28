@@ -8,32 +8,23 @@
 namespace craft\events;
 
 use craft\base\Element;
+use craft\base\Event;
 
 /**
- * Asset event class.
+ * Render element class.
  *
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
- * @since 5.7.5
+ * @since 5.8.0
  */
-class BeforeRenderElementEvent extends CancelableEvent
+class RenderElementEvent extends Event
 {
-    /**
-     * @var Element The element associated with the event.
-     */
-    public Element $element;
-
     /**
      * @var array Additional variables to be passed to the template
      */
     public array $variables;
 
     /**
-     * @var array Array of template paths to check for partials
-     */
-    public array $templates;
-
-    /**
      * @var string The output of the event
      */
-    public string $output = '';
+    public string $output;
 }

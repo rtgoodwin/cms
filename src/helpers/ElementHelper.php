@@ -13,19 +13,15 @@ use craft\base\ElementActionInterface;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\NestedElementInterface;
-use craft\config\GeneralConfig;
 use craft\db\Query;
 use craft\db\Table;
 use craft\errors\OperationAbortedException;
-use craft\events\BeforeRenderElementEvent;
 use craft\fieldlayoutelements\CustomField;
 use craft\i18n\Locale;
 use craft\services\ElementSources;
-use craft\web\View;
 use DateTime;
 use Throwable;
 use Twig\Markup;
-use yii\base\Event;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
@@ -39,27 +35,6 @@ use yii\base\NotSupportedException;
 class ElementHelper
 {
     private const URI_MAX_LENGTH = 255;
-
-    /**
-     * @event BeforeRenderElementEvent The event that is triggered before an element is rendered.
-     * @since 5.7.5
-     *
-     *  ```php
-     *  use craft\events\AuthorizationCheckEvent;
-     *  use craft\services\Elements;
-     *  use yii\base\Event;
-     *
-     *  Event::on(
-     *      craft\helpers\ElementHelper::class,
-     *      craft\helpers\ElementHelper::EVENT_BEFORE_RENDER_ELEMENT,
-     *      function(craft\events\BeforeRenderElementEvent $event) {
-     *         $event->output = '…';
-     *      }
-     *  );
-     *  ```
-     */
-    public const EVENT_BEFORE_RENDER_ELEMENT = 'beforeRenderElement';
-
 
     /**
      * Generates a new temporary slug.
@@ -1019,48 +994,8 @@ class ElementHelper
      */
     public static function renderElements(array $elements, array $variables = []): Markup
     {
-        $view = Craft::$app->getView();
-        $generalConfig = Craft::$app->getConfig()->getGeneral();
-        $output = array_map(fn(ElementInterface $element) => self::renderElement($element, $variables, $view, $generalConfig), $elements);
+        $output = array_map(fn(ElementInterface $element) => (string)$element->render($variables), $elements);
         return new Markup(implode("\n", $output), Craft::$app->charset);
-    }
-
-    private static function renderElement(ElementInterface $element, array $variables, View $view, GeneralConfig $generalConfig): string
-    {
-        $refHandle = $element::refHandle();
-        if ($refHandle === null) {
-            throw new NotSupportedException(sprintf('Element type “%s” doesn’t define a reference handle, so it doesn’t support partial templates.', $element::displayName()));
-        }
-
-        $variables[$refHandle] = $element;
-        $templates = [
-            sprintf('%s/%s', $generalConfig->partialTemplatesPath, $refHandle),
-        ];
-
-        $providerHandle = $element->getFieldLayout()?->provider?->getHandle();
-        if ($providerHandle !== null) {
-            array_unshift($templates, sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $providerHandle));
-        }
-
-        if (Event::hasHandlers(static::class, self::EVENT_BEFORE_RENDER_ELEMENT)) {
-            $event = new BeforeRenderElementEvent([
-                'element' => $element,
-                'variables' => $variables,
-                'templates' => $templates,
-                'output' => '',
-            ]);
-            Event::trigger(static::class, self::EVENT_BEFORE_RENDER_ELEMENT, $event);
-            return $event->output;
-        }
-
-        foreach ($templates as $template) {
-            if ($view->doesTemplateExist($template, View::TEMPLATE_MODE_SITE)) {
-                return $view->renderTemplate($template, $variables, View::TEMPLATE_MODE_SITE);
-            }
-        }
-
-        // fallback to the string representation of the element
-        return Html::tag('p', Html::encode((string)$element));
     }
 
     /**
