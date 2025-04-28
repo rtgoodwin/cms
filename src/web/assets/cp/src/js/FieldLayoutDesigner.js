@@ -399,6 +399,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       customizableTabs: true,
       customizableUi: true,
       withCardViewDesigner: false,
+      showThumbPositionSelection: false,
       readOnly: false,
     },
 
@@ -1913,6 +1914,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
   sortableCheckboxSelect: null,
   $thumbManagementContainer: null,
   thumbPosition: null,
+  showThumbPositionSelection: false,
 
   init: function (designer, container) {
     this.designer = designer;
@@ -1928,6 +1930,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     );
     this.$thumbManagementContainer = this.$container.find('.thumb-management');
     this.thumbPosition = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-position"] .btn.active')?.data('value');
+    this.showThumbPositionSelection = designer.settings.showThumbPositionSelection;
 
     // trigger preview update when items are checked/unchecked
     this.$libraryContainer.on('change', function (ev) {
@@ -1944,8 +1947,12 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
       this.manageThumbnails(ev.target);
     });
 
+    if (this.showThumbPositionSelection) {
+      // always show the thumbnail position buttons
+      this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').removeClass('hidden');
+    }
+
     let $thumbPositionBtns = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-position"] .btn');
-    console.log($thumbPositionBtns);
     this.addListener($thumbPositionBtns, 'activate', (ev) => {
       this.manageThumbnailPosition(ev.target);
     });
@@ -2152,9 +2159,12 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
   manageThumbnails: function(target) {
     let $select = $(target);
 
-    if ($select.val() == 'none') {
-      // hide the position buttons
-      this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').addClass('hidden');
+    if ($select.val() == '__none__' || $select.val() == '__default__') {
+
+      if ($select.val() == '__none__') {
+        // hide the position buttons
+        this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').addClass('hidden');
+      }
 
       // find the element that's currently a thumb and call dropThumbnail on it
       // that will take care of updating the card preview too

@@ -2787,9 +2787,15 @@ JS, [
     private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
     {
         $readOnly = isset($config['disabled']) && $config['disabled'];
-        $options = [
-            ['label' => Craft::t('app', 'No thumbnail'), 'value' => 'none'],
-        ];
+        if ((new ($fieldLayout['type']))->hasThumbs()) {
+            $options = [
+                ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
+            ];
+        } else {
+            $options = [
+                ['label' => Craft::t('app', 'No thumbnail'), 'value' => '__none__'],
+            ];
+        }
         $elementThumbnail = $fieldLayout->getThumbField()?->uid;
         $thumbnailPosition = $fieldLayout->getCardThumbPosition();
 
@@ -2866,7 +2872,7 @@ JS, [
      */
     public static function cardPreviewHtml(FieldLayout $fieldLayout, array $cardElements = [], $showThumb = false): string
     {
-        $hasThumb = $showThumb ?? $fieldLayout->getThumbField() !== null;
+        $hasThumb = $showThumb ?? $fieldLayout->getThumbField() !== null ? true : (new ($fieldLayout['type']))->hasThumbs();
         $thumbPosition = $fieldLayout->getCardThumbPosition();
 
         // get heading
@@ -3003,6 +3009,7 @@ JS, [
             'customizableTabs' => $config['customizableTabs'],
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
+            'showThumbPositionSelection' => (new ($fieldLayout['type']))->hasThumbs(),
             'readOnly' => $readOnly,
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
