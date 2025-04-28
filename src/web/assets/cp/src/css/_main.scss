@@ -3567,6 +3567,68 @@ table.editable {
     }
   }
 
+  thead:first-child,
+  tbody:first-child,
+  colgroup + thead,
+  colgroup + tbody {
+    tr:first-child {
+      th,
+      td {
+        &:first-child {
+          @include border-top-left-radius(var(--large-border-radius));
+
+          textarea,
+          input.text {
+            @include border-top-left-radius(
+              calc(var(--large-border-radius) - 1px)
+            );
+          }
+        }
+
+        &:last-child {
+          @include border-top-right-radius(var(--large-border-radius));
+
+          textarea,
+          input.text {
+            @include border-top-right-radius(
+              calc(var(--large-border-radius) - 1px)
+            );
+          }
+        }
+      }
+    }
+  }
+
+  thead,
+  tbody {
+    &:last-child tr:last-child {
+      th,
+      td {
+        &:first-child {
+          @include border-bottom-left-radius(var(--large-border-radius));
+
+          textarea,
+          input.text {
+            @include border-bottom-left-radius(
+              calc(var(--large-border-radius) - 1px)
+            );
+          }
+        }
+
+        &:last-child {
+          @include border-bottom-right-radius(var(--large-border-radius));
+
+          textarea,
+          input.text {
+            @include border-bottom-right-radius(
+              calc(var(--large-border-radius) - 1px)
+            );
+          }
+        }
+      }
+    }
+  }
+
   thead {
     tr {
       th {
@@ -3590,19 +3652,6 @@ table.editable {
         th,
         td {
           border-top: 1px solid var(--hairline-color);
-        }
-      }
-
-      &:last-child {
-        td:first-child {
-          @include border-bottom-left-radius(var(--large-border-radius));
-
-          textarea,
-          input.text {
-            @include border-bottom-left-radius(
-              calc(var(--large-border-radius) - 1px)
-            );
-          }
         }
       }
 

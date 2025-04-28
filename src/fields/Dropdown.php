@@ -98,10 +98,10 @@ class Dropdown extends BaseOptionsField implements SortableFieldInterface
             if (!$static) {
                 Craft::$app->getView()->setInitialDeltaValue($this->handle, $this->encodeValue($value->value));
             }
-            $default = $this->defaultValue();
 
+            $default = $this->defaultValue();
             if ($default !== null) {
-                $value = $this->normalizeValue($this->defaultValue());
+                $value = $this->normalizeValue($default);
             } else {
                 $value = null;
 

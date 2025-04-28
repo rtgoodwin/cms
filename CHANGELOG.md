@@ -2,8 +2,21 @@
 
 ## Unreleased
 
+- Fixed a styling issue.
+
+## 4.15.2 - 2025-04-23
+
+- Fixed a bug where control panel-generated URLs could be malformed. ([#17157](https://github.com/craftcms/cms/issues/17157), [#17161](https://github.com/craftcms/cms/issues/17161))
+- Fixed a bug where the `forms.checkboxField` macro wasn’t respecting `fieldset` and `checkboxLabel` keys passed into its config.
+- Fixed an error that could occur when backing up the database, if the database password contained special characters. ([#17158](https://github.com/craftcms/cms/issues/17158))
+- Fixed a PHP deprecation error that could occur when applying the `replace` Twig filter to a `null` variable. ([#17159](https://github.com/craftcms/cms/issues/17159))
+
+## 4.15.1 - 2025-04-22
+
 - Fixed a bug where static relational field inputs weren’t showing the related elements’ hierarchy. ([#17127](https://github.com/craftcms/cms/issues/17127))
 - Fixed a bug where some system screens shown on the front end were sent without no-cache headers. ([#17129](https://github.com/craftcms/cms/issues/17129))
+- Fixed a bug where the default `notificationDuration` value per the `accessibilityDefaults` config setting wasn’t being respected for users who hadn’t saved their preferences yet.
+- Fixed a bug where control panel JavaScript-generated URLs weren’t formatted correctly if the `omitScriptNameInUrls` and `usePathInfo` config settings were both disabled. ([#17147](https://github.com/craftcms/cms/issues/17147))
 
 ## 4.15.0.2 - 2025-04-17
 
