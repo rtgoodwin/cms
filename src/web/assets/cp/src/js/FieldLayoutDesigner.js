@@ -2265,13 +2265,13 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     $option.text(label);
   },
 
-  showThumbAlignment: function() {
+  showThumbAlignment: function () {
     this.$thumbManagementContainer
       .find('[data-attribute="thumb-alignment"]')
       .removeClass('hidden');
   },
 
-  hideThumbAlignment: function() {
+  hideThumbAlignment: function () {
     this.$thumbManagementContainer
       .find('[data-attribute="thumb-alignment"]')
       .addClass('hidden');
