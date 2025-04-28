@@ -805,7 +805,7 @@ abstract class Element extends Component implements ElementInterface
      *
      * Event::on(
      *     Element::class,
-     *     Element::EVENT_BEFORE_RENDER_ELEMENT,
+     *     Element::EVENT_RENDER,
      *     function(RenderElementEvent $event) {
      *         $event->output = '…';
      *     }
