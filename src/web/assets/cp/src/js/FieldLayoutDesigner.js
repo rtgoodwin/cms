@@ -1962,9 +1962,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
 
     if (this.alwaysShowThumbAlignmentBtns) {
       // always show the thumbnail alignment buttons
-      this.$thumbManagementContainer
-        .find('[data-attribute="thumb-alignment"]')
-        .removeClass('hidden');
+      this.showThumbAlignment();
     }
 
     let $thumbAlignmentBtns = this.$thumbManagementContainer.find(
@@ -2182,9 +2180,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
         !this.designer.settings.alwaysShowThumbAlignmentBtns
       ) {
         // hide the alignment buttons
-        this.$thumbManagementContainer
-          .find('[data-attribute="thumb-alignment"]')
-          .addClass('hidden');
+        this.hideThumbAlignment();
       }
 
       // find the element that's currently a thumb and call dropThumbnail on it
@@ -2200,9 +2196,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
       }
     } else {
       // show the alignment buttons
-      this.$thumbManagementContainer
-        .find('[data-attribute="thumb-alignment"]')
-        .removeClass('hidden');
+      this.showThumbAlignment();
 
       // get the element that's supposed to become a new thumbnail and call makeThumbnail() on it;
       // that will take care of updating the card preview too
@@ -2243,7 +2237,11 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
         // if the option we're removing was selected
         if ($option.attr('selected')) {
           // select the "none" option
-          $select?.find('option[value="none"').attr('selected');
+          $select?.find('option[value="__none__"').attr('selected');
+          if (!this.designer.settings.alwaysShowThumbAlignmentBtns) {
+            // hide the alignment buttons
+            this.hideThumbAlignment();
+          }
         }
 
         // remove
@@ -2265,5 +2263,17 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
 
     let label = $container.find('.fld-element-label').text() ?? this.attribute;
     $option.text(label);
+  },
+
+  showThumbAlignment: function() {
+    this.$thumbManagementContainer
+      .find('[data-attribute="thumb-alignment"]')
+      .removeClass('hidden');
+  },
+
+  hideThumbAlignment: function() {
+    this.$thumbManagementContainer
+      .find('[data-attribute="thumb-alignment"]')
+      .addClass('hidden');
   },
 });
