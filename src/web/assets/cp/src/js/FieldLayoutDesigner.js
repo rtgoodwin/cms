@@ -399,7 +399,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       customizableTabs: true,
       customizableUi: true,
       withCardViewDesigner: false,
-      showThumbPositionSelection: false,
+      alwaysShowThumbAlignmentBtns: false,
       readOnly: false,
     },
 
@@ -1913,8 +1913,8 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
   showThumb: null,
   sortableCheckboxSelect: null,
   $thumbManagementContainer: null,
-  thumbPosition: null,
-  showThumbPositionSelection: false,
+  thumbAlignment: null,
+  alwaysShowThumbAlignmentBtns: false,
 
   init: function (designer, container) {
     this.designer = designer;
@@ -1929,8 +1929,8 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
       'sortableCheckboxSelect'
     );
     this.$thumbManagementContainer = this.$container.find('.thumb-management');
-    this.thumbPosition = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-position"] .btn.active')?.data('value');
-    this.showThumbPositionSelection = designer.settings.showThumbPositionSelection;
+    this.thumbAlignment = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-alignment"] .btn.active')?.data('value');
+    this.alwaysShowThumbAlignmentBtns = designer.settings.alwaysShowThumbAlignmentBtns;
 
     // trigger preview update when items are checked/unchecked
     this.$libraryContainer.on('change', function (ev) {
@@ -1947,14 +1947,14 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
       this.manageThumbnails(ev.target);
     });
 
-    if (this.showThumbPositionSelection) {
-      // always show the thumbnail position buttons
-      this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').removeClass('hidden');
+    if (this.alwaysShowThumbAlignmentBtns) {
+      // always show the thumbnail alignment buttons
+      this.$thumbManagementContainer.find('[data-attribute="thumb-alignment"]').removeClass('hidden');
     }
 
-    let $thumbPositionBtns = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-position"] .btn');
-    this.addListener($thumbPositionBtns, 'activate', (ev) => {
-      this.manageThumbnailPosition(ev.target);
+    let $thumbAlignmentBtns = this.$thumbManagementContainer.find('div.btngroup[id$="thumb-alignment"] .btn');
+    this.addListener($thumbAlignmentBtns, 'activate', (ev) => {
+      this.manageThumbnailAlignment(ev.target);
     });
 
     this.listenToSortableEvents();
@@ -2025,7 +2025,7 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
         fieldLayoutConfig: this.designer.config,
         cardElements: cardElements,
         showThumb: this.showThumb,
-        thumbPosition: this.thumbPosition,
+        thumbAlignment: this.thumbAlignment,
       },
     })
       .then(({data}) => {
@@ -2146,12 +2146,12 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
   },
 
   /** THUMBNAILS **/
-  manageThumbnailPosition: function(target) {
+  manageThumbnailAlignment: function(target) {
     let $btn = $(target);
-    let position = $btn.data('value');
+    let alignment = $btn.data('value');
 
-    if (position !== this.thumbPosition) {
-      this.thumbPosition = position;
+    if (alignment !== this.thumbAlignment) {
+      this.thumbAlignment = alignment;
       this.updatePreview();
     }
   },
@@ -2162,8 +2162,8 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     if ($select.val() == '__none__' || $select.val() == '__default__') {
 
       if ($select.val() == '__none__') {
-        // hide the position buttons
-        this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').addClass('hidden');
+        // hide the alignment buttons
+        this.$thumbManagementContainer.find('[data-attribute="thumb-alignment"]').addClass('hidden');
       }
 
       // find the element that's currently a thumb and call dropThumbnail on it
@@ -2178,8 +2178,8 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
         }
       }
     } else {
-      // show the position buttons
-      this.$thumbManagementContainer.find('[data-attribute="thumb-position"]').removeClass('hidden');
+      // show the alignment buttons
+      this.$thumbManagementContainer.find('[data-attribute="thumb-alignment"]').removeClass('hidden');
 
       // get the element that's supposed to become a new thumbnail and call makeThumbnail() on it;
       // that will take care of updating the card preview too

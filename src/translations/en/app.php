@@ -1794,7 +1794,7 @@ return [
     'This {type} doesn’t have revisions.' => 'This {type} doesn’t have revisions.',
     'This {type} has been edited.' => 'This {type} has been edited.',
     'This {type} has been updated.' => 'This {type} has been updated.',
-    'Thumbnail position' => 'Thumbnail position',
+    'Thumbnail alignment' => 'Thumbnail alignment',
     'Time Zone' => 'Time Zone',
     'Time fields are better suited for managing Time-only values.' => 'Time fields are better suited for managing Time-only values.',
     'Time to reserve' => 'Time to reserve',

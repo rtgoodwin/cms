@@ -25,10 +25,10 @@ interface Thumbable
     public function getThumbHtml(int $size): ?string;
 
     /**
-     * Returns the position in which the component's thumbnail should show.
+     * Returns the alignment in which the component's thumbnail should show.
      *
      * @return string
      * @since 5.8.0
      */
-    public function getThumbPosition(): string;
+    public function getThumbAlignment(): string;
 }

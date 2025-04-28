@@ -4296,9 +4296,9 @@ JS, [
     /**
      * @inheritdoc
      */
-    public function getThumbPosition(): string
+    public function getThumbAlignment(): string
     {
-        return $this->getFieldLayout()?->getCardThumbPosition() ?? 'end';
+        return $this->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
     }
 
     /**

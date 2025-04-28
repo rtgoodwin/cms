@@ -255,10 +255,10 @@ class FieldLayout extends Model
 
     /**
      * @var string
-     * @see getCardThumbPosition()
-     * @see setCardThumbPosition()
+     * @see getCardThumbAlignment()
+     * @see setCardThumbAlignment()
      */
-    private string $_cardThumbPosition;
+    private string $_cardThumbAlignment;
 
     /**
      * @inheritdoc
@@ -284,8 +284,8 @@ class FieldLayout extends Model
             }
         }
 
-        if (!isset($this->_cardThumbPosition)) {
-            $this->setCardThumbPosition();
+        if (!isset($this->_cardThumbAlignment)) {
+            $this->setCardThumbAlignment();
         }
     }
 
@@ -434,35 +434,35 @@ class FieldLayout extends Model
     }
 
     /**
-     * Returns the layout’s card view thumbnail position.
+     * Returns the layout’s card view thumbnail alignment.
      *
-     * @return string The layout’s card view thumbnail position.
+     * @return string The layout’s card view thumbnail alignment.
      * @since 5.8.0
      */
-    public function getCardThumbPosition(): string
+    public function getCardThumbAlignment(): string
     {
-        if (!isset($this->_cardThumbPosition)) {
-            $this->setCardThumbPosition();
+        if (!isset($this->_cardThumbAlignment)) {
+            $this->setCardThumbAlignment();
         }
 
-        return $this->_cardThumbPosition;
+        return $this->_cardThumbAlignment;
     }
 
     /**
-     * Sets the layout’s card view thumbnail position.
+     * Sets the layout’s card view thumbnail alignment.
      *
-     * @param string|null $position The position of the card view thumbnail.
+     * @param string|null $alignment The alignment of the card view thumbnail.
      * @since 5.8.0
      */
-    public function setCardThumbPosition(?string $position = null): void
+    public function setCardThumbAlignment(?string $alignment = null): void
     {
-        $validPositions = ['start', 'end'];
+        $validOptions = ['start', 'end'];
 
-        if (!in_array($position, $validPositions)) {
-            $position = null;
+        if (!in_array($alignment, $validOptions)) {
+            $alignment = null;
         }
 
-        $this->_cardThumbPosition = $position ?? 'end';
+        $this->_cardThumbAlignment = $alignment ?? 'end';
     }
 
     /**
@@ -630,17 +630,17 @@ class FieldLayout extends Model
         ));
 
         $cardViewConfig = $this->getCardView();
-        $cardThumbPosition = $this->getCardThumbPosition();
+        $cardThumbAlignment = $this->getCardThumbAlignment();
 
         if (empty($tabConfigs) && empty($cardViewConfig)) {
-            // no point bothering with the thumb position if we don't have the card view
+            // no point bothering with the thumb alignment if we don't have the card view
             return null;
         }
 
         return [
             'tabs' => $tabConfigs,
             'cardView' => $cardViewConfig,
-            'cardThumbPosition' => $cardThumbPosition,
+            'cardThumbAlignment' => $cardThumbAlignment,
         ];
     }
 
