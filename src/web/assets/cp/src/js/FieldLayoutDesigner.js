@@ -2244,8 +2244,6 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
         if ($option.attr('selected')) {
           // select the "none" option
           $select?.find('option[value="none"').attr('selected');
-          // and drop the thumbnail
-          element.dropThumbnail();
         }
 
         // remove
