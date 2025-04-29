@@ -56,7 +56,7 @@
       onChange: (selectedOption) => {
         $('#{{ inputId|namespaceInputId }}').val(selectedOption.data('value'));
       },
-      readOnly: {{ disabled }}
+      readOnly: {{ disabled ? 1 : 0 }}
     });
   })();
   {% endjs %}
