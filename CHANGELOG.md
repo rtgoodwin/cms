@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where relational fields weren’t enforcing their “Maintain hierarchy” and “Branch Limit” settings on save.
+- Fixed a bug where eager-loading relational field elements wasn’t always working, if multiple fields were aliased to the same handle.
 
 ## 5.7.4 - 2025-04-25
 
