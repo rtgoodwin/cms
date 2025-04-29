@@ -194,7 +194,7 @@ Craft.ElementEditor = Garnish.Base.extend(
         throw 'Element editors may only be used with forms.';
       }
 
-      if (this.isFullPage && Craft.edition !== Craft.Solo) {
+      if (Craft.edition !== Craft.Solo) {
         this.$activityContainer = this.$container.find('.activity-container');
         this._checkActivity();
       }
@@ -953,7 +953,7 @@ Craft.ElementEditor = Garnish.Base.extend(
       const button = menu.addItem(
         {
           type: 'button',
-          icon: 'edit',
+          icon: async () => await Craft.ui.icon('edit'),
           label: Craft.t('app', 'Edit draft settings'),
         },
         group
@@ -2374,43 +2374,47 @@ Craft.ElementEditor = Garnish.Base.extend(
                   }
                 }
 
-                // if the element has been updated upstream, show a notification about it
-                const elementUpdated =
-                  this.settings.updatedTimestamp &&
-                  this.settings.updatedTimestamp !== data.updatedTimestamp;
-                const canonicalUpdated =
-                  this.settings.canonicalUpdatedTimestamp &&
-                  this.settings.canonicalUpdatedTimestamp !==
-                    data.canonicalUpdatedTimestamp;
+                if (this.isFullPage) {
+                  // if the element has been updated upstream, show a notification about it
+                  const elementUpdated =
+                    this.settings.updatedTimestamp &&
+                    this.settings.updatedTimestamp !== data.updatedTimestamp;
+                  const canonicalUpdated =
+                    this.settings.canonicalUpdatedTimestamp &&
+                    this.settings.canonicalUpdatedTimestamp !==
+                      data.canonicalUpdatedTimestamp;
 
-                if (elementUpdated || canonicalUpdated) {
-                  const $reloadBtn = Craft.ui.createButton({
-                    label: Craft.t('app', 'Reload'),
-                    spinner: true,
-                  });
+                  if (elementUpdated || canonicalUpdated) {
+                    const $reloadBtn = Craft.ui.createButton({
+                      label: Craft.t('app', 'Reload'),
+                      spinner: true,
+                    });
 
-                  Craft.cp.displayNotice(
-                    Craft.uppercaseFirst(
-                      Craft.t('app', 'This {type} has been updated.', {
-                        type:
-                          elementUpdated &&
-                          this.settings.draftId &&
-                          !this.settings.isProvisionalDraft
-                            ? Craft.t('app', 'draft')
-                            : Craft.elementTypeNames[this.settings.elementType]
-                              ? Craft.elementTypeNames[
-                                  this.settings.elementType
-                                ][2]
-                              : Craft.t('app', 'element'),
-                      })
-                    ),
-                    {
-                      details: $reloadBtn,
-                    }
-                  );
-                  $reloadBtn.on('click', () => {
-                    window.location.reload();
-                  });
+                    Craft.cp.displayNotice(
+                      Craft.uppercaseFirst(
+                        Craft.t('app', 'This {type} has been updated.', {
+                          type:
+                            elementUpdated &&
+                            this.settings.draftId &&
+                            !this.settings.isProvisionalDraft
+                              ? Craft.t('app', 'draft')
+                              : Craft.elementTypeNames[
+                                    this.settings.elementType
+                                  ]
+                                ? Craft.elementTypeNames[
+                                    this.settings.elementType
+                                  ][2]
+                                : Craft.t('app', 'element'),
+                        })
+                      ),
+                      {
+                        details: $reloadBtn,
+                      }
+                    );
+                    $reloadBtn.on('click', () => {
+                      window.location.reload();
+                    });
+                  }
                 }
 
                 this.settings.updatedTimestamp = data.updatedTimestamp;

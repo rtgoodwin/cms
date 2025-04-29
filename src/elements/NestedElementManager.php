@@ -16,6 +16,8 @@ use craft\base\NestedElementInterface;
 use craft\behaviors\DraftBehavior;
 use craft\db\Table;
 use craft\elements\actions\ChangeSortOrder;
+use craft\elements\actions\MoveDown;
+use craft\elements\actions\MoveUp;
 use craft\elements\db\ElementQueryInterface;
 use craft\enums\Color;
 use craft\enums\PropagationMethod;
@@ -192,14 +194,10 @@ class NestedElementManager extends Component
         if ($fetchAll && $query->getCachedResult() === null) {
             $query
                 ->drafts(null)
+                ->canonicalsOnly()
                 ->savedDraftsOnly()
                 ->status(null)
-                ->limit(null)
-                ->andWhere([
-                    'or',
-                    ['elements.draftId' => null],
-                    ['elements.canonicalId' => null],
-                ]);
+                ->limit(null);
         }
 
         return $query;
@@ -399,6 +397,7 @@ class NestedElementManager extends Component
                     $elements = $value->getCachedResult() ?? $value
                         ->status(null)
                         ->limit(null)
+                        ->eagerly()
                         ->all();
                 }
 
@@ -422,6 +421,8 @@ class NestedElementManager extends Component
                             'context' => 'field',
                             'showActionMenu' => true,
                             'sortable' => $config['sortable'],
+                            'showInGrid' => $config['showInGrid'] ?? false,
+                            'hyperlink' => false,
                         ]),
                         $elements,
                     ), [
@@ -523,6 +524,16 @@ class NestedElementManager extends Component
                     $actionConfig = ElementHelper::actionConfig(new ChangeSortOrder($owner, $attribute));
                     $actionConfig['bodyHtml'] = $view->clearJsBuffer();
                     $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveUp($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveDown($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
                 }
 
                 return Cp::elementIndexHtml($this->elementType, [
@@ -555,6 +566,7 @@ class NestedElementManager extends Component
         $config += [
             'sortable' => false,
             'canCreate' => false,
+            'canPaste' => false,
             'createButtonLabel' => null,
             'createAttributes' => null,
             'minElements' => null,
@@ -596,10 +608,12 @@ class NestedElementManager extends Component
                 'attribute' => $attribute,
                 'sortable' => $config['sortable'],
                 'canCreate' => $config['canCreate'],
+                'canPaste' => $config['canPaste'],
                 'minElements' => $config['minElements'],
                 'maxElements' => $config['maxElements'],
                 'createButtonLabel' => $config['createButtonLabel'],
                 'ownerIdParam' => $this->ownerIdParam,
+                'fieldId' => $this->field?->id,
                 'fieldHandle' => $this->field?->handle,
                 'baseInputName' => $view->getNamespace(),
                 'prevalidate' => $config['prevalidate'] ?? false,
@@ -938,15 +952,11 @@ JS, [
         /** @var NestedElementInterface[] $elements */
         $elements = $this->nestedElementQuery($owner)
             ->drafts(null)
+            ->canonicalsOnly()
             ->savedDraftsOnly(false)
             ->status(null)
             ->siteId($owner->siteId)
             ->andWhere(['not', ['elements.id' => $except]])
-            ->andWhere([
-                'or',
-                ['elements.draftId' => null],
-                ['elements.canonicalId' => null],
-            ])
             ->all();
 
         $elementsService = Craft::$app->getElements();

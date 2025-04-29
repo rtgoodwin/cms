@@ -173,13 +173,15 @@ $gridColor: var(--gray-100);
         cursor: move;
         cursor: grab;
       }
-
-      span {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
     }
+  }
+
+  .fld-tab__name {
+    margin-block: 0;
+    font-weight: var(--font-weight-regular);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .fld-tabcontent {
@@ -358,6 +360,10 @@ $gridColor: var(--gray-100);
   padding-inline: var(--padding);
   overflow: hidden auto;
   position: relative;
+
+  hr {
+    margin-inline: -24px;
+  }
 }
 
 .fld-element-settings-footer {
