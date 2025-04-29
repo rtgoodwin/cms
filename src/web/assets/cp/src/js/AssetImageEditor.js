@@ -67,9 +67,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     draggingFocal: false,
     cropperPickedUp: false,
     focalPickedUp: false,
+    handlePickedUp: false,
     focalClicked: false,
     cropperClicked: false,
-    handlePickedUp: false,
     previousMouseX: 0,
     previousMouseY: 0,
     shiftKeyHeld: false,
@@ -2308,9 +2308,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         });
       }
 
-      if (this.cornerPickedUp) {
+      if (this.handlePickedUp) {
         let cornerCoordinates = this.getClipperCornerPosition(
-          this.cornerPickedUp
+          this.handlePickedUp
         );
 
         this.cropperCornerFocusRing = new fabric.Circle({
@@ -2389,7 +2389,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.cornerPickedUp) {
+      if (this.handlePickedUp) {
         this.croppingCanvas.add(this.cropperCornerFocusRing);
       }
     },
@@ -2489,13 +2489,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // Defaults
       this.cropperPickedUp = false;
-      this.cornerPickedUp = false;
+      this.handlePickedUp = false;
       this.$cropperEditBtn.attr('aria-pressed', 'false');
 
       // Grab button text for state message
       let item = $btn.text().trim();
-
-      console.log('hello');
 
       if (!pickingUp) {
         stateMessage = Craft.t('app', '{item} dropped.', {
@@ -2513,7 +2511,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
         } else {
-          this.cornerPickedUp = $btn.attr('data-corner-handle');
+          this.handlePickedUp = $btn.attr('data-cropper-handle');
         }
 
         stateMessage = Craft.t('app', '{item} picked up.', {
@@ -2589,7 +2587,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleKeyDown: function (ev) {
       const {target} = ev;
 
-      if (!this.focalPoint && !this.cropperPickedUp && !this.cornerPickedUp)
+      if (!this.focalPoint && !this.cropperPickedUp && !this.handlePickedUp)
         return;
 
       const isDirectionalKey = [
@@ -2849,7 +2847,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
-      } else if (this.cornerPickedUp) {
+      } else if (this.handlePickedUp) {
         //this._handleCropperKeyboardResize(ev);
       }
     },
@@ -2877,9 +2875,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
-      } else if (this.cornerPickedUp) {
+      } else if (this.handlePickedUp) {
         this._resizeCropperByCornerAndDelta(
-          this.cornerPickedUp,
+          this.handlePickedUp,
           deltaValues.deltaX,
           deltaValues.deltaY
         );

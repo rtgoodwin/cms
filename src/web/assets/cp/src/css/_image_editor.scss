@@ -25,12 +25,12 @@ html.noscroll body {
     grid-gap: var(--s);
   }
 
-  .cropper-edit__wrapper--corners {
+  .cropper-edit__wrapper--handles {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
-  .cropper-edit__wrapper--corners,
+  .cropper-edit__wrapper--handles,
   .cropper-edit__wrapper--arrows {
     grid-gap: var(--xs);
   }
