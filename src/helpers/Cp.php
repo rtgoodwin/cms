@@ -660,6 +660,15 @@ JS, [
             $classes[] = 'error';
         }
 
+        $thumb = $element->getThumbHtml(120);
+        if ($thumb) {
+            $thumbAlignment = $element->getThumbAlignment();
+
+            if ($thumbAlignment) {
+                $classes[] = 'thumb-' . $thumbAlignment;
+            }
+        }
+
         $attributes = ArrayHelper::merge(
             self::baseElementAttributes($element, $config),
             [
@@ -732,7 +741,6 @@ JS, [
                 Html::endTag('div');
         }
 
-        $thumb = $element->getThumbHtml(120);
         $icon = $element instanceof Iconic ? $element->getIcon() : null;
         $title = $element->getCardTitle();
 
@@ -2001,7 +2009,7 @@ JS, [
     }
 
     /**
-     * Renders a lightswitch field’s HTML.
+     * Renders a range field’s HTML.
      *
      * @param array $config
      * @return string
@@ -2012,6 +2020,33 @@ JS, [
     {
         $config['id'] ??= 'range' . mt_rand();
         return static::fieldHtml('template:_includes/forms/range.twig', $config);
+    }
+
+    /**
+     * Renders a button group input’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     * @since 5.8.0
+     */
+    public static function buttonGroupHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
+     * Renders a button group field’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     * @since 5.8.0
+     */
+    public static function buttonGroupFieldHtml(array $config): string
+    {
+        $config['id'] ??= 'buttongroup' . mt_rand();
+        return static::fieldHtml('template:_includes/forms/buttonGroup.twig', $config);
     }
 
     /**
@@ -2745,7 +2780,94 @@ JS, [
             Html::endTag('div') . // .cvd-preview-container
             Html::endTag('div') . // .cvd-preview
             Html::endTag('div') . // .cvd-container
+            self::_getThumbManagementHtml($fieldLayout, $config) .
             Html::endTag('div'); // .card-view-designer
+    }
+
+    /**
+     * Return HTML for managing thumbnail provider and position.
+     *
+     * @param FieldLayout $fieldLayout
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     */
+    private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
+    {
+        $readOnly = isset($config['disabled']) && $config['disabled'];
+        if ((new ($fieldLayout['type']))->hasThumbs()) {
+            $options = [
+                ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
+            ];
+        } else {
+            $options = [
+                ['label' => Craft::t('app', 'No thumbnail'), 'value' => '__none__'],
+            ];
+        }
+        $elementThumbnail = $fieldLayout->getThumbField()?->uid;
+        $thumbnailAlignment = $fieldLayout->getCardThumbAlignment();
+
+        $thumbableElements = array_filter(
+            $fieldLayout->getAllElements(),
+            fn($element) => $element instanceof BaseField && $element->thumbable()
+        );
+
+        foreach ($thumbableElements as $thumbableElement) {
+            $options[] = ['label' => $thumbableElement->label(), 'value' => $thumbableElement->uid];
+        }
+
+        $thumbHtml = Html::beginTag('div', ['class' => 'thumb-management']) .
+            Html::tag('h2', Craft::t('app', 'Manage element thumbnails'), ['class' => 'visually-hidden']) .
+            Html::beginTag('div', ['class' => 'flex flex-nowrap']);
+
+        // dropdown field that contains all thumbable fields + 'No thumbnail' option
+        $thumbHtml .= self::selectFieldHtml([
+            'label' => Craft::t('app', 'Use for element thumbnails'),
+            'id' => 'thumb-source',
+            'name' => 'thumbSource',
+            'options' => $options,
+            'value' => $elementThumbnail,
+            'disabled' => $readOnly,
+        ]);
+
+        // radio button switch that lets you choose whether the thumb alignment should be start or end
+        $orientation = Craft::$app->getLocale()->getOrientation();
+        $thumbHtml .= self::buttonGroupFieldHtml([
+            'label' => Craft::t('app', 'Thumbnail alignment'),
+            'id' => 'thumb-alignment',
+            'fieldClass' => $elementThumbnail === null ? 'hidden' : false,
+            'name' => 'thumbAlignment',
+            'options' => [
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-left' : 'slideout-right',
+                    'value' => 'start',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        ],
+                    ],
+                ],
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-right' : 'slideout-left',
+                    'value' => 'end',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        ],
+                    ],
+                ],
+            ],
+            'value' => $thumbnailAlignment,
+            'disabled' => $readOnly,
+        ]);
+
+
+        $thumbHtml .= Html::endTag('div') . // .flex
+            Html::endTag('div'); // .thumb-management
+
+        return $thumbHtml;
     }
 
     /**
@@ -2758,6 +2880,9 @@ JS, [
      */
     public static function cardPreviewHtml(FieldLayout $fieldLayout, array $cardElements = [], $showThumb = false): string
     {
+        $hasThumb = $showThumb ?? $fieldLayout->getThumbField() !== null ? true : (new ($fieldLayout['type']))->hasThumbs();
+        $thumbAlignment = $fieldLayout->getCardThumbAlignment();
+
         // get heading
         $heading = Html::tag('craft-element-label',
             Html::tag('a', Html::tag('span', Craft::t('app', 'Title')), [
@@ -2777,7 +2902,7 @@ JS, [
 
         $previewHtml =
             Html::beginTag('div', [
-                'class' => ['element', 'card'],
+                'class' => ['element', 'card', $hasThumb ? 'thumb-' . $thumbAlignment : null],
             ]);
 
         $previewHtml .=
@@ -2816,7 +2941,7 @@ JS, [
             Html::endTag('div'); // .card-content
 
         // get thumb placeholder
-        if ($showThumb ?? $fieldLayout->getThumbField() !== null) {
+        if ($hasThumb) {
             $previewThumb = Html::tag('div',
                 Html::tag('div', Cp::iconSvg('image'), ['class' => 'cp-icon']),
                 ['class' => 'cvd-thumbnail']
@@ -2892,6 +3017,7 @@ JS, [
             'customizableTabs' => $config['customizableTabs'],
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
+            'alwaysShowThumbAlignmentBtns' => (new ($fieldLayout['type']))->hasThumbs(),
             'readOnly' => $readOnly,
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
