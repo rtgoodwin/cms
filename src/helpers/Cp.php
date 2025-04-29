@@ -2794,7 +2794,7 @@ JS, [
      */
     private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
     {
-        $readOnly = isset($config['disabled']) && $config['disabled'];
+        $readOnly = isset($config['config']['disabled']) && $config['config']['disabled'];
         if ((new ($fieldLayout['type']))->hasThumbs()) {
             $options = [
                 ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
