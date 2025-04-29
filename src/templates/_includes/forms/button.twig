@@ -7,13 +7,17 @@
 {% set icon = icon ?? null %}
 {% set label = label ?? null %}
 {% set labelHtml = labelHtml ?? null %}
+
+{# the "disabled" class takes care of disabling the button,
+   but the "read-only" class is needed so that it is allowed to have custom tabindex attribute #}
 {% set attributes = {
     type: type ?? 'button',
     id: id ?? false,
     class: (class ?? [])|explodeClass|merge([
         'btn',
         not (icon or label or labelHtml) ? 'btn-empty' : null,
-        (disabled ?? false) ? 'disabled',
+        (disabled ?? readOnly ?? false) ? 'disabled',
+        (readOnly ?? false) ? 'read-only',
     ]|filter),
     data: {
         'busy-message': busyMessage,
