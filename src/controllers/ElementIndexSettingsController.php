@@ -254,22 +254,32 @@ class ElementIndexSettingsController extends BaseElementsController
 
         // Normalize to the way it's stored in the DB
         foreach ($sourceOrder as $source) {
+            // @TODO do we still need this condition now that headings have a `key`?
             if (isset($source['heading'])) {
                 $newSourceConfigs[] = [
                     'type' => ElementSources::TYPE_HEADING,
                     'heading' => $source['heading'],
                 ];
             } elseif (isset($source['key'])) {
-                $isCustom = str_starts_with($source['key'], 'custom:');
+                $type = match (true) {
+                    str_starts_with($source['key'], 'custom:') => ElementSources::TYPE_CUSTOM,
+                    str_starts_with($source['key'], 'heading:') => ElementSources::TYPE_HEADING,
+                    default => ElementSources::TYPE_NATIVE,
+                };
+
+                $isCustom = $type === ElementSources::TYPE_CUSTOM;
                 $sourceConfig = [
-                    'type' => $isCustom ? ElementSources::TYPE_CUSTOM : ElementSources::TYPE_NATIVE,
+                    'type' => $type,
                     'key' => $source['key'],
                 ];
 
                 // Were new settings posted?
                 if (isset($sourceSettings[$source['key']])) {
                     $postedSettings = $sourceSettings[$source['key']];
-                    $sourceConfig['tableAttributes'] = array_values(array_filter($postedSettings['tableAttributes'] ?? [])) ?: '-';
+
+                    if ($type !== ElementSources::TYPE_HEADING) {
+                        $sourceConfig['tableAttributes'] = array_values(array_filter($postedSettings['tableAttributes'] ?? [])) ?: '-';
+                    }
 
                     if (isset($postedSettings['defaultSort'])) {
                         $sourceConfig['defaultSort'] = $postedSettings['defaultSort'];
@@ -292,6 +302,8 @@ class ElementIndexSettingsController extends BaseElementsController
                         if (isset($postedSettings['userGroups']) && $postedSettings['userGroups'] !== '*') {
                             $sourceConfig['userGroups'] = is_array($postedSettings['userGroups']) ? $postedSettings['userGroups'] : false;
                         }
+                    } elseif ($type === ElementSources::TYPE_HEADING) {
+                        $sourceConfig['heading'] = $postedSettings['heading'];
                     } elseif (isset($postedSettings['enabled'])) {
                         $sourceConfig['disabled'] = !$postedSettings['enabled'];
                         if ($sourceConfig['disabled']) {
