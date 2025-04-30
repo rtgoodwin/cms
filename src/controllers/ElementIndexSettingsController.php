@@ -243,7 +243,7 @@ class ElementIndexSettingsController extends BaseElementsController
         // Get the old source configs
         $projectConfig = Craft::$app->getProjectConfig();
         $oldSourceConfigs = $projectConfig->get(ProjectConfig::PATH_ELEMENT_SOURCES . ".$elementType") ?? [];
-        $oldSourceConfigs = ArrayHelper::index(array_filter($oldSourceConfigs, fn($s) => $s['type'] !== ElementSources::TYPE_HEADING), 'key');
+        $oldSourceConfigs = ArrayHelper::index($oldSourceConfigs, 'key');
 
         $conditionsService = Craft::$app->getConditions();
 
@@ -304,7 +304,11 @@ class ElementIndexSettingsController extends BaseElementsController
                         }
                     } elseif ($type === ElementSources::TYPE_HEADING) {
                         $sourceConfig['heading'] = $postedSettings['heading'];
-                        $sourceConfig['collapsible'] = ($postedSettings['collapsible'] ?? false) === '1';
+                        if (isset($postedSettings['collapsible'])) {
+                            $sourceConfig['collapsible'] = $postedSettings['collapsible'] === '1';
+                        } else {
+                            $sourceConfig['collapsible'] = $oldSourceConfigs[$source['key']]['collapsible'] ?? false;
+                        }
                     } elseif (isset($postedSettings['enabled'])) {
                         $sourceConfig['disabled'] = !$postedSettings['enabled'];
                         if ($sourceConfig['disabled']) {

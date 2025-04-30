@@ -1103,6 +1103,7 @@ a.fieldtoggle::before {
 }
 
 .toggle.expanded::before,
+.toggle[aria-expanded='true']::before,
 button.fieldtoggle:not(.lightswitch).expanded::before,
 a.fieldtoggle.expanded::before,
 .sidebar nav li.expanded > .toggle::before,

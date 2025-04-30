@@ -92,7 +92,12 @@
             {% endif %}
             <li class="heading">
                 <span>{{ source.heading|t('site') }}</span>
-                <ul>
+            {% if source.collapsible ?? false %}
+                <craft-disclosure>
+                    <button type="button" class="toggle" aria-expanded="false" aria-label="{{ 'Show nested sources'|t('app') }}" aria-controls="{{ source.key }}"></button>
+                </craft-disclosure>
+            {% endif %}
+                <ul id="{{ source.key ?? 'heading' }}">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
             {% set key = source.keyPath ?? (keyPrefix ~ source.key) %}

@@ -1622,6 +1622,7 @@ li.breadcrumb-toggle-wrapper {
     position: relative;
     margin-block: 0;
     margin-inline: var(--xl);
+    line-height: 1.2;
 
     &:not(:first-child) {
       margin-block-start: var(--m);
@@ -1644,6 +1645,16 @@ li.breadcrumb-toggle-wrapper {
     & > ul {
       margin-block: 2px;
       margin-inline: calc(var(--xl) * -1);
+    }
+
+    craft-disclosure .toggle {
+      height: 1lh;
+      padding-block-start: calc(2rem / 16);
+      inset-inline-start: var(--neg-padding);
+
+      &[aria-expanded='false'] {
+        inset-block-start: calc(4rem / 16);
+      }
     }
   }
 
@@ -1806,6 +1817,10 @@ li.breadcrumb-toggle-wrapper {
       &.expanded {
         & > ul {
           display: block;
+
+          &[data-state='collapsed'] {
+            display: none;
+          }
         }
       }
     }
