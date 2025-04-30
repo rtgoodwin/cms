@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Fixed a bug where admin tables pagination footers in slideouts could be positioned incorrectly. ([#17187](https://github.com/craftcms/cms/issues/17187))
+- Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
 - Fixed a bug where relational fields weren’t enforcing their “Maintain hierarchy” and “Branch Limit” settings on save.
 - Fixed a bug where eager-loading relational field elements wasn’t always working, if multiple fields were aliased to the same handle.
 
