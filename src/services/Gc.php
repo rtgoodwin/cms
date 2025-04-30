@@ -80,6 +80,11 @@ class Gc extends Component
     private GeneralConfig $_generalConfig;
 
     /**
+     * @var int The number of items that should be deleted in a single batch
+     */
+    private int $_chunkSize = 10000;
+
+    /**
      * @inheritdoc
      */
     public function init()
@@ -254,7 +259,7 @@ class Gc extends Component
                 ->column();
 
             if (!empty($ids)) {
-                foreach (array_chunk($ids, 1000) as $idsChunk) {
+                foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                     Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
                 }
             }
@@ -310,7 +315,7 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            foreach (array_chunk($ids, 1000) as $idsChunk) {
+            foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                 Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
             }
         }
@@ -452,7 +457,7 @@ class Gc extends Component
         }
 
         if (!empty($deleteIds)) {
-            foreach (array_chunk($deleteIds, 1000) as $deleteIdsChunk) {
+            foreach (array_chunk($deleteIds, $this->_chunkSize) as $deleteIdsChunk) {
                 Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIdsChunk]);
             }
         }
@@ -476,7 +481,7 @@ class Gc extends Component
                 ->column();
 
             if (!empty($ids)) {
-                foreach (array_chunk($ids, 1000) as $idsChunk) {
+                foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                     Db::delete($table, ['id' => $idsChunk]);
                 }
             }
@@ -504,7 +509,7 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            foreach (array_chunk($ids, 1000) as $idsChunk) {
+            foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                 Db::delete(Table::RELATIONS, ['id' => $idsChunk]);
             }
         }
@@ -528,7 +533,7 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            foreach (array_chunk($ids, 1000) as $idsChunk) {
+            foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                 Db::delete(Table::STRUCTUREELEMENTS, ['id' => $idsChunk]);
             }
         }
@@ -648,7 +653,7 @@ SQL;
             ->column();
 
         if (!empty($ids)) {
-            foreach (array_chunk($ids, 1000) as $idsChunk) {
+            foreach (array_chunk($ids, $this->_chunkSize) as $idsChunk) {
                 Db::delete(Table::FIELDLAYOUTS, ['id' => $idsChunk]);
             }
         }
