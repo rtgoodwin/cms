@@ -254,7 +254,9 @@ class Gc extends Component
                 ->column();
 
             if (!empty($ids)) {
-                Db::delete(Table::ELEMENTS, ['id' => $ids]);
+                foreach (array_chunk($ids, 1000) as $idsChunk) {
+                    Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
+                }
             }
         }
 
@@ -308,7 +310,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::ELEMENTS, ['id' => $ids]);
+            foreach (array_chunk($ids, 1000) as $idsChunk) {
+                Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -448,7 +452,9 @@ class Gc extends Component
         }
 
         if (!empty($deleteIds)) {
-            Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIds]);
+            foreach (array_chunk($deleteIds, 1000) as $deleteIdsChunk) {
+                Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIdsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -470,7 +476,9 @@ class Gc extends Component
                 ->column();
 
             if (!empty($ids)) {
-                Db::delete($table, ['id' => $ids]);
+                foreach (array_chunk($ids, 1000) as $idsChunk) {
+                    Db::delete($table, ['id' => $idsChunk]);
+                }
             }
         }
 
@@ -496,7 +504,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::RELATIONS, ['id' => $ids]);
+            foreach (array_chunk($ids, 1000) as $idsChunk) {
+                Db::delete(Table::RELATIONS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -518,7 +528,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::STRUCTUREELEMENTS, ['id' => $ids]);
+            foreach (array_chunk($ids, 1000) as $idsChunk) {
+                Db::delete(Table::STRUCTUREELEMENTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -636,7 +648,9 @@ SQL;
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::FIELDLAYOUTS, ['id' => $ids]);
+            foreach (array_chunk($ids, 1000) as $idsChunk) {
+                Db::delete(Table::FIELDLAYOUTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
