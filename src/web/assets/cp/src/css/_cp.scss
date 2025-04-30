@@ -1649,12 +1649,7 @@ li.breadcrumb-toggle-wrapper {
 
     craft-disclosure .toggle {
       height: 1lh;
-      padding-block-start: calc(2rem / 16);
       inset-inline-start: var(--neg-padding);
-
-      &[aria-expanded='false'] {
-        inset-block-start: calc(4rem / 16);
-      }
     }
   }
 
