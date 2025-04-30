@@ -304,6 +304,7 @@ class ElementIndexSettingsController extends BaseElementsController
                         }
                     } elseif ($type === ElementSources::TYPE_HEADING) {
                         $sourceConfig['heading'] = $postedSettings['heading'];
+                        $sourceConfig['collapsible'] = ($postedSettings['collapsible'] ?? false) === '1';
                     } elseif (isset($postedSettings['enabled'])) {
                         $sourceConfig['disabled'] = !$postedSettings['enabled'];
                         if ($sourceConfig['disabled']) {
