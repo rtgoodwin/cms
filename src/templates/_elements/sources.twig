@@ -83,6 +83,7 @@
 
 {% tag 'ul' with {
     class: keyPrefix ? 'nested' : null,
+    id: id ?? ''
 } %}
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
@@ -91,12 +92,14 @@
                 </li>
             {% endif %}
             <li class="heading">
-                <span>{{ source.heading|t('site') }}</span>
-            {% if source.collapsible ?? false %}
-                <craft-disclosure>
-                    <button type="button" class="toggle" aria-expanded="false" aria-label="{{ 'Show nested sources'|t('app') }}" aria-controls="{{ source.key }}"></button>
-                </craft-disclosure>
-            {% endif %}
+                <span class="source-heading">{{ source.heading|t('site') }}</span>
+                {% if source.collapsible ?? false %}
+                    <craft-disclosure class="nav-item__trigger" state="expanded">
+                        <button type="button" class="toggle" aria-expanded="false" aria-controls="{{ source.key }}">
+                            <span class="visually-hidden">{{ 'Show nested sources' | t('app') }}</span>
+                        </button>
+                    </craft-disclosure>
+                {% endif %}
                 <ul id="{{ source.key ?? 'heading' }}">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
@@ -108,9 +111,19 @@
             } %}
                 {{ _self.sourceLink(key, source, isTopLevel, elementType, sortOptions ?? null, baseSortOptions ?? null, tableColumns ?? null, defaultTableColumns ?? null, viewModes ?? null) }}
                 {% if source.nested is defined and source.nested is not empty %}
-                    <button class="toggle" aria-expanded="false" aria-label="{{ 'Show nested sources'|t('app') }}"></button>
+                    <craft-disclosure>
+                        <button
+                            class="toggle"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="{{ key }}"
+                        >
+                            <span class="visually-hidden">{{ 'Show nested sources'|t('app') }}</span>
+                        </button>
+                    </craft-disclosure>
                     {% include "_elements/sources" with {
                         keyPrefix: key ~ '/',
+                        id: key,
                         sources: source.nested
                     } %}
                 {% endif %}

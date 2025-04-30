@@ -1804,8 +1804,16 @@ li.breadcrumb-toggle-wrapper {
         justify-content: center;
       }
 
-      ul {
+      ul:not([data-state]) {
         display: none;
+      }
+
+      ul[data-state='collapsed'] {
+        display: none;
+      }
+
+      ul[data-state='expanded'] {
+        display: block;
       }
 
       &.heading,
