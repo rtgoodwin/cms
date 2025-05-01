@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+- `craft\services\Entries::getEntryTypeById()` now has a `$withTrashed` argument.
 - Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
 - Fixed a bug where relational fields weren’t enforcing their “Maintain hierarchy” and “Branch Limit” settings on save.
 - Fixed a bug where eager-loading relational field elements wasn’t always working, if multiple fields were aliased to the same handle.
+- Fixed an error that could occur when applying project config changes after running the `entry-types/merge` command, if the outgoing entry type was used by a Single section. ([#16628](https://github.com/craftcms/cms/issues/16628))
 
 ## 5.7.4 - 2025-04-25
 
