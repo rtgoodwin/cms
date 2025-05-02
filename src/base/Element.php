@@ -1746,7 +1746,13 @@ abstract class Element extends Component implements ElementInterface
         // Get all the custom fields by that handle
         $fields = [];
         foreach (static::fieldLayouts(null) as $fieldLayout) {
-            if ($providerHandle === null || $fieldLayout->provider?->getHandle() === $providerHandle) {
+            $provider = $fieldLayout->provider;
+            if ($provider && property_exists($provider, 'original')) {
+                $handle = $provider->original?->getHandle() ?? $provider->getHandle();
+            } else {
+                $handle = $provider?->getHandle();
+            }
+            if ($providerHandle === null || $handle === $providerHandle) {
                 $layoutField = $fieldLayout->getFieldByHandle($fieldHandle);
                 if ($layoutField) {
                     $fields[] = $layoutField;
@@ -5602,7 +5608,11 @@ JS, [
     private function providerHandle(): ?string
     {
         try {
-            return $this->getFieldLayout()?->provider?->getHandle();
+            $provider = $this->getFieldLayout()?->provider;
+            if ($provider && property_exists($provider, 'original')) {
+                return $provider->original?->getHandle() ?? $provider->getHandle();
+            }
+            return $provider?->getHandle();
         } catch (InvalidConfigException) {
             return null;
         }
