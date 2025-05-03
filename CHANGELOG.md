@@ -10,6 +10,7 @@
 - Fixed a bug where eager-loading relational field elements wasn’t always working, if multiple fields were aliased to the same handle.
 - Fixed an error that could occur when applying project config changes after running the `entry-types/merge` command, if the outgoing entry type was used by a Single section. ([#16628](https://github.com/craftcms/cms/issues/16628))
 - Fixed a bug where `resave/*` commands could end prematurely if an unexpected error occurred.
+- Fixed a bug where Matrix fields weren’t always loading nested entries in the control panel. ([#17213](https://github.com/craftcms/cms/pull/17213))
 
 ## 5.7.4 - 2025-04-25
 
