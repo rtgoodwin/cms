@@ -1486,13 +1486,7 @@ class ElementQuery extends Query implements ElementQueryInterface
     public function prepForEagerLoading(string $handle, ElementInterface $sourceElement): static
     {
         // Prefix the handle with the provider's handle, if there is one
-        $provider = $sourceElement->getFieldLayout()?->provider;
-        // prioritise the original handle if there is one
-        if ($provider && property_exists($provider, 'original')) {
-            $providerHandle = $provider->original?->getHandle() ?? $provider->getHandle();
-        } else {
-            $providerHandle = $provider?->getHandle();
-        }
+        $providerHandle = $sourceElement->getFieldLayout()?->provider?->getHandle();
         $this->eagerLoadHandle = $providerHandle ? "$providerHandle:$handle" : $handle;
 
         $this->eagerLoadSourceElement = $sourceElement;
