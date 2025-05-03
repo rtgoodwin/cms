@@ -1631,18 +1631,13 @@ class Elements extends Component
                                 throw new InvalidElementException($element, "Skipped resaving $label due to an error obtaining its root element: " . $rootException->getMessage());
                             }
                         }
-                    } catch (InvalidElementException $e) {
-                    }
 
-                    if ($e === null) {
-                        try {
-                            $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
-                        } catch (Throwable $e) {
-                            if (!$continueOnError) {
-                                throw $e;
-                            }
-                            Craft::$app->getErrorHandler()->logException($e);
+                        $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
+                    } catch (Throwable $e) {
+                        if (!$continueOnError) {
+                            throw $e;
                         }
+                        Craft::$app->getErrorHandler()->logException($e);
                     }
 
                     // Fire an 'afterResaveElement' event
