@@ -63,13 +63,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     draggingCropper: false,
     movingCropper: false,
     scalingCropper: false,
-    handleClicked: false,
+    handlePicked: false,
     draggingFocal: false,
     cropperPickedUp: false,
     focalPickedUp: false,
     focalClicked: false,
     cropperClicked: false,
-    handlePickedUp: false,
     previousMouseX: 0,
     previousMouseY: 0,
     shiftKeyHeld: false,
@@ -2648,7 +2647,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         if (focal) {
           this.focalClicked = true;
         } else if (handle) {
-          this.handleClicked = handle;
+          this.handlePicked = handle;
         } else if (move) {
           this.cropperClicked = true;
         }
@@ -2677,7 +2676,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this._handleFocalDrag(this.mouseMoveEvent);
         this.storeFocalPointState();
         this.renderImage();
-      } else if (this.cropperClicked || this.handleClicked) {
+      } else if (this.cropperClicked || this.handlePicked) {
         if (this.cropperClicked) {
           this.draggingCropper = true;
           this._handleCropperDrag(this.mouseMoveEvent);
@@ -2726,7 +2725,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // Reset scaling
       this.scalingCropper = false;
-      this.handleClicked = false;
+      this.handlePicked = false;
 
       // Reset focal
       this.draggingFocal = false;
@@ -3333,11 +3332,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this._handleCropperResize._.deltaX = ev.pageX - this.previousMouseX;
       this._handleCropperResize._.deltaY = ev.pageY - this.previousMouseY;
 
-      if (this.handleClicked === 'b' || this.handleClicked === 't') {
+      if (this.handlePicked === 'b' || this.handlePicked === 't') {
         this._handleCropperResize._.deltaX = 0;
       }
 
-      if (this.handleClicked === 'l' || this.handleClicked === 'r') {
+      if (this.handlePicked === 'l' || this.handlePicked === 'r') {
         this._handleCropperResize._.deltaY = 0;
       }
 
@@ -3349,7 +3348,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       this._resizeCropperByCornerAndDelta(
-        this.handleClicked,
+        this.handlePicked,
         this._handleCropperResize._.deltaX,
         this._handleCropperResize._.deltaY
       );
