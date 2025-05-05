@@ -2511,7 +2511,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
         } else {
-          this.cornerPickedUp = $btn.attr('data-corner-handle');
+          this.cornerPickedUp = $btn.attr('data-handle');
         }
 
         stateMessage = Craft.t('app', '{item} picked up.', {
