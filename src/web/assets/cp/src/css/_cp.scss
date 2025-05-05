@@ -1606,6 +1606,42 @@ li.breadcrumb-toggle-wrapper {
   }
 }
 
+%type-heading-small {
+  text-transform: uppercase;
+  color: var(--medium-text-color);
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.source-item {
+  --source-item-toggle-size: calc(var(--xl) - 2px);
+  position: relative;
+
+  // Toggle button
+  .source-item__toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+    width: var(--source-item-toggle-size);
+    height: var(--source-item-toggle-size);
+    z-index: 1;
+    color: inherit;
+  }
+
+  &:has(.sel) {
+    --icon-color: var(--white);
+  }
+}
+
+.source-item--heading {
+  @extend %type-heading-small;
+}
+
 /* Sidebar */
 .sidebar {
   width: $sidebarWidth;
@@ -1621,44 +1657,38 @@ li.breadcrumb-toggle-wrapper {
   .heading {
     position: relative;
     margin-block: 0;
-    margin-inline: var(--xl);
     line-height: 1.2;
 
     &:not(:first-child) {
       margin-block-start: var(--m);
     }
 
+    .type-heading-small,
     & > span {
+      // Backwards compatibility
+      @extend %type-heading-small;
       display: inline-block;
       position: relative;
       z-index: 1;
       padding-block: 0;
-      padding-inline: 5px;
+      padding-inline: var(--xl) var(--m);
       margin-block: 0;
-      margin-inline: -5px;
-      text-transform: uppercase;
-      color: var(--medium-text-color);
-      font-size: 11px;
-      font-weight: bold;
     }
 
     & > ul {
       margin-block: 2px;
-      margin-inline: calc(var(--xl) * -1);
-    }
-
-    craft-disclosure .toggle {
-      height: 1lh;
-      inset-inline-start: var(--neg-padding);
     }
   }
 
   @mixin nav-level($level) {
-    & > a {
+    & > a,
+    .type-heading-small,
+    [data-source-item] {
       padding-inline-start: 24px + 14 * $level;
     }
 
-    & > .toggle {
+    & > .toggle,
+    [aria-controls] {
       inset-inline-start: calc(var(--m) * #{$level});
     }
   }
@@ -1693,7 +1723,8 @@ li.breadcrumb-toggle-wrapper {
     li {
       position: relative;
 
-      &:not(.has-subnav) > a {
+      &:not(.has-subnav) > a,
+      &:not(.has-subnav) [data-source-item] {
         &:not(.sel):hover {
           text-decoration: none;
         }

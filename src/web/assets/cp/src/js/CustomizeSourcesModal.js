@@ -380,7 +380,7 @@ Craft.CustomizeSourcesModal = Garnish.Modal.extend({
     if (sourceData.type === 'heading') {
       // Sources pre 5.8 don't have a `key` so we need to add one if it is missing.
       if (!sourceData.key) {
-        sourceData.key = `heading:${Craft.uuid()}`
+        sourceData.key = `heading:${Craft.uuid()}`;
       }
 
       $item.addClass('heading');
@@ -1086,11 +1086,12 @@ Craft.CustomizeSourcesModal.Heading =
         .appendTo($container);
       this.$labelInput = $labelField.find('.text');
 
-      Craft.ui.createLightswitchField({
-        label: Craft.t('app', 'Collapsible'),
-        name: `sources[${this.sourceData.key}][collapsible]`,
-        on: this.sourceData.collapsible,
-      })
+      Craft.ui
+        .createLightswitchField({
+          label: Craft.t('app', 'Collapsible'),
+          name: `sources[${this.sourceData.key}][collapsible]`,
+          on: this.sourceData.collapsible,
+        })
         .appendTo($container);
 
       $container.append('<hr/>');

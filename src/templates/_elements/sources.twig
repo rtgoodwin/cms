@@ -92,35 +92,48 @@
                 </li>
             {% endif %}
             <li class="heading">
-                <span class="source-heading">{{ source.heading|t('site') }}</span>
-                {% if source.collapsible ?? false %}
-                    <craft-disclosure class="nav-item__trigger" state="expanded">
-                        <button type="button" class="toggle" aria-expanded="false" aria-controls="{{ source.key }}">
-                            <span class="visually-hidden">{{ 'Show nested sources' | t('app') }}</span>
-                        </button>
-                    </craft-disclosure>
-                {% endif %}
+                <div class="source-item source-item--heading">
+                    <span class="type-heading-small">{{ source.heading|t('site') }}</span>
+                    {% if source.collapsible ?? false %}
+                        <craft-disclosure state="expanded" >
+                            <button type="button" aria-expanded="false" aria-controls="{{ source.key }}"  class="source-item__toggle">
+                                <span class="cp-icon puny">
+                                    {{ iconSvg('angle-down') }}
+                                </span>
+                                <span class="visually-hidden">{{ 'Show nested sources' | t('app') }}</span>
+                            </button>
+                        </craft-disclosure>
+                    {% endif %}
+                </div>
                 <ul id="{{ source.key ?? 'heading' }}">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
             {% set key = source.keyPath ?? (keyPrefix ~ source.key) %}
             {% tag 'li' with {
                 class: [
+                    (source.nested ?? false) ? 'collapsible' : null,
                     (source.disabled ?? false) ? 'hidden' : null,
                 ]|filter,
             } %}
-                {{ _self.sourceLink(key, source, isTopLevel, elementType, sortOptions ?? null, baseSortOptions ?? null, tableColumns ?? null, defaultTableColumns ?? null, viewModes ?? null) }}
+                <div class="source-item source-item--link">
+                    {{ _self.sourceLink(key, source, isTopLevel, elementType, sortOptions ?? null, baseSortOptions ?? null, tableColumns ?? null, defaultTableColumns ?? null, viewModes ?? null) }}
+                    {% if source.nested is defined and source.nested is not empty %}
+                        <craft-disclosure state="expanded">
+                            <button
+                                type="button"
+                                class="source-item__toggle"
+                                aria-expanded="false"
+                                aria-controls="{{ key }}"
+                                aria-label="{{ 'Show nested sources'|t('app') }}"
+                            >
+                                <span class="cp-icon puny">
+                                    {{ iconSvg('angle-down') }}
+                                </span>
+                            </button>
+                        </craft-disclosure>
+                    {% endif %}
+                </div>
                 {% if source.nested is defined and source.nested is not empty %}
-                    <craft-disclosure>
-                        <button
-                            class="toggle"
-                            type="button"
-                            aria-expanded="false"
-                            aria-controls="{{ key }}"
-                        >
-                            <span class="visually-hidden">{{ 'Show nested sources'|t('app') }}</span>
-                        </button>
-                    </craft-disclosure>
                     {% include "_elements/sources" with {
                         keyPrefix: key ~ '/',
                         id: key,
