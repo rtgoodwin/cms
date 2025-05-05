@@ -32,6 +32,7 @@ use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\db\NestedElementQueryInterface;
 use craft\elements\ElementCollection;
+use craft\elements\Entry;
 use craft\elements\exporters\Expanded;
 use craft\elements\exporters\Raw;
 use craft\elements\User;
@@ -1765,32 +1766,44 @@ abstract class Element extends Component implements ElementInterface
             $fieldHandle = $handle;
         }
 
-        $field = null;
+        // Get all the custom fields by that handle
+        $fields = [];
         foreach (static::fieldLayouts(null) as $fieldLayout) {
             if ($providerHandle === null || $fieldLayout->provider?->getHandle() === $providerHandle) {
                 $layoutField = $fieldLayout->getFieldByHandle($fieldHandle);
                 if ($layoutField) {
-                    $field = $layoutField;
-                    break;
+                    $fields[] = $layoutField;
+                    if ($providerHandle !== null) {
+                        break;
+                    }
                 }
             }
         }
 
-        if ($field instanceof EagerLoadingFieldInterface) {
-            // filter out elements, if field is not part of its layout
-            // https://github.com/craftcms/cms/issues/12539
-            $sourceElements = array_values(
-                array_filter($sourceElements, function($sourceElement) use ($field) {
-                    $layoutField = $sourceElement->getFieldLayout()?->getFieldByHandle($field->handle);
-                    return $layoutField && $layoutField->id === $field->id;
-                })
-            );
+        // If there were any matching fields, find the first one that's actually included in
+        // at least one of the source elements’ field layouts
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                if (!$field instanceof EagerLoadingFieldInterface) {
+                    continue;
+                }
 
-            if (empty($sourceElements)) {
-                return false;
+                // filter out elements, if field is not part of its layout
+                // https://github.com/craftcms/cms/issues/12539
+                $fieldSourceElements = array_values(
+                    array_filter($sourceElements, function($sourceElement) use ($field) {
+                        $layoutField = $sourceElement->getFieldLayout()?->getFieldByHandle($field->handle);
+                        return $layoutField && $layoutField->id === $field->id;
+                    })
+                );
+
+                if (!empty($fieldSourceElements)) {
+                    return $field->getEagerLoadingMap($fieldSourceElements);
+                }
             }
 
-            return $field->getEagerLoadingMap($sourceElements);
+            // None of the source elements include any of the matching fields
+            return false;
         }
 
         // Fire a 'defineEagerLoadingMap' event
@@ -6838,6 +6851,17 @@ JS, [
         $templates = [
             sprintf('%s/%s', $generalConfig->partialTemplatesPath, $refHandle),
         ];
+
+        // todo: make this better in 5.8
+        if ($this instanceof Entry) {
+            $entryType = $this->getType();
+            if (isset($entryType->original) && $entryType->original->handle !== $entryType->handle) {
+                array_unshift(
+                    $templates,
+                    sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $entryType->original->handle),
+                );
+            }
+        }
 
         $providerHandle = $this->getFieldLayout()?->provider?->getHandle();
         if ($providerHandle !== null) {

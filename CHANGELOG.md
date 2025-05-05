@@ -2,7 +2,16 @@
 
 ## Unreleased
 
+- `craft\services\Entries::getEntryTypeById()` now has a `$withTrashed` argument.
+- Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
+- Fixed a SQL error that could occur when running garbage collection. ([#17197](https://github.com/craftcms/cms/issues/17197))
+- Fixed a PHP error that could occur if malformed UTF-8 data was passed to `craft\helpers\StringHepler::replaceMb4()`. ([#17202](https://github.com/craftcms/cms/issues/17202))
+- Fixed a bug where “Applying new propagation method” jobs weren’t propagating elements to newly-supported sites. ([#17207](https://github.com/craftcms/cms/issues/17207))
 - Fixed a bug where relational fields weren’t enforcing their “Maintain hierarchy” and “Branch Limit” settings on save.
+- Fixed a bug where eager-loading relational field elements wasn’t always working, if multiple fields were aliased to the same handle.
+- Fixed an error that could occur when applying project config changes after running the `entry-types/merge` command, if the outgoing entry type was used by a Single section. ([#16628](https://github.com/craftcms/cms/issues/16628))
+- Fixed a bug where `resave/*` commands could end prematurely if an unexpected error occurred.
+- Fixed a bug where Matrix fields weren’t always loading nested entries in the control panel. ([#17213](https://github.com/craftcms/cms/pull/17213))
 
 ## 5.7.4 - 2025-04-25
 
@@ -629,6 +638,7 @@
 - Added `craft\fields\Color::$palette`. ([#16249](https://github.com/craftcms/cms/pull/16249))
 - Added `craft\fields\Color::getDefaultColor()`. ([#16249](https://github.com/craftcms/cms/pull/16249))
 - Added `craft\fields\Color::setDefaultValue()`. ([#16249](https://github.com/craftcms/cms/pull/16249))
+- Added `craft\fields\Link::$fullGraphqlData`.
 - Added `craft\fields\data\LinkData::$ariaLabel`.
 - Added `craft\fields\data\LinkData::$class`.
 - Added `craft\fields\data\LinkData::$id`.
