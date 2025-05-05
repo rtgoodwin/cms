@@ -3124,6 +3124,8 @@ class Elements extends Component
                 if (!$path->count && !$path->all) {
                     $path->all = true;
                 }
+                // ...recursively for any nested plans
+                $path->nested = $this->createEagerLoadingPlans($path->nested);
 
                 // Don't index the plan by its alias, as two plans w/ different `when` filters could be using the same alias.
                 // Side effect: mixing EagerLoadPlan objects and arrays could result in redundant element queries,
