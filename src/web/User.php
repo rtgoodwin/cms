@@ -467,9 +467,9 @@ class User extends \yii\web\User
     }
 
     /**
-     * @inheritDoc
+     * @inheritdoc
      */
-    public function setReturnUrl($url)
+    public function setReturnUrl($url): void
     {
         parent::setReturnUrl(strip_tags($url));
     }
