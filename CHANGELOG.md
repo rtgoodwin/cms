@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Return URLs are now sanitized before being saved to the PHP session.
 - `craft\services\Entries::getEntryTypeById()` now has a `$withTrashed` argument.
 - Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
 - Fixed a SQL error that could occur when running garbage collection. ([#17197](https://github.com/craftcms/cms/issues/17197))
