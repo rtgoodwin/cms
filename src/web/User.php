@@ -467,6 +467,14 @@ class User extends \yii\web\User
     }
 
     /**
+     * @inheritDoc
+     */
+    public function setReturnUrl($url)
+    {
+        parent::setReturnUrl(strip_tags($url));
+    }
+
+    /**
      * @inheritdoc
      */
     protected function renewAuthStatus(): void
