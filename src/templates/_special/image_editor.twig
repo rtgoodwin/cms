@@ -81,35 +81,19 @@
         {% set cropHandleBtns = [
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'tl' : 'tr',
-            },
-            {
-                label: 'Top Handle'|t('app'),
-                handle: 't',
+                corner: orientation == 'ltr' ? 'tl' : 'tr',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'tr' : 'tl',
-            },
-            {
-                label: orientation == 'ltr' ? 'Left Handle'|t('app') : 'Right Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'l' : 'r',
-            },
-            {
-                label: orientation == 'ltr' ? 'Right Handle'|t('app') : 'Left Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'r' : 'l',
+                corner: orientation == 'ltr' ? 'tr' : 'tl',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'bl' : 'br',
-            },
-            {
-                label: 'Bottom Handle'|t('app'),
-                handle: 'b',
+                corner: orientation == 'ltr' ? 'bl' : 'br',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
-                handle: orientation == 'ltr' ? 'br' : 'bl',
+                corner: orientation == 'ltr' ? 'br' : 'bl',
             },
         ] %}
 
@@ -152,18 +136,15 @@
                 }) }}
             </div>
 
-            <div class="cropper-edit__wrapper cropper-edit__wrapper--handles">
+            <div class="cropper-edit__wrapper cropper-edit__wrapper--corners">
                 {% for button in cropHandleBtns %}
-                    {% if loop.index == 5 %}
-                        <div></div>
-                    {% endif %}
                     {{ _self.iconButton({
                         icon: 'expand',
                         label: button.label,
                         buttonAttributes: {
                             data: {
-                                'crop-editor': 'handle',
-                                'cropper-handle': button.handle,
+                                'crop-editor': 'corner',
+                                'corner-handle': button.corner,
                             },
                             class: ['cropper-edit__btn']
                         }
