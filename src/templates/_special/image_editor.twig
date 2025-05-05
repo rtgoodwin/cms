@@ -81,19 +81,19 @@
         {% set cropHandleBtns = [
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'tl' : 'tr',
+                handle: orientation == 'ltr' ? 'tl' : 'tr',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'tr' : 'tl',
+                handle: orientation == 'ltr' ? 'tr' : 'tl',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'bl' : 'br',
+                handle: orientation == 'ltr' ? 'bl' : 'br',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
-                corner: orientation == 'ltr' ? 'br' : 'bl',
+                handle: orientation == 'ltr' ? 'br' : 'bl',
             },
         ] %}
 
@@ -144,7 +144,7 @@
                         buttonAttributes: {
                             data: {
                                 'crop-editor': 'corner',
-                                'corner-handle': button.corner,
+                                'corner-handle': button.handle,
                             },
                             class: ['cropper-edit__btn']
                         }
