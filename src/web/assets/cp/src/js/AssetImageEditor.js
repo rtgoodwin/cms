@@ -2307,9 +2307,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         });
       }
 
-      if (this.cornerPickedUp) {
-        let cornerCoordinates = this.getClipperCornerPosition(
-          this.cornerPickedUp
+      if (this.handlePicked) {
+        let handleCoordinates = this.getClipperHandlePosition(
+          this.handlePicked
         );
 
         this.cropperHandleFocusRing = new fabric.Circle({
@@ -2317,8 +2317,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           fill: 'rgba(255,255,255,0.5)',
           strokeWidth: 4,
           stroke: 'rgba(255,255,255,0.8)',
-          left: cornerCoordinates.x,
-          top: cornerCoordinates.y,
+          left: handleCoordinates.x,
+          top: handleCoordinates.y,
           originX: 'center',
           originY: 'center',
         });
@@ -2388,7 +2388,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.cornerPickedUp) {
+      if (this.handlePicked) {
         this.croppingCanvas.add(this.cropperHandleFocusRing);
       }
     },
@@ -2488,7 +2488,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // Defaults
       this.cropperPickedUp = false;
-      this.cornerPickedUp = false;
+      this.handlePicked = false;
       this.$cropperEditBtn.attr('aria-pressed', 'false');
 
       // Grab button text for state message
@@ -2510,7 +2510,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         if (itemPicked === 'rectangle') {
           this.cropperPickedUp = true;
         } else {
-          this.cornerPickedUp = $btn.attr('data-handle');
+          this.handlePicked = $btn.attr('data-handle');
         }
 
         stateMessage = Craft.t('app', '{item} picked up.', {
@@ -2591,7 +2591,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleKeydownOnCropperEditBtn: function (ev) {
       const {target} = ev;
 
-      if (!this.focalPoint && !this.cropperPickedUp && !this.cornerPickedUp)
+      if (!this.focalPoint && !this.cropperPickedUp && !this.handlePicked)
         return;
 
       const isDirectionalKey = [
@@ -2810,32 +2810,44 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Returns the x and y coordinates of the clipper corners.
+     * Returns the x and y coordinates of the clipper handles.
      *
-     * @param {'tl'|'tr'|'br'|'bl'} corner
+     * @param {'tl'|'t'|'tr'|'r'|'br'|'b'|'bl'|'l'} handle
      */
-    getClipperCornerPosition: function (corner) {
+    getClipperHandlePosition: function (handle) {
       let position = {
         x: null,
         y: null,
       };
 
-      switch (corner) {
+      switch (handle) {
         case 'tl':
           position.x = this.clipper.left - this.clipper.width / 2;
           position.y = this.clipper.top - this.clipper.height / 2;
+          break;
+        case 't':
+          console.log('top');
           break;
         case 'tr':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top - this.clipper.height / 2;
           break;
+        case 'r':
+          console.log('right');
+          break;
         case 'br':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
           break;
+        case 'b':
+          console.log('bottom');
+          break;
         case 'bl':
           position.x = this.clipper.left - this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
+          break;
+        case 'l':
+          console.log('left');
           break;
       }
 
@@ -2849,9 +2861,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
-      } else if (this.cornerPickedUp) {
-        this._resizeCropperByCornerAndDelta(
-          this.cornerPickedUp,
+      } else if (this.handlePicked) {
+        this._resizeCropperByHandleAndDelta(
+          this.handlePicked,
           deltaValues.deltaX,
           deltaValues.deltaY
         );
@@ -2881,16 +2893,16 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
-      } else if (this.cornerPickedUp) {
-        this._resizeCropperByCornerAndDelta(
-          this.cornerPickedUp,
+      } else if (this.handlePicked) {
+        this._resizeCropperByHandleAndDelta(
+          this.handlePicked,
           deltaValues.deltaX,
           deltaValues.deltaY
         );
       }
     },
 
-    _resizeCropperByCornerAndDelta: function (corner, deltaX, deltaY) {
+    _resizeCropperByHandleAndDelta: function (handle, deltaX, deltaY) {
       if (typeof this._handleCropperResize._ === 'undefined') {
         this._handleCropperResize._ = {};
       }
@@ -2908,7 +2920,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this._handleCropperResize._.startingRectangle,
           deltaX,
           deltaY,
-          corner
+          handle
         );
 
       if (
@@ -3347,7 +3359,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         return;
       }
 
-      this._resizeCropperByCornerAndDelta(
+      this._resizeCropperByHandleAndDelta(
         this.handlePicked,
         this._handleCropperResize._.deltaX,
         this._handleCropperResize._.deltaY
