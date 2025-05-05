@@ -1418,6 +1418,7 @@ return [
     'Save and add another' => 'Save and add another',
     'Save and continue editing' => 'Save and continue editing',
     'Save and send activation email' => 'Save and send activation email',
+    'Save as a new entry type' => 'Save as a new entry type',
     'Save as a new {type}' => 'Save as a new {type}',
     'Save assets uploaded by other users' => 'Save assets uploaded by other users',
     'Save categories in the “{categoryGroup}” category group' => 'Save categories in the “{categoryGroup}” category group',

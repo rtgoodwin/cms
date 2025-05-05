@@ -9,6 +9,7 @@
 
 ### Administration
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
+- Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
 
 ### Extensibility
@@ -19,6 +20,7 @@
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
 - Added `craft\fields\data\OptionData::$color`.
 - Added `craft\fields\data\OptionData::$icon`.
+- Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
 - Added the `_includes/forms/buttonGroup.twig` template.
