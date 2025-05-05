@@ -41,7 +41,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     grid: null,
     croppingCanvas: null,
     clipper: null,
-    cropperCornerFocusRing: null,
+    cropperHandleFocusRing: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
@@ -2220,8 +2220,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.croppingRectangle);
       }
 
-      if (this.cropperCornerFocusRing) {
-        this.croppingCanvas.remove(this.cropperCornerFocusRing);
+      if (this.cropperHandleFocusRing) {
+        this.croppingCanvas.remove(this.cropperHandleFocusRing);
       }
 
       this._redrawCropperElements._.lineOptions = {
@@ -2313,7 +2313,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.cornerPickedUp
         );
 
-        this.cropperCornerFocusRing = new fabric.Circle({
+        this.cropperHandleFocusRing = new fabric.Circle({
           radius: 12,
           fill: 'rgba(255,255,255,0.5)',
           strokeWidth: 4,
@@ -2390,7 +2390,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.croppingRectangle);
 
       if (this.cornerPickedUp) {
-        this.croppingCanvas.add(this.cropperCornerFocusRing);
+        this.croppingCanvas.add(this.cropperHandleFocusRing);
       }
     },
 
@@ -2494,8 +2494,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // Grab button text for state message
       let item = $btn.text().trim();
-
-      console.log('hello');
 
       if (!pickingUp) {
         stateMessage = Craft.t('app', '{item} dropped.', {
