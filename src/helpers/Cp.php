@@ -1808,6 +1808,33 @@ JS, [
     }
 
     /**
+     * Renders a button group.
+     *
+     * @param array $config
+     * @return string
+     * @since 5.8.0
+     */
+    public static function buttonGroupHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
+     * Renders a button group field’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @since 5.8.0
+     */
+    public static function buttonGroupFieldHtml(array $config): string
+    {
+        $config['id'] ??= 'buttongroup' . mt_rand();
+        $config['fieldset'] = true;
+        return static::fieldHtml('template:_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
      * Renders a checkbox field’s HTML.
      *
      * Note that unlike the `checkboxField` macro in `_includes/forms.html`, you must set the checkbox label via
@@ -3508,15 +3535,23 @@ JS;
                     'asterisk-slash',
                     'diamond-slash',
                     'element-card',
-                    'gear-slash',
                     'element-card-slash',
                     'element-cards',
+                    'gear-slash',
                     'graphql',
                     'grip-dots',
                     'image-slash',
                     'list-flip',
                     'list-tree-flip',
+                    'notification-bottom-left',
+                    'notification-bottom-right',
+                    'notification-top-left',
+                    'notification-top-right',
                     'share-flip',
+                    'slideout-left',
+                    'slideout-right',
+                    'thumb-left',
+                    'thumb-right',
                     => Craft::getAlias("@app/icons/custom-icons/$icon.svg"),
                     default => Craft::getAlias("@appicons/$icon.svg"),
                 };
