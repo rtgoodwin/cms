@@ -3,7 +3,6 @@
 ## Unreleased
 
 - Return URLs are now sanitized before being saved to the PHP session.
-- Prevented potential email enumeration on public registration forms. ([#17085](https://github.com/craftcms/cms/pull/17085))
 - Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
 - Fixed a SQL error that could occur when running garbage collection. ([#17197](https://github.com/craftcms/cms/issues/17197))
 - Fixed a PHP error that could occur if malformed UTF-8 data was passed to `craft\helpers\StringHepler::replaceMb4()`. ([#17202](https://github.com/craftcms/cms/issues/17202))

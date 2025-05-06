@@ -6,3 +6,6 @@
 
 ### Extensibility
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
+
+### System
+- Prevented potential email enumeration on public registration forms. ([#17085](https://github.com/craftcms/cms/pull/17085))
