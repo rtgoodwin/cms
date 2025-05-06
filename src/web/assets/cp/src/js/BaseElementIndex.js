@@ -3963,11 +3963,33 @@ const SourceNav = Garnish.Base.extend(
     $container: null,
     $items: null,
     $selectedItem: null,
+    $disclosures: null,
 
     init: function (container, settings) {
       this.$container = $(container);
       this.setSettings(settings, SourceNav.defaults);
       this.$items = $();
+      this.initDisclosures();
+    },
+
+    initDisclosures: function () {
+      const self = this;
+      const activeChildClass = 'has-active-child';
+      this.$disclosures = this.$container.find('craft-disclosure');
+      this.$disclosures.on('open', function () {
+        $(this).closest(`.${activeChildClass}`).removeClass(activeChildClass);
+      });
+
+      this.$disclosures.on('close', function () {
+        const disclosure = $(this)[0];
+        const target = disclosure.target;
+
+        if (target.querySelector(`.${self.settings.selectedClass}`)) {
+          $(disclosure.trigger)
+            .closest('.source-item')
+            .addClass(activeChildClass);
+        }
+      });
     },
 
     addItems: function (items) {

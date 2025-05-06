@@ -1614,7 +1614,7 @@ li.breadcrumb-toggle-wrapper {
 }
 
 .source-item {
-  --source-item-toggle-size: calc(var(--xl) - 2px);
+  --source-item-toggle-size: calc(20rem / 16);
   position: relative;
 
   // Toggle button
@@ -1635,6 +1635,16 @@ li.breadcrumb-toggle-wrapper {
 
   &:has(.sel) {
     --icon-color: var(--white);
+  }
+}
+
+.has-active-child {
+  --icon-color: var(--white);
+
+  .source-item__toggle {
+    background-color: var(--gray-500);
+    color: var(--white);
+    border-radius: 4px;
   }
 }
 
@@ -1756,7 +1766,7 @@ li.breadcrumb-toggle-wrapper {
         flex-direction: row;
         align-items: center;
         padding-block: 7px;
-        padding-inline: var(--xl);
+        padding-inline: var(--xl) var(--m);
         min-height: var(--xl);
         box-sizing: border-box;
         color: var(--text-color);
