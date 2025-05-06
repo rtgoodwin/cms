@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.3 - 2025-05-06
 
 - Return URLs are now sanitized before being saved to the PHP session.
 - Fixed a bug where admin tables’ pagination footers could be positioned incorrectly in slideouts. ([#17187](https://github.com/craftcms/cms/issues/17187))
