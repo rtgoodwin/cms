@@ -14,6 +14,7 @@
 - Fixed a bug where `resave/*` commands could end prematurely if an unexpected error occurred.
 - Fixed a bug where Matrix fields weren’t always loading nested entries in the control panel. ([#17213](https://github.com/craftcms/cms/pull/17213))
 - Fixed a bug where GraphQL queries could return unexpected results. ([#17160](https://github.com/craftcms/cms/issues/17160))
+- Fixed a bug where Card Attributes settings weren’t always remembering custom field selections, for fields that were just added to the field layout designer. ([#17223](https://github.com/craftcms/cms/pull/17223))
 
 ## 5.7.4 - 2025-04-25
 
