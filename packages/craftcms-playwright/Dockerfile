@@ -1,46 +1,25 @@
-ARG PHP_VERSION=8.2
-ARG PROJECT_TYPE=fpm
-
-FROM php:${PHP_VERSION}-${PROJECT_TYPE}-alpine
+FROM ghcr.io/craftcms/image:8.2 AS craft
 
 USER root
 
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 
-RUN apt-get update -y
+#RUN apt-get update -y
 
 RUN apt install -y nodejs mysql-client git postgresql-client
-
-RUN apt-get -y install \
-    libglib2.0-0 \
-    libnss3 \
-    libnspr4 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libdbus-1-3 \
-    libxkbcommon0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxrandr2 \
-    libgbm1 \
-    libpango-1.0-0 \
-    libcairo2 \
-    libasound2 \
-    libatspi2.0-0
 
 RUN curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
 
 RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
 
-#RUN mv /app/* /app-bak/
+# copy the files from the host to the container that we need
+COPY packages/craftcms-playwright/craftcms/etc/nginx/nginx.conf /etc/nginx/nginx.conf
+COPY packages/craftcms-playwright/craftcms/etc/supervisord.d/nginx.ini /etc/supervisord.d/nginx.ini
 
 # set the sockets and pid files to be writable by the appuser
 RUN mkdir -p /var/log/nginx && chown -R appuser:appgroup /var/log/nginx
 RUN chown -R appuser:appgroup /var/lib/nginx && touch /run/nginx.pid && chown -R appuser:appgroup /run/nginx.pid
+
 
 RUN composer create-project -n craftcms/craft /tmp/app
 
@@ -50,7 +29,10 @@ RUN rm -f /tmp/app/.env
 
 RUN mv /tmp/app/* /app
 
-RUN chown -R appuser /app
-RUN chgrp -R appgroup /app
+RUN chown -R appuser:appgroup /app
 
+# run container as the www-data user
 USER appuser
+
+# set the working directory for convenience
+WORKDIR /app
