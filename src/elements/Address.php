@@ -81,7 +81,7 @@ class Address extends Element implements AddressInterface, BlockElementInterface
     }
 
     /**
-     * @inerhitdoc
+     * @inheritdoc
      */
     public static function hasTitles(): bool
     {
