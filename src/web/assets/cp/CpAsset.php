@@ -158,6 +158,7 @@ JS;
             'Clear',
             'Close Preview',
             'Close',
+            'Collapsible',
             'Color hex value',
             'Color picker',
             'Content',

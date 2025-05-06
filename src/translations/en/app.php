@@ -317,6 +317,7 @@ return [
     'Close' => 'Close',
     'Closed Issues' => 'Closed Issues',
     'Collapse' => 'Collapse',
+    'Collapsible' => 'Collapsible',
     'Color hex value' => 'Color hex value',
     'Color picker' => 'Color picker',
     'Color' => 'Color',
