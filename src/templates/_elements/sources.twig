@@ -81,6 +81,13 @@
 
 {% set nestedUnderHeading = false %}
 
+{% set toggleContent %}
+    <span class="cp-icon puny">
+        {{ iconSvg('angle-down') }}
+    </span>
+    <span class="visually-hidden">{{ 'Show nested sources' | t('app') }}</span>
+{% endset %}
+
 {% tag 'ul' with {
     class: keyPrefix ? 'nested' : null,
     id: id ?? ''
@@ -95,14 +102,14 @@
                 <div class="source-item source-item--heading">
                     <span class="type-heading-small">{{ source.heading|t('site') }}</span>
                     {% if source.collapsible ?? false %}
-                        <craft-disclosure state="expanded" >
-                            <button type="button" aria-expanded="false" aria-controls="{{ source.key }}"  class="source-item__toggle">
-                                <span class="cp-icon puny">
-                                    {{ iconSvg('angle-down') }}
-                                </span>
-                                <span class="visually-hidden">{{ 'Show nested sources' | t('app') }}</span>
-                            </button>
-                        </craft-disclosure>
+                        {% include '_includes/disclosure-toggle' with {
+                            cookieName: 'sources-list:'~ source.key,
+                            controls: source.key,
+                            content: toggleContent,
+                            attributes: {
+                                class: 'source-item__toggle'
+                            }
+                        } only %}
                     {% endif %}
                 </div>
                 <ul id="{{ source.key ?? 'heading' }}">
@@ -118,19 +125,14 @@
                 <div class="source-item source-item--link">
                     {{ _self.sourceLink(key, source, isTopLevel, elementType, sortOptions ?? null, baseSortOptions ?? null, tableColumns ?? null, defaultTableColumns ?? null, viewModes ?? null) }}
                     {% if source.nested is defined and source.nested is not empty %}
-                        <craft-disclosure state="expanded">
-                            <button
-                                type="button"
-                                class="source-item__toggle"
-                                aria-expanded="false"
-                                aria-controls="{{ key }}"
-                                aria-label="{{ 'Show nested sources'|t('app') }}"
-                            >
-                                <span class="cp-icon puny">
-                                    {{ iconSvg('angle-down') }}
-                                </span>
-                            </button>
-                        </craft-disclosure>
+                        {% include '_includes/disclosure-toggle' with {
+                            cookieName: 'sources-list:'~ key,
+                            controls: key,
+                            content: toggleContent,
+                            attributes: {
+                                class: 'source-item__toggle'
+                            }
+                        } only %}
                     {% endif %}
                 </div>
                 {% if source.nested is defined and source.nested is not empty %}
