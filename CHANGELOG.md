@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.5 - 2025-05-06
 
 - Return URLs are now sanitized before being saved to the PHP session.
 - `craft\services\Entries::getEntryTypeById()` now has a `$withTrashed` argument.
