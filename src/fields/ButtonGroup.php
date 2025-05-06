@@ -93,10 +93,21 @@ class ButtonGroup extends BaseOptionsField implements SortableFieldInterface
         }
 
         $id = $this->getInputId();
+        $options = $this->translatedOptions(true, $value, $element);
+
+        if ($this->iconsOnly) {
+            foreach ($options as &$option) {
+                if (!empty($option['icon']) || ($option['icon'] ?? null) === '0') {
+                    $option['attributes']['aria']['label'] = $option['label'];
+                    unset($option['label']);
+                }
+            }
+        }
 
         return Cp::buttonGroupHtml([
             'id' => $id,
-            'options' => $this->translatedOptions(true, $value, $element),
+            'name' => $this->handle,
+            'options' => $options,
             'value' => $this->encodeValue($value),
         ]);
     }
