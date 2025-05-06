@@ -88,6 +88,16 @@ abstract class BaseRelationField extends Field implements PreviewableFieldInterf
     abstract public static function elementType(): string;
 
     /**
+     * Returns whether the “Show the site menu” setting should be shown for the field.
+     *
+     * @since 4.16.0
+     */
+    protected static function canShowSiteMenu(): bool
+    {
+        return static::elementType()::isLocalized();
+    }
+
+    /**
      * Returns the default [[selectionLabel]] value.
      *
      * @return string The default selection label
@@ -527,10 +537,13 @@ JS, [
         }
 
         if ($errorCount) {
-            $elementType = static::elementType();
-            $element->addError($this->handle, Craft::t('app', 'Validation errors found in {attribute} {type}; please fix them.', [
-                'type' => $errorCount === 1 ? $elementType::lowerDisplayName() : $elementType::pluralLowerDisplayName(),
-                'attribute' => Craft::t('site', $this->name),
+            $selectedCount = (int)$value->count();
+            $element->addError($this->handle, Craft::t('app', 'The selected {relatedType} {count, plural, =1{contains} other{contain}} validation errors, preventing this {type} from being saved. Edit the {relatedType} to fix them.', [
+                'relatedType' => $selectedCount === 1
+                    ? static::elementType()::lowerDisplayName()
+                    : static::elementType()::pluralLowerDisplayName(),
+                'count' => $selectedCount,
+                'type' => $element::lowerDisplayName(),
             ]));
         }
     }
@@ -1104,7 +1117,7 @@ JS, [
             ];
         }
 
-        return
+        $html =
             Cp::checkboxFieldHtml([
                 'checkboxLabel' => Craft::t('app', 'Relate {type} from a specific site?', ['type' => $pluralType]),
                 'name' => 'useTargetSite',
@@ -1119,8 +1132,10 @@ JS, [
                 'name' => 'targetSiteId',
                 'options' => $siteOptions,
                 'value' => $this->targetSiteId,
-            ]) .
-            Cp::checkboxFieldHtml([
+            ]);
+
+        if (static::canShowSiteMenu()) {
+            $html .= Cp::checkboxFieldHtml([
                 'fieldset' => true,
                 'fieldClass' => $showTargetSite ? ['hidden'] : null,
                 'checkboxLabel' => Craft::t('app', 'Show the site menu'),
@@ -1134,6 +1149,9 @@ JS, [
                 'name' => 'showSiteMenu',
                 'checked' => $this->showSiteMenu,
             ]);
+        }
+
+        return $html;
     }
 
     /**
@@ -1274,7 +1292,7 @@ JS, [
             'condition' => $selectionCondition,
             'referenceElement' => $element,
             'criteria' => $selectionCriteria,
-            'showSiteMenu' => ($this->targetSiteId || !$this->showSiteMenu) ? false : 'auto',
+            'showSiteMenu' => ($this->targetSiteId || !$this->showSiteMenu || !static::canShowSiteMenu()) ? false : 'auto',
             'allowSelfRelations' => (bool)$this->allowSelfRelations,
             'maintainHierarchy' => (bool)$this->maintainHierarchy,
             'branchLimit' => $this->branchLimit,
