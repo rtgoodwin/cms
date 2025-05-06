@@ -3160,7 +3160,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     _getSourcesInList: function ($list, topLevel) {
       let $sources = $list.find('> li:not(.heading) [data-source-item]');
       if (topLevel) {
-        $sources = $sources.add($list.find('> li.heading > ul > li [data-source-item]'));
+        $sources = $sources.add(
+          $list.find('> li.heading > ul > li [data-source-item]')
+        );
       }
       return $sources;
     },
