@@ -20,6 +20,8 @@
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
 - Added `craft\fields\data\OptionData::$color`.
 - Added `craft\fields\data\OptionData::$icon`.
+- Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
+- Added `craft\helpers\Cp::buttonGroupHtml()`.
 - Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
