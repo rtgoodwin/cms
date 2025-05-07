@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
+
 ## 4.15.3 - 2025-05-06
 
 - Return URLs are now sanitized before being saved to the PHP session.
