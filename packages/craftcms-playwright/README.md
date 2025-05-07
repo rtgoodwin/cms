@@ -16,3 +16,7 @@ All commands should be run from the cms repo’s location
 - to start test generator
   - run `npx craft-playwright boot`
   - run `npx playwright codegen 127.0.0.1:8089/admin`
+
+
+> [!TIP]
+> For tests on pages that use `ElementEditor`, use `.pressSequentially('text', { delay: 100 })` instead of `.fill('text')` because we have custom keyboard handling. Using `fill` will cause the tests to be flaky (the fact that text was written won't always be acknowledged). 

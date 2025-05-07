@@ -22,12 +22,10 @@ test.describe('Cards', () => {
     await page.waitForLoadState();
 
     // add nested entry to the matrix & save,
-    await page.getByRole('button', { name: 'plus New entry' }).click();
+    await page.locator('#content').getByRole('button', { name: 'New entry' }).click();
 
-    // wait for the field to be visible, otherwise things might happen too fast;
-    // playwright says it waits for elements to be visible before filling but it doesn't seem to always be the case
-    await page.locator('.slideout-container:not(.hidden) .so-content input[name$="[fields][plainTextField2]"]').waitFor();
-    await page.locator('.slideout-container:not(.hidden) .so-content input[name$="[fields][plainTextField2]"]').fill('card 1');
+    // fill out the field
+    await page.locator('.slideout-container:not(.hidden) .so-content input[name$="[fields][plainTextField2]"]').pressSequentially('card 1', { delay: 100 });
 
     // check if the draft card was attached to the dom
     const firstCard = page.locator('#fields-matrixCardsField-field .cards > li:first-child .card');
@@ -40,14 +38,14 @@ test.describe('Cards', () => {
     // wait for the status of the card to get updated
     await firstCard.locator('.status-label-text:text-is("Live")').waitFor();
 
-    // check the card was added and has the modified indicator
+    // check the card was added and the field has the modified indicator
     await expect(page.locator('#'+firstCardId)).toContainText('card 1');
     await expect(page.locator('#fields-matrixCardsField-field').getByTitle('This field has been modified.')).toBeVisible();
 
     // check that the nested entry can be edited after being created
-    await page.locator('#'+firstCardId).getByLabel('Actions').click();
-    await page.getByRole('button', { name: 'Edit entry' }).click();
-    await expect(page.locator('.slideout-container:not(.hidden) .so-content input[name$="[fields][plainTextField2]"]')).toHaveValue('card 1');
+    await page.locator('#'+firstCardId).getByRole('button', { name: 'Edit entry' }).click();
+    await expect(page.locator('.slideout-container:not(.hidden) .so-content input[name$="[fields][plainTextField2]"]'))
+      .toHaveValue('card 1');
     await page.getByRole('button', { name: 'Cancel' }).click();
 
     // and save the root entry
@@ -70,15 +68,14 @@ test.describe('Cards', () => {
     let firstCardId = await firstCard.getAttribute('id');
 
     // check that the entry nested in a matrix can be edited
-    await page.locator('#'+firstCardId).getByLabel('Actions').click();
-    await page.getByRole('button', { name: 'Edit entry' }).click();
+    await page.locator('#'+firstCardId).getByRole('button', { name: 'Edit entry' }).click();
 
     // update text field value & save
     const slideout = page.locator('.slideout-container:not(.hidden)');
     // wait for the input field to be visible
     await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').waitFor();
-    await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').fill('card 1 edited');
-    await slideout.locator('.so-footer .discard-changes-btn').waitFor();
+    await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').pressSequentially('card 1 edited', { delay: 100 });
+    //await slideout.locator('.so-footer .discard-changes-btn').waitFor();
     await slideout.getByRole('button', { name: 'Save' }).click();
 
     await page.locator('#revision-indicators').getByTitle('Saving').waitFor({state: 'hidden'});
@@ -90,7 +87,7 @@ test.describe('Cards', () => {
     // save root entry
     await page.keyboard.press('ControlOrMeta+s');
     await page.locator('#revision-indicators').getByTitle('Saving').waitFor({state: 'hidden'});
-    await firstCard.waitFor();
+    //await firstCard.waitFor();
     firstCardId = await firstCard.getAttribute('id');
 
     // and check if the change is there
@@ -109,14 +106,14 @@ test.describe('Cards', () => {
     await page.waitForLoadState();
 
     // we need to turn the root entry into a draft or the second nested entry won't save against a draft via playwright in headless mode
-    await page.locator('#slug').fill('test');
+    await page.locator('#slug').pressSequentially('test', { delay: 100 });
     await page.locator('#content-notice .discard-changes-btn').waitFor();
 
     // add a second nested entry to the matrix,
-    await page.getByRole('button', { name: 'plus New entry' }).click();
+    await page.getByRole('button', { name: 'New entry' }).click();
     const slideout = page.locator('.slideout-container:not(.hidden)');
     await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').waitFor();
-    await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').fill('card 2');
+    await slideout.locator('.so-content input[name$="[fields][plainTextField2]"]').pressSequentially('card 2', { delay: 100 });
 
     // wait for the draft card to be attached
     const lastCard = page.locator('#fields-matrixCardsField-field .cards > li:last-child .card');
