@@ -631,14 +631,14 @@ $('#' + $id).on('activate', (ev) => {
   } else {
     // focus on the button so that when the slideout is closed, it's returned to the button
     $(ev.currentTarget).focus();
-    
-    let jsSettings = JSON.parse(`$settings`);
+
+    const settings = $settings;
     // if settings have draftId but the replaced card doesn't have the data-draft-id attribute anymore,
     // remove the draftId from the settings before creating element editor, so the correct element can be retrieved
-    if (jsSettings.draftId !== null && !Garnish.hasAttr($(ev.currentTarget).parents('.card'), 'data-draft-id')) {
-      jsSettings.draftId = null;
+    if (settings.draftId && !Garnish.hasAttr($(ev.currentTarget).parents('.card'), 'data-draft-id')) {
+      delete settings.draftId;
     }
-    Craft.createElementEditor($elementType, jsSettings);
+    Craft.createElementEditor($elementType, settings);
   }
 });
 JS, [
