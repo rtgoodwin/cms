@@ -2492,7 +2492,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.$cropperEditBtn.attr('aria-pressed', 'false');
 
       // Grab button text for state message
-      let item = $btn.text().trim();
+      let item = $btn.find('[data-item-name]').text();
 
       if (!pickingUp) {
         stateMessage = Craft.t('app', '{item} dropped.', {
