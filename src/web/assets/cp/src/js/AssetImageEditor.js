@@ -2826,28 +2826,32 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           position.y = this.clipper.top - this.clipper.height / 2;
           break;
         case 't':
-          console.log('top');
+          position.x = this.clipper.left;
+          position.y = this.clipper.top - this.clipper.height / 2;
+          break;
+        case 'b':
+          position.x = this.clipper.left;
+          position.y = this.clipper.top + this.clipper.height / 2;
           break;
         case 'tr':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top - this.clipper.height / 2;
           break;
         case 'r':
-          console.log('right');
+          position.x = this.clipper.left + this.clipper.width / 2;
+          position.y = this.clipper.top;
+          break;
+        case 'l':
+          position.x = this.clipper.left - this.clipper.width / 2;
+          position.y = this.clipper.top;
           break;
         case 'br':
           position.x = this.clipper.left + this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
           break;
-        case 'b':
-          console.log('bottom');
-          break;
         case 'bl':
           position.x = this.clipper.left - this.clipper.width / 2;
           position.y = this.clipper.top + this.clipper.height / 2;
-          break;
-        case 'l':
-          console.log('left');
           break;
       }
 
