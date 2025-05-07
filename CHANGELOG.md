@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
+- Updated the symfony/yaml requirement to allow `^6.0`. ([#17229](https://github.com/craftcms/cms/discussions/17229))
 
 ## 5.7.5 - 2025-05-06
 
