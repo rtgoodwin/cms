@@ -12,7 +12,7 @@ test.describe('Plugin Actions', () => {
       response
         .url()
         .includes('//api.craftcms.com/v1/plugin-store/plugin/seomatic')
-    );
+    , {timeout: 30*1000});
 
     // Developer name
     const title = page.locator('.plugin-details-header h1');
@@ -25,17 +25,20 @@ test.describe('Plugin Actions', () => {
     const status = page.locator('#status');
     await expect(status).toContainText('Checking environment');
     await page.waitForResponse((response) =>
-      response.url().includes('precheck')
+      response.url().includes('precheck'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Finstall%2Fprecheck
     await expect(status).toContainText(
       'Updating Composer dependencies (this may take a minute)…'
     );
     await page.waitForResponse((response) =>
-      response.url().includes('composer-install')
+      response.url().includes('composer-install'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Finstall%2Fcomposer-install
     await expect(status).toContainText('Installing the plugin');
     await page.waitForResponse((response) =>
-      response.url().includes('craft-install')
+      response.url().includes('craft-install'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Finstall%2Fcraft-install
     await expect(status).toContainText('All done!');
   });
@@ -76,17 +79,20 @@ test.describe('Plugin Actions', () => {
     const status = page.locator('#status');
     await expect(status).toContainText('Checking environment');
     await page.waitForResponse((response) =>
-      response.url().includes('precheck')
+      response.url().includes('precheck'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Fprecheck
     await expect(status).toContainText(
       'Updating Composer dependencies (this may take a minute)…'
     );
     await page.waitForResponse((response) =>
-      response.url().includes('composer-remove')
+      response.url().includes('composer-remove'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Fcomposer-remove
     await expect(status).toContainText('The plugin was removed successfully.');
     await page.waitForResponse((response) =>
-      response.url().includes('finish')
+      response.url().includes('finish'),
+      {timeout: 30*1000}
     ); //craft4.test/index.php?p=admin%2Factions%2Fpluginstore%2Fremove%2Ffinish
   });
 });
