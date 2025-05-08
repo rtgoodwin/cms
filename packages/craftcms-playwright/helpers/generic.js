@@ -13,7 +13,12 @@ const clickToNavigate = async (page, selector = '[type="submit"]') => {
   return await Promise.all([page.waitForNavigation(), page.click(selector)]);
 };
 
+const waitForAutosaveToComplete = async (page) => {
+  await page.locator('#revision-indicators').getByTitle('Saving').waitFor({state: 'hidden'});
+}
+
 module.exports = {
   getUrl,
   clickToNavigate,
+  waitForAutosaveToComplete,
 };

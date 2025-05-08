@@ -1,7 +1,7 @@
 /* jshint esversion: 9, strict: false */
 /* globals module, require */
 const baseConfig = require('./_config');
-const helpers = require('./_helpers');
+const helpers = require('./helpers/generic');
 const {test, expect} = require('./_fixtures');
 
 module.exports = {
