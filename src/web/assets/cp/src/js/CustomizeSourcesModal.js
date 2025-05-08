@@ -1086,14 +1086,6 @@ Craft.CustomizeSourcesModal.Heading =
         .appendTo($container);
       this.$labelInput = $labelField.find('.text');
 
-      Craft.ui
-        .createLightswitchField({
-          label: Craft.t('app', 'Collapsible'),
-          name: `sources[${this.sourceData.key}][collapsible]`,
-          on: this.sourceData.collapsible,
-        })
-        .appendTo($container);
-
       $container.append('<hr/>');
 
       this.$deleteBtn = $('<a class="error delete pointer"/>')

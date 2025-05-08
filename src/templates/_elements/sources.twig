@@ -94,6 +94,7 @@
 } %}
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
+            {% set key = source.key ?? source.heading | kebab %}
             {% if nestedUnderHeading %}
                     </ul>
                 </li>
@@ -101,18 +102,16 @@
             <li class="heading">
                 <div class="source-item source-item--heading">
                     <span class="type-heading-small">{{ source.heading|t('site') }}</span>
-                    {% if source.collapsible ?? false %}
-                        {% include '_includes/disclosure-toggle' with {
-                            cookieName: 'sources-list:'~ source.key,
-                            controls: source.key,
-                            content: toggleContent,
-                            attributes: {
-                                class: 'source-item__toggle'
-                            }
-                        } only %}
-                    {% endif %}
+                    {% include '_includes/disclosure-toggle' with {
+                        cookieName: 'sources-list:'~ key,
+                        controls: key,
+                        content: toggleContent,
+                        attributes: {
+                            class: 'source-item__toggle'
+                        }
+                    } only %}
                 </div>
-                <ul id="{{ source.key ?? 'heading' }}">
+                <ul id="{{ key }}">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
             {% set key = source.keyPath ?? (keyPrefix ~ source.key) %}
