@@ -20,7 +20,12 @@ return [
         'fieldLayoutId' => null,
         'name' => 'With Matrix in Cards mode',
         'handle' => 'withMatrixInCardsMode',
+        // the title field doesn't actually show, doesn't get visibly added even when this runs in codeception,
+        // but it's not a problem in codeception because the property exists and can be filled;
+        // that's why we need to set titleFormat, so we can have some sort of default title
         'titleFormat' => 'Entry {id}',
+        // and since we have and rely on titleFormat, we need to set hasTitleField, or it won't work properly
+        'hasTitleField' => false,
         'fieldLayoutUid' => 'field-layout-1003----------------uid',
         'uid' => 'entry-type-1001------------------uid',
     ],
@@ -29,7 +34,12 @@ return [
         'fieldLayoutId' => null,
         'name' => 'With Matrix in Element Index mode',
         'handle' => 'withMatrixInElementIndexMode',
+        // the title field doesn't actually show, doesn't get visibly added even when this runs in codeception,
+        // but it's not a problem in codeception because the property exists and can be filled;
+        // that's why we need to set titleFormat, so we can have some sort of default title
         'titleFormat' => 'Entry {id}',
+        // and since we have and rely on titleFormat, we need to set hasTitleField, or it won't work properly
+        'hasTitleField' => false,
         'fieldLayoutUid' => 'field-layout-1004----------------uid',
         'uid' => 'entry-type-1002------------------uid',
     ],
@@ -38,7 +48,12 @@ return [
         'fieldLayoutId' => null,
         'name' => 'With Matrix in Blocks mode',
         'handle' => 'withMatrixInBlocksMode',
+        // the title field doesn't actually show, doesn't get visibly added even when this runs in codeception,
+        // but it's not a problem in codeception because the property exists and can be filled;
+        // that's why we need to set titleFormat, so we can have some sort of default title
         'titleFormat' => 'Entry {id}',
+        // and since we have and rely on titleFormat, we need to set hasTitleField, or it won't work properly
+        'hasTitleField' => false,
         'fieldLayoutUid' => 'field-layout-1005----------------uid',
         'uid' => 'entry-type-1003------------------uid',
     ],
@@ -47,8 +62,12 @@ return [
         'fieldLayoutId' => null,
         'name' => 'With Plain Text as Title',
         'handle' => 'withPlainTextAsTitle',
-        'hasTitleField' => false,
+        // the title field doesn't actually show, doesn't get visibly added even when this runs in codeception,
+        // but it's not a problem in codeception because the property exists and can be filled;
+        // that's why we need to set titleFormat, so we can have some sort of default title
         'titleFormat' => '{plainTextField2}',
+        // and since we have and rely on titleFormat, we need to set hasTitleField, or it won't work properly
+        'hasTitleField' => false,
         'fieldLayoutUid' => 'field-layout-1006----------------uid',
         'uid' => 'entry-type-1004------------------uid',
     ],
