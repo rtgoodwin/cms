@@ -5,6 +5,7 @@
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
 - Updated the symfony/yaml requirement to allow `^6.0`. ([#17229](https://github.com/craftcms/cms/discussions/17229))
 - Fixed a bug where edit screen slideouts were given focus before the slideout was finished opening, which could cause UI glitches. ([#17232](https://github.com/craftcms/cms/issues/17232))
+- Fixed a bug where Money field condition rules weren’t working within field layouts. ([#17236](https://github.com/craftcms/cms/issues/17236))
 - Fixed an error that could occur when attempting to edit a newly-created nested entry within a Matrix field set to the element index view mode. ([#17231](https://github.com/craftcms/cms/pull/17231))
 - Fixed a styling issue.
 
