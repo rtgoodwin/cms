@@ -1920,6 +1920,7 @@ JS, [
                 'title' => $title,
                 'previewTargets' => $previewTargets,
                 'previewParamValue' => $previewTargets ? Craft::$app->getSecurity()->hashData(StringHelper::randomString(10)) : null,
+                'deltaNames' => Craft::$app->getView()->getDeltaNames(),
                 'initialDeltaValues' => Craft::$app->getView()->getInitialDeltaValues(),
                 'updatedTimestamp' => $element->dateUpdated->getTimestamp(),
                 'canonicalUpdatedTimestamp' => $element->getCanonical()->dateUpdated->getTimestamp(),
@@ -2274,7 +2275,7 @@ JS, [
         $fieldLayout = $element->getFieldLayout();
         $form = $fieldLayout->createForm($element, false, [
             'namespace' => $namespace,
-            'registerDeltas' => false,
+            'registerDeltas' => $view->getIsDeltaRegistrationActive(),
             'visibleElements' => $this->_visibleLayoutElements,
         ]);
         $missingElements = [];

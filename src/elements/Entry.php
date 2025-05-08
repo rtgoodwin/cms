@@ -3026,6 +3026,9 @@ JS;
         $oldFields = Arr::keyBy($oldLayout->getCustomFields(), fn(FieldInterface $field) => $field->handle);
         $fieldsService = Craft::$app->getFields();
 
+        // allow fields from the new layout to be registered as deltaNames
+        Craft::$app->getView()->setIsDeltaRegistrationActive(true);
+
         foreach ($newFields as $newField) {
             if (isset($oldFields[$newField->handle])) {
                 $oldField = $oldFields[$newField->handle];

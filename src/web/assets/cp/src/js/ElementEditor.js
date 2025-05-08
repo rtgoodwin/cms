@@ -2008,6 +2008,12 @@ Craft.ElementEditor = Garnish.Base.extend(
             response.data.initialDeltaValues
           );
         }
+        if (response.data.deltaNames) {
+          Object.assign(
+            this.$container.data('delta-names'),
+            response.data.deltaNames
+          );
+        }
 
         if (noChanges) {
           // Update our record of the last serialized value to avoid a pointless resave
