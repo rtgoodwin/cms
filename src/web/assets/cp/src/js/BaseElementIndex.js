@@ -3979,7 +3979,9 @@ const SourceNav = Garnish.Base.extend(
       const self = this;
       this.$disclosures = this.$container.find('craft-disclosure');
       this.$disclosures.on('open', function () {
-        $(this).closest(`.${self.settings.activeChildClass}`).removeClass(self.settings.activeChildClass);
+        $(this)
+          .closest(`.${self.settings.activeChildClass}`)
+          .removeClass(self.settings.activeChildClass);
       });
 
       this.$disclosures.on('close', function () {
@@ -4073,7 +4075,9 @@ const SourceNav = Garnish.Base.extend(
         .removeClass(this.settings.selectedClass);
 
       // Reset all disclosures
-      $(`.${this.settings.activeChildClass}`).removeClass(this.settings.activeChildClass);
+      $(`.${this.settings.activeChildClass}`).removeClass(
+        this.settings.activeChildClass
+      );
 
       this.onSelectionChange();
     },
