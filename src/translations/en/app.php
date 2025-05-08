@@ -318,7 +318,6 @@ return [
     'Closed Issues' => 'Closed Issues',
     'Collapse all blocks' => 'Collapse all blocks',
     'Collapse' => 'Collapse',
-    'Collapsible' => 'Collapsible',
     'Color hex value' => 'Color hex value',
     'Color picker' => 'Color picker',
     'Color' => 'Color',
