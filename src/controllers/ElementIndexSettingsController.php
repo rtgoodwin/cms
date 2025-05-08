@@ -254,13 +254,7 @@ class ElementIndexSettingsController extends BaseElementsController
 
         // Normalize to the way it's stored in the DB
         foreach ($sourceOrder as $source) {
-            // @TODO do we still need this condition now that headings have a `key`?
-            if (isset($source['heading'])) {
-                $newSourceConfigs[] = [
-                    'type' => ElementSources::TYPE_HEADING,
-                    'heading' => $source['heading'],
-                ];
-            } elseif (isset($source['key'])) {
+            if (isset($source['key'])) {
                 $type = match (true) {
                     str_starts_with($source['key'], 'custom:') => ElementSources::TYPE_CUSTOM,
                     str_starts_with($source['key'], 'heading:') => ElementSources::TYPE_HEADING,
@@ -304,11 +298,6 @@ class ElementIndexSettingsController extends BaseElementsController
                         }
                     } elseif ($type === ElementSources::TYPE_HEADING) {
                         $sourceConfig['heading'] = $postedSettings['heading'];
-                        if (isset($postedSettings['collapsible'])) {
-                            $sourceConfig['collapsible'] = $postedSettings['collapsible'] === '1';
-                        } else {
-                            $sourceConfig['collapsible'] = $oldSourceConfigs[$source['key']]['collapsible'] ?? false;
-                        }
                     } elseif (isset($postedSettings['enabled'])) {
                         $sourceConfig['disabled'] = !$postedSettings['enabled'];
                         if ($sourceConfig['disabled']) {

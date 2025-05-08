@@ -3966,6 +3966,7 @@ const SourceNav = Garnish.Base.extend(
     $items: null,
     $selectedItem: null,
     $disclosures: null,
+    activeChildClass: null,
 
     init: function (container, settings) {
       this.$container = $(container);
@@ -3976,10 +3977,9 @@ const SourceNav = Garnish.Base.extend(
 
     initDisclosures: function () {
       const self = this;
-      const activeChildClass = 'has-active-child';
       this.$disclosures = this.$container.find('craft-disclosure');
       this.$disclosures.on('open', function () {
-        $(this).closest(`.${activeChildClass}`).removeClass(activeChildClass);
+        $(this).closest(`.${self.settings.activeChildClass}`).removeClass(self.settings.activeChildClass);
       });
 
       this.$disclosures.on('close', function () {
@@ -3989,7 +3989,7 @@ const SourceNav = Garnish.Base.extend(
         if (target.querySelector(`.${self.settings.selectedClass}`)) {
           $(disclosure.trigger)
             .closest('.source-item')
-            .addClass(activeChildClass);
+            .addClass(self.settings.activeChildClass);
         }
       });
     },
@@ -4072,6 +4072,9 @@ const SourceNav = Garnish.Base.extend(
         .attr('aria-current', 'false')
         .removeClass(this.settings.selectedClass);
 
+      // Reset all disclosures
+      $(`.${this.settings.activeChildClass}`).removeClass(this.settings.activeChildClass);
+
       this.onSelectionChange();
     },
 
@@ -4133,6 +4136,7 @@ const SourceNav = Garnish.Base.extend(
   },
   {
     defaults: {
+      activeChildClass: 'has-active-child',
       selectedClass: 'sel',
       onSelectionChange: $.noop,
       handleCtrlClicks: false,
