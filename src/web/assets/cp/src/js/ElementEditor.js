@@ -1746,7 +1746,6 @@ Craft.ElementEditor = Garnish.Base.extend(
               } else {
                 $newElement.appendTo($tabContainer);
               }
-              Craft.initUiElements($newElement);
               changedElements = true;
             }
           } else {
@@ -1824,6 +1823,7 @@ Craft.ElementEditor = Garnish.Base.extend(
 
       Craft.appendHeadHtml(response.data.headHtml);
       Craft.appendBodyHtml(response.data.bodyHtml);
+      Craft.initUiElements(this.$contentContainer);
 
       // Did any layout elements get added or removed?
       if (changedElements) {
