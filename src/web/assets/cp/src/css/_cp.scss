@@ -1700,7 +1700,7 @@ li.breadcrumb-toggle-wrapper {
     }
 
     & > ul {
-      margin-block: 2px;
+      margin-block: var(--xs) 2px;
     }
   }
 
