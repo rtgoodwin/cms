@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Matrix fields set to the inline-editable blocks view mode now duplicate/copy all selected nested entries, rather than just the one the action was activated for. ([#17248](https://github.com/craftcms/cms/pull/17248))
 - Improved the accessibility and UI of “Delete” “buttons” within route edit modals. ([#17243](https://github.com/craftcms/cms/pull/17243))
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
 - Updated the symfony/yaml requirement to allow `^6.0`. ([#17229](https://github.com/craftcms/cms/discussions/17229))
