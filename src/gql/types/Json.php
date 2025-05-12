@@ -30,7 +30,7 @@ class Json extends ScalarType implements SingularTypeInterface
      */
     public static function getName(): string
     {
-        return 'CraftJson';
+        return 'Json';
     }
 
     public static function getType(): Type
