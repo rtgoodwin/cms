@@ -1601,9 +1601,14 @@ Craft.ElementEditor = Garnish.Base.extend(
         // get the current delta names
         let currentDeltaNames = this.$container.data('delta-names') ?? [];
         // filter out any custom fields, so only attributes remain
-        currentDeltaNames = currentDeltaNames.filter((name) => !name.startsWith('fields['));
+        currentDeltaNames = currentDeltaNames.filter(
+          (name) => !name.startsWith('fields[')
+        );
         // set delta names to the new value + any attributes that are left from the old ones
-        this.$container.data('delta-names', [...response.data.deltaNames, ...currentDeltaNames]);
+        this.$container.data('delta-names', [
+          ...response.data.deltaNames,
+          ...currentDeltaNames,
+        ]);
         // perform after update on the new form so that we can track the modified fields correctly from now on
         this.afterUpdate(this.serializeForm(true));
 
