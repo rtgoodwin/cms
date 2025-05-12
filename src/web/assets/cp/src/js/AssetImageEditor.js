@@ -66,6 +66,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     handlePicked: false,
     draggingFocal: false,
     cropperPickedUp: false,
+    cropperEditBtnFocused: null,
     focalPickedUp: false,
     focalClicked: false,
     cropperClicked: false,
@@ -880,6 +881,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
       this.addListener(this.$cropperEditBtn, 'keydown', (ev) => {
         this._handleKeydownOnCropperEditBtn(ev);
+      });
+      this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
+        console.log(ev.target);
       });
       this.addListener(this.$directionalArrowBtn, 'click', (ev) => {
         this._handleDirectionalArrowBtnPress(ev);
@@ -2298,6 +2302,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         originX: 'center',
         originY: 'center',
       });
+
+      // If an edit button is focused, add a "focus" style on the cropper rectangle/handle
+      if (this.cropperEditBtnFocused) {
+        console.log('use focus styles');
+      }
 
       // If cropper is picked up, add focus styles
       if (this.cropperPickedUp) {
