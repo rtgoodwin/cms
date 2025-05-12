@@ -401,6 +401,14 @@ class Local extends Fs implements LocalFsInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getMimeType(string $path): ?string
+    {
+        return FileHelper::getMimeType($this->prefixPath($path));
+    }
+
+    /**
      * Create the recursive iterator for traversing file system.
      *
      * @param string $targetDir

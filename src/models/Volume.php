@@ -593,6 +593,14 @@ class Volume extends Model implements
     /**
      * @inheritdoc
      */
+    public function getMimeType(string $path): ?string
+    {
+        return $this->getFs()->getMimeType($this->getSubpath() . $path);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getFileSize(string $uri): int
     {
         return $this->getFs()->getFileSize($this->getSubpath() . $uri);

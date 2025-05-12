@@ -9,6 +9,7 @@ namespace craft\base;
 
 use Craft;
 use craft\helpers\App;
+use craft\helpers\FileHelper;
 use craft\validators\HandleValidator;
 
 /**
@@ -72,6 +73,14 @@ abstract class Fs extends SavableComponent implements FsInterface
     public function getShowUrlSetting(): bool
     {
         return static::$showUrlSetting;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMimeType(string $path): ?string
+    {
+        return FileHelper::getMimeTypeByExtension($path);
     }
 
     /**
