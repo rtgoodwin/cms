@@ -1501,9 +1501,12 @@ Craft.ElementEditor = Garnish.Base.extend(
           data: params.join('&'),
         })
           .then((response) => {
+            let performAfterUpdate = true;
+
             this._afterSaveDraft();
             this.settings.previewParamValue = response.data.previewParamValue;
             this._afterUpdateFieldLayout(data, selectedTabId, response);
+            performAfterUpdate = this._maybeSetNewDeltaNames(response);
             this._handleSaveDraftResponse(response);
 
             if ($.isPlainObject(response.data.draftElementUids)) {
@@ -1546,7 +1549,9 @@ Craft.ElementEditor = Garnish.Base.extend(
               );
             }
 
-            this.afterUpdate(data);
+            if (performAfterUpdate) {
+              this.afterUpdate(data);
+            }
             this.trigger('afterSaveDraft', {response});
 
             if (Craft.broadcaster) {
@@ -1588,6 +1593,24 @@ Craft.ElementEditor = Garnish.Base.extend(
             }
           });
       });
+    },
+
+    _maybeSetNewDeltaNames(response) {
+      // if new deltaNames were passed in the response it means we changed the entry type
+      if (response.data.deltaNames && response.data.deltaNames.length > 0) {
+        // get the current delta names
+        let currentDeltaNames = this.$container.data('delta-names') ?? [];
+        // filter out any custom fields, so only attributes remain
+        currentDeltaNames = currentDeltaNames.filter((name) => !name.startsWith('fields['));
+        // set delta names to the new value + any attributes that are left from the old ones
+        this.$container.data('delta-names', [...response.data.deltaNames, ...currentDeltaNames]);
+        // perform after update on the new form so that we can track the modified fields correctly from now on
+        this.afterUpdate(this.serializeForm(true));
+
+        return false;
+      }
+
+      return true;
     },
 
     _handleSaveDraftResponse(response) {
@@ -2006,12 +2029,6 @@ Craft.ElementEditor = Garnish.Base.extend(
           Object.assign(
             this.$container.data('initial-delta-values'),
             response.data.initialDeltaValues
-          );
-        }
-        if (response.data.deltaNames) {
-          Object.assign(
-            this.$container.data('delta-names'),
-            response.data.deltaNames
           );
         }
 
