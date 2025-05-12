@@ -12,6 +12,9 @@
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
 
+### Development
+- User `preferences` field now returns a JSON object in GraphQL queries.
+
 ### Extensibility
 - Element edit pages now support being passed a hashed `returnUrl` query string param. ([#17137](https://github.com/craftcms/cms/discussions/17137))
 - Added `craft\base\Element::EVENT_RENDER`. ([#17188](https://github.com/craftcms/cms/discussions/17188))
@@ -20,6 +23,7 @@
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
 - Added `craft\fields\data\OptionData::$color`.
 - Added `craft\fields\data\OptionData::$icon`.
+- Added `craft\gql\types\Json`.
 - Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
 - Added `craft\models\FieldLayout::resetUids()`.

@@ -13,6 +13,7 @@ use craft\gql\GqlEntityRegistry;
 use craft\gql\interfaces\Element;
 use craft\gql\resolvers\elements\Address as AddressResolver;
 use craft\gql\types\generators\UserType;
+use craft\gql\types\Json;
 use craft\helpers\Gql;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;
@@ -85,7 +86,7 @@ class User extends Element
             ],
             'preferences' => [
                 'name' => 'preferences',
-                'type' => Type::nonNull(Type::string()),
+                'type' => Json::getType(),
                 'description' => 'The user’s preferences.',
                 'complexity' => Gql::nPlus1Complexity(),
             ],
