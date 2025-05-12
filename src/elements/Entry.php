@@ -2556,7 +2556,11 @@ JS;
     {
         $entryType = $this->getType();
 
-        if ($entryType->hasTitleField && trim($this->title ?? '') !== '') {
+        if (
+            $entryType->hasTitleField &&
+            trim($this->title ?? '') !== '' &&
+            $entryType->getFieldLayout()->getField('title')->showInForm($this)
+        ) {
             return;
         }
 
