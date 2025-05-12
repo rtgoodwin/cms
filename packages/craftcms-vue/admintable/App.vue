@@ -1182,6 +1182,7 @@
     margin-top: 14px;
     position: sticky;
     min-height: 44px;
+    z-index: 1;
 
     .so-body & {
       margin: 0;

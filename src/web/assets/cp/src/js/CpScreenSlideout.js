@@ -405,8 +405,8 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
             Craft.cp.elementThumbLoader.load(this.$sidebar);
           }
 
-          if (!Garnish.isMobileBrowser()) {
-            Craft.setFocusWithin(this.$content);
+          if (!Garnish.isMobileBrowser() && !this.isOpening) {
+            this.setFocusWithin();
           }
 
           resolve();
@@ -414,6 +414,10 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
           this.settings.onLoad();
         });
       });
+    },
+
+    setFocusWithin: function () {
+      Craft.setFocusWithin(this.$content);
     },
 
     updateTabs: function (tabs) {
