@@ -1060,7 +1060,8 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         } catch (InvalidArgumentException) {
             return true;
         }
-        return $titleField->required;
+
+        return $titleField->required && $titleField->showInForm($this);
     }
 
     /**
