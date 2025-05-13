@@ -2556,10 +2556,17 @@ JS;
     {
         $entryType = $this->getType();
 
+        $titleField = null;
+        try {
+            /** @var EntryTitleField $titleField */
+            $titleField = $entryType->getFieldLayout()->getField('title');
+        } catch (InvalidArgumentException) {
+        }
+
         if (
             $entryType->hasTitleField &&
             trim($this->title ?? '') !== '' &&
-            $entryType->getFieldLayout()->getField('title')->showInForm($this)
+            ($titleField == null || $titleField->showInForm($this))
         ) {
             return;
         }
