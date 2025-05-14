@@ -6,3 +6,4 @@
 
 ### Extensibility
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
+- `craft\fields\data\ColorData` now extends `craft\base\Model` and includes `blue`, `green`, `hex`, `luma`, `red`, and `rgb` attributes in its array keys. ([#17265](https://github.com/craftcms/cms/issues/17265))
