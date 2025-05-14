@@ -102,14 +102,17 @@
             <li class="heading">
                 <div class="source-item source-item--heading">
                     <span class="type-heading-small">{{ source.heading|t('site') }}</span>
-                    {% include '_includes/disclosure-toggle' with {
-                        cookieName: 'sources-list:'~ key,
-                        controls: key,
-                        content: toggleContent,
-                        attributes: {
-                            class: 'source-item__toggle'
-                        }
-                    } only %}
+                    {# Don't toggle blank headings #}
+                    {% if source.heading | length %}
+                        {% include '_includes/disclosure-toggle' with {
+                            cookieName: 'sources-list:'~ key,
+                            controls: key,
+                            content: toggleContent,
+                            attributes: {
+                                class: 'source-item__toggle'
+                            }
+                        } only %}
+                    {% endif %}
                 </div>
                 <ul id="{{ key }}">
             {% set nestedUnderHeading = true %}
