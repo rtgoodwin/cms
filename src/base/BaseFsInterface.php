@@ -37,15 +37,6 @@ interface BaseFsInterface
     public function getFileList(string $directory = '', bool $recursive = true): Generator;
 
     /**
-     * Returns the MIME type for the file at the given path.
-     *
-     * @param string $path
-     * @return string|null
-     * @since 5.8.0
-     */
-    public function getMimeType(string $path): ?string;
-
-    /**
      * Return the file size.
      *
      * @param string $uri
