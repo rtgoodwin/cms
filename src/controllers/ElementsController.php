@@ -396,7 +396,10 @@ class ElementsController extends Controller
                 $canCreateDrafts,
             ))
             ->toolbarHtml(
-                Html::tag('div', options: ['class' => 'flex-grow']) .
+                // if we're in a slideout, we don't want to add the .flex-grow to the header toolbar
+                // as it'll mess with the width available for the tabs
+                // see https://github.com/craftcms/cms/issues/17260
+                ($this->_isSlideout() ? '' : Html::tag('div', options: ['class' => 'flex-grow'])) .
                 Html::tag('div', options: ['class' => 'activity-container']),
             )
             ->additionalButtonsHtml(fn() => $this->_additionalButtons(
