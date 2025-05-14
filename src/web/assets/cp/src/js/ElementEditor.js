@@ -1248,6 +1248,17 @@ Craft.ElementEditor = Garnish.Base.extend(
             this.settings.previewParamValue = response.data.previewParamValue;
             this._afterUpdateFieldLayout(data, selectedTabId, response);
 
+            if (response.data.deltaNames?.length) {
+              let deltaNames = this.$container.data('delta-names');
+              deltaNames = Array.isArray(deltaNames) ? [...deltaNames] : [];
+              for (const name of response.data.deltaNames) {
+                if (deltaNames.indexOf(name) === -1) {
+                  deltaNames.push(name);
+                }
+              }
+              this.$container.data('delta-names', deltaNames);
+            }
+
             const createdProvisionalDraft = !this.settings.draftId;
 
             if (createdProvisionalDraft) {
