@@ -25,6 +25,7 @@
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
 - Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
+- `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - `craft\services\Assets::replaceAssetFile()` now has a `$mimeType` argument.
 - `craft\services\Users::saveUserPhoto()` now has a `$mimeType` argument.
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
