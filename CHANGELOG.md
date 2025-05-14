@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.4 - 2025-05-14
 
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
 - Fixed a bug where edit screen slideouts were given focus before the slideout was finished opening, which could cause UI glitches. ([#17232](https://github.com/craftcms/cms/issues/17232))
