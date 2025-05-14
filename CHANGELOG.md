@@ -6,6 +6,8 @@
 - Fixed a bug where edit screen slideouts were given focus before the slideout was finished opening, which could cause UI glitches. ([#17232](https://github.com/craftcms/cms/issues/17232))
 - Fixed a bug where Money field condition rules weren’t working within field layouts. ([#17236](https://github.com/craftcms/cms/issues/17236))
 - Fixed a bug where some custom field inputs weren’t getting initialized properly after being lazily-shown via a field layout condition. ([#17239](https://github.com/craftcms/cms/issues/17239))
+- Fixed a bug where “Add a rule” buttons could be unresponsive if multiple condition builders were rendered on the same page in the same input namespace.
+- Fixed a bug where opening the filter HUD within an element selection modal would close the parent filter HUD. ([#17241](https://github.com/craftcms/cms/issues/17241))
 
 ## 4.15.3 - 2025-05-06
 
