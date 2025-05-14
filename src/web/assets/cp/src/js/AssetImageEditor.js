@@ -2327,19 +2327,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           });
         } else {
           const handle = this.cropperEditBtnFocused.data('handle');
-          let handleCoordinates = this.getClipperHandlePosition(handle);
-          console.log(handleCoordinates);
-
-          this.cropperHandleFocusRing = new fabric.Circle({
-            radius: 12,
-            fill: 'rgba(255,255,255,0.5)',
-            strokeWidth: 4,
-            stroke: 'rgba(255,255,255,0.8)',
-            left: handleCoordinates.x,
-            top: handleCoordinates.y,
-            originX: 'center',
-            originY: 'center',
-          });
+          this.cropperHandleFocusRing = this._getCropperHandleFocusRing(handle);
         }
       }
 
@@ -2417,6 +2405,41 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (this.cropperHandleFocusRing) {
         this.croppingCanvas.add(this.cropperHandleFocusRing);
       }
+    },
+
+    _getCropperHandleFocusRing: function (handle) {
+      let handleCoordinates = this.getClipperHandlePosition(handle);
+
+      const innerRing = new fabric.Circle({
+        radius: 12,
+        fill: 'rgba(255,255,255,0.5)',
+        strokeWidth: 4,
+        stroke: 'blue',
+        left: 0,
+        top: 0,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      const outerRing = new fabric.Circle({
+        radius: 16,
+        fill: null,
+        strokeWidth: 4,
+        stroke: 'rgba(255,255,255,0.8)',
+        left: 0,
+        top: 0,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      const focusRing = new fabric.Group([outerRing, innerRing], {
+        originX: 'center',
+        originY: 'center',
+        left: handleCoordinates.x,
+        top: handleCoordinates.y,
+      });
+
+      return focusRing;
     },
 
     /**
