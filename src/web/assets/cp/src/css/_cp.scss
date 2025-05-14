@@ -1652,6 +1652,10 @@ li.breadcrumb-toggle-wrapper {
   }
 }
 
+.source-item--heading {
+  margin-block-end: var(--s);
+}
+
 .has-active-child {
   --icon-color: var(--white);
 
