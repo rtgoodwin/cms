@@ -7904,6 +7904,10 @@ textarea.text.fullwidth {
   container-type: inline-size;
 
   & > .flex {
+    & > .flex-grow {
+      overflow: hidden;
+    }
+
     & > div {
       &.text-link {
         border: var(--input-border);
@@ -7935,7 +7939,7 @@ textarea.text.fullwidth {
         }
 
         .chip {
-          height: calc(34rem / 16);
+          min-height: calc(34rem / 16);
           padding-inline: var(--s);
 
           .chip-content {
