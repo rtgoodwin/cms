@@ -13,6 +13,7 @@
 - Fixed a bug where opening the filter HUD within an element selection modal would close the parent filter HUD. ([#17241](https://github.com/craftcms/cms/issues/17241))
 - Fixed an error that could occur when attempting to edit a newly-created nested entry within a Matrix field set to the element index view mode. ([#17231](https://github.com/craftcms/cms/pull/17231))
 - Fixed a bug where setting up two-step verification for an impersonated user would result in the original user getting logged back in. ([#17245](https://github.com/craftcms/cms/pull/17245))
+- Fixed a bug where conditionally-hidden entry Title fields were still being validated as required. ([#17249](https://github.com/craftcms/cms/issues/17249))
 - Fixed styling issues. ([#17237](https://github.com/craftcms/cms/issues/17237))
 
 ## 5.7.5 - 2025-05-06
