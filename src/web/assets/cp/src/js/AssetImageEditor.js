@@ -2234,6 +2234,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.cropperHandleFocusRing);
       }
 
+      this.cropperHandleFocusRing = null;
+
       this._redrawCropperElements._.lineOptions = {
         strokeWidth: 4,
         stroke: 'rgb(255,255,255)',
@@ -2312,32 +2314,40 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // If an edit button is focused, add a "focus" style on the cropper rectangle/handle
       if (this.cropperEditBtnFocused) {
-        console.log('use focus styles');
+        // Check button properties. If rectangle, use rectangle styles
+        const isRectangle =
+          this._getCropperElementToEditFromButton(
+            this.cropperEditBtnFocused
+          ) === 'rectangle';
+
+        if (isRectangle) {
+          this.croppingRectangle.set({
+            strokeWidth: 4,
+            stroke: 'rgba(255,255,255,1)',
+          });
+        } else {
+          const handle = this.cropperEditBtnFocused.data('handle');
+          let handleCoordinates = this.getClipperHandlePosition(handle);
+          console.log(handleCoordinates);
+
+          this.cropperHandleFocusRing = new fabric.Circle({
+            radius: 12,
+            fill: 'rgba(255,255,255,0.5)',
+            strokeWidth: 4,
+            stroke: 'rgba(255,255,255,0.8)',
+            left: handleCoordinates.x,
+            top: handleCoordinates.y,
+            originX: 'center',
+            originY: 'center',
+          });
+        }
       }
 
-      // If cropper is picked up, add focus styles
+      // TODO: Add active styles when the rectangle/handles are picked up
       if (this.cropperPickedUp) {
-        this.croppingRectangle.set({
-          strokeWidth: 4,
-          stroke: 'rgba(255,255,255,1)',
-        });
       }
 
       if (this.handlePicked) {
-        let handleCoordinates = this.getClipperHandlePosition(
-          this.handlePicked
-        );
-
-        this.cropperHandleFocusRing = new fabric.Circle({
-          radius: 12,
-          fill: 'rgba(255,255,255,0.5)',
-          strokeWidth: 4,
-          stroke: 'rgba(255,255,255,0.8)',
-          left: handleCoordinates.x,
-          top: handleCoordinates.y,
-          originX: 'center',
-          originY: 'center',
-        });
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2404,7 +2414,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.handlePicked) {
+      if (this.cropperHandleFocusRing) {
         this.croppingCanvas.add(this.cropperHandleFocusRing);
       }
     },
