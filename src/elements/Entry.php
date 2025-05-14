@@ -2556,18 +2556,8 @@ JS;
     {
         $entryType = $this->getType();
 
-        $titleField = null;
-        try {
-            /** @var EntryTitleField $titleField */
-            $titleField = $entryType->getFieldLayout()->getField('title');
-        } catch (InvalidArgumentException) {
-        }
-
-        if (
-            $entryType->hasTitleField &&
-            trim($this->title ?? '') !== '' &&
-            ($titleField == null || $titleField->showInForm($this))
-        ) {
+        // Leave the title alone if the layout has a Title field, and it's already set to something
+        if ($entryType->hasTitleField && trim($this->title ?? '') !== '') {
             return;
         }
 
