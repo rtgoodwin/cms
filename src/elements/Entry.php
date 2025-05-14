@@ -1060,7 +1060,8 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         } catch (InvalidArgumentException) {
             return true;
         }
-        return $titleField->required;
+
+        return $titleField->required && $titleField->showInForm($this);
     }
 
     /**
@@ -2555,6 +2556,7 @@ JS;
     {
         $entryType = $this->getType();
 
+        // Leave the title alone if the layout has a Title field, and it's already set to something
         if ($entryType->hasTitleField && trim($this->title ?? '') !== '') {
             return;
         }
