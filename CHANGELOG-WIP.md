@@ -16,6 +16,7 @@
 - Element edit pages now support being passed a hashed `returnUrl` query string param. ([#17137](https://github.com/craftcms/cms/discussions/17137))
 - Added `craft\base\Element::EVENT_RENDER`. ([#17188](https://github.com/craftcms/cms/discussions/17188))
 - Added `craft\base\ElementInterface::render()`.
+- Added `craft\elements\Asset::setMimeType()`.
 - Added `craft\events\RenderElementEvent`. ([#`17188`](https://github.com/craftcms/cms/discussions/17188))
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
 - Added `craft\fields\data\OptionData::$color`.
@@ -24,6 +25,12 @@
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
 - Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
+- `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
+- `craft\services\Assets::replaceAssetFile()` now has a `$mimeType` argument.
+- `craft\services\Users::saveUserPhoto()` now has a `$mimeType` argument.
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
 - Added the `_includes/forms/buttonGroup.twig` template.
 - `Craft.CpScreenSlideout` now supports overriding the `closeOnEsc`, `closeOnShadeClick`, `containerElement`, and `containerAttributes` settings. Slideouts with a non-`<form>` container element won’t get a “Save” button, and the close button will be labelled “Close” rather than “Cancel”. ([#13593](https://github.com/craftcms/cms/discussions/13593))
+
+### System
+- Assets now keep track of their MIME types when uploaded, improving the accuracy of `craft\elements\Asset::getMimeType()`. ([#17254](https://github.com/craftcms/cms/pull/17254))

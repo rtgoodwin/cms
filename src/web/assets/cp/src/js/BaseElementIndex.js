@@ -4709,20 +4709,18 @@ const FilterHud = Garnish.HUD.extend({
     return this.showing || this.conditionConfig || this.serialized;
   },
 
-  init: function (elementIndex, sourceKey, siteId, settings) {
+  init: function (elementIndex, sourceKey, siteId, settings = {}) {
     this.elementIndex = elementIndex;
     this.sourceKey = sourceKey;
     this.siteId = siteId;
     this.id = `filter-${Math.floor(Math.random() * 1000000000)}`;
 
-    if (settings) {
-      if (settings.conditionConfig) {
-        this.conditionConfig = settings.conditionConfig;
-        delete settings.conditionConfig;
-      } else if (settings.serialized) {
-        this.serialized = settings.serialized;
-        delete settings.serialized;
-      }
+    if (settings.conditionConfig) {
+      this.conditionConfig = settings.conditionConfig;
+      delete settings.conditionConfig;
+    } else if (settings.serialized) {
+      this.serialized = settings.serialized;
+      delete settings.serialized;
     }
 
     const $loadingContent = $('<div/>')
@@ -4745,6 +4743,7 @@ const FilterHud = Garnish.HUD.extend({
       Object.assign(
         {
           hudClass: 'hud element-filter-hud loading',
+          closeOtherHUDs: false,
         },
         settings
       )
