@@ -1163,9 +1163,9 @@ class Asset extends Element
     private string $_filename;
 
     /**
-     * @var string|false
+     * @var string|null
      */
-    private string|false $_mimeType;
+    private ?string $_mimeType = null;
 
     /**
      * @var int|null Width
@@ -2450,7 +2450,7 @@ JS,[
         }
 
         if (isset($this->_mimeType)) {
-            return $this->_mimeType ?: null;
+            return $this->_mimeType;
         }
 
         $volume = $this->getVolume();
@@ -2472,7 +2472,7 @@ JS,[
      */
     public function setMimeType(?string $mimeType): void
     {
-        $this->_mimeType = $mimeType ?? false;
+        $this->_mimeType = $mimeType;
     }
 
     /**
@@ -3310,7 +3310,7 @@ JS;
             $record->dateModified = Db::prepareDateForDb($this->dateModified);
 
             if (isset($this->_mimeType)) {
-                $record->mimeType = $this->_mimeType ?: null;
+                $record->mimeType = $this->_mimeType;
             }
 
             if ($record->alt === null) {
