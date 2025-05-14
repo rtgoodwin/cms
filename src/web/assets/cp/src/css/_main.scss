@@ -7902,6 +7902,10 @@ textarea.text.fullwidth {
   container-type: inline-size;
 
   & > .flex {
+    & > .flex-grow {
+      overflow: hidden;
+    }
+
     & > div {
       &.text-link {
         border: var(--input-border);
