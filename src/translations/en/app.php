@@ -1507,6 +1507,7 @@ return [
     'Show in folder' => 'Show in folder',
     'Show nav' => 'Show nav',
     'Show nested sources' => 'Show nested sources',
+    'Show nested sources for "{heading}"' => 'Show nested sources for "{heading}"',
     'Show sidebar' => 'Show sidebar',
     'Show the Slug field' => 'Show the Slug field',
     'Show the Status field' => 'Show the Status field',
