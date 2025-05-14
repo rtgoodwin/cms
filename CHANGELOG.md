@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.6 - 2025-05-14
 
 - Matrix fields set to the inline-editable blocks view mode now duplicate/copy all selected nested entries, rather than just the one the action was activated for. ([#17248](https://github.com/craftcms/cms/pull/17248))
 - Improved the accessibility and UI of “Delete” “buttons” within route edit modals. ([#17243](https://github.com/craftcms/cms/pull/17243))
