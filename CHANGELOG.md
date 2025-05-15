@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where element card titles could disappear after the card was dragged. ([#17270](https://github.com/craftcms/cms/issues/17270))
+- Fixed a bug where newly-shown conditional custom fields were getting marked as changed prematurely.
 
 ## 5.7.6 - 2025-05-14
 
