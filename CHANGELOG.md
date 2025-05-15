@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where element card titles could disappear after the card was dragged. ([#17270](https://github.com/craftcms/cms/issues/17270))
+- Fixed a bug where newly-shown conditional custom fields were getting marked as changed prematurely.
+
 ## 5.7.6 - 2025-05-14
 
 - Matrix fields set to the inline-editable blocks view mode now duplicate/copy all selected nested entries, rather than just the one the action was activated for. ([#17248](https://github.com/craftcms/cms/pull/17248))
