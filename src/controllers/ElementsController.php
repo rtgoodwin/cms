@@ -1664,15 +1664,8 @@ JS, [
         Craft::$app->getDb()->transaction(function() use ($elementInfo, $newAttributes, &$newElementInfo) {
             $elementsService = Craft::$app->getElements();
             $elementsService->ensureBulkOp(function() use ($elementInfo, $newAttributes, &$newElementInfo, $elementsService) {
-                $user = static::currentUser();
-
                 foreach ($elementInfo as $info) {
                     $element = $this->_element($info);
-                    $authorized = $elementsService->canDuplicate($element, $user);
-                    if (!$authorized) {
-                        throw new ForbiddenHttpException('User not authorized to duplicate this element.');
-                    }
-
                     $safeNewAttributes = Collection::make($newAttributes)
                         ->only($element->safeAttributes())
                         ->all();
