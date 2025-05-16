@@ -2,10 +2,28 @@
 
 ## Unreleased
 
+- Fixed a bug where element card titles could disappear after the card was dragged. ([#17270](https://github.com/craftcms/cms/issues/17270))
+- Fixed a bug where newly-shown conditional custom fields were getting marked as changed prematurely.
+- Fixed a bug where sections weren’t saving preview targets in the specified order. ([#17271](https://github.com/craftcms/cms/issues/17271))
+- Fixed a bug where copy/pasting a nested element from a Matrix or Addresses field that had reached its “Max Entries”/“Max Addresses” setting would result in a “User not authorized to duplicate this element.” error. ([#17274](https://github.com/craftcms/cms/issues/17274))
+
+## 5.7.6 - 2025-05-14
+
+- Matrix fields set to the inline-editable blocks view mode now duplicate/copy all selected nested entries, rather than just the one the action was activated for. ([#17248](https://github.com/craftcms/cms/pull/17248))
+- Improved the accessibility and UI of “Delete” “buttons” within route edit modals. ([#17243](https://github.com/craftcms/cms/pull/17243))
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
 - Updated the symfony/yaml requirement to allow `^6.0`. ([#17229](https://github.com/craftcms/cms/discussions/17229))
 - Fixed a bug where edit screen slideouts were given focus before the slideout was finished opening, which could cause UI glitches. ([#17232](https://github.com/craftcms/cms/issues/17232))
+- Fixed a bug where Money field condition rules weren’t working within field layouts. ([#17236](https://github.com/craftcms/cms/issues/17236))
+- Fixed a bug where some custom field inputs weren’t getting initialized properly after being lazily-shown via a field layout condition. ([#17239](https://github.com/craftcms/cms/issues/17239))
+- Fixed a bug where “Add a rule” buttons could be unresponsive if multiple condition builders were rendered on the same page in the same input namespace.
+- Fixed a bug where opening the filter HUD within an element selection modal would close the parent filter HUD. ([#17241](https://github.com/craftcms/cms/issues/17241))
+- Fixed a bug where element editors weren’t tracking delta changes for custom fields which weren’t visible within the form on page load.
 - Fixed an error that could occur when attempting to edit a newly-created nested entry within a Matrix field set to the element index view mode. ([#17231](https://github.com/craftcms/cms/pull/17231))
+- Fixed a bug where setting up two-step verification for an impersonated user would result in the original user getting logged back in. ([#17245](https://github.com/craftcms/cms/pull/17245))
+- Fixed a bug where conditionally-hidden entry Title fields were still being validated as required. ([#17249](https://github.com/craftcms/cms/issues/17249))
+- Fixed an error that could occur when upgrading to Craft 5. ([#17262](https://github.com/craftcms/cms/pull/17262))
+- Fixed styling issues. ([#17237](https://github.com/craftcms/cms/issues/17237), [#17261](https://github.com/craftcms/cms/pull/17261), [#17264](https://github.com/craftcms/cms/pull/17264), [#17266](https://github.com/craftcms/cms/pull/17266))
 
 ## 5.7.5 - 2025-05-06
 

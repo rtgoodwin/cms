@@ -2162,8 +2162,7 @@ ul.icons {
   }
 }
 
-.btn,
-.spinner {
+.btn {
   height: var(--input-height);
   min-height: var(--input-height);
 }
@@ -6381,6 +6380,11 @@ $min2ColWidth: 400px;
     z-index: 2;
     border-radius: 0;
 
+    // keep the margin-block-start as it was for wider viewports
+    @media only screen and (width <= 767px) {
+      margin-block: calc(var(--xl) * -1) var(--padding);
+    }
+
     & > .so-toolbar {
       display: flex;
       flex-direction: row;
@@ -6427,6 +6431,11 @@ $min2ColWidth: 400px;
       box-sizing: border-box;
       padding-block: 0 var(--spacing);
       padding-inline: var(--padding);
+
+      // set the margin-block-start so the slideout doesn't overlap the toolbar
+      @media only screen and (width <= 767px) {
+        margin-block-start: 16px;
+      }
 
       & > .preview-thumb-container {
         margin-block: 0;
@@ -7903,6 +7912,10 @@ textarea.text.fullwidth {
   container-type: inline-size;
 
   & > .flex {
+    & > .flex-grow {
+      overflow: hidden;
+    }
+
     & > div {
       &.text-link {
         border: var(--input-border);
@@ -7934,7 +7947,7 @@ textarea.text.fullwidth {
         }
 
         .chip {
-          height: calc(34rem / 16);
+          min-height: calc(34rem / 16);
           padding-inline: var(--s);
 
           .chip-content {

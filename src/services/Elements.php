@@ -1851,7 +1851,7 @@ class Elements extends Component
         $mainClone->setDirtyFields($dirtyFields, false);
 
         // Check authorization?
-        if ($checkAuthorization && !$this->canSave($mainClone)) {
+        if ($checkAuthorization && !($this->canDuplicate($mainClone) && $this->canSave($mainClone))) {
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
