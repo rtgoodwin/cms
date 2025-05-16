@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `where` is now a reserved field handle. ([#17269](https://github.com/craftcms/cms/issues/17269))
+- Fixed a bug where element card titles could disappear after the card was dragged. ([#17270](https://github.com/craftcms/cms/issues/17270))
+- Fixed a bug where newly-shown conditional custom fields were getting marked as changed prematurely.
+- Fixed a bug where sections weren’t saving preview targets in the specified order. ([#17271](https://github.com/craftcms/cms/issues/17271))
+- Fixed a bug where copy/pasting a nested element from a Matrix or Addresses field that had reached its “Max Entries”/“Max Addresses” setting would result in a “User not authorized to duplicate this element.” error. ([#17274](https://github.com/craftcms/cms/issues/17274))
+
+## 5.7.6 - 2025-05-14
+
 - Matrix fields set to the inline-editable blocks view mode now duplicate/copy all selected nested entries, rather than just the one the action was activated for. ([#17248](https://github.com/craftcms/cms/pull/17248))
 - Improved the accessibility and UI of “Delete” “buttons” within route edit modals. ([#17243](https://github.com/craftcms/cms/pull/17243))
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
@@ -16,7 +24,7 @@
 - Fixed a bug where setting up two-step verification for an impersonated user would result in the original user getting logged back in. ([#17245](https://github.com/craftcms/cms/pull/17245))
 - Fixed a bug where conditionally-hidden entry Title fields were still being validated as required. ([#17249](https://github.com/craftcms/cms/issues/17249))
 - Fixed an error that could occur when upgrading to Craft 5. ([#17262](https://github.com/craftcms/cms/pull/17262))
-- Fixed styling issues. ([#17237](https://github.com/craftcms/cms/issues/17237), [#17261](https://github.com/craftcms/cms/pull/17261), [#17264](https://github.com/craftcms/cms/pull/17264))
+- Fixed styling issues. ([#17237](https://github.com/craftcms/cms/issues/17237), [#17261](https://github.com/craftcms/cms/pull/17261), [#17264](https://github.com/craftcms/cms/pull/17264), [#17266](https://github.com/craftcms/cms/pull/17266))
 
 ## 5.7.5 - 2025-05-06
 
