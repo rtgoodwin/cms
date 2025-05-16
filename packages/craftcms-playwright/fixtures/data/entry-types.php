@@ -48,4 +48,12 @@ return [
         'fieldLayoutUid' => 'field-layout-1006----------------uid',
         'uid' => 'entry-type-1004------------------uid',
     ],
+    [
+        'id' => '1005',
+        'fieldLayoutId' => null,
+        'name' => 'With Colour',
+        'handle' => 'withColour',
+        'fieldLayoutUid' => 'field-layout-1007----------------uid',
+        'uid' => 'entry-type-1003------------------uid',
+    ],
 ];

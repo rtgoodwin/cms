@@ -9,6 +9,7 @@ use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\elements\User;
 use craft\fieldlayoutelements\entries\EntryTitleField;
+use craft\fields\Color;
 use craft\fields\Matrix;
 use craft\fields\Number;
 use craft\fields\PlainText;
@@ -198,13 +199,102 @@ return [
                         'required' => false,
                     ],
 
-                    // PLAIN TEXT FIELD2
+                    // COLOUR
                     [
                         'uid' => 'field-1007-----------------------uid',
-                        'name' => 'Plain Text Field 3',
-                        'handle' => 'plainTextField3',
-                        'type' => PlainText::class,
+                        'name' => 'Colour',
+                        'handle' => 'colour',
+                        'type' => Color::class,
                         'required' => false,
+                        'allowCustomColors' => true,
+                        "palette" => [
+                            [
+                                "color" => "#ff00ff",
+                                "label" => "pink",
+                                "default" => "",
+                            ],
+                            [
+                                "color" => "#bbff00",
+                                "label" => "lime",
+                                "default" => "",
+                            ],
+                            [
+                                "color" => "#0099ff",
+                                "label" => "",
+                                "default" => "",
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+    [
+        'uid' => 'field-layout-1007----------------uid',
+        'type' => Entry::class,
+        'tabs' => [
+            [
+                'name' => 'Tab 1',
+                'fields' => [
+                    // Entry Title Field
+                    [
+                        'uid' => 'native-field-1005----------------uid',
+                        'type' => EntryTitleField::class,
+                        'required' => true,
+                    ],
+                    // COLOUR 2 FIELD
+                    [
+                        'uid' => 'field-1008-----------------------uid',
+                        'name' => 'Colour 2',
+                        'handle' => 'colour2',
+                        'type' => Color::class,
+                        'required' => false,
+                        'allowCustomColors' => true,
+                        "palette" => [
+                            [
+                                "color" => "#ff00ff",
+                                "label" => "pink",
+                                "default" => "",
+                            ],
+                            [
+                                "color" => "#bbff00",
+                                "label" => "lime",
+                                "default" => "",
+                            ],
+                            [
+                                "color" => "#0099ff",
+                                "label" => "",
+                                "default" => "",
+                            ],
+                        ],
+                    ],
+                    // MATRIX FIELD IN BLOCKS MODE
+                    [
+                        'uid' => 'field-1005-----------------------uid',
+                        'name' => 'Matrix Blocks Field 2',
+                        'handle' => 'matrixBlocksField2',
+                        'type' => Matrix::class,
+                        'required' => false,
+                        'viewMode' => Matrix::VIEW_MODE_BLOCKS,
+                        'entryTypes' => [
+                            [
+                                'uid' => 'entry-type-1004------------------uid',
+                            ],
+                        ],
+                    ],
+                    // MATRIX FIELD IN CARDS MODE
+                    [
+                        'uid' => 'field-1003-----------------------uid',
+                        'name' => 'Matrix Cards Field 2',
+                        'handle' => 'matrixCardsField2',
+                        'type' => Matrix::class,
+                        'required' => false,
+                        'viewMode' => Matrix::VIEW_MODE_CARDS,
+                        'entryTypes' => [
+                            [
+                                'uid' => 'entry-type-1004------------------uid',
+                            ],
+                        ],
                     ],
                 ],
             ],

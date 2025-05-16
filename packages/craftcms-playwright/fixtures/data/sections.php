@@ -26,4 +26,21 @@ return [
         'uid' => 'section-1001---------------------uid',
         'entryTypes' => ['1001', '1002', '1003'],
     ],
+    [
+        'id' => '1002',
+        'name' => 'Test Init UI Elements',
+        'handle' => 'testInitUiElements',
+        'type' => 'channel',
+        'enableVersioning' => false,
+        'propagationMethod' => 'all',
+        'previewTargets' => [
+            [
+                'label' => 'Primary entry page',
+                'refresh' => '1',
+                'urlFormat' => '{url}',
+            ],
+        ],
+        'uid' => 'section-1002---------------------uid',
+        'entryTypes' => ['1005'],
+    ],
 ];
