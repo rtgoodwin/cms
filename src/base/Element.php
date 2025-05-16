@@ -91,6 +91,7 @@ use craft\web\UploadedFile;
 use craft\web\View;
 use DateTime;
 use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -6828,55 +6829,70 @@ JS, [
      */
     public function render(array $variables = []): Markup
     {
+        $templates = $this->partialTemplatePathCandidates();
+
+        $refHandle = static::refHandle();
+        if ($refHandle !== null) {
+            $variables[$refHandle] = $this;
+        }
+
         if ($this->hasEventHandlers(self::EVENT_RENDER)) {
             $event = new RenderElementEvent([
+                'templates' => $templates,
                 'variables' => $variables,
             ]);
             $this->trigger(self::EVENT_RENDER, $event);
             if (isset($event->output)) {
                 return new Markup($event->output, Craft::$app->charset);
             }
+            $templates = $event->templates;
             $variables = $event->variables;
         }
 
-        $refHandle = static::refHandle();
-        if ($refHandle === null) {
-            throw new NotSupportedException(sprintf('Element type “%s” doesn’t define a reference handle, so it doesn’t support partial templates.', static::displayName()));
-        }
-
-        $generalConfig = Craft::$app->getConfig()->getGeneral();
-        $view = Craft::$app->getView();
-
-        $variables[$refHandle] = $this;
-        $templates = [
-            sprintf('%s/%s', $generalConfig->partialTemplatesPath, $refHandle),
-        ];
-
-        // todo: make this better in 5.8
-        if ($this instanceof Entry) {
-            $entryType = $this->getType();
-            if (isset($entryType->original) && $entryType->original->handle !== $entryType->handle) {
-                array_unshift(
-                    $templates,
-                    sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $entryType->original->handle),
-                );
-            }
-        }
-
-        $providerHandle = $this->getFieldLayout()?->provider?->getHandle();
-        if ($providerHandle !== null) {
-            array_unshift($templates, sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $providerHandle));
-        }
-
-        foreach ($templates as $template) {
-            if ($view->doesTemplateExist($template, View::TEMPLATE_MODE_SITE)) {
-                $output = $view->renderTemplate($template, $variables, View::TEMPLATE_MODE_SITE);
-                return new Markup($output, Craft::$app->charset);
+        if (!empty($templates)) {
+            $view = Craft::$app->getView();
+            foreach (Arr::sort($templates, 'priority') as $template) {
+                if ($view->doesTemplateExist($template['template'], View::TEMPLATE_MODE_SITE)) {
+                    $output = $view->renderTemplate($template['template'], $variables, View::TEMPLATE_MODE_SITE);
+                    return new Markup($output, Craft::$app->charset);
+                }
             }
         }
 
         // fallback to the string representation of the element
         $output = Html::tag('p', Html::encode((string)$this));
         return new Markup($output, Craft::$app->charset);
+    }
+
+    /**
+     * Returns the template paths to check when rendering the element’s partial template.
+     *
+     * @return array{template:string,priority:int}[]
+     * @since 5.8.0
+     */
+    protected function partialTemplatePathCandidates(): array
+    {
+        $refHandle = static::refHandle();
+        if ($refHandle === null) {
+            return [];
+        }
+
+        $templates = [];
+        $generalConfig = Craft::$app->getConfig()->getGeneral();
+
+        $providerHandle = $this->getFieldLayout()?->provider?->getHandle();
+        if ($providerHandle !== null) {
+            $templates[] = [
+                'template' => sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $providerHandle),
+                'priority' => 1,
+            ];
+        }
+
+        $templates[] = [
+            'template' => sprintf('%s/%s', $generalConfig->partialTemplatesPath, $refHandle),
+            'priority' => 10,
+        ];
+
+        return $templates;
     }
 }

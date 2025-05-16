@@ -15,6 +15,7 @@
 ### Extensibility
 - Element edit pages now support being passed a hashed `returnUrl` query string param. ([#17137](https://github.com/craftcms/cms/discussions/17137))
 - Added `craft\base\Element::EVENT_RENDER`. ([#17188](https://github.com/craftcms/cms/discussions/17188))
+- Added `craft\base\Element::partialTemplatePathCandidates()`.
 - Added `craft\base\ElementInterface::render()`.
 - Added `craft\elements\Asset::setMimeType()`.
 - Added `craft\events\RenderElementEvent`. ([#`17188`](https://github.com/craftcms/cms/discussions/17188))

@@ -3046,4 +3046,24 @@ JS;
             }
         }
     }
+
+    protected function partialTemplatePathCandidates(): array
+    {
+        $templates = parent::partialTemplatePathCandidates();
+
+        $entryType = $this->getType();
+        if (isset($entryType->original) && $entryType->original->handle !== $entryType->handle) {
+            $templates[] = [
+                'template' => sprintf(
+                    '%s/%s/%s',
+                    Craft::$app->getConfig()->getGeneral()->partialTemplatesPath,
+                    static::refHandle(),
+                    $entryType->original->handle,
+                ),
+                'priority' => 5,
+            ];
+        }
+
+        return $templates;
+    }
 }
