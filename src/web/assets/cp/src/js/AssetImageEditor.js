@@ -41,7 +41,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     grid: null,
     croppingCanvas: null,
     clipper: null,
-    cropperHandleFocusRing: null,
+    activeCropperHandleIndicator: null,
+    focusedCropperHandleIndicator: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
@@ -2230,11 +2231,15 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.croppingRectangle);
       }
 
-      if (this.cropperHandleFocusRing) {
-        this.croppingCanvas.remove(this.cropperHandleFocusRing);
+      if (this.focusedCropperHandleIndicator) {
+        this.croppingCanvas.remove(this.focusedCropperHandleIndicator);
+        this.focusedCropperHandleIndicator = null;
       }
 
-      this.cropperHandleFocusRing = null;
+      if (this.activeCropperHandleIndicator) {
+        this.croppingCanvas.remove(this.activeCropperHandleIndicator);
+        this.activeCropperHandleIndicator = null;
+      }
 
       this._redrawCropperElements._.lineOptions = {
         strokeWidth: 4,
@@ -2327,7 +2332,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           });
         } else {
           const handle = this.cropperEditBtnFocused.data('handle');
-          this.cropperHandleFocusRing = this._getCropperHandleFocusRing(handle);
+          this.focusedCropperHandleIndicator =
+            this._getFocusedCropperHandleIndicator(handle);
         }
       }
 
@@ -2336,6 +2342,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (this.handlePicked) {
+        this.activeCropperHandleIndicator =
+          this._getActiveCropperHandleIndicator(this.handlePicked);
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2402,12 +2410,51 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.cropperHandleFocusRing) {
-        this.croppingCanvas.add(this.cropperHandleFocusRing);
+      if (this.focusedCropperHandleIndicator) {
+        this.croppingCanvas.add(this.focusedCropperHandleIndicator);
+      }
+
+      if (this.activeCropperHandleIndicator) {
+        this.croppingCanvas.add(this.activeCropperHandleIndicator);
       }
     },
 
-    _getCropperHandleFocusRing: function (handle) {
+    _getFocusedCropperHandleIndicator: function (handle) {
+      let handleCoordinates = this.getClipperHandlePosition(handle);
+
+      const innerRing = new fabric.Circle({
+        radius: 12,
+        fill: 'rgba(255,255,255,0.5)',
+        strokeWidth: 4,
+        stroke: 'blue',
+        left: 0,
+        top: 0,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      const outerRing = new fabric.Circle({
+        radius: 16,
+        fill: null,
+        strokeWidth: 4,
+        stroke: 'rgba(255,255,255,0.8)',
+        left: 0,
+        top: 0,
+        originX: 'center',
+        originY: 'center',
+      });
+
+      const focusRing = new fabric.Group([outerRing, innerRing], {
+        originX: 'center',
+        originY: 'center',
+        left: handleCoordinates.x,
+        top: handleCoordinates.y,
+      });
+
+      return focusRing;
+    },
+
+    _getActiveCropperHandleIndicator: function (handle) {
       let handleCoordinates = this.getClipperHandlePosition(handle);
 
       const innerRing = new fabric.Circle({
