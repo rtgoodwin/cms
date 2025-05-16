@@ -8,6 +8,7 @@
 use craft\elements\Asset;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\fieldlayoutelements\entries\EntryTitleField;
 use craft\fields\Matrix;
 use craft\fields\Number;
 use craft\fields\PlainText;
@@ -61,6 +62,12 @@ return [
             [
                 'name' => 'Tab 1',
                 'fields' => [
+                    // Entry Title Field
+                    [
+                        'uid' => 'native-field-1001----------------uid',
+                        'type' => EntryTitleField::class,
+                        'required' => true,
+                    ],
                     // PLAIN TEXT FIELD
                     [
                         'uid' => 'field-1001-----------------------uid',
@@ -89,6 +96,12 @@ return [
             [
                 'name' => 'Tab 1',
                 'fields' => [
+                    // Entry Title Field
+                    [
+                        'uid' => 'native-field-1002----------------uid',
+                        'type' => EntryTitleField::class,
+                        'required' => true,
+                    ],
                     // MATRIX FIELD IN CARDS MODE
                     [
                         'uid' => 'field-1003-----------------------uid',
@@ -114,6 +127,12 @@ return [
             [
                 'name' => 'Tab 1',
                 'fields' => [
+                    // Entry Title Field
+                    [
+                        'uid' => 'native-field-1003----------------uid',
+                        'type' => EntryTitleField::class,
+                        'required' => true,
+                    ],
                     // MATRIX FIELD IN ELEMENT INDEX MODE
                     [
                         'uid' => 'field-1004-----------------------uid',
@@ -139,6 +158,12 @@ return [
             [
                 'name' => 'Tab 1',
                 'fields' => [
+                    // Entry Title Field
+                    [
+                        'uid' => 'native-field-1004----------------uid',
+                        'type' => EntryTitleField::class,
+                        'required' => true,
+                    ],
                     // MATRIX FIELD IN BLOCKS MODE
                     [
                         'uid' => 'field-1005-----------------------uid',

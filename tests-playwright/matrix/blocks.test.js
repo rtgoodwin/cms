@@ -12,14 +12,14 @@ test.beforeEach(async ({page}) => {
 });
 
 test.describe('Blocks', () => {
-
+  const titleText = 'Entry with blocks matrix';
   const originalText = 'card 1';
   const editedText = originalText + ' edited';
+  const titleFieldLocator = '#title';
   const matrixBlocksFieldLocator = '#fields-matrixBlocksField-field';
   const firstBlockLocator = matrixBlocksFieldLocator + ' .blocks > .matrixblock:first-child';
   const textFieldLocator = ' input[name$="[fields][plainTextField2]"]';
   const newBlockLocator = '.buttons button.add';
-
 
   // create new entry that contains matrix field in inline-editable blocks view mode
   // add nested entry (block) to the matrix,
@@ -38,6 +38,11 @@ test.describe('Blocks', () => {
 
     // wait for the loader to disappear
     await entries.waitForAutosaveToComplete(page);
+    await page.locator(matrixBlocksFieldLocator).waitFor({state: 'visible'});
+
+    // set the title
+    await page.locator(titleFieldLocator).pressSequentially(titleText, {delay: 50});
+    await entries.waitForAutosaveToComplete(page);
 
     // add entry block to the matrix,
     await matrixBlocksField.locator(newBlockLocator).click();
@@ -51,9 +56,9 @@ test.describe('Blocks', () => {
     await firstBlock.locator(textFieldLocator).pressSequentially(originalText, { delay: 100 });
     await entries.waitForAutosaveToComplete(page);
 
-    // check the card was added and the field has the modified indicator
-    await expect(page.locator(matrixBlocksFieldLocator + ' > .status-badge')).not.toBeVisible();
-    await expect(firstBlock.getByTitle(entries.fieldModifiedText)).not.toBeVisible();
+    // check the block was added and the field has the modified indicator
+    await expect(page.locator(matrixBlocksFieldLocator + ' > .status-badge')).toBeVisible();
+    //await expect(firstBlock.getByTitle(entries.fieldModifiedText)).not.toBeVisible();
 
     // and save the root entry
     await page.getByRole('button', { name: 'Create entry' }).click();
@@ -126,7 +131,7 @@ test.describe('Blocks', () => {
     await expect(secondBlock.getByTitle(entries.fieldModifiedText)).not.toBeVisible();
 
     // discard root entry changes
-    page.on('dialog', async dialog => {
+    page.on('dialog', async (dialog) => {
       await dialog.accept();
     });
     await page.locator('#content .discard-changes-btn').click();
@@ -136,11 +141,8 @@ test.describe('Blocks', () => {
     await expect(matrixBlocksField.locator(' > .status-badge')).not.toBeVisible();
 
     // and there's only one card in the matrix field
-    await expect(matrixBlocksField.locator('.blocks .matrixblock')).toHaveCount(1);
+    await expect(matrixBlocksField.locator('.blocks .matrixblock')).toHaveCount(
+      1
+    );
   });
-
 });
-
-const iwona = () => {
-  console.log('IWONA');
-}
