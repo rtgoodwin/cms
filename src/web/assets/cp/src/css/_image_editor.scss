@@ -27,6 +27,12 @@ html.noscroll body {
     &:not([data-state='expanded']) {
       @include mixins.visually-hidden;
     }
+
+    &[data-state='collapsed'] {
+      .directional-buttons {
+        display: none;
+      }
+    }
   }
 
   .cropper-edit__wrapper--handles {
