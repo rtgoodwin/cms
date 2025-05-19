@@ -23,6 +23,10 @@ html.noscroll body {
     display: grid;
     max-width: 400px;
     grid-gap: var(--s);
+
+    &:not([data-state='expanded']) {
+      @include mixins.visually-hidden;
+    }
   }
 
   .cropper-edit__wrapper--handles {

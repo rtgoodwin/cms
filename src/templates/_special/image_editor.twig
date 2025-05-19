@@ -131,7 +131,11 @@
                 direction: orientation == 'ltr' ? 'right' : 'left',
             },
         ] %}
-        <fieldset class="cropper-edit">
+        <craft-disclosure>
+            <button type="button" aria-controls="cropper-edit">Show on-screen edit controls</button>
+        </craft-disclosure>
+
+        <fieldset id="cropper-edit" class="cropper-edit">
             <legend class="cropper-edit__legend">
                 {{ 'Edit {type}'|t('app', {
                     type: 'Cropping Rectangle'|t('app'),
