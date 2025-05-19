@@ -2143,6 +2143,7 @@ return [
     'is less than or equals' => 'is less than or equals',
     'is less than' => 'is less than',
     'is not one of' => 'is not one of',
+    'is of type' => 'is of type',
     'is one of' => 'is one of',
     'is related to' => 'is related to',
     'item' => 'item',
