@@ -2619,7 +2619,7 @@ $.extend(Craft, {
     const $actions = $(chip).find(
       '> .chip-content > .chip-actions, > .card-titlebar > .card-actions-container > .card-actions'
     );
-    let $actionMenuBtn = $actions.find('.action-btn');
+    let $actionMenuBtn = $actions.find('.action-btn').removeClass('hidden');
 
     if (!$actionMenuBtn.length) {
       // the chip/card doesn't have an action menu yet, so add one
