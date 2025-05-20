@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.7 - 2025-05-20
 
 - `where` is now a reserved field handle. ([#17269](https://github.com/craftcms/cms/issues/17269))
 - Fixed a bug where HUDs could be positioned incorrectly if their trigger element had been scrolled since the last time the HUD was opened. ([#17282](https://github.com/craftcms/cms/issues/17282))
