@@ -10,6 +10,7 @@
 - Fixed a bug where sections weren’t saving preview targets in the specified order. ([#17271](https://github.com/craftcms/cms/issues/17271))
 - Fixed a bug where copy/pasting a nested element from a Matrix or Addresses field that had reached its “Max Entries”/“Max Addresses” setting would result in a “User not authorized to duplicate this element.” error. ([#17274](https://github.com/craftcms/cms/issues/17274))
 - Fixed a bug where chips within element select inputs could be missing their “Replace” and “Remove” actions. ([verbb/formie#2431](https://github.com/verbb/formie/issues/2431))
+- Fixed a SQL error that occurred when using the Find & Replace utility on PostgreSQL. ([#17287](https://github.com/craftcms/cms/issues/17287))
 
 ## 5.7.6 - 2025-05-14
 
