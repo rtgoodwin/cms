@@ -1,6 +1,11 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.5 - 2025-05-20
+
+- Fixed a bug where HUDs could be positioned incorrectly if their trigger element had been scrolled since the last time the HUD was opened. ([#17282](https://github.com/craftcms/cms/issues/17282))
+- Fixed a bug where Checkboxes, Dropdown, Multi-select, and Radio Buttons fields’ GraphQL mutation arguments’ descriptions didn’t include the field instructions text. ([#17288](https://github.com/craftcms/cms/issues/17288))
+
+## 4.15.4 - 2025-05-14
 
 - Improved error responses for `assets/generate-transform` requests. ([#17228](https://github.com/craftcms/cms/issues/17228))
 - Fixed a bug where edit screen slideouts were given focus before the slideout was finished opening, which could cause UI glitches. ([#17232](https://github.com/craftcms/cms/issues/17232))
