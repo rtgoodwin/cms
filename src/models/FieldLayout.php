@@ -574,6 +574,22 @@ class FieldLayout extends Model
     }
 
     /**
+     * Returns all fields in the layout that match a given callback.
+     *
+     * @param callable $filter
+     * @return BaseField[]
+     * @throws InvalidArgumentException if the field isn’t included
+     * @since 5.8.0
+     */
+    public function getFields(callable $filter): array
+    {
+        return iterator_to_array($this->_elements(fn(FieldLayoutElement $layoutElement) => (
+            $layoutElement instanceof BaseField &&
+            $filter($layoutElement)
+        )));
+    }
+
+    /**
      * Returns the field layout’s config.
      *
      * @return array|null
