@@ -47,6 +47,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     cropperHandles: null,
     cropperGrid: null,
     croppingShade: null,
+    darkFocusColor: null,
+    lightFocusColor: null,
 
     // Image state attributes
     imageStraightenAngle: 0,
@@ -158,6 +160,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       Craft.sendActionRequest('POST', 'assets/image-editor', {
         data: {assetId},
       }).then((response) => this.loadEditor(response.data));
+
+      // Get colors
+      const root = document.documentElement;
+      const rootStyles = window.getComputedStyle(root);
+      this.darkFocusColor = rootStyles.getPropertyValue('--blue-500');
     },
 
     /**
@@ -2421,30 +2428,36 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
     _getFocusedCropperHandleIndicator: function (handle) {
       let handleCoordinates = this.getClipperHandlePosition(handle);
-
-      const innerRing = new fabric.Circle({
-        radius: 12,
-        fill: 'rgba(255,255,255,0.5)',
-        strokeWidth: 4,
-        stroke: 'blue',
+      const size = 12;
+      const width = 3;
+      const commonProps = {
+        fill: null,
+        strokeWidth: width,
         left: 0,
         top: 0,
         originX: 'center',
         originY: 'center',
+      }
+
+      const innerRing = new fabric.Circle({
+        radius: size,
+        stroke: this.darkFocusColor,
+        ...commonProps
+      });
+
+      const centerRing = new fabric.Circle({
+        radius: size + width,
+        stroke: 'rgba(255,255,255,1)',
+        ...commonProps
       });
 
       const outerRing = new fabric.Circle({
-        radius: 16,
-        fill: null,
-        strokeWidth: 4,
-        stroke: 'rgba(255,255,255,0.8)',
-        left: 0,
-        top: 0,
-        originX: 'center',
-        originY: 'center',
+        radius: size + (width * 2),
+        stroke: this.darkFocusColor,
+        ...commonProps
       });
 
-      const focusRing = new fabric.Group([outerRing, innerRing], {
+      const focusRing = new fabric.Group([outerRing, centerRing, innerRing], {
         originX: 'center',
         originY: 'center',
         left: handleCoordinates.x,
