@@ -11,6 +11,7 @@
 - Fixed a bug where copy/pasting a nested element from a Matrix or Addresses field that had reached its “Max Entries”/“Max Addresses” setting would result in a “User not authorized to duplicate this element.” error. ([#17274](https://github.com/craftcms/cms/issues/17274))
 - Fixed a bug where chips within element select inputs could be missing their “Replace” and “Remove” actions. ([verbb/formie#2431](https://github.com/verbb/formie/issues/2431))
 - Fixed a SQL error that occurred when using the Find & Replace utility on PostgreSQL. ([#17287](https://github.com/craftcms/cms/issues/17287))
+- Fixed a bug where pasting an element to a different site than it was copied from wasn’t working correctly. ([#17294](https://github.com/craftcms/cms/issues/17294))
 
 ## 5.7.6 - 2025-05-14
 
