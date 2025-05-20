@@ -4,6 +4,7 @@
 
 - `where` is now a reserved field handle. ([#17269](https://github.com/craftcms/cms/issues/17269))
 - Fixed a bug where HUDs could be positioned incorrectly if their trigger element had been scrolled since the last time the HUD was opened. ([#17282](https://github.com/craftcms/cms/issues/17282))
+- Fixed a bug where Button Group, Checkboxes, Dropdown, Multi-select, and Radio Buttons fields’ GraphQL mutation arguments’ descriptions didn’t include the field instructions text. ([#17288](https://github.com/craftcms/cms/issues/17288))
 - Fixed a bug where element card titles could disappear after the card was dragged. ([#17270](https://github.com/craftcms/cms/issues/17270))
 - Fixed a bug where newly-shown conditional custom fields were getting marked as changed prematurely.
 - Fixed a bug where sections weren’t saving preview targets in the specified order. ([#17271](https://github.com/craftcms/cms/issues/17271))
