@@ -90,6 +90,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     constraintOrientation: 'landscape',
     showingCustomConstraint: false,
     saving: false,
+    nonDragEditMode: false,
 
     // Rendering proxy functions
     renderImage: null,
@@ -2410,30 +2411,30 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.croppingRectangle);
 
       if (this.cropperHandleIndicator) {
-        this.croppingCanvas.add(this.cropperHandleIndicator);
-      }
+        if (this.handlePicked) {
+          console.log('show icon');
+          // Adjust handle indictor to reflect active styles
+          fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+            var obj = fabric.util.groupSVGElements(objects, options);
+            obj.set({
+              left: 0,
+              top: 0,
+              scaleX: 0.03,
+              scaleY: 0.03,
+              originX: 'center',
+              originY: 'center',
+              fill: 'white',
+            });
 
-      if (this.handlePicked && this.cropperHandleIndicator) {
-        console.log('show icon');
-        // Adjust handle indictor to reflect active styles
-        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-          var obj = fabric.util.groupSVGElements(objects, options);
-          obj.set({
-            left: 0,
-            top: 0,
-            scaleX: 0.03,
-            scaleY: 0.03,
-            originX: 'center',
-            originY: 'center',
-            fill: 'white',
+            this.cropperHandleIndicator.add(obj);
           });
 
-          this.cropperHandleIndicator.add(obj);
-        });
+          this.cropperHandleIndicator.item(0).set({
+            fill: 'rgba(0, 0, 0, .8)',
+          });
+        }
 
-        this.cropperHandleIndicator.item(0).set({
-          fill: 'black',
-        });
+        this.croppingCanvas.add(this.cropperHandleIndicator);
       }
     },
 
@@ -2698,26 +2699,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       event.preventDefault();
 
-      if (this.focalPoint) {
-        // Find current focal point position
-        let x = this.focalPoint.left;
-        let y = this.focalPoint.top;
-
-        switch (ev.keyCode) {
-          case Garnish.LEFT_KEY:
-          case Garnish.UP_KEY:
-            const $prevTab = this._getPrevTab();
-            this.activateTab($prevTab);
-            break;
-          case Garnish.RIGHT_KEY:
-          case Garnish.DOWN_KEY:
-            break;
-        }
-        const newFocalPoint = {
-          x: this.focalPoint.left,
-          y: this.focalPoint.top,
-        };
-      } else if (this.croppingCanvas) {
+      if (this.croppingCanvas) {
         this._handleCropperKeyboardEdit(ev);
       }
     },
