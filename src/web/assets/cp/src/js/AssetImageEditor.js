@@ -2437,24 +2437,24 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         top: 0,
         originX: 'center',
         originY: 'center',
-      }
+      };
 
       const innerRing = new fabric.Circle({
         radius: size,
         stroke: this.darkFocusColor,
-        ...commonProps
+        ...commonProps,
       });
 
       const centerRing = new fabric.Circle({
         radius: size + width,
         stroke: 'rgba(255,255,255,1)',
-        ...commonProps
+        ...commonProps,
       });
 
       const outerRing = new fabric.Circle({
-        radius: size + (width * 2),
+        radius: size + width * 2,
         stroke: this.darkFocusColor,
-        ...commonProps
+        ...commonProps,
       });
 
       const focusRing = new fabric.Group([outerRing, centerRing, innerRing], {

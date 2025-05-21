@@ -259,6 +259,18 @@ return array(
     'terms' => ' downwards arrow download ',
     'pro' => false,
   ),
+  'arrow-down-left' =>
+  array(
+    'name' => ' arrow down left ',
+    'terms' => ' diagonal southwest ',
+    'pro' => true,
+  ),
+  'arrow-down-right' =>
+  array(
+    'name' => ' arrow down right ',
+    'terms' => ' diagonal southeast ',
+    'pro' => true,
+  ),
   'arrow-down-short-wide' =>
   array(
     'name' => ' arrow down short wide ',
@@ -336,6 +348,18 @@ return array(
     'name' => ' arrow up ',
     'terms' => ' upwards arrow forward upgrade upload ',
     'pro' => false,
+  ),
+  'arrow-up-left' =>
+  array(
+    'name' => ' arrow up left ',
+    'terms' => ' diagonal northwest ',
+    'pro' => true,
+  ),
+  'arrow-up-right' =>
+  array(
+    'name' => ' arrow up right ',
+    'terms' => ' diagonal northeast ',
+    'pro' => true,
   ),
   'arrow-up-right-from-square' =>
   array(

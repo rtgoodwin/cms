@@ -82,34 +82,42 @@
             {
                 label: orientation == 'ltr' ? 'Top Left Handle'|t('app') : 'Top Right Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'tl' : 'tr',
+                icon: orientation == 'ltr' ? 'arrow-up-left' : 'arrow-up-right',
             },
             {
                 label: 'Top Handle'|t('app'),
                 handle: 't',
+                icon: 'arrow-up',
             },
             {
                 label: orientation == 'ltr' ? 'Top Right Handle'|t('app') : 'Top Left Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'tr' : 'tl',
+                icon: orientation == 'ltr' ? 'arrow-up-right' : 'arrow-up-left',
             },
             {
                 label: orientation == 'ltr' ? 'Left Handle'|t('app') : 'Right Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'l' : 'r',
+                icon: orientation == 'ltr' ? 'arrow-left' : 'arrow-right',
             },
             {
                 label: orientation == 'ltr' ? 'Right Handle'|t('app') : 'Left Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'r' : 'l',
+                icon: orientation == 'ltr' ? 'arrow-right' : 'arrow-left',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Left Handle'|t('app') : 'Bottom Right Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'bl' : 'br',
+                icon: orientation == 'ltr' ? 'arrow-down-left' : 'arrow-down-right',
             },
             {
                 label: 'Bottom Handle'|t('app'),
                 handle: 'b',
+                icon: 'arrow-down',
             },
             {
                 label: orientation == 'ltr' ? 'Bottom Right Handle'|t('app') : 'Bottom Left Handle'|t('app'),
                 handle: orientation == 'ltr' ? 'br' : 'bl',
+                icon: orientation == 'ltr' ? 'arrow-down-right' : 'arrow-down-left',
             },
         ] %}
 
@@ -132,7 +140,13 @@
             },
         ] %}
         <craft-disclosure>
-            <button type="button" aria-controls="cropper-edit">Show on-screen edit controls</button>
+            {{ _self.iconButton({
+                icon: 'eye',
+                label: 'Crop Edit Controls'|t('app'),
+                buttonAttributes: {
+                    'aria-controls': 'cropper-edit'
+                }
+            }) }}
         </craft-disclosure>
 
         <fieldset id="cropper-edit" class="cropper-edit">
@@ -144,8 +158,8 @@
 
             <div class="cropper-edit__wrapper">
                 {{ _self.iconButton({
-                    icon: 'up-down-left-right',
-                    label: 'Cropping Rectangle'|t('app'),
+                    icon: 'frame',
+                    label: 'Move'|t('app'),
                     id: 'cropper-handle',
                     buttonAttributes: {
                         data: {
@@ -162,7 +176,7 @@
                         <div></div>
                     {% endif %}
                     {{ _self.iconButton({
-                        icon: 'expand',
+                        icon: button.icon,
                         label: button.label,
                         buttonAttributes: {
                             data: {
