@@ -42,14 +42,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     croppingCanvas: null,
     clipper: null,
     cropperHandleIndicator: null,
-    activeCropperHandleIndicator: null,
-    focusedCropperHandleIndicator: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
     croppingShade: null,
     darkFocusColor: null,
     lightFocusColor: null,
+    moveIcon: null,
 
     // Image state attributes
     imageStraightenAngle: 0,
@@ -222,6 +221,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.$body
       );
 
+      // Get SVG to use for move/active indicator
+      const $moveSvg = $('#move-icon-wrapper svg');
+      this.moveIcon = $moveSvg.prop('outerHTML');
       this._showSpinner();
 
       this.updateSizeAndPosition();
@@ -2412,7 +2414,23 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (this.handlePicked && this.cropperHandleIndicator) {
+        console.log('show icon');
         // Adjust handle indictor to reflect active styles
+        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+          var obj = fabric.util.groupSVGElements(objects, options);
+          obj.set({
+            left: 0,
+            top: 0,
+            scaleX: 0.03,
+            scaleY: 0.03,
+            originX: 'center',
+            originY: 'center',
+            fill: 'white',
+          });
+
+          this.cropperHandleIndicator.add(obj);
+        });
+
         this.cropperHandleIndicator.item(0).set({
           fill: 'black',
         });
