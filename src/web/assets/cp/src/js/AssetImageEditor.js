@@ -41,7 +41,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     grid: null,
     croppingCanvas: null,
     clipper: null,
-    cropperHandleIndicator: null,
+    activeHandleIndicator: null,
+    focusedHandleIndicator: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
@@ -2245,9 +2246,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.croppingRectangle);
       }
 
-      if (this.cropperHandleIndicator) {
-        this.croppingCanvas.remove(this.cropperHandleIndicator);
-        this.cropperHandleIndicator = null;
+      if (this.focusedHandleIndicator) {
+        this.croppingCanvas.remove(this.focusedHandleIndicator);
+        this.focusedHandleIndicator = null;
+      }
+
+      if (this.activeHandleIndicator) {
+        this.croppingCanvas.remove(this.activeHandleIndicator);
+        this.activeHandleIndicator = null;
       }
 
       this._redrawCropperElements._.lineOptions = {
@@ -2341,12 +2347,34 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           });
         } else {
           const handle = this.cropperEditBtnFocused.data('handle');
-          this.cropperHandleIndicator = this._getCropperHandleIndicator(handle);
+          this.focusedHandleIndicator = this._getCropperHandleIndicator(handle);
         }
       }
 
-      // TODO: Add active styles when the rectangle/handles are picked up
-      if (this.cropperPickedUp) {
+      if (this.handlePicked) {
+        console.log('show icon');
+        this.activeHandleIndicator = this._getCropperHandleIndicator(
+          this.handlePicked
+        );
+
+        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+          var obj = fabric.util.groupSVGElements(objects, options);
+          obj.set({
+            left: 0,
+            top: 0,
+            scaleX: 0.03,
+            scaleY: 0.03,
+            originX: 'center',
+            originY: 'center',
+            fill: 'white',
+          });
+
+          this.activeHandleIndicator.add(obj);
+        });
+
+        this.activeHandleIndicator.item(0).set({
+          fill: 'rgba(0, 0, 0, .8)',
+        });
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2413,31 +2441,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.cropperHandleIndicator) {
-        if (this.handlePicked) {
-          console.log('show icon');
-          // Adjust handle indictor to reflect active styles
-          fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-            var obj = fabric.util.groupSVGElements(objects, options);
-            obj.set({
-              left: 0,
-              top: 0,
-              scaleX: 0.03,
-              scaleY: 0.03,
-              originX: 'center',
-              originY: 'center',
-              fill: 'white',
-            });
+      if (this.focusedHandleIndicator) {
+        this.croppingCanvas.add(this.focusedHandleIndicator);
+      }
 
-            this.cropperHandleIndicator.add(obj);
-          });
-
-          this.cropperHandleIndicator.item(0).set({
-            fill: 'rgba(0, 0, 0, .8)',
-          });
-        }
-
-        this.croppingCanvas.add(this.cropperHandleIndicator);
+      if (this.activeHandleIndicator) {
+        this.croppingCanvas.add(this.activeHandleIndicator);
       }
     },
 
@@ -2584,6 +2593,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       let item = $btn.find('[data-item-name]').text();
 
       if (!pickingUp) {
+        this.nonDragEditMode = false;
         stateMessage = Craft.t('app', '{item} dropped.', {
           item: item,
         });
@@ -2591,6 +2601,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         // Hide directional buttons
         this.$directionalArrowContainer.addClass('hidden');
       } else {
+        this.nonDragEditMode = true;
         $btn.attr('aria-pressed', 'true');
 
         // Show directional buttons
@@ -2738,6 +2749,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param {Object} ev
      */
     _handleMouseMove: function (ev) {
+      if (this.nonDragEditMode) return;
+
       if (this.mouseMoveEvent !== null) {
         Garnish.requestAnimationFrame(this._handleMouseMoveInternal.bind(this));
       }
