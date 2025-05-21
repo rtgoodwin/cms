@@ -894,8 +894,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.addListener(this.$cropperEditBtn, 'keydown', (ev) => {
         this._handleKeydownOnCropperEditBtn(ev);
       });
-      this.addListener('button', 'focus', (ev) => {
+      this.addListener(this.$container, 'focusin', (ev) => {
+        if (!this.clipper) return;
+
         const $target = $(ev.target);
+
         if (this.$cropperEditBtn.is($target)) {
           this.cropperEditBtnFocused = $target;
         } else {
