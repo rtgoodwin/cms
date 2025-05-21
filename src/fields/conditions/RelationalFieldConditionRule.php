@@ -151,10 +151,22 @@ class RelationalFieldConditionRule extends BaseElementSelectConditionRule implem
                     ]);
                     break;
                 case self::OPERATOR_NOT_EMPTY:
-                    $query->andWhere(['not', [$valueSql => null]]);
+                    $query->andWhere(
+                        [
+                            'and',
+                            ['not', [$valueSql => null]],
+                            ['not', [$valueSql => '[]']],
+                        ]
+                    );
                     break;
                 case self::OPERATOR_EMPTY:
-                    $query->andWhere([$valueSql => null]);
+                    $query->andWhere(
+                        [
+                            'or',
+                            [$valueSql => null],
+                            [$valueSql => '[]'],
+                        ]
+                    );
                     break;
             }
             return;
