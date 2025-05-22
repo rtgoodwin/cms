@@ -8,6 +8,7 @@
 - Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
 - Fixed an “Invalid field layout ID” error that could occur when running `craft up` with pending project config YAML files which cause a Single section’s entry type to be soft-deleted.
 - Fixed a bug where only one relation field value could get saved when bulk-editing elements. ([#17302](https://github.com/craftcms/cms/issues/17302))
+- Fixed a bug where element index column headings could display “`__blank`” for custom fields with labels overridden to be hidden. ([#17305](https://github.com/craftcms/cms/issues/17305))
 - Fixed a styling issue.
 
 ## 5.7.7 - 2025-05-20
