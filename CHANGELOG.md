@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `craft\services\Fields::getLayoutById()` now has a `$withTrashed` argument.
+- Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
+- Fixed an “Invalid field layout ID” error that could occur when running `craft up` with pending project config YAML files which cause a Single section’s entry type to be soft-deleted.
+- Fixed a styling issue.
+
+## 5.7.7 - 2025-05-20
+
 - `where` is now a reserved field handle. ([#17269](https://github.com/craftcms/cms/issues/17269))
 - Fixed a bug where HUDs could be positioned incorrectly if their trigger element had been scrolled since the last time the HUD was opened. ([#17282](https://github.com/craftcms/cms/issues/17282))
 - Fixed a bug where Button Group, Checkboxes, Dropdown, Multi-select, and Radio Buttons fields’ GraphQL mutation arguments’ descriptions didn’t include the field instructions text. ([#17288](https://github.com/craftcms/cms/issues/17288))
@@ -11,6 +18,7 @@
 - Fixed a bug where copy/pasting a nested element from a Matrix or Addresses field that had reached its “Max Entries”/“Max Addresses” setting would result in a “User not authorized to duplicate this element.” error. ([#17274](https://github.com/craftcms/cms/issues/17274))
 - Fixed a bug where chips within element select inputs could be missing their “Replace” and “Remove” actions. ([verbb/formie#2431](https://github.com/verbb/formie/issues/2431))
 - Fixed a SQL error that occurred when using the Find & Replace utility on PostgreSQL. ([#17287](https://github.com/craftcms/cms/issues/17287))
+- Fixed a bug where pasting an element to a different site than it was copied from wasn’t working correctly. ([#17294](https://github.com/craftcms/cms/issues/17294))
 
 ## 5.7.6 - 2025-05-14
 
