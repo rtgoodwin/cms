@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
+- Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
 
 ## 4.15.5 - 2025-05-20
 
