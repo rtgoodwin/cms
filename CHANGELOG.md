@@ -4,6 +4,7 @@
 
 - `craft\services\Fields::getLayoutById()` now has a `$withTrashed` argument.
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
+- Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
 - Fixed an “Invalid field layout ID” error that could occur when running `craft up` with pending project config YAML files which cause a Single section’s entry type to be soft-deleted.
 - Fixed a styling issue.
 
