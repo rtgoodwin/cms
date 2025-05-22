@@ -622,6 +622,7 @@ class Table extends Field
 
         return Type::listOf(GqlEntityRegistry::getOrCreate($typeName, fn() => new InputObjectType([
             'name' => $typeName,
+            'description' => sprintf('Defines a row within the “%s” Table field’s data.', $this->name),
             'fields' => fn() => TableRow::prepareRowFieldDefinition($this->columns, false),
         ])));
     }
