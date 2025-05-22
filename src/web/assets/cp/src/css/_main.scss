@@ -8187,6 +8187,7 @@ fieldset {
   margin-inline-start: 5px;
   width: calc(30rem / 16);
   height: calc(17rem / 16);
+  min-height: auto;
   padding: 0;
   line-height: 16px;
   border-radius: var(--small-border-radius);
