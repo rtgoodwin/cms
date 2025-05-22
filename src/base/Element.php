@@ -4121,12 +4121,7 @@ JS, [
         // Permissions
         $canDeleteDraft = $isDraft && !$this->isProvisionalDraft && $elementsService->canDelete($this, $user);
         $canDeleteCanonical = $elementsService->canDelete($canonical, $user);
-        $canDeleteForSite = (
-            $isMultiSiteElement &&
-            count($propSiteIds) > 1 &&
-            (($isCurrent && $canDeleteCanonical) || ($canDeleteDraft && $isNewSite)) &&
-            $elementsService->canDeleteForSite($this, $user)
-        );
+        $canDeleteForSite = $elementsService->canDeleteForSite($this, $user);
 
         if ($isCurrent) {
             // Delete for site

@@ -496,10 +496,14 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                         'withDescendants' => true,
                     ];
                 }
+            }
 
-                if ($section->propagationMethod === PropagationMethod::Custom && $section->getHasMultiSiteEntries()) {
-                    $actions[] = DeleteForSite::class;
-                }
+            if (
+                $section->propagationMethod === PropagationMethod::Custom &&
+                $section->getHasMultiSiteEntries() &&
+                $user->can("deleteEntriesForSite:$section->uid")
+            ) {
+                $actions[] = DeleteForSite::class;
             }
         } else {
             $actions[] = Copy::class;
@@ -2035,7 +2039,18 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return false;
         }
 
-        return $section->propagationMethod === PropagationMethod::Custom;
+        if ($section->propagationMethod === PropagationMethod::Custom && (!$this->getIsDraft() || $this->getIsUnpublishedDraft())) {
+            if (!$user->can("deleteEntriesForSite:$section->uid")) {
+                return false;
+            }
+
+            return (
+                in_array($user->id, $this->getAuthorIds(), true) ||
+                $user->can("deletePeerEntriesForSite:$section->uid")
+            );
+        }
+
+        return false;
     }
 
     /**

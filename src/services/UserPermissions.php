@@ -558,8 +558,17 @@ class UserPermissions extends Component
                                     'type' => $pluralType,
                                 ]),
                             ],
+                            "deleteEntriesForSite:$section->uid" => [
+                                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Delete {type} for site', ['type' => $pluralType])),
+                                'info' => Craft::t('app', 'Allows deleting {type} on the current site, provided the user has access to it.', [
+                                    'type' => $pluralType,
+                                ]),
+                            ],
                             "deleteEntries:$section->uid" => [
                                 'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Delete {type}', ['type' => $pluralType])),
+                                'info' => Craft::t('app', 'Allows deleting {type} for all sites.', [
+                                    'type' => $pluralType,
+                                ]),
                             ],
                             "viewPeerEntries:$section->uid" => [
                                 'label' => StringHelper::upperCaseFirst(Craft::t('app', 'View other users’ {type}', ['type' => $pluralType])),
@@ -567,8 +576,17 @@ class UserPermissions extends Component
                                     "savePeerEntries:$section->uid" => [
                                         'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Save other users’ {type}', ['type' => $pluralType])),
                                     ],
+                                    "deletePeerEntriesForSite:$section->uid" => [
+                                        'label' => Craft::t('app', 'Delete other users’ {type} for site', ['type' => $pluralType]),
+                                        'info' => Craft::t('app', 'Allows deleting other users’ {type} on the current site, provided the user has access to it.', [
+                                            'type' => $pluralType,
+                                        ]),
+                                    ],
                                     "deletePeerEntries:$section->uid" => [
                                         'label' => Craft::t('app', 'Delete other users’ {type}', ['type' => $pluralType]),
+                                        'info' => Craft::t('app', 'Allows deleting other users’ {type} for all sites.', [
+                                            'type' => $pluralType,
+                                        ]),
                                     ],
                                 ],
                             ],
