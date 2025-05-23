@@ -5,6 +5,7 @@
 {% set successMessage = successMessage ?? false %}
 {% set enableLiveRegion = busyMessage or failureMessage or retryMessage or successMessage %}
 {% set icon = icon ?? null %}
+{% set iconHtml = iconHtml ?? null %}
 {% set label = label ?? null %}
 {% set labelHtml = labelHtml ?? null %}
 
@@ -35,8 +36,12 @@
     {% tag 'button' with attributes %}
         {% if hasIcon or hasLabel or hasLabelHtml %}
             <div class="inline-flex">
-                {% if hasIcon %}
-                    <div class="cp-icon">{{ iconSvg(icon) }}</div>
+                {% if hasIcon or iconHtml %}
+                    {% if icon %}
+                        <div class="cp-icon">{{ iconSvg(icon) }}</div>
+                    {% elseif iconHtml %}
+                        {{ iconHtml }}
+                    {% endif %}
                 {% endif %}
                 {% if hasLabel or hasLabelHtml %}
                     {{ tag('div', {

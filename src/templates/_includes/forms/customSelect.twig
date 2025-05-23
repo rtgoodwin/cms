@@ -17,20 +17,19 @@
   {{- color is instance of ('craft\\enums\\Color') ? color.value : color -}}
 {% endmacro %}
 
-{% set buttonLabelHtml %}
-  <div class="inline-flex">
+{% set buttonIconHtml %}
     {% if selectedOption.icon ?? false %}
-      {{ tag('div', {
-        class: [
-          'cp-icon',
-          _self.color(selectedOption.iconColor ?? null),
-        ]|filter,
-        html: iconSvg(selectedOption.icon),
-      }) }}
+        {{ tag('div', {
+            class: [
+                'cp-icon',
+                _self.color(selectedOption.iconColor ?? null),
+            ]|filter,
+            html: iconSvg(selectedOption.icon),
+        }) }}
     {% endif %}
-    <div class="label">{{ selectedOption ? (selectedOption.label ?? selectedOption.labelHtml|raw) : defaultButtonLabel ?? 'Choose'|t('app') }}</div>
-  </div>
 {% endset %}
+
+{% set buttonLabel = selectedOption ? (selectedOption.label ?? selectedOption.labelHtml|raw) : defaultButtonLabel ?? 'Choose'|t('app')  %}
 
 {% tag 'div' with {
   class: {
@@ -42,7 +41,8 @@
 }|merge(attributes ?? {}, recursive=true) %}
   {{ forms.button({
     id: buttonId,
-    labelHtml: buttonLabelHtml ?? null,
+    iconHtml: buttonIconHtml,
+    label: buttonLabel,
     class: ['menubtn'],
     attributes: buttonAttributes ?? {},
   }) }}
