@@ -37,7 +37,7 @@
         {% if hasIcon or hasLabel or hasLabelHtml %}
             <div class="inline-flex">
                 {% if hasIcon or iconHtml %}
-                    {% if icon %}
+                    {% if hasIcon %}
                         <div class="cp-icon">{{ iconSvg(icon) }}</div>
                     {% elseif iconHtml %}
                         {{ iconHtml }}

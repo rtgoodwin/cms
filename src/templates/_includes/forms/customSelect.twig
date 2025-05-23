@@ -17,8 +17,9 @@
   {{- color is instance of ('craft\\enums\\Color') ? color.value : color -}}
 {% endmacro %}
 
-{% set buttonIconHtml %}
-    {% if selectedOption.icon ?? false %}
+{% set buttonIconHtml = null %}
+{% if selectedOption.icon ?? false %}
+    {% set buttonIconHtml %}
         {{ tag('div', {
             class: [
                 'cp-icon',
@@ -26,8 +27,8 @@
             ]|filter,
             html: iconSvg(selectedOption.icon),
         }) }}
-    {% endif %}
-{% endset %}
+    {% endset %}
+{% endif %}
 
 {% set buttonLabel = selectedOption ? (selectedOption.label ?? selectedOption.labelHtml|raw) : defaultButtonLabel ?? 'Choose'|t('app')  %}
 
