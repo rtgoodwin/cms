@@ -3868,13 +3868,6 @@ abstract class Element extends Component implements ElementInterface
 
         $altActions = [
             [
-                'label' => Craft::t('app', 'Validate current draft'),
-                'redirect' => '{cpEditUrl}',
-                'retainScroll' => true,
-                'eventData' => ['autosave' => false],
-                'action' => 'elements/validate-draft',
-            ],
-            [
                 'label' => $isUnpublishedDraft && $canSaveCanonical
                     ? Craft::t('app', 'Create and continue editing')
                     : Craft::t('app', 'Save and continue editing'),
@@ -3971,6 +3964,21 @@ abstract class Element extends Component implements ElementInterface
     {
         $items = [];
         $elementsService = Craft::$app->getElements();
+
+        // Draft validation
+        if ($this->getIsDraft()) {
+            $items[] = [
+                'label' => Craft::t('app', 'Validate current draft'),
+                'redirect' => '{cpEditUrl}',
+                'type' => MenuItemType::Button,
+                'retainScroll' => true,
+                'eventData' => ['autosave' => false],
+                'params' => [
+                    'elementId' => $this->id,
+                ],
+                'action' => 'elements/validate-draft',
+            ];
+        }
 
         // View
         $url = $this->getUrl();
