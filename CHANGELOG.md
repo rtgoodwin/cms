@@ -3,6 +3,7 @@
 ## Unreleased
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
+- The `update-statuses` action now ensures it is only being run once at a time.
 - `craft\services\Fields::getLayoutById()` now has a `$withTrashed` argument.
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
 - Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
