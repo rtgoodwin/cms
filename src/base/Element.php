@@ -3868,7 +3868,7 @@ abstract class Element extends Component implements ElementInterface
 
         $altActions = [
             [
-                'label' => Craft::t('app', 'Validate draft before saving'),
+                'label' => Craft::t('app', 'Validate current draft'),
                 'redirect' => '{cpEditUrl}',
                 'retainScroll' => true,
                 'eventData' => ['autosave' => false],
