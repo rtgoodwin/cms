@@ -1789,6 +1789,40 @@ JS, [
     }
 
     /**
+     * Validates a draft.
+     *
+     * @return Response|null
+     * @since
+     */
+    public function actionValidateDraft(): ?Response
+    {
+        $this->requirePostRequest();
+
+        /** @var Element|DraftBehavior|Response|null $element */
+        $element = $this->_element();
+
+        // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
+        // and we hit "create entry" before the autosave kicks in
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        if ($element->validate()) {
+            return $this->_asSuccess(Craft::t('app', 'Validating {type} succeeded', [
+                'type' => $element::lowerDisplayName(),
+            ]), $element);
+        } else {
+            return $this->_asFailure($element, Craft::t('app', 'Validating {type} failed', [
+                'type' => $element::lowerDisplayName(),
+            ]));
+        }
+    }
+
+    /**
      * Saves a draft.
      *
      * @return Response|null

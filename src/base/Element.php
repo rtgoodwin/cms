@@ -3868,6 +3868,13 @@ abstract class Element extends Component implements ElementInterface
 
         $altActions = [
             [
+                'label' => Craft::t('app', 'Validate draft before saving'),
+                'redirect' => '{cpEditUrl}',
+                'retainScroll' => true,
+                'eventData' => ['autosave' => false],
+                'action' => 'elements/validate-draft',
+            ],
+            [
                 'label' => $isUnpublishedDraft && $canSaveCanonical
                     ? Craft::t('app', 'Create and continue editing')
                     : Craft::t('app', 'Save and continue editing'),
