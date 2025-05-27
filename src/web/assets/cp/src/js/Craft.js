@@ -2111,22 +2111,25 @@ $.extend(Craft, {
     $('[data-disclosure-trigger]', $container).disclosureMenu();
 
     /**
-     * Swap any instruction text with info icons
+     * Swap any instruction text with info icons but avoid those with the class
+     * visually-hidden as those have already been swapped
      * This needs to happen before the `infoicon` method
      */
     $(
       '.field.info-icon-instructions > .instructions, #details .meta > .field > .instructions',
       $container
-    ).each(function () {
-      const $instructions = $(this);
-      const $label = $instructions.siblings('.heading').find('label');
-      $('<div/>', {
-        class: 'info',
-        html: $instructions.children().html(),
-      }).appendTo($label);
-      // Keep the original element around in case an aria-describedby attribute is referencing it
-      $instructions.addClass('visually-hidden');
-    });
+    )
+      .not('.visually-hidden')
+      .each(function () {
+        const $instructions = $(this);
+        const $label = $instructions.siblings('.heading').find('label');
+        $('<div/>', {
+          class: 'info',
+          html: $instructions.children().html(),
+        }).appendTo($label);
+        // Keep the original element around in case an aria-describedby attribute is referencing it
+        $instructions.addClass('visually-hidden');
+      });
 
     $('.info', $container).infoicon();
 
