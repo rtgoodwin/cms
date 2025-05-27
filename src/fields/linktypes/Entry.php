@@ -11,6 +11,7 @@ use Craft;
 use craft\elements\Entry as EntryElement;
 use craft\helpers\Cp;
 use craft\models\Section;
+use craft\services\ElementSources;
 use Illuminate\Support\Collection;
 
 /**
@@ -123,19 +124,19 @@ class Entry extends BaseElementLinkType
         $config = parent::elementSelectConfig();
 
         if (!$this->showUnpermittedSections) {
+            // get all the native & custom sources that user has permissions to view
+            $sourcesUserHasPermissionsFor = Collection::make(Craft::$app->getElementSources()->getSources(EntryElement::class))
+                ->filter(fn($source) => $source['type'] !== ElementSources::TYPE_HEADING)
+                ->pluck('key')
+                ->all();
+
             $sourceKeys = $this->sources ?? Collection::make($this->availableSources())
                 ->map(fn(array $source) => $source['key'])
                 ->all();
-            $userService = Craft::$app->getUser();
+
             $config['sources'] = Collection::make((array)$sourceKeys)
-                ->filter(function(string $source) use ($userService) {
-                    // If it’s not a section, let it through
-                    if (!str_starts_with($source, 'section:')) {
-                        return true;
-                    }
-                    // Only show it if they have permission to view it
-                    $sectionUid = explode(':', $source)[1];
-                    return $userService->checkPermission("viewEntries:$sectionUid");
+                ->filter(function(string $source) use ($sourcesUserHasPermissionsFor) {
+                    return in_array($source, $sourcesUserHasPermissionsFor);
                 })
                 ->all();
         }
