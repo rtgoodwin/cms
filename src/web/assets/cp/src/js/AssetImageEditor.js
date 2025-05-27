@@ -3032,36 +3032,38 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     _resizeCropperByHandleAndDelta: function (handle, deltaX, deltaY) {
-      if (typeof this._handleCropperResize._ === 'undefined') {
-        this._handleCropperResize._ = {};
+      if (typeof this._resizeCropperByHandleAndDelta._ === 'undefined') {
+        this._resizeCropperByHandleAndDelta._ = {};
       }
 
       // Translate from center-center origin to absolute coords
-      this._handleCropperResize._.startingRectangle = {
+      this._resizeCropperByHandleAndDelta._.startingRectangle = {
         left: this.clipper.left - this.clipper.width / 2,
         top: this.clipper.top - this.clipper.height / 2,
         width: this.clipper.width,
         height: this.clipper.height,
       };
 
-      this._handleCropperResize._.rectangle =
+      this._resizeCropperByHandleAndDelta._.rectangle =
         this._calculateNewCropperSizeByDeltas(
-          this._handleCropperResize._.startingRectangle,
+          this._resizeCropperByHandleAndDelta._.startingRectangle,
           deltaX,
           deltaY,
           handle
         );
 
       if (
-        this._handleCropperResize._.rectangle.height < 30 ||
-        this._handleCropperResize._.rectangle.width < 30
+        this._resizeCropperByHandleAndDelta._.rectangle.height < 30 ||
+        this._resizeCropperByHandleAndDelta._.rectangle.width < 30
       ) {
         return;
       }
 
       if (
         !this.arePointsInsideRectangle(
-          this._getRectangleVertices(this._handleCropperResize._.rectangle),
+          this._getRectangleVertices(
+            this._resizeCropperByHandleAndDelta._.rectangle
+          ),
           this.imageVerticeCoords
         )
       ) {
@@ -3071,16 +3073,17 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Translate back to center-center origin.
       this.clipper.set({
         top:
-          this._handleCropperResize._.rectangle.top +
-          this._handleCropperResize._.rectangle.height / 2,
+          this._resizeCropperByHandleAndDelta._.rectangle.top +
+          this._resizeCropperByHandleAndDelta._.rectangle.height / 2,
         left:
-          this._handleCropperResize._.rectangle.left +
-          this._handleCropperResize._.rectangle.width / 2,
-        width: this._handleCropperResize._.rectangle.width,
-        height: this._handleCropperResize._.rectangle.height,
+          this._resizeCropperByHandleAndDelta._.rectangle.left +
+          this._resizeCropperByHandleAndDelta._.rectangle.width / 2,
+        width: this._resizeCropperByHandleAndDelta._.rectangle.width,
+        height: this._resizeCropperByHandleAndDelta._.rectangle.height,
       });
 
       this._redrawCropperElements();
+      this._tempAnnounce('make an announcement here');
     },
 
     _getDeltaValuesFromDirection: function (direction) {
