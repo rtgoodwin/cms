@@ -890,10 +890,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       // Cropper
       this.addListener(this.$cropperEditBtn, 'click', (ev) => {
-        this._toggleCropperEditState(ev);
+        this._handleCropperEditBtnClick(ev);
       });
       this.addListener(this.$cropperEditBtn, 'keydown', (ev) => {
         this._handleKeydownOnCropperEditBtn(ev);
+      });
+      this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
+        this._handleCropperEditBtnBlur(ev);
       });
       this.addListener(this.$container, 'focusin', (ev) => {
         if (!this.clipper) return;
@@ -2335,19 +2338,18 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // If an edit button is focused, add a "focus" style on the cropper rectangle/handle
       if (this.cropperEditBtnFocused) {
         // Check button properties. If rectangle, use rectangle styles
-        const isRectangle =
-          this._getCropperElementToEditFromButton(
-            this.cropperEditBtnFocused
-          ) === 'rectangle';
+        const cropperElement = this._getCropperElementFromEditBtn(
+          this.cropperEditBtnFocused
+        );
 
-        if (isRectangle) {
+        if (cropperElement === 'rectangle') {
           this.croppingRectangle.set({
             strokeWidth: 4,
             stroke: 'rgba(255,255,255,1)',
           });
         } else {
-          const handle = this.cropperEditBtnFocused.data('handle');
-          this.focusedHandleIndicator = this._getCropperHandleIndicator(handle);
+          this.focusedHandleIndicator =
+            this._getCropperHandleIndicator(cropperElement);
         }
       }
 
@@ -2574,66 +2576,18 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
     },
 
-    _toggleCropperEditState: function (ev) {
+    _handleCropperEditBtnClick: function (ev) {
       const $btn = $(ev.target.closest('button'));
-      const pickingUp = $btn.attr('aria-pressed') === 'false';
-      const itemPicked = this._getCropperElementToEditFromButton($btn);
+      const btnPressed = $btn.attr('aria-pressed') === 'true';
+      const itemPicked = this._getCropperElementFromEditBtn($btn);
 
-      // Messages
-      let stateMessage = '';
-      let positionMessage = '';
-      let instructionMessage = '';
-
-      // Defaults
-      this.cropperPickedUp = false;
-      this.handlePicked = false;
-      this.$cropperEditBtn.attr('aria-pressed', 'false');
-
-      // Grab button text for state message
-      let item = $btn.find('[data-item-name]').text();
-
-      if (!pickingUp) {
+      if (btnPressed) {
         this.nonDragEditMode = false;
-        stateMessage = Craft.t('app', '{item} dropped.', {
-          item: item,
-        });
-
-        // Hide directional buttons
-        this.$directionalArrowContainer.addClass('hidden');
+        this._dropCropperElement(itemPicked);
       } else {
         this.nonDragEditMode = true;
-        $btn.attr('aria-pressed', 'true');
-
-        // Show directional buttons
-        this.$directionalArrowContainer.removeClass('hidden');
-
-        if (itemPicked === 'rectangle') {
-          this.cropperPickedUp = true;
-        } else {
-          this.handlePicked = $btn.attr('data-handle');
-        }
-
-        stateMessage = Craft.t('app', '{item} picked up.', {
-          item: item,
-        });
-
-        instructionMessage += Craft.t(
-          'app',
-          'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.'
-        );
+        this._pickUpCropperElement(itemPicked);
       }
-
-      if (itemPicked === 'rectangle') {
-        positionMessage = this.getRelativePositionMessage(this.clipper);
-      }
-
-      // Announce
-      this._tempAnnounce(
-        `${stateMessage} ${positionMessage} ${instructionMessage}`
-      );
-
-      this._redrawCropperElements();
-      this.renderCropper();
     },
 
     /**
@@ -2663,10 +2617,80 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
     /**
      * @param $btn
-     * @returns {'rectangle'|'handle'|'focal'}
+     * @returns {'rectangle'|'tl'|'t'|'tr'|'l'|'r'|'bl'|'b'|'br'}
      */
-    _getCropperElementToEditFromButton: function ($btn) {
+    _getCropperElementFromEditBtn: function ($btn) {
       return $($btn).attr('data-crop-editor');
+    },
+
+    _getCropperEditBtnFromElementHandle: function (element) {
+      return this.$cropperEditBtn.filter(`[data-crop-editor="${element}"]`);
+    },
+
+    _pickUpCropperElement: function (element) {
+      this.cropperPickedUp = false;
+      this.handlePicked = false;
+
+      let stateMessage = '';
+      let positionMessage = '';
+      let instructionMessage = '';
+
+      // Show directional buttons
+      this.$directionalArrowContainer.removeClass('hidden');
+
+      const $btn = this._getCropperEditBtnFromElementHandle(element);
+      $btn.attr('aria-pressed', 'true');
+      const itemName = $btn.find('[data-item-name]').text();
+
+      if (element === 'rectangle') {
+        this.cropperPickedUp = true;
+        positionMessage = this.getRelativePositionMessage(this.clipper);
+      } else {
+        $btn.attr('aria-pressed', 'true');
+        this.handlePicked = element;
+      }
+
+      stateMessage = Craft.t('app', '{item} picked up.', {
+        item: itemName,
+      });
+
+      instructionMessage += Craft.t(
+        'app',
+        'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.'
+      );
+
+      this._tempAnnounce(
+        `${stateMessage} ${positionMessage} ${instructionMessage}`
+      );
+
+      this._redrawCropperElements();
+      this.renderCropper();
+    },
+
+    _dropCropperElement: function (element) {
+      const $btn = this._getCropperEditBtnFromElementHandle(element);
+      const itemName = $btn.find('[data-item-name]').text();
+
+      // Messages
+      let stateMessage = '';
+      let positionMessage = '';
+
+      // Defaults
+      this.cropperPickedUp = false;
+      this.handlePicked = false;
+      $btn.attr('aria-pressed', 'false');
+
+      stateMessage = Craft.t('app', '{item} dropped.', {
+        item: itemName,
+      });
+
+      // Hide directional buttons
+      this.$directionalArrowContainer.addClass('hidden');
+
+      this._tempAnnounce(`${stateMessage} ${positionMessage}`);
+
+      this._redrawCropperElements();
+      this.renderCropper();
     },
 
     _toggleFocalModeStyles: function () {
@@ -2715,6 +2739,16 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (this.croppingCanvas) {
         this._handleCropperKeyboardEdit(ev);
+      }
+    },
+
+    _handleCropperEditBtnBlur: function (ev) {
+      const $btn = $(ev.target.closest('button'));
+      const btnPressed = $btn.attr('aria-pressed') !== 'false';
+
+      if (btnPressed) {
+        const elementToDrop = this._getCropperElementFromEditBtn($btn);
+        this._dropCropperElement(elementToDrop);
       }
     },
 

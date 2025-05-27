@@ -160,7 +160,7 @@
             <div class="cropper-edit__wrapper">
                 {{ _self.iconButton({
                     icon: 'frame',
-                    label: 'Move'|t('app'),
+                    label: 'Cropping Rectangle'|t('app'),
                     id: 'cropper-handle',
                     buttonAttributes: {
                         data: {
@@ -181,8 +181,7 @@
                         label: button.label,
                         buttonAttributes: {
                             data: {
-                                'crop-editor': 'handle',
-                                'handle': button.handle,
+                                'crop-editor': button.handle,
                             },
                             class: ['cropper-edit__btn']
                         }
