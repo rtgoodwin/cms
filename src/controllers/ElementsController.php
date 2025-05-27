@@ -355,7 +355,7 @@ class ElementsController extends Controller
         [$docTitle, $title] = $this->_editElementTitles($element);
         $enabledForSite = $element->getEnabledForSite();
         $hasRoute = $element->getRoute() !== null;
-        $redirectUrl = ElementHelper::postEditUrl($element);
+        $redirectUrl = $this->request->getValidatedQueryParam('returnUrl') ?? ElementHelper::postEditUrl($element);
 
         // Site statuses
         if ($canEditMultipleSites) {
@@ -1355,8 +1355,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || $element->getIsDraft() || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
@@ -1785,6 +1788,42 @@ JS, [
 
         return $this->_asSuccess(Craft::t('app', '{type} deleted for site.', [
             'type' => $element->getIsDraft() && !$element->isProvisionalDraft ? Craft::t('app', 'Draft') : $element::displayName(),
+        ]), $element);
+    }
+
+    /**
+     * Validates an element.
+     *
+     * @return Response|null
+     * @since 5.8.0
+     */
+    public function actionValidate(): ?Response
+    {
+        $this->requirePostRequest();
+
+        /** @var Element|DraftBehavior|Response|null $element */
+        $element = $this->_element();
+
+        // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
+        // and we hit "create entry" before the autosave kicks in
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $element->setScenario(Element::SCENARIO_LIVE);
+
+        if (!$element->validate()) {
+            return $this->_asFailure($element, Craft::t('app', '{type} validation failed.', [
+                'type' => $element::displayName(),
+            ]));
+        }
+
+        return $this->_asSuccess(Craft::t('app', '{type} validation successful.', [
+            'type' => $element::displayName(),
         ]), $element);
     }
 
