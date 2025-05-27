@@ -236,9 +236,9 @@ class Entries extends BaseRelationField
             }
 
             // otherwise, go through all the selected sources and return ones that user has permissions to view
-            return ArrayHelper::where((array)$this->sources, function(string $source) use ($sourcesUserHasPermissionsFor) {
-                return in_array($source, $sourcesUserHasPermissionsFor);
-            }, true, true, false);
+            return ArrayHelper::where((array)$this->sources,
+                fn(string $source) => in_array($source, $sourcesUserHasPermissionsFor),
+                true, true, false);
         }
         return $this->sources;
     }

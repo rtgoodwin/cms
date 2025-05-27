@@ -135,9 +135,7 @@ class Entry extends BaseElementLinkType
                 ->all();
 
             $config['sources'] = Collection::make((array)$sourceKeys)
-                ->filter(function(string $source) use ($sourcesUserHasPermissionsFor) {
-                    return in_array($source, $sourcesUserHasPermissionsFor);
-                })
+                ->filter(fn(string $source) => in_array($source, $sourcesUserHasPermissionsFor))
                 ->all();
         }
 
