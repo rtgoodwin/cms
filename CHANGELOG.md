@@ -13,6 +13,7 @@
 - Fixed a bug where element index column headings could display “`__blank`” for custom fields with labels overridden to be hidden. ([#17305](https://github.com/craftcms/cms/issues/17305))
 - Fixed a bug where entry type names could overflow their input within entry forms’ “Entry Type” fields. ([#17310](https://github.com/craftcms/cms/issues/17310))
 - Fixed a bug where it wasn’t possible for pending users to reset their password. ([#17325](https://github.com/craftcms/cms/issues/17325))
+- Fixed a bug where thumbnails weren’t always loading for element chips within toast notifications. ([#17327](https://github.com/craftcms/cms/issues/17327))
 - Fixed a styling issue.
 
 ## 5.7.7 - 2025-05-20
