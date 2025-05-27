@@ -32,6 +32,10 @@ body,
     box-shadow: none;
     outline: none;
   }
+
+  .CodeMirror-gutters {
+    background-color: #fff;
+  }
 }
 
 .cp-graphiql-header {
