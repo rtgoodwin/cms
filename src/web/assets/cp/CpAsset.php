@@ -164,7 +164,7 @@ JS;
             'Continue',
             'Copied to clipboard.',
             'Copy from',
-            'Copy the URL',
+            'Copy URL',
             'Copy the reference tag',
             'Copy to clipboard',
             'Copy “{name}” value',
