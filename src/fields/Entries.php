@@ -224,22 +224,24 @@ class Entries extends BaseRelationField
         // Enforce the showUnpermittedSections setting
         if (!$this->showUnpermittedSections) {
             // get all the native & custom sources that user has permissions to view
-            $sourcesUserHasPermissionsFor = Collection::make(Craft::$app->getElementSources()->getSources(Entry::class))
+            $permittedSources = Collection::make(Craft::$app->getElementSources()->getSources(Entry::class))
                 ->filter(fn($source) => $source['type'] !== ElementSources::TYPE_HEADING)
                 ->pluck('key')
+                ->flip()
                 ->all();
 
             // if the field is set to show all the sources
             if ($this->sources === '*') {
                 // return all the native & custom sources that user has permissions to view
-                return array_values(array_unique($sourcesUserHasPermissionsFor));
+                return array_keys($permittedSources);
             }
 
             // otherwise, go through all the selected sources and return ones that user has permissions to view
             return ArrayHelper::where((array)$this->sources,
-                fn(string $source) => in_array($source, $sourcesUserHasPermissionsFor),
+                fn(string $sourceKey) => isset($permittedSources[$sourceKey]),
                 true, true, false);
         }
+
         return $this->sources;
     }
 }

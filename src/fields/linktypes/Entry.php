@@ -125,9 +125,10 @@ class Entry extends BaseElementLinkType
 
         if (!$this->showUnpermittedSections) {
             // get all the native & custom sources that user has permissions to view
-            $sourcesUserHasPermissionsFor = Collection::make(Craft::$app->getElementSources()->getSources(EntryElement::class))
+            $permittedSources = Collection::make(Craft::$app->getElementSources()->getSources(EntryElement::class))
                 ->filter(fn($source) => $source['type'] !== ElementSources::TYPE_HEADING)
                 ->pluck('key')
+                ->flip()
                 ->all();
 
             $sourceKeys = $this->sources ?? Collection::make($this->availableSources())
@@ -135,7 +136,7 @@ class Entry extends BaseElementLinkType
                 ->all();
 
             $config['sources'] = Collection::make((array)$sourceKeys)
-                ->filter(fn(string $source) => in_array($source, $sourcesUserHasPermissionsFor))
+                ->filter(fn(string $sourceKey) => isset($permittedSources[$sourceKey]))
                 ->all();
         }
 
