@@ -19,7 +19,7 @@
 - Fixed a bug where Entries and Link fields with “Show unpermitted sections” disabled weren’t factoring in permissions for Single sections. ([#17332](https://github.com/craftcms/cms/pull/17332))
 - Fixed a bug where entry selection modals weren’t showing a sources sidebar for Entries fields with all sources selected and “Show unpermitted sections” disabled. ([#17323](https://github.com/craftcms/cms/issues/17323))
 - Fixed a bug where revisions were getting “Copy” actions. ([#17334](https://github.com/craftcms/cms/pull/17334))
-- Fixed a styling issue.
+- Fixed styling issues. ([#17335](https://github.com/craftcms/cms/pull/17335))
 
 ## 5.7.7 - 2025-05-20
 
