@@ -4,12 +4,21 @@
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
 - The `update-statuses` action now ensures it is only being run once at a time.
+- Added `craft\elements\User::getHasSsoIdentity()`.
 - `craft\services\Fields::getLayoutById()` now has a `$withTrashed` argument.
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
 - Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
 - Fixed an “Invalid field layout ID” error that could occur when running `craft up` with pending project config YAML files which cause a Single section’s entry type to be soft-deleted.
 - Fixed a bug where only one relation field value could get saved when bulk-editing elements. ([#17302](https://github.com/craftcms/cms/issues/17302))
 - Fixed a bug where element index column headings could display “`__blank`” for custom fields with labels overridden to be hidden. ([#17305](https://github.com/craftcms/cms/issues/17305))
+- Fixed a bug where entry type names could overflow their input within entry forms’ “Entry Type” fields. ([#17310](https://github.com/craftcms/cms/issues/17310))
+- Fixed a bug where it wasn’t possible for pending users to reset their password. ([#17325](https://github.com/craftcms/cms/issues/17325))
+- Fixed a bug where thumbnails weren’t always loading for element chips within toast notifications. ([#17327](https://github.com/craftcms/cms/issues/17327))
+- Fixed an error that could occur when saving a user.
+- Fixed a bug where Link fields weren’t showing plugin-registered entry sources. ([#17331](https://github.com/craftcms/cms/pull/17331))
+- Fixed a bug where Entries and Link fields with “Show unpermitted sections” disabled weren’t factoring in permissions for Single sections. ([#17332](https://github.com/craftcms/cms/pull/17332))
+- Fixed a bug where entry selection modals weren’t showing a sources sidebar for Entries fields with all sources selected and “Show unpermitted sections” disabled. ([#17323](https://github.com/craftcms/cms/issues/17323))
+- Fixed a bug where revisions were getting “Copy” actions. ([#17334](https://github.com/craftcms/cms/pull/17334))
 - Fixed a styling issue.
 
 ## 5.7.7 - 2025-05-20
