@@ -223,26 +223,21 @@ class Entries extends BaseRelationField
 
         // Enforce the showUnpermittedSections setting
         if (!$this->showUnpermittedSections) {
+            // get all the native & custom sources that user has permissions to view
+            $sourcesUserHasPermissionsFor = Collection::make(Craft::$app->getElementSources()->getSources(Entry::class))
+                ->filter(fn($source) => $source['type'] !== ElementSources::TYPE_HEADING)
+                ->pluck('key')
+                ->all();
+
             // if the field is set to show all the sources
             if ($this->sources === '*') {
-                // only get the native & custom sources that user has permissions to view
-                $sources = Collection::make(Craft::$app->getElementSources()->getSources(Entry::class))
-                    ->filter(fn($source) => $source['type'] !== ElementSources::TYPE_HEADING)
-                    ->pluck('key')
-                    ->all();
-                return array_values(array_unique($sources));
+                // return all the native & custom sources that user has permissions to view
+                return array_values(array_unique($sourcesUserHasPermissionsFor));
             }
 
             // otherwise, go through all the selected sources and return ones that user has permissions to view
-            $userService = Craft::$app->getUser();
-            return ArrayHelper::where((array)$this->sources, function(string $source) use ($userService) {
-                // If it’s not a section, let it through
-                if (!str_starts_with($source, 'section:')) {
-                    return true;
-                }
-                // Only show it if they have permission to view it
-                $sectionUid = explode(':', $source)[1];
-                return $userService->checkPermission("viewEntries:$sectionUid");
+            return ArrayHelper::where((array)$this->sources, function(string $source) use ($sourcesUserHasPermissionsFor) {
+                return in_array($source, $sourcesUserHasPermissionsFor);
             }, true, true, false);
         }
         return $this->sources;
