@@ -32,7 +32,9 @@ body,
     box-shadow: none;
     outline: none;
   }
+}
 
+.graphiql-query-editor {
   .CodeMirror-gutters {
     background-color: #fff;
   }
