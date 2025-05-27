@@ -73,39 +73,32 @@ class Entry extends BaseElementLinkType
 
     protected function availableSourceKeys(): array
     {
-        // get keys for all native sources
-        $sources = Collection::make(Craft::$app->getElementSources()->getSources(static::elementType(), ElementSources::CONTEXT_FIELD))
-            ->filter(fn($s) => $s['type'] !== ElementSources::TYPE_HEADING && $s['type'] !== ElementSources::TYPE_CUSTOM)
-            ->pluck('key')
-            ->all();
-
+        // find the sections that don't have a URL format in any site
         $sections = Craft::$app->getEntries()->getAllSections();
         $sites = Craft::$app->getSites()->getAllSites();
-        $showSingles = false;
+        $excludeKeys = [];
 
         foreach ($sections as $section) {
-            if ($section->type === Section::TYPE_SINGLE) {
-                $showSingles = true;
-            } else {
+            if ($section->type !== Section::TYPE_SINGLE) {
                 $sectionSiteSettings = $section->getSiteSettings();
-                $includeSection = false;
                 foreach ($sites as $site) {
                     if (isset($sectionSiteSettings[$site->id]) && $sectionSiteSettings[$site->id]->hasUrls) {
-                        // if the section has urls for at least one site - keep it as available source
-                        $includeSection = true;
-                        break;
+                        continue 2;
                     }
                 }
-                if (!$includeSection && $key = array_search("section:$section->uid", $sources)) {
-                    array_splice($sources, $key, 1);
-                }
+                // exclude it
+                $excludeKeys["section:$section->uid"] = true;
             }
         }
 
-        // if there aren't any Single sections, but somehow we have 'singles' in the sources array - remove it
-        if (!$showSingles && $key = array_search('singles', $sources)) {
-            array_splice($sources, $key, 1);
-        }
+        // Get all the native source keys, excluding URL-less sections
+        $sources = Collection::make(Craft::$app->getElementSources()->getSources(static::elementType(), ElementSources::CONTEXT_FIELD))
+            ->filter(fn($s) => (
+                $s['type'] === ElementSources::TYPE_NATIVE &&
+                !isset($excludeKeys[$s['key']])
+            ))
+            ->pluck('key')
+            ->all();
 
         // if we have sources, but not the all ('*') option - add it
         if (!empty($sources) && !in_array('*', $sources)) {
