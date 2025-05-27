@@ -1789,12 +1789,12 @@ JS, [
     }
 
     /**
-     * Validates a draft.
+     * Validates an element.
      *
      * @return Response|null
-     * @since
+     * @since 5.8.0
      */
-    public function actionValidateDraft(): ?Response
+    public function actionValidate(): ?Response
     {
         $this->requirePostRequest();
 
@@ -1811,15 +1811,17 @@ JS, [
             throw new BadRequestHttpException('No element was identified by the request.');
         }
 
-        if ($element->validate()) {
-            return $this->_asSuccess(Craft::t('app', 'Validating {type} succeeded', [
-                'type' => $element::lowerDisplayName(),
-            ]), $element);
-        } else {
-            return $this->_asFailure($element, Craft::t('app', 'Validating {type} failed', [
-                'type' => $element::lowerDisplayName(),
+        $element->setScenario(Element::SCENARIO_LIVE);
+
+        if (!$element->validate()) {
+            return $this->_asFailure($element, Craft::t('app', '{type} validation failed.', [
+                'type' => $element::displayName(),
             ]));
         }
+
+        return $this->_asSuccess(Craft::t('app', '{type} validation successful.', [
+            'type' => $element::displayName(),
+        ]), $element);
     }
 
     /**
