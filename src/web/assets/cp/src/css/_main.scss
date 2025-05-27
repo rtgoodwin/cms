@@ -3726,7 +3726,7 @@ table {
 
 .elements.inline-chips.chips-large {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 300px));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
 }
 
 /** cards */
@@ -3884,7 +3884,7 @@ table {
 .card-grid {
   display: grid !important;
   gap: var(--s) !important;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 
   & > li {
     border-radius: var(--large-border-radius);
