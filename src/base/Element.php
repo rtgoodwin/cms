@@ -4013,7 +4013,7 @@ JS, [
         }
 
         // Copy
-        if ($elementsService->canCopy($this)) {
+        if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
             $copyId = sprintf('action-copy-%s', mt_rand());
             $items[] = [
                 'id' => $copyId,
