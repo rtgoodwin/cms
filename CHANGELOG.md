@@ -4,6 +4,7 @@
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
 - The `update-statuses` action now ensures it is only being run once at a time.
+- Added `craft\elements\User::getHasSsoIdentity()`.
 - `craft\services\Fields::getLayoutById()` now has a `$withTrashed` argument.
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
 - Fixed a bug where elements with invalid URIs were getting disabled on save, rather than surfacing the validation error. ([#17293](https://github.com/craftcms/cms/issues/17293))
@@ -11,6 +12,7 @@
 - Fixed a bug where only one relation field value could get saved when bulk-editing elements. ([#17302](https://github.com/craftcms/cms/issues/17302))
 - Fixed a bug where element index column headings could display “`__blank`” for custom fields with labels overridden to be hidden. ([#17305](https://github.com/craftcms/cms/issues/17305))
 - Fixed a bug where entry type names could overflow their input within entry forms’ “Entry Type” fields. ([#17310](https://github.com/craftcms/cms/issues/17310))
+- Fixed a bug where it wasn’t possible for pending users to reset their password. ([#17325](https://github.com/craftcms/cms/issues/17325))
 - Fixed a styling issue.
 
 ## 5.7.7 - 2025-05-20
