@@ -6264,11 +6264,19 @@ $min2ColWidth: 400px;
     justify-content: flex-start;
     width: 100%;
     background-color: transparent;
+    overflow: hidden;
+
+    // button padding + icon size + inset-inline-end
+    padding-inline-end: calc(var(--button-padding) + calc(7rem / 16) + 11px);
 
     &::after {
       position: absolute;
       inset-block-start: calc(50% - 5px);
       inset-inline-end: 11px;
+    }
+
+    .inline-flex {
+      overflow: hidden;
     }
   }
 
