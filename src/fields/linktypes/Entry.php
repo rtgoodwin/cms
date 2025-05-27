@@ -11,6 +11,7 @@ use Craft;
 use craft\elements\Entry as EntryElement;
 use craft\helpers\Cp;
 use craft\models\Section;
+use craft\services\ElementSources;
 use Illuminate\Support\Collection;
 
 /**
@@ -72,7 +73,12 @@ class Entry extends BaseElementLinkType
 
     protected function availableSourceKeys(): array
     {
-        $sources = [];
+        // get keys for all native sources
+        $sources = Collection::make(Craft::$app->getElementSources()->getSources(static::elementType(), ElementSources::CONTEXT_FIELD))
+            ->filter(fn($s) => $s['type'] !== ElementSources::TYPE_HEADING && $s['type'] !== ElementSources::TYPE_CUSTOM)
+            ->pluck('key')
+            ->all();
+
         $sections = Craft::$app->getEntries()->getAllSections();
         $sites = Craft::$app->getSites()->getAllSites();
         $showSingles = false;
@@ -82,26 +88,31 @@ class Entry extends BaseElementLinkType
                 $showSingles = true;
             } else {
                 $sectionSiteSettings = $section->getSiteSettings();
+                $includeSection = false;
                 foreach ($sites as $site) {
                     if (isset($sectionSiteSettings[$site->id]) && $sectionSiteSettings[$site->id]->hasUrls) {
-                        $sources[] = "section:$section->uid";
+                        // if the section has urls for at least one site - keep it as available source
+                        $includeSection = true;
                         break;
                     }
+                }
+                if (!$includeSection && $key = array_search("section:$section->uid", $sources)) {
+                    array_splice($sources, $key, 1);
                 }
             }
         }
 
-        $sources = array_values(array_unique($sources));
-
-        if ($showSingles) {
-            array_unshift($sources, 'singles');
+        // if there aren't any Single sections, but somehow we have 'singles' in the sources array - remove it
+        if (!$showSingles && $key = array_search('singles', $sources)) {
+            array_splice($sources, $key, 1);
         }
 
-        if (!empty($sources)) {
+        // if we have sources, but not the all ('*') option - add it
+        if (!empty($sources) && !in_array('*', $sources)) {
             array_unshift($sources, '*');
         }
 
-        return $sources;
+        return array_values(array_unique($sources));
     }
 
     protected function selectionCriteria(): array
