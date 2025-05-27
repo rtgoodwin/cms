@@ -547,6 +547,12 @@ body.dragging .offset-drag-helper {
   padding-inline: 60px 0;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 img {
   max-width: 100%;
 }
@@ -7959,12 +7965,6 @@ textarea.text.fullwidth {
         .chip {
           min-height: calc(34rem / 16);
           padding-inline: var(--s);
-
-          .chip-content {
-            a {
-              word-break: break-word;
-            }
-          }
         }
       }
     }
