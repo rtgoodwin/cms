@@ -46,6 +46,7 @@
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
 - Added the `_includes/forms/buttonGroup.twig` template.
 - `Craft.CpScreenSlideout` now supports overriding the `closeOnEsc`, `closeOnShadeClick`, `containerElement`, and `containerAttributes` settings. Slideouts with a non-`<form>` container element won’t get a “Save” button, and the close button will be labelled “Close” rather than “Cancel”. ([#13593](https://github.com/craftcms/cms/discussions/13593))
+- Deprecated `craft\web\assets\picturefill\PicturefillAsset`. ([#17344](https://github.com/craftcms/cms/pull/17344))
 
 ### System
 - Assets now keep track of their MIME types when uploaded, improving the accuracy of `craft\elements\Asset::getMimeType()`. ([#17254](https://github.com/craftcms/cms/pull/17254))
