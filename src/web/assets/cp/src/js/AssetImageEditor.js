@@ -898,17 +898,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
         this._handleCropperEditBtnBlur(ev);
       });
-      this.addListener(this.$container, 'focusin', (ev) => {
-        if (!this.clipper) return;
-
-        const $target = $(ev.target);
-
-        if (this.$cropperEditBtn.is($target)) {
-          this.cropperEditBtnFocused = $target;
-        } else {
-          this.cropperEditBtnFocused = null;
-        }
-
+      this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
+        this.cropperEditBtnFocused = $(ev.target);
         this._redrawCropperElements();
       });
       this.addListener(this.$directionalArrowBtn, 'click', (ev) => {
@@ -2353,7 +2344,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         }
       }
 
-      if (this.handlePicked) {
+      if (this.handlePicked && this.nonDragEditMode) {
         console.log('show icon');
         this.activeHandleIndicator = this._getCropperHandleIndicator(
           this.handlePicked
@@ -2745,6 +2736,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _handleCropperEditBtnBlur: function (ev) {
       const $btn = $(ev.target.closest('button'));
       const btnPressed = $btn.attr('aria-pressed') !== 'false';
+
+      this.cropperEditBtnFocused = null;
+      this.nonDragEditMode = false;
 
       if (btnPressed) {
         const elementToDrop = this._getCropperElementFromEditBtn($btn);
