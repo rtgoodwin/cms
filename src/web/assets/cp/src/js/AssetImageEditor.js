@@ -2444,7 +2444,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     _getCropperHandleIndicator: function (handle) {
-      let handleCoordinates = this.getClipperHandlePosition(handle);
+      let handleCoordinates = this._getClipperHandlePosition(handle);
       const size = 12;
       const width = 3;
       const commonProps = {
@@ -2585,7 +2585,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Get the position of an item relative to the image.
      * @param item
      */
-    getRelativePositionMessage: function (item) {
+    _getRelativePositionMessage: function (item) {
       if (!item.left || !item.top) return;
 
       const xPercent = (
@@ -2635,7 +2635,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       if (element === 'rectangle') {
         this.cropperPickedUp = true;
-        positionMessage = this.getRelativePositionMessage(this.clipper);
+        positionMessage = this._getRelativePositionMessage(this.clipper);
       } else {
         $btn.attr('aria-pressed', 'true');
         this.handlePicked = element;
@@ -2933,7 +2933,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      *
      * @param {'tl'|'t'|'tr'|'r'|'br'|'b'|'bl'|'l'} handle
      */
-    getClipperHandlePosition: function (handle) {
+    _getClipperHandlePosition: function (handle) {
       let position = {
         x: null,
         y: null,
@@ -3125,15 +3125,20 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (
         !this.arePointsInsideRectangle(newVertices, this.imageVerticeCoords)
       ) {
-        const calculatedMove = this.getFurthestPossibleMove(
-          this._moveCropperByDelta._
-        );
+        const {farthest, farthestDeltas} =
+          this._getFarthestAllowedDeltasForRectangle(
+            this._moveCropperByDelta._.rectangle,
+            {
+              x: this._moveCropperByDelta._.deltaX,
+              y: this._moveCropperByDelta._.deltaY,
+            }
+          );
 
-        if (calculatedMove.furthest == 0) {
+        if (farthest == 0) {
           return;
         } else {
-          this._moveCropperByDelta._.deltaX = calculatedMove.furthestDeltas.x;
-          this._moveCropperByDelta._.deltaY = calculatedMove.furthestDeltas.y;
+          this._moveCropperByDelta._.deltaX = farthestDeltas.x;
+          this._moveCropperByDelta._.deltaY = farthestDeltas.y;
         }
       }
 
@@ -3142,7 +3147,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         top: this.clipper.top + this._moveCropperByDelta._.deltaY,
       });
 
-      this._tempAnnounce(this.getRelativePositionMessage(this.clipper));
+      this._tempAnnounce(this._getRelativePositionMessage(this.clipper));
 
       this._redrawCropperElements();
       this.storeCropperState();
@@ -3150,49 +3155,45 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Try to find the furthest possible placement based on the proposed move.
+     * Try to find the farthest possible placement based on the proposed move.
      * @param moveObj
      */
-    getFurthestPossibleMove: function (proposedMove) {
+    _getFarthestAllowedDeltasForRectangle: function (rectangle, deltas) {
       // Delta iterator setup
       let dxi = 0;
       let dyi = 0;
-      let xStep = proposedMove.deltaX > 0 ? -1 : 1;
-      let yStep = proposedMove.deltaY > 0 ? -1 : 1;
+      let xStep = deltas.x > 0 ? -1 : 1;
+      let yStep = deltas.y > 0 ? -1 : 1;
 
       const calculatedMove = {
-        furthest: 0,
-        furthestDeltas: {},
+        farthest: 0,
+        farthestDeltas: {},
       };
 
       // Loop through every combination of dragging it not so far
-      for (dxi = Math.min(Math.abs(proposedMove.deltaX), 10); dxi >= 0; dxi--) {
-        for (
-          dyi = Math.min(Math.abs(proposedMove.deltaY), 10);
-          dyi >= 0;
-          dyi--
-        ) {
+      for (dxi = Math.min(Math.abs(deltas.x), 10); dxi >= 0; dxi--) {
+        for (dyi = Math.min(Math.abs(deltas.y), 10); dyi >= 0; dyi--) {
           const vertices = this._getRectangleVertices(
-            proposedMove.rectangle,
-            dxi * (proposedMove.deltaX > 0 ? 1 : -1),
-            dyi * (proposedMove.deltaY > 0 ? 1 : -1)
+            rectangle,
+            dxi * (deltas.x > 0 ? 1 : -1),
+            dyi * (deltas.y > 0 ? 1 : -1)
           );
 
           if (
             this.arePointsInsideRectangle(vertices, this.imageVerticeCoords)
           ) {
-            if (dxi + dyi > calculatedMove.furthest) {
-              calculatedMove.furthest = dxi + dyi;
-              calculatedMove.furthestDeltas = {
-                x: dxi * (proposedMove.deltaX > 0 ? 1 : -1),
-                y: dyi * (proposedMove.deltaY > 0 ? 1 : -1),
+            if (dxi + dyi > calculatedMove.farthest) {
+              calculatedMove.farthest = dxi + dyi;
+              calculatedMove.farthestDeltas = {
+                x: dxi * (deltas.x > 0 ? 1 : -1),
+                y: dyi * (deltas.y > 0 ? 1 : -1),
               };
             }
           }
         }
       }
 
-      return {...proposedMove, ...calculatedMove};
+      return calculatedMove;
     },
 
     /**
@@ -3230,16 +3231,18 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.imageVerticeCoords
         )
       ) {
-        const calculatedMove = this.getFurthestPossibleMove(
-          this._handleCropperDrag._
-        );
+        const {farthest, farthestDeltas} =
+          this._getFarthestAllowedDeltasForRectangle(rectangle, {
+            x: this._handleCropperDrag._.deltaX,
+            y: this._handleCropperDrag._.deltaY,
+          });
 
         // REALLY can't drag along the cursor movement
-        if (calculatedMove.furthest == 0) {
+        if (farthest == 0) {
           return;
         } else {
-          this._handleCropperDrag._.deltaX = calculatedMove.furthestDeltas.x;
-          this._handleCropperDrag._.deltaY = calculatedMove.furthestDeltas.y;
+          this._handleCropperDrag._.deltaX = farthestDeltas.x;
+          this._handleCropperDrag._.deltaY = farthestDeltas.y;
         }
       }
 
