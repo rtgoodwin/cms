@@ -11,6 +11,7 @@ use Craft;
 use craft\base\Colorable;
 use craft\base\Element;
 use craft\base\ElementContainerFieldInterface;
+use craft\base\ElementInterface;
 use craft\base\ExpirableElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
@@ -21,6 +22,7 @@ use craft\behaviors\DraftBehavior;
 use craft\controllers\ElementIndexesController;
 use craft\db\Connection;
 use craft\db\FixedOrderExpression;
+use craft\db\Query;
 use craft\db\Table;
 use craft\elements\actions\Copy;
 use craft\elements\actions\Delete;
@@ -731,19 +733,17 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         switch ($handle) {
             case 'author':
             case 'authors':
-                $map = [];
+                $entryIds = array_map(fn(ElementInterface $entry) => $entry->id, $sourceElements);
+                $map = (new Query())
+                    ->select([
+                        'source' => 'entryId',
+                        'target' => 'authorId',
+                    ])
+                    ->from(Table::ENTRIES_AUTHORS)
+                    ->where(['entryId' => $entryIds])
+                    ->orderBy(['sortOrder' => SORT_ASC])
+                    ->all();
 
-                /** @var self[] $sourceElements */
-                foreach ($sourceElements as $entry) {
-                    foreach ($entry->getAuthorIds() as $authorId) {
-                        $map[] = [
-                            'source' => $entry->id,
-                            'target' => $authorId,
-                        ];
-                    }
-                }
-
-                /** @phpstan-ignore-next-line */
                 return [
                     'elementType' => User::class,
                     'map' => $map,
@@ -1745,6 +1745,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     ->status(null)
                     ->all();
             } else {
+                if (isset($this->elementQueryResult) && count($this->elementQueryResult) > 1) {
+                    // eager-load authors for all queried entries
+                    Craft::$app->getElements()->eagerLoadElements(self::class, $this->elementQueryResult, ['authors']);
+                    return $this->_authors ?? [];
+                }
+
                 $authors = User::find()
                     ->authorOf($this)
                     ->status(null)
