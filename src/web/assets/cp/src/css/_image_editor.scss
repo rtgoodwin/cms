@@ -34,34 +34,6 @@ html.noscroll body {
       }
     }
   }
-
-  .cropper-edit__wrapper--handles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .cropper-edit__wrapper--handles,
-  .cropper-edit__wrapper--arrows {
-    grid-gap: var(--xs);
-  }
-
-  .cropper-edit__wrapper--arrows {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-areas:
-      '. up .'
-      'dir dir dir';
-
-    [data-direction='up'] {
-      grid-area: up;
-    }
-
-    [data-direction='down'],
-    [data-direction='left'],
-    [data-direction='right'] {
-      grid-row-start: 2;
-    }
-  }
 }
 
 .modal.imageeditor.modal {

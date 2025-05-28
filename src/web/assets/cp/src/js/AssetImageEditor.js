@@ -23,8 +23,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $croppingCanvas: null,
     $cropperMoveBtn: null,
     $cropperEditBtn: null,
-    $directionalArrowContainer: null,
-    $directionalArrowBtn: null,
     $spinner: null,
     $constraintContainer: null,
     $constraintRadioInputs: null,
@@ -214,14 +212,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
       this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
-      this.$directionalArrowContainer = $(
-        '.cropper-edit__wrapper--arrows',
-        this.$body
-      );
-      this.$directionalArrowBtn = $(
-        '.cropper-edit__wrapper--arrows button',
-        this.$body
-      );
 
       // Get SVG to use for move/active indicator
       const $moveSvg = $('#move-icon-wrapper svg');
@@ -901,9 +891,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
         this.cropperEditBtnFocused = $(ev.target);
         this._redrawCropperElements();
-      });
-      this.addListener(this.$directionalArrowBtn, 'click', (ev) => {
-        this._handleDirectionalArrowBtnPress(ev);
       });
 
       // Straighten slider
@@ -2633,9 +2620,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       let positionMessage = '';
       let instructionMessage = '';
 
-      // Show directional buttons
-      this.$directionalArrowContainer.removeClass('hidden');
-
       const $btn = this._getCropperEditBtnFromElementHandle(element);
       $btn.attr('aria-pressed', 'true');
       const itemName = $btn.find('[data-item-name]').text();
@@ -2681,9 +2665,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       stateMessage = Craft.t('app', '{item} dropped.', {
         item: itemName,
       });
-
-      // Hide directional buttons
-      this.$directionalArrowContainer.addClass('hidden');
 
       this._tempAnnounce(`${stateMessage} ${positionMessage}`);
 
@@ -2982,22 +2963,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       return position;
-    },
-
-    _handleDirectionalArrowBtnPress: function (ev) {
-      const direction = $(ev.target).closest('button').attr('data-direction');
-
-      const deltaValues = this._getDeltaValuesFromDirection(direction);
-
-      if (this.cropperPickedUp) {
-        this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
-      } else if (this.handlePicked) {
-        this._resizeCropperByHandleAndDelta(
-          this.handlePicked,
-          deltaValues.deltaX,
-          deltaValues.deltaY
-        );
-      }
     },
 
     _handleCropperKeyboardEdit: function (ev) {
