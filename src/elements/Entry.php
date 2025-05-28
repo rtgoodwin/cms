@@ -2045,7 +2045,15 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return false;
         }
 
-        if ($section->propagationMethod === PropagationMethod::Custom && (!$this->getIsDraft() || $this->getIsUnpublishedDraft())) {
+        if ($section->propagationMethod === PropagationMethod::Custom) {
+            if ($this->getIsDraft()) {
+                /** @var static|DraftBehavior $this */
+                return (
+                    $this->creatorId === $user->id ||
+                    $user->can("deletePeerEntryDrafts:$section->uid")
+                );
+            }
+
             if (!$user->can("deleteEntriesForSite:$section->uid")) {
                 return false;
             }
