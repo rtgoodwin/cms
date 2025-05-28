@@ -2599,7 +2599,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         100
       ).toFixed(1);
 
-      return `X axis: ${xPercent}%. Y axis: ${yPercent}%.`;
+      return `Centered at X axis: ${xPercent}%, Y axis: ${yPercent}%.`;
+    },
+
+    _getSizeAndRelativePositionMessage: function (item) {
+      const positionMessage = this._getRelativePositionMessage(item);
+      const sizeMessage = `Crop rectangle width: ${item.width}px, height:${item.height}px.`;
+
+      return `${sizeMessage} ${positionMessage}`;
     },
 
     _tempAnnounce: function (message) {
@@ -2647,7 +2654,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       instructionMessage += Craft.t(
         'app',
-        'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.'
+        'Use the arrow keys to change position, Tab or Spacebar to drop.'
       );
 
       this._tempAnnounce(
@@ -3077,7 +3084,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
 
       this._redrawCropperElements();
-      this._tempAnnounce('make an announcement here');
+      this._tempAnnounce(this._getSizeAndRelativePositionMessage(this.clipper));
     },
 
     _getDeltaValuesFromDirection: function (direction) {

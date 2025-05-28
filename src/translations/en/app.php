@@ -1916,7 +1916,7 @@ return [
     'Use defaults' => 'Use defaults',
     'Use for element thumbnails' => 'Use for element thumbnails',
     'Use shapes to represent statuses' => 'Use shapes to represent statuses',
-    'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.' => 'Use the arrow keys to change position, Spacebar to drop, Escape key to cancel.',
+    'Use the arrow keys to change position, Tab or Spacebar to drop.' => 'Use the arrow keys to change position, Tab or Spacebar to drop.',
     'Use the loaded project config' => 'Use the loaded project config',
     'Use this field’s values as search keywords' => 'Use this field’s values as search keywords',
     'Used by' => 'Used by',
