@@ -16,6 +16,7 @@ use craft\elements\Category;
 use craft\elements\Entry;
 use craft\elements\User;
 use craft\enums\CmsEdition;
+use craft\enums\PropagationMethod;
 use craft\errors\WrongEditionException;
 use craft\events\ConfigEvent;
 use craft\events\RegisterUserPermissionsEvent;
@@ -610,6 +611,12 @@ class UserPermissions extends Component
                         ],
                     ],
                 ];
+
+                // if section doesn't have `custom` propagation method, don't add delete for site permissions
+                if ($section->propagationMethod != PropagationMethod::Custom) {
+                    unset($sectionPermissions["viewEntries:$section->uid"]['nested']["deleteEntriesForSite:$section->uid"]);
+                    unset($sectionPermissions["viewEntries:$section->uid"]['nested']["viewPeerEntries:$section->uid"]['nested']["deletePeerEntriesForSite:$section->uid"]);
+                }
             }
 
             $permissions[] = [

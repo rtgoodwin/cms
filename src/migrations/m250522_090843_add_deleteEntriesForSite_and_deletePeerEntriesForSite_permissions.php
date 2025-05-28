@@ -6,6 +6,7 @@ use Craft;
 use craft\db\Migration;
 use craft\db\Query;
 use craft\db\Table;
+use craft\enums\PropagationMethod;
 
 /**
  * m250522_090843_add_deleteEntriesForSite_and_deletePeerEntriesForSite_permissions migration.
@@ -42,21 +43,23 @@ class m250522_090843_add_deleteEntriesForSite_and_deletePeerEntriesForSite_permi
                 foreach ($userIdsByPermission as $permission => $userIds) {
                     // get section uid
                     $sectionUid = str_replace($existingPermissionName, '', $permission);
+                    $section = Craft::$app->getEntries()->getSectionByUid($sectionUid);
+                    if ($section && $section->propagationMethod == PropagationMethod::Custom) {
+                        $insert = [];
 
-                    $insert = [];
+                        $this->insert(Table::USERPERMISSIONS, [
+                            'name' => $newPermissionName . ':' . $sectionUid,
+                        ]);
+                        $newPermissionId = $this->db->getLastInsertID(Table::USERPERMISSIONS);
 
-                    $this->insert(Table::USERPERMISSIONS, [
-                        'name' => $newPermissionName . ':' . $sectionUid,
-                    ]);
-                    $newPermissionId = $this->db->getLastInsertID(Table::USERPERMISSIONS);
+                        $userIds = array_unique($userIds);
 
-                    $userIds = array_unique($userIds);
+                        foreach ($userIds as $userId) {
+                            $insert[] = [$newPermissionId, $userId];
+                        }
 
-                    foreach ($userIds as $userId) {
-                        $insert[] = [$newPermissionId, $userId];
+                        $this->batchInsert(Table::USERPERMISSIONS_USERS, ['permissionId', 'userId'], $insert);
                     }
-
-                    $this->batchInsert(Table::USERPERMISSIONS_USERS, ['permissionId', 'userId'], $insert);
                 }
             }
 
@@ -68,8 +71,11 @@ class m250522_090843_add_deleteEntriesForSite_and_deletePeerEntriesForSite_permi
                     if (str_starts_with($permission, $existingPermissionName)) {
                         // get section uid
                         $sectionUid = str_replace($existingPermissionName, '', $permission);
-                        $groupPermissions[$newPermissionName . ':' . $sectionUid] = true;
-                        $changed = true;
+                        $section = Craft::$app->getEntries()->getSectionByUid($sectionUid);
+                        if ($section && $section->propagationMethod == PropagationMethod::Custom) {
+                            $groupPermissions[$newPermissionName . ':' . $sectionUid] = true;
+                            $changed = true;
+                        }
                     }
                 }
                 if ($changed) {
