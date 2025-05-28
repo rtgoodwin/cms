@@ -99,7 +99,7 @@
     gap: var(--xs);
 
     &:not(:has(.lp-close-btn)) {
-      padding-inline: 0 0.5rem;
+      padding-inline-start: 0;
 
       .pane-tabs [role='tablist'] {
         padding-inline-start: 0;
