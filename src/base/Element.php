@@ -3983,8 +3983,8 @@ abstract class Element extends Component implements ElementInterface
             ];
         }
 
-        // Edit
         if ($elementsService->canView($this)) {
+            // Edit
             $editId = sprintf('action-edit-%s', mt_rand());
             $items[] = [
                 'id' => $editId,
@@ -4010,39 +4010,39 @@ JS, [
                     'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
                 ],
             ]);
-        }
 
-        // Copy
-        if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
-            $copyId = sprintf('action-copy-%s', mt_rand());
-            $items[] = [
-                'id' => $copyId,
-                'color' => Color::Fuchsia,
-                'icon' => 'clone-dashed',
-                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
-                    'type' => static::lowerDisplayName(),
-                ])),
-            ];
+            // Copy
+            if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
+                $copyId = sprintf('action-copy-%s', mt_rand());
+                $items[] = [
+                    'id' => $copyId,
+                    'color' => Color::Fuchsia,
+                    'icon' => 'clone-dashed',
+                    'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
+                        'type' => static::lowerDisplayName(),
+                    ])),
+                ];
 
-            $view = Craft::$app->getView();
-            $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
+                $view = Craft::$app->getView();
+                $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
 (() => {
   $('#' + $id).on('activate', () => {
     Craft.cp.copyElements([$elementInfo]);
   });
 })();
 JS, [
-                $view->namespaceInputId($copyId),
-                [
-                    'type' => static::class,
-                    'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
-                    'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
-                    'revisionId' => $this->revisionId,
-                    'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
-                    'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
-                    'siteId' => $this->siteId,
-                ],
-            ]);
+                    $view->namespaceInputId($copyId),
+                    [
+                        'type' => static::class,
+                        'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
+                        'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
+                        'revisionId' => $this->revisionId,
+                        'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
+                        'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                        'siteId' => $this->siteId,
+                    ],
+                ]);
+            }
         }
 
         return $items;
