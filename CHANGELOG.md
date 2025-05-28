@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.6 - 2025-05-28
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
 - Fixed a bug where the `--language` option was required when running the `install` command non-interactively.
