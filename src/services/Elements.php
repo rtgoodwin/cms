@@ -4446,7 +4446,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user);
+        return (
+            (!$element::isLocalized() || $user->can(sprintf('editSite:%s', $element->getSite()->uid))) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user))
+        );
     }
 
     /**
@@ -4466,7 +4469,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user);
+        return (
+            (!$element::isLocalized() || $user->can(sprintf('editSite:%s', $element->getSite()->uid))) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user))
+        );
     }
 
     /**
@@ -4533,6 +4539,8 @@ SQL;
 
     /**
      * Returns whether a user is authorized to copy the given element, to be duplicated elsewhere.
+     *
+     *  This should always be called in conjunction with [[canView()]].
      *
      * @param ElementInterface $element
      * @param User|null $user
