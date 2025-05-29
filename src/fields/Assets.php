@@ -92,6 +92,14 @@ class Assets extends BaseRelationField
     /**
      * @inheritdoc
      */
+    protected static function canShowSiteMenu(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public static function defaultSelectionLabel(): string
     {
         return Craft::t('app', 'Add an asset');
@@ -555,6 +563,7 @@ class Assets extends BaseRelationField
                         $asset = new Asset();
                         $asset->tempFilePath = $tempPath;
                         $asset->setFilename($file['filename']);
+                        $asset->setMimeType(FileHelper::getMimeType($tempPath, checkExtension: false) ?? $file['mimeType']);
                         $asset->newFolderId = $uploadFolderId;
                         $asset->setVolumeId($uploadFolder->volumeId);
                         $asset->uploaderId = Craft::$app->getUser()->getId();
@@ -833,7 +842,7 @@ class Assets extends BaseRelationField
         if (isset($this->_uploadedDataFiles['data']) && is_array($this->_uploadedDataFiles['data'])) {
             foreach ($this->_uploadedDataFiles['data'] as $index => $dataString) {
                 if (preg_match('/^data:(?<type>[a-z0-9]+\/[a-z0-9\+\-\.]+);base64,(?<data>.+)/i', $dataString, $matches)) {
-                    $type = $matches['type'];
+                    $mimeType = $matches['type'];
                     $data = base64_decode($matches['data']);
 
                     if (!$data) {
@@ -843,7 +852,7 @@ class Assets extends BaseRelationField
                     if (!empty($this->_uploadedDataFiles['filename'][$index])) {
                         $filename = $this->_uploadedDataFiles['filename'][$index];
                     } else {
-                        $extensions = FileHelper::getExtensionsByMimeType($type);
+                        $extensions = FileHelper::getExtensionsByMimeType($mimeType);
 
                         if (empty($extensions)) {
                             continue;
@@ -854,6 +863,7 @@ class Assets extends BaseRelationField
 
                     $files[] = [
                         'filename' => $filename,
+                        'mimeType' => $mimeType,
                         'data' => $data,
                         'type' => 'data',
                     ];
@@ -870,6 +880,7 @@ class Assets extends BaseRelationField
             foreach ($uploadedFiles as $uploadedFile) {
                 $files[] = [
                     'filename' => $uploadedFile->name,
+                    'mimeType' => $uploadedFile->type,
                     'path' => $uploadedFile->tempName,
                     'type' => 'upload',
                 ];
