@@ -163,7 +163,9 @@ class Html extends \yii\helpers\Html
                     'url' => UrlHelper::actionUrl('users/session-info'),
                 ],
                 View::TEMPLATE_MODE_CP,
-            )
+            ),
+            View::POS_END,
+            'async-csrf-input'
         );
 
         return static::tag('craft-csrf-input');
