@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Fixed a styling issue. ([#17343](https://github.com/craftcms/cms/issues/17343))
+
+## 5.7.8 - 2025-05-28
+
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
 - The `update-statuses` action now ensures it is only being run once at a time.
 - Added `craft\elements\User::getHasSsoIdentity()`.
@@ -19,7 +23,11 @@
 - Fixed a bug where Entries and Link fields with “Show unpermitted sections” disabled weren’t factoring in permissions for Single sections. ([#17332](https://github.com/craftcms/cms/pull/17332))
 - Fixed a bug where entry selection modals weren’t showing a sources sidebar for Entries fields with all sources selected and “Show unpermitted sections” disabled. ([#17323](https://github.com/craftcms/cms/issues/17323))
 - Fixed a bug where revisions were getting “Copy” actions. ([#17334](https://github.com/craftcms/cms/pull/17334))
-- Fixed styling issues. ([#17335](https://github.com/craftcms/cms/pull/17335))
+- Fixed a bug where Link fields could show multiple info icons within their advanced fields. ([#17329](https://github.com/craftcms/cms/issues/17329))
+- Fixed a bug where element chips and cards could get hyperlinks, “Edit”, and “Copy” actions, when the current user didn’t have permission to edit content in the element’s site.
+- Fixed a bug where the `up` command was updating project config YAML files when admin changes weren’t allowed. ([#17345](https://github.com/craftcms/cms/issues/17345))
+- Fixed a bug where nested entry revisions were getting included in GraphQL results unexpectedly, for Matrix fields with versioning enabled. ([#17324](https://github.com/craftcms/cms/issues/17324))
+- Fixed styling issues. ([#17335](https://github.com/craftcms/cms/pull/17335), [#17342](https://github.com/craftcms/cms/pull/17342))
 
 ## 5.7.7 - 2025-05-20
 
