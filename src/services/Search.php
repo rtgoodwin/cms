@@ -308,9 +308,21 @@ class Search extends Component
         }
 
         try {
-            if (!Db::update(Table::SEARCHINDEXQUEUE, ['reserved' => true], ['id' => $jobId])) {
-                // another process must be handling the same job
-                return;
+            for ($try = 0; $try < 3; $try++) {
+                try {
+                    if (!Db::update(Table::SEARCHINDEXQUEUE, ['reserved' => true], ['id' => $jobId])) {
+                        // another process must be handling the same job
+                        return;
+                    }
+                } catch (DbException $e) {
+                    if (str_contains($e->getPrevious()?->getMessage(), 'deadlock')) {
+                        // A gap lock was probably hit. Try again in one second
+                        // https://github.com/craftcms/cms/issues/17318
+                        sleep(1);
+                    } else {
+                        throw $e;
+                    }
+                }
             }
         } finally {
             $mutex->release($lockName);
