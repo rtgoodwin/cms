@@ -39,8 +39,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     grid: null,
     croppingCanvas: null,
     clipper: null,
-    activeHandleIndicator: null,
-    focusedHandleIndicator: null,
+    cropperHandleIndicator: null,
     croppingRectangle: null,
     cropperHandles: null,
     cropperGrid: null,
@@ -2228,14 +2227,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.croppingCanvas.remove(this.croppingRectangle);
       }
 
-      if (this.focusedHandleIndicator) {
-        this.croppingCanvas.remove(this.focusedHandleIndicator);
-        this.focusedHandleIndicator = null;
-      }
-
-      if (this.activeHandleIndicator) {
-        this.croppingCanvas.remove(this.activeHandleIndicator);
-        this.activeHandleIndicator = null;
+      if (this.cropperHandleIndicator) {
+        this.croppingCanvas.remove(this.cropperHandleIndicator);
+        this.cropperHandleIndicator = null;
       }
 
       this._redrawCropperElements._.lineOptions = {
@@ -2301,49 +2295,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         }
       );
 
+      this.cropperHandleIndicator = this._getCropperHandleIndicator();
+
       // Don't forget the rectangle
       this.croppingRectangle = this._getCroppingRectangle();
-
-      // If an edit button is focused, add a "focus" style on the cropper rectangle/handle
-      if (this.cropperEditBtnFocused) {
-        // Check button properties. If rectangle, use rectangle styles
-        const cropperElement = this._getCropperElementFromEditBtn(
-          this.cropperEditBtnFocused
-        );
-
-        if (cropperElement !== 'rectangle') {
-          this.focusedHandleIndicator =
-            this._getCropperHandleIndicator(cropperElement);
-        }
-      }
-
-      if (this.nonDragEditMode) {
-        if (this.handlePicked) {
-          console.log('show icon');
-          this.activeHandleIndicator = this._getCropperHandleIndicator(
-            this.handlePicked
-          );
-
-          fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-            var obj = fabric.util.groupSVGElements(objects, options);
-            obj.set({
-              left: 0,
-              top: 0,
-              scaleX: 0.03,
-              scaleY: 0.03,
-              originX: 'center',
-              originY: 'center',
-              fill: 'white',
-            });
-
-            this.activeHandleIndicator.add(obj);
-          });
-
-          this.activeHandleIndicator.item(0).set({
-            fill: 'rgba(0, 0, 0, .8)',
-          });
-        }
-      }
 
       this.cropperGrid = new fabric.Group(
         [
@@ -2409,12 +2364,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.croppingCanvas.add(this.cropperGrid);
       this.croppingCanvas.add(this.croppingRectangle);
 
-      if (this.focusedHandleIndicator) {
-        this.croppingCanvas.add(this.focusedHandleIndicator);
-      }
-
-      if (this.activeHandleIndicator) {
-        this.croppingCanvas.add(this.activeHandleIndicator);
+      if (this.cropperHandleIndicator) {
+        this.croppingCanvas.add(this.cropperHandleIndicator);
       }
     },
 
@@ -2426,6 +2377,21 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         );
 
         if (cropperElement === 'rectangle') {
+          return true;
+        }
+
+        return false;
+      }
+    },
+
+    _getCropperHandleEditBtnIsFocused: function () {
+      if (this.cropperEditBtnFocused) {
+        // Check button properties. If rectangle, use rectangle styles
+        const cropperElement = this._getCropperElementFromEditBtn(
+          this.cropperEditBtnFocused
+        );
+
+        if (cropperElement !== 'rectangle') {
           return true;
         }
 
@@ -2447,7 +2413,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
     },
 
-    _getCropperHandleIndicator: function (handle) {
+    _getCropperHandleIndicator: function () {
+      if (!this._getCropperHandleEditBtnIsFocused() && !this.handlePicked)
+        return;
+
+      const handle = this.handlePicked
+        ? this.handlePicked
+        : this._getCropperElementFromEditBtn(this.cropperEditBtnFocused);
+
       let handleCoordinates = this._getClipperHandlePosition(handle);
       const size = 12;
       const width = 3;
@@ -2484,6 +2457,27 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         left: handleCoordinates.x,
         top: handleCoordinates.y,
       });
+
+      if (this.handlePicked) {
+        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+          var obj = fabric.util.groupSVGElements(objects, options);
+          obj.set({
+            left: 0,
+            top: 0,
+            scaleX: 0.03,
+            scaleY: 0.03,
+            originX: 'center',
+            originY: 'center',
+            fill: 'white',
+          });
+
+          focusRing.add(obj);
+        });
+
+        focusRing.item(0).set({
+          fill: 'rgba(0, 0, 0, .8)',
+        });
+      }
 
       return focusRing;
     },
