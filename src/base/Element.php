@@ -2605,7 +2605,7 @@ abstract class Element extends Component implements ElementInterface
     public function __isset($name): bool
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->fieldByHandle(substr($name, 6)) !== null;
         }
 
@@ -2623,7 +2623,7 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->getFieldValue(substr($name, 6));
         }
 
@@ -2641,7 +2641,7 @@ abstract class Element extends Component implements ElementInterface
     public function __set($name, $value)
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             $this->setFieldValue(substr($name, 6), $value);
             return;
         }
@@ -2663,7 +2663,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function __call($name, $params)
     {
-        if (strncmp($name, 'isFieldEmpty:', 13) === 0) {
+        if (str_starts_with($name, 'isFieldEmpty:')) {
             return $this->isFieldEmpty(substr($name, 13));
         }
 
@@ -2851,7 +2851,7 @@ abstract class Element extends Component implements ElementInterface
     public function getAttributeLabel($attribute): string
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 
@@ -3120,7 +3120,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function addError($attribute, $error = ''): void
     {
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 

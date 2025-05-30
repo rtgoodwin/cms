@@ -1429,7 +1429,7 @@ class App
 
                                 // If the license key path starts with the root project path, trim the project path off
                                 $rootPath = Craft::getAlias('@root');
-                                if (strpos($keyPath, $rootPath . '/') === 0) {
+                                if (str_starts_with($keyPath, $rootPath . '/')) {
                                     $keyPath = substr($keyPath, strlen($rootPath) + 1);
                                 }
 
