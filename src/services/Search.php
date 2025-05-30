@@ -221,7 +221,12 @@ class Search extends Component
      */
     public function queueIndexElement(ElementInterface $element, array $fieldHandles): void
     {
-        $this->createOrUpdateIndexJob($element, $fieldHandles);
+        try {
+            $this->createOrUpdateIndexJob($element, $fieldHandles);
+        } catch (DbException) {
+            // the job was probably just cascade-deleted
+            return;
+        }
 
         Queue::push(new UpdateSearchIndex([
             'elementType' => get_class($element),
@@ -231,6 +236,9 @@ class Search extends Component
         ]), 2048);
     }
 
+    /**
+     * @throws DbException
+     */
     private function createOrUpdateIndexJob(ElementInterface $element, array $fieldHandles): void
     {
         $jobId = $this->pendingIndexJobId($element->id, $element->siteId);
