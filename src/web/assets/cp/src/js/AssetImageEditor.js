@@ -2362,9 +2362,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           'rgba(0,0,0,0.5)';
       }
 
+      this.croppingCanvas.add(this.croppingRectangle);
       this.croppingCanvas.add(this.cropperHandles);
       this.croppingCanvas.add(this.cropperGrid);
-      this.croppingCanvas.add(this.croppingRectangle);
 
       if (this.cropperHandleIndicator) {
         this.croppingCanvas.add(this.cropperHandleIndicator);
@@ -2402,51 +2402,82 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     _getCroppingRectangle: function () {
-      const rectangle = new fabric.Rect({
+      const strokeWidth = 2;
+      const width = this.clipper.width;
+      const height = this.clipper.height;
+      const rectantleOptions = {
+        fill: 'rgba(0,0,0,0)',
         top: 0,
         left: 0,
-        width: this.clipper.width,
-        height: this.clipper.height,
-        fill: 'rgba(0,0,0,0)',
-        stroke: 'rgba(255,255,255,0.8)',
-        strokeWidth: this._getCroppingRectangleEditBtnIsFocused() ? 4 : 2,
+        strokeWidth: strokeWidth,
         originX: 'center',
         originY: 'center',
+      };
+
+      const outerOutline = new fabric.Rect({
+        width: width + strokeWidth * 4,
+        height: height + strokeWidth * 4,
+        stroke: null,
+        ...rectantleOptions,
       });
 
-      const group = new fabric.Group([rectangle], {
-        originX: 'center',
-        originY: 'center',
-        left: this.clipper.left,
-        top: this.clipper.top,
+      const innerOutline = new fabric.Rect({
+        width: width + strokeWidth * 2,
+        height: height + strokeWidth * 2,
+        stroke: null,
+        ...rectantleOptions,
       });
+
+      const cropperRectangle = new fabric.Rect({
+        width: width,
+        height: height,
+        stroke: 'rgba(255,255,255,1)',
+        ...rectantleOptions,
+      });
+
+      const group = new fabric.Group(
+        [outerOutline, innerOutline, cropperRectangle],
+        {
+          originX: 'center',
+          originY: 'center',
+          left: this.clipper.left,
+          top: this.clipper.top,
+        }
+      );
 
       if (this.cropperPickedUp) {
-        console.log('active state');
+        //this._addMoveIconToGroup(group);
 
-        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-          var obj = fabric.util.groupSVGElements(objects, options);
-          obj.set({
-            left: 0,
-            top: 0,
-            scaleX: 0.03,
-            scaleY: 0.03,
-            originX: 'center',
-            originY: 'center',
-            fill: 'white',
-          });
-
-          group.add(obj);
-        });
-
-        group.item(0).set({
+        cropperRectangle.set({
           fill: 'rgba(0, 0, 0, .8)',
         });
       } else if (this._getCroppingRectangleEditBtnIsFocused()) {
-        console.log('focusedState');
+        outerOutline.set({
+          stroke: 'rgba(255,255,255,1)',
+        });
+        innerOutline.set({
+          stroke: this.darkFocusColor,
+        });
       }
 
       return group;
+    },
+
+    _addMoveIconToGroup: function (group) {
+      fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+        var obj = fabric.util.groupSVGElements(objects, options);
+        obj.set({
+          left: 0,
+          top: 0,
+          scaleX: 0.03,
+          scaleY: 0.03,
+          originX: 'center',
+          originY: 'center',
+          fill: 'white',
+        });
+
+        group.add(obj);
+      });
     },
 
     _getCropperHandleIndicator: function () {
@@ -2495,20 +2526,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
 
       if (this.handlePicked) {
-        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-          var obj = fabric.util.groupSVGElements(objects, options);
-          obj.set({
-            left: 0,
-            top: 0,
-            scaleX: 0.03,
-            scaleY: 0.03,
-            originX: 'center',
-            originY: 'center',
-            fill: 'white',
-          });
-
-          focusRing.add(obj);
-        });
+        this._addMoveIconToGroup(focusRing);
 
         focusRing.item(0).set({
           fill: 'rgba(0, 0, 0, .8)',
