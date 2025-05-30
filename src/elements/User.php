@@ -1950,7 +1950,7 @@ XML;
                 case self::STATUS_PENDING:
                     // Only provide activation actions if they have an email address
                     if ($this->email) {
-                        if ($this->pending || $canAdministrateUsers) {
+                        if ($this->pending || $canModerateUsers) {
                             $statusItems[] = [
                                 'icon' => 'paperplane',
                                 'label' => Craft::t('app', 'Send activation email'),
