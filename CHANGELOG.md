@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
+
 ## 4.15.6 - 2025-05-28
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
