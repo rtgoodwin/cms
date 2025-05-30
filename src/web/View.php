@@ -30,7 +30,6 @@ use craft\web\twig\SinglePreloaderExtension;
 use craft\web\twig\TemplateLoader;
 use Illuminate\Support\Collection;
 use LogicException;
-use Stringable;
 use Throwable;
 use Twig\Error\LoaderError as TwigLoaderError;
 use Twig\Error\RuntimeError as TwigRuntimeError;
@@ -2047,9 +2046,10 @@ JS;
 
         if (isset($this->_hooks[$hook])) {
             $handled = false;
+
+            /** @var callable(array $context, bool &$handled):string $method */
             foreach ($this->_hooks[$hook] as $method) {
                 $return .= $method($context, $handled);
-                /** @var bool $handled */
                 if ($handled) {
                     break;
                 }

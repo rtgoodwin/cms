@@ -685,7 +685,10 @@ class Craft extends Yii2
             return;
         }
 
-        /** @var array $componentMap */
+        /**
+         * @var array $componentMap
+         * @phpstan-ignore argument.type
+         */
         $componentMap = call_user_func([$moduleClass, 'getComponentMap']);
 
         // Set it.

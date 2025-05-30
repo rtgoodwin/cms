@@ -1077,7 +1077,7 @@ JS, [
 
         // show the draft name?
         if (($config['showDraftName'] ?? true) && $element->getIsDraft() && !$element->isProvisionalDraft && !$element->getIsUnpublishedDraft()) {
-            /** @var DraftBehavior|ElementInterface $element */
+            /** @var DraftBehavior&ElementInterface $element */
             $content .= Html::tag('span', $element->draftName ?: Craft::t('app', 'Draft'), [
                 'class' => 'context-label',
             ]);
@@ -1806,7 +1806,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException
+     * @throws TemplateLoaderException
      * @since 5.7.0
      */
     public static function buttonHtml(array $config): string
@@ -1911,7 +1911,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 5.6.0
      */
     public static function colorHtml(array $config): string
@@ -1991,7 +1991,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function lightswitchHtml(array $config): string
@@ -2026,7 +2026,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 5.5.0
      */
     public static function rangeHtml(array $config): string
@@ -2183,7 +2183,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function textHtml(array $config): string
@@ -2210,7 +2210,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function textareaHtml(array $config): string
@@ -2237,7 +2237,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function dateHtml(array $config): string
@@ -2264,7 +2264,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function timeHtml(array $config): string
@@ -2308,7 +2308,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function elementSelectHtml(array $config): string
@@ -2688,7 +2688,7 @@ JS, [
         $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
 
         // get remaining attributes
-        /** @var class-string<ElementInterface> $elementType */
+        /** @var ElementInterface $elementType */
         $elementType = new ($fieldLayout['type']);
         $remainingItems = $elementType::cardAttributes();
         foreach ($remainingItems as $key => $cardAttributes) {

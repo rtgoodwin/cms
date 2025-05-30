@@ -64,6 +64,7 @@ use yii\db\Expression;
 /**
  * Matrix field type
  *
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -976,7 +977,7 @@ JS, [
             return Html::tag('div', $message, ['class' => 'pane no-border zilch small']);
         }
 
-        if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
+        if ($element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         }
 
@@ -1317,6 +1318,7 @@ JS;
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public function getEagerLoadingMap(array $sourceElements): array|null|false
     {

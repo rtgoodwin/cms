@@ -152,6 +152,7 @@ use yii\web\Response;
  * @property string|null $url The element’s full URL
  * @property-write int|null $revisionCreatorId revision creator ID to be saved
  * @property-write string|null $revisionNotes revision notes to be saved
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -1734,6 +1735,7 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
     {
@@ -2406,11 +2408,11 @@ abstract class Element extends Component implements ElementInterface
     private bool $_allDirty = false;
 
     /**
-     * @var string[]|null Record of dirty attributes.
+     * @var array<string, int|string|bool> Record of dirty attributes.
      * @see getDirtyAttributes()
      * @see isAttributeDirty()
      */
-    private ?array $_dirtyAttributes = [];
+    private array $_dirtyAttributes = [];
 
     /**
      * @var string|null The initial title value, if there was one.
@@ -4916,7 +4918,6 @@ JS, [
     public function offsetExists($offset): bool
     {
         return (
-            /** @phpstan-ignore-next-line */
             $offset === 'title' ||
             /** @phpstan-ignore-next-line */
             ($this->hasEagerLoadedElements($offset) && !($this->_lazyEagerLoadedElements[$offset] ?? false)) ||
@@ -6180,7 +6181,10 @@ JS, [
     protected function notesFieldHtml(): string
     {
         // todo: this should accept a $static arg
-        /** @var static|DraftBehavior $this */
+        /**
+         * @var static|DraftBehavior $this
+         * @phpstan-ignore varTag.nativeType
+         */
         return Cp::textareaFieldHtml([
             'label' => Craft::t('app', 'Notes about your changes'),
             'labelClass' => 'h6',

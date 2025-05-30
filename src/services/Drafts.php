@@ -275,7 +275,7 @@ SQL,
      */
     public function applyDraft(ElementInterface $draft, array $newAttributes = []): ElementInterface
     {
-        /** @var ElementInterface|DraftBehavior $draft */
+        /** @var ElementInterface&DraftBehavior $draft */
         /** @var DraftBehavior $behavior */
         $behavior = $draft->getBehavior('draft');
         $canonical = $draft->getCanonical(true);

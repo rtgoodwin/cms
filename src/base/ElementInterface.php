@@ -31,7 +31,8 @@ use yii\web\Response;
  * @mixin CustomFieldBehavior
  * @mixin Component
  * @phpstan-require-extends Element
- * @phpstan-type EagerLoadingMap array{elementType?:class-string<ElementInterface>,map:array{elementType?:class-string<ElementInterface>,source:int,target:int}[],criteria?:array,createElement?:callable}
+ * @phpstan-type EagerLoadingMapItem array{elementType?:class-string<ElementInterface>,source:int,target:int}
+ * @phpstan-type EagerLoadingMap array{elementType?:class-string<ElementInterface>,map:EagerLoadingMapItem[],criteria?:array,createElement?:callable}
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */

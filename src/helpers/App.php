@@ -232,7 +232,7 @@ class App
             $value = $env . ($matches[2] ?? '');
         }
 
-        if (is_string($value) && str_starts_with($value, '@')) {
+        if (str_starts_with($value, '@')) {
             $value = Craft::getAlias($value, false) ?: $value;
         }
 
@@ -703,6 +703,7 @@ class App
         // ini_set can return false or an empty string depending on your php version / FastCGI.
         // If ini_set has been disabled in php.ini, the value will be null because of our muted error handler
         return (
+            /** @phpstan-ignore-next-line */
             $result !== null &&
             $result !== false &&
             $result !== '' &&

@@ -22,6 +22,7 @@ use yii\web\Session;
  * @mixin Target
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.1.23
+ * @phpstan-ignore trait.unused
  */
 trait LogTargetTrait
 {

@@ -1001,7 +1001,8 @@ class ElementHelper
     /**
      * Swaps out any canonical elements with provisional drafts, when they exist.
      *
-     * @param ElementInterface[] $elements
+     * @template T of ElementInterface
+     * @param T[] $elements
      * @since 5.2.0
      */
     public static function swapInProvisionalDrafts(array &$elements): void
@@ -1024,6 +1025,7 @@ class ElementHelper
 
         $first = reset($canonicalElements);
 
+        /** @var T[] $drafts */
         $drafts = $first::find()
             ->draftOf($canonicalElements)
             ->draftCreator($user)

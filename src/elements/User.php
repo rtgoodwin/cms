@@ -1466,7 +1466,7 @@ class User extends Element implements IdentityInterface
             return false;
         }
 
-        if (is_object($group) && $group instanceof UserGroup) {
+        if ($group instanceof UserGroup) {
             $group = $group->id;
         }
 
@@ -1677,7 +1677,7 @@ XML;
      */
     protected function thumbAlt(): ?string
     {
-        return $this->getPhoto()?->alt ?? $this->getName();
+        return $this->getPhoto()->alt ?? $this->getName();
     }
 
     /**
@@ -2377,7 +2377,7 @@ JS, [
                         ],
                     ]);
                 }
-                
+
                 // no break
             case 'isCredentialed':
                 $value = $this->getIsCredentialed();

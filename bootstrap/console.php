@@ -12,6 +12,7 @@ use yii\console\ExitCode;
 ini_set('display_errors', 'stderr');
 
 // Make sure they're running PHP 8+
+/** @phpstan-ignore-next-line */
 if (PHP_VERSION_ID < 80002) {
     echo "Craft requires PHP 8.0.2 or later.\n";
     exit(ExitCode::UNSPECIFIED_ERROR);
