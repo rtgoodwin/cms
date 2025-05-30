@@ -130,14 +130,13 @@
             },
         ] %}
 
-        <fieldset class="cropper-edit">
-            <div id="move-icon-wrapper" style="display: none;">{{ iconSvg('up-down-left-right') }}</div>
+        <fieldset data-cropper-edit>
             <legend>
                 {{ 'Edit {type}'|t('app', {
                     type: 'Cropping Rectangle'|t('app'),
                 }) }}
             </legend>
-
+            <div id="move-icon-wrapper" style="display: none;">{{ iconSvg('up-down-left-right') }}</div>
             <div>
                 {{ _self.cropperButton({
                     label: 'Cropping Rectangle'|t('app'),
