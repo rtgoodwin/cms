@@ -887,6 +887,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
       this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
         this._handleCropperEditBtnBlur(ev);
+        this._redrawCropperElements();
       });
       this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
         this.cropperEditBtnFocused = $(ev.target);
@@ -2310,12 +2311,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.cropperEditBtnFocused
         );
 
-        if (cropperElement === 'rectangle') {
-          this.croppingRectangle.set({
-            strokeWidth: 4,
-            stroke: 'rgba(255,255,255,1)',
-          });
-        } else {
+        if (cropperElement !== 'rectangle') {
           this.focusedHandleIndicator =
             this._getCropperHandleIndicator(cropperElement);
         }
@@ -2422,6 +2418,21 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
     },
 
+    _getCroppingRectangleEditBtnIsFocused: function () {
+      if (this.cropperEditBtnFocused) {
+        // Check button properties. If rectangle, use rectangle styles
+        const cropperElement = this._getCropperElementFromEditBtn(
+          this.cropperEditBtnFocused
+        );
+
+        if (cropperElement === 'rectangle') {
+          return true;
+        }
+
+        return false;
+      }
+    },
+
     _getCroppingRectangle: function () {
       return new fabric.Rect({
         left: this.clipper.left,
@@ -2430,7 +2441,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         height: this.clipper.height,
         fill: 'rgba(0,0,0,0)',
         stroke: 'rgba(255,255,255,0.8)',
-        strokeWidth: 2,
+        strokeWidth: this._getCroppingRectangleEditBtnIsFocused() ? 4 : 2,
         originX: 'center',
         originY: 'center',
       });
