@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
+- Fixed a styling issue. ([#17368](https://github.com/craftcms/cms/issues/17368))
 
 ## 5.7.8.1 - 2025-05-29
 
