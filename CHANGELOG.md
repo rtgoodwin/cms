@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed a bug where non-admin users couldn’t edit content on single-site Craft installs. ([#17363](https://github.com/craftcms/cms/issues/17363))
 - Fixed a styling issue. ([#17343](https://github.com/craftcms/cms/issues/17343))
 
 ## 5.7.8 - 2025-05-28

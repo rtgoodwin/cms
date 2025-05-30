@@ -4447,7 +4447,7 @@ SQL;
         }
 
         return (
-            (!$element::isLocalized() || $user->can(sprintf('editSite:%s', $element->getSite()->uid))) &&
+            $this->_siteAuthCheck($element, $user) &&
             ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user))
         );
     }
@@ -4470,7 +4470,7 @@ SQL;
         }
 
         return (
-            (!$element::isLocalized() || $user->can(sprintf('editSite:%s', $element->getSite()->uid))) &&
+            $this->_siteAuthCheck($element, $user) &&
             ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user))
         );
     }
@@ -4641,5 +4641,14 @@ SQL;
 
         $this->trigger($eventName, $event);
         return $event->authorized;
+    }
+
+    private function _siteAuthCheck(ElementInterface $element, User $user): bool
+    {
+        return (
+            !$element::isLocalized() ||
+            !Craft::$app->getIsMultiSite() ||
+            $user->can(sprintf('editSite:%s', $element->getSite()->uid))
+        );
     }
 }
