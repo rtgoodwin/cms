@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.8.1 - 2025-05-29
 
 - Fixed a bug where non-admin users couldn’t edit content on single-site Craft installs. ([#17363](https://github.com/craftcms/cms/issues/17363))
 - Fixed a styling issue. ([#17343](https://github.com/craftcms/cms/issues/17343))
