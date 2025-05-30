@@ -1809,7 +1809,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
