@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
+- Reduced the likelihood of a deadlock error occurring when updating search indexes. ([#17318](https://github.com/craftcms/cms/issues/17318))
 
 ## 4.15.6 - 2025-05-28
 
