@@ -294,7 +294,7 @@ class App
      *
      * @param string $name The option name, beginning with `--` or `-`
      * @param bool $unset Whether the option should be removed from `argv` if found
-     * @return string|float|int|true|null
+     * @return string|float|int|bool|null
      * @since 4.0.0
      */
     public static function cliOption(string $name, bool $unset = false): string|float|int|bool|null

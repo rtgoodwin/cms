@@ -189,16 +189,6 @@ class View extends \yii\web\View
     /**
      * @var array|null
      */
-    private ?array $_cpTemplateRoots = null;
-
-    /**
-     * @var array|null
-     */
-    private ?array $_siteTemplateRoots = null;
-
-    /**
-     * @var array|null
-     */
     private ?array $_templateRoots = null;
 
     /**
@@ -433,8 +423,8 @@ class View extends \yii\web\View
         $twig = new Environment(new TemplateLoader($this), $this->_getTwigOptions());
 
         // Mark SafeHtml as a safe interface
-        /** @var class-string<Stringable> $safeClass */
         $safeClass = SafeHtml::class;
+        /** @phpstan-ignore argument.type */
         $twig->getRuntime(EscaperRuntime::class)->addSafeClass($safeClass, ['html']);
 
         $twig->addExtension(new StringLoaderExtension());
@@ -852,7 +842,6 @@ class View extends \yii\web\View
      * @param string|null $templateMode The template mode to use.
      * @param bool $publicOnly Whether to only look for public templates (template paths that don’t start with the private template trigger).
      * @return bool Whether the template exists.
-     * @throws Exception
      */
     public function doesTemplateExist(string $name, ?string $templateMode = null, bool $publicOnly = false): bool
     {
