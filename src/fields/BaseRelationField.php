@@ -1696,7 +1696,8 @@ JS, [
             ->status(null)
             ->site('*')
             ->limit(null)
-            ->unique();
+            ->unique()
+            ->eagerly(false);
         if ($element !== null) {
             $clone->preferSites([$this->targetSiteId($element)]);
         }

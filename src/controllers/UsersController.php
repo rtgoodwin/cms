@@ -668,7 +668,10 @@ class UsersController extends Controller
 
             $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($loginName);
 
-            if (!$user || !$user->getIsCredentialed() || !$user->getHasPassword()) {
+            if (
+                !$user?->getIsCredentialed() ||
+                (!$user->getHasPassword() && $user->getHasSsoIdentity())
+            ) {
                 $errors[] = Craft::$app->getConfig()->getGeneral()->useEmailAsUsername
                     ? Craft::t('app', 'Invalid email.')
                     : Craft::t('app', 'Invalid username or email.');
@@ -1182,7 +1185,7 @@ class UsersController extends Controller
             'currentGroupIds' => array_map(fn(UserGroup $group) => $group->id, $user->getGroups()),
         ]);
 
-        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('administrateUsers')) {
+        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('moderateUsers')) {
             $response->additionalButtonsHtml(
                 Html::button(Craft::t('app', 'Save and send activation email'), [
                     'class' => ['btn', 'secondary', 'formsubmit'],
@@ -1935,7 +1938,7 @@ JS);
         }
 
         if (!$user->pending) {
-            $this->requirePermission('administrateUsers');
+            $this->requirePermission('moderateUsers');
         }
 
         $userVariable = $this->request->getValidatedBodyParam('userVariable') ?? 'user';

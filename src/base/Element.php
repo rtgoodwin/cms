@@ -234,7 +234,7 @@ abstract class Element extends Component implements ElementInterface
      * @event ElementIndexTableAttributeEvent The event that is triggered when preparing an element query for an element index, for each
      * attribute present in the table.
      *
-     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_SET_TABLE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
+     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_DEFINE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
      *
      * ```php
      * use craft\base\Element;
@@ -268,7 +268,7 @@ abstract class Element extends Component implements ElementInterface
      *
      * Event::on(
      *     Entry::class,
-     *     Element::EVENT_SET_TABLE_ATTRIBUTE_HTML,
+     *     Element::EVENT_DEFINE_ATTRIBUTE_HTML,
      *     function(DefineAttributeHtmlEvent $e) {
      *         $attribute = $e->attribute;
      *
@@ -3990,6 +3990,46 @@ abstract class Element extends Component implements ElementInterface
     {
         $items = [];
         $elementsService = Craft::$app->getElements();
+        $view = Craft::$app->getView();
+
+        // Validate
+        if (
+            !$this->getIsRevision() &&
+            !Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id')
+        ) {
+            $validateId = sprintf('action-validate-%s', mt_rand());
+            $items[] = [
+                'id' => $validateId,
+                'icon' => 'circle-check',
+                'label' => Craft::t('app', 'Validate {type}', [
+                    'type' => static::lowerDisplayName(),
+                ]),
+            ];
+
+            $view->registerJsWithVars(fn($id) => <<<JS
+(() => {
+  const btn = $('#' + $id);
+  btn.on('activate', () => {
+    const elementId = btn.closest('.menu').data('disclosureMenu').\$trigger
+      .closest('form').data('elementEditor').settings.elementId;
+    const form = Craft.createForm()
+      .addClass('hidden')
+      .append(Craft.getCsrfInput())
+      .appendTo(Garnish.\$bod);
+
+    Craft.submitForm(form, {
+      action: 'elements/validate',
+      retainScroll: true,
+      params: {
+        elementId,
+      },
+    });
+  });
+})();
+JS, [
+                $view->namespaceInputId($validateId),
+            ]);
+        }
 
         // View
         $url = $this->getUrl();
@@ -4009,8 +4049,8 @@ abstract class Element extends Component implements ElementInterface
             ];
         }
 
-        // Edit
         if ($elementsService->canView($this)) {
+            // Edit
             $editId = sprintf('action-edit-%s', mt_rand());
             $items[] = [
                 'id' => $editId,
@@ -4020,7 +4060,6 @@ abstract class Element extends Component implements ElementInterface
                 ])),
             ];
 
-            $view = Craft::$app->getView();
             $view->registerJsWithVars(fn($id, $elementType, $settings) => <<<JS
 $('#' + $id).on('activate', () => {
   Craft.createElementEditor($elementType, $settings);
@@ -4036,39 +4075,39 @@ JS, [
                     'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
                 ],
             ]);
-        }
 
-        // Copy
-        if ($elementsService->canCopy($this)) {
-            $copyId = sprintf('action-copy-%s', mt_rand());
-            $items[] = [
-                'id' => $copyId,
-                'color' => Color::Fuchsia,
-                'icon' => 'clone-dashed',
-                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
-                    'type' => static::lowerDisplayName(),
-                ])),
-            ];
+            // Copy
+            if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
+                $copyId = sprintf('action-copy-%s', mt_rand());
+                $items[] = [
+                    'id' => $copyId,
+                    'color' => Color::Fuchsia,
+                    'icon' => 'clone-dashed',
+                    'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
+                        'type' => static::lowerDisplayName(),
+                    ])),
+                ];
 
-            $view = Craft::$app->getView();
-            $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
+                $view = Craft::$app->getView();
+                $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
 (() => {
   $('#' + $id).on('activate', () => {
     Craft.cp.copyElements([$elementInfo]);
   });
 })();
 JS, [
-                $view->namespaceInputId($copyId),
-                [
-                    'type' => static::class,
-                    'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
-                    'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
-                    'revisionId' => $this->revisionId,
-                    'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
-                    'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
-                    'siteId' => $this->siteId,
-                ],
-            ]);
+                    $view->namespaceInputId($copyId),
+                    [
+                        'type' => static::class,
+                        'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
+                        'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
+                        'revisionId' => $this->revisionId,
+                        'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
+                        'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                        'siteId' => $this->siteId,
+                    ],
+                ]);
+            }
         }
 
         return $items;
