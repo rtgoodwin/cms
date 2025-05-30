@@ -308,7 +308,6 @@ class Asset extends Element
             // Get the source element IDs
             $sourceElementIds = array_map(fn(ElementInterface $element) => $element->id, $sourceElements);
 
-            /** @var array{elementType?:class-string<ElementInterface>,source:int,target:int}[] $map */
             $map = (new Query())
                 ->select(['id as source', 'uploaderId as target'])
                 ->from([Table::ASSETS])
