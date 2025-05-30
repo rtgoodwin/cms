@@ -2301,17 +2301,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       );
 
       // Don't forget the rectangle
-      this.croppingRectangle = new fabric.Rect({
-        left: this.clipper.left,
-        top: this.clipper.top,
-        width: this.clipper.width,
-        height: this.clipper.height,
-        fill: 'rgba(0,0,0,0)',
-        stroke: 'rgba(255,255,255,0.8)',
-        strokeWidth: 2,
-        originX: 'center',
-        originY: 'center',
-      });
+      this.croppingRectangle = this._getCroppingRectangle();
 
       // If an edit button is focused, add a "focus" style on the cropper rectangle/handle
       if (this.cropperEditBtnFocused) {
@@ -2331,30 +2321,32 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         }
       }
 
-      if (this.handlePicked && this.nonDragEditMode) {
-        console.log('show icon');
-        this.activeHandleIndicator = this._getCropperHandleIndicator(
-          this.handlePicked
-        );
+      if (this.nonDragEditMode) {
+        if (this.handlePicked) {
+          console.log('show icon');
+          this.activeHandleIndicator = this._getCropperHandleIndicator(
+            this.handlePicked
+          );
 
-        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-          var obj = fabric.util.groupSVGElements(objects, options);
-          obj.set({
-            left: 0,
-            top: 0,
-            scaleX: 0.03,
-            scaleY: 0.03,
-            originX: 'center',
-            originY: 'center',
-            fill: 'white',
+          fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+            var obj = fabric.util.groupSVGElements(objects, options);
+            obj.set({
+              left: 0,
+              top: 0,
+              scaleX: 0.03,
+              scaleY: 0.03,
+              originX: 'center',
+              originY: 'center',
+              fill: 'white',
+            });
+
+            this.activeHandleIndicator.add(obj);
           });
 
-          this.activeHandleIndicator.add(obj);
-        });
-
-        this.activeHandleIndicator.item(0).set({
-          fill: 'rgba(0, 0, 0, .8)',
-        });
+          this.activeHandleIndicator.item(0).set({
+            fill: 'rgba(0, 0, 0, .8)',
+          });
+        }
       }
 
       this.cropperGrid = new fabric.Group(
@@ -2428,6 +2420,20 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (this.activeHandleIndicator) {
         this.croppingCanvas.add(this.activeHandleIndicator);
       }
+    },
+
+    _getCroppingRectangle: function () {
+      return new fabric.Rect({
+        left: this.clipper.left,
+        top: this.clipper.top,
+        width: this.clipper.width,
+        height: this.clipper.height,
+        fill: 'rgba(0,0,0,0)',
+        stroke: 'rgba(255,255,255,0.8)',
+        strokeWidth: 2,
+        originX: 'center',
+        originY: 'center',
+      });
     },
 
     _getCropperHandleIndicator: function (handle) {
