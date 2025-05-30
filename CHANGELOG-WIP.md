@@ -16,6 +16,9 @@
 - Improved the wording of validation errors caused by relational fields’ “Validate related [type]” settings. ([#9960](https://github.com/craftcms/cms/discussions/9960))
 - URL chips within Link fields are now truncated if wider than the container, and have a “Copy URL” action. ([#17339](https://github.com/craftcms/cms/pull/17339))
 
+### Content Management
+- Element condition builders now show condition rules for custom fields with duplicate names. ([#17361](https://github.com/craftcms/cms/pull/17361))
+
 ### Administration
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
