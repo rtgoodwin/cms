@@ -350,6 +350,11 @@ class Gql
      */
     public static function applyDirectives(mixed $source, ResolveInfo $resolveInfo, mixed $value): mixed
     {
+        /** @phpstan-ignore-next-line */
+        if (!isset($resolveInfo->fieldNodes[0]->directives)) {
+            return $value;
+        }
+        
         foreach ($resolveInfo->fieldNodes[0]->directives as $directive) {
             /** @var Directive|false $directiveEntity */
             $directiveEntity = GqlEntityRegistry::getEntity($directive->name->value);
