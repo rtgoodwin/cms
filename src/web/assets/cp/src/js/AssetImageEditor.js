@@ -887,10 +887,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
         this._handleCropperEditBtnBlur(ev);
         this._redrawCropperElements();
+        this.renderCropper();
       });
       this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
         this.cropperEditBtnFocused = $(ev.target);
         this._redrawCropperElements();
+        this.renderCropper();
       });
 
       // Straighten slider
@@ -2400,9 +2402,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     _getCroppingRectangle: function () {
-      return new fabric.Rect({
-        left: this.clipper.left,
-        top: this.clipper.top,
+      const rectangle = new fabric.Rect({
+        top: 0,
+        left: 0,
         width: this.clipper.width,
         height: this.clipper.height,
         fill: 'rgba(0,0,0,0)',
@@ -2411,6 +2413,40 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         originX: 'center',
         originY: 'center',
       });
+
+      const group = new fabric.Group([rectangle], {
+        originX: 'center',
+        originY: 'center',
+        left: this.clipper.left,
+        top: this.clipper.top,
+      });
+
+      if (this.cropperPickedUp) {
+        console.log('active state');
+
+        fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
+          var obj = fabric.util.groupSVGElements(objects, options);
+          obj.set({
+            left: 0,
+            top: 0,
+            scaleX: 0.03,
+            scaleY: 0.03,
+            originX: 'center',
+            originY: 'center',
+            fill: 'white',
+          });
+
+          group.add(obj);
+        });
+
+        group.item(0).set({
+          fill: 'rgba(0, 0, 0, .8)',
+        });
+      } else if (this._getCroppingRectangleEditBtnIsFocused()) {
+        console.log('focusedState');
+      }
+
+      return group;
     },
 
     _getCropperHandleIndicator: function () {
