@@ -3805,7 +3805,7 @@ table {
       }
     }
 
-    @container (min-width: 500px) {
+    @container (min-width: 200px) {
       grid-template-columns: 1fr auto;
     }
   }

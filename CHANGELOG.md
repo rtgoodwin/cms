@@ -1,7 +1,14 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.8.2 - 2025-05-30
 
+- Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
+- Reduced the likelihood of a deadlock error occurring when updating search indexes. ([#17318](https://github.com/craftcms/cms/issues/17318))
+- Fixed a styling issue. ([#17368](https://github.com/craftcms/cms/issues/17368))
+
+## 5.7.8.1 - 2025-05-29
+
+- Fixed a bug where non-admin users couldn’t edit content on single-site Craft installs. ([#17363](https://github.com/craftcms/cms/issues/17363))
 - Fixed a styling issue. ([#17343](https://github.com/craftcms/cms/issues/17343))
 
 ## 5.7.8 - 2025-05-28
