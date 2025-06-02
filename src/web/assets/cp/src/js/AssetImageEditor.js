@@ -213,8 +213,24 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
 
       // Get SVG to use for move/active indicator
-      const $moveSvg = $('#move-icon-wrapper svg');
-      this.moveIcon = $moveSvg.prop('outerHTML');
+      const $moveSvg = $('#move-icon-wrapper svg').prop('outerHTML');
+
+      // Store move icon for later use
+      fabric.loadSVGFromString($moveSvg, (objects, options) => {
+        var obj = fabric.util.groupSVGElements(objects, options);
+        obj.set({
+          left: 0,
+          top: 0,
+          scaleX: 0.03,
+          scaleY: 0.03,
+          originX: 'center',
+          originY: 'center',
+          fill: 'white',
+        });
+
+        this.moveIcon = obj;
+      });
+
       this._showSpinner();
 
       this.updateSizeAndPosition();
@@ -2446,7 +2462,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       );
 
       if (this.cropperPickedUp) {
-        //this._addMoveIconToGroup(group);
+        group.add(this.moveIcon);
 
         cropperRectangle.set({
           fill: 'rgba(0, 0, 0, .8)',
@@ -2461,23 +2477,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       return group;
-    },
-
-    _addMoveIconToGroup: function (group) {
-      fabric.loadSVGFromString(this.moveIcon, (objects, options) => {
-        var obj = fabric.util.groupSVGElements(objects, options);
-        obj.set({
-          left: 0,
-          top: 0,
-          scaleX: 0.03,
-          scaleY: 0.03,
-          originX: 'center',
-          originY: 'center',
-          fill: 'white',
-        });
-
-        group.add(obj);
-      });
     },
 
     _getCropperHandleIndicator: function () {
@@ -2526,7 +2525,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
 
       if (this.handlePicked) {
-        this._addMoveIconToGroup(focusRing);
+        focusRing.add(this.moveIcon);
 
         focusRing.item(0).set({
           fill: 'rgba(0, 0, 0, .8)',
