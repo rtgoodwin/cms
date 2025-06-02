@@ -44,8 +44,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     cropperHandles: null,
     cropperGrid: null,
     croppingShade: null,
-    darkFocusColor: null,
-    lightFocusColor: null,
+    mediumBlueColor: null,
     moveIcon: null,
 
     // Image state attributes
@@ -165,7 +164,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Get colors
       const root = document.documentElement;
       const rootStyles = window.getComputedStyle(root);
-      this.darkFocusColor = rootStyles.getPropertyValue('--blue-500');
+      this.mediumBlueColor = rootStyles.getPropertyValue('--blue-500');
       this.addLiveRegion();
     },
 
@@ -2391,6 +2390,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
     },
 
+    /**
+     * Whether the cropping rectangle edit button is focused.
+     * @returns {boolean}
+     */
     _getCroppingRectangleEditBtnIsFocused: function () {
       if (this.cropperEditBtnFocused) {
         // Check button properties. If rectangle, use rectangle styles
@@ -2406,6 +2409,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
     },
 
+    /**
+     * Whether one of the handle edit buttons is focused.
+     * @returns {boolean}
+     */
     _getCropperHandleEditBtnIsFocused: function () {
       if (this.cropperEditBtnFocused) {
         // Check button properties. If rectangle, use rectangle styles
@@ -2421,6 +2428,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
     },
 
+    /**
+     * Creates and returns a cropping rectangle group.
+     * @returns {fabric.Group} The created rectangle group.
+     */
     _getCroppingRectangle: function () {
       const strokeWidth = 2;
       const width = this.clipper.width;
@@ -2473,7 +2484,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           stroke: this.settings.colors.white,
         });
         innerOutline.set({
-          stroke: this.darkFocusColor,
+          stroke: this.mediumBlueColor,
         });
 
         if (this.cropperPickedUp) {
@@ -2496,6 +2507,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return group;
     },
 
+    /**
+     * Creates and returns a cropper handle indicator group.
+     * @returns {fabric.Group} The created cropper handle indicator group.
+     */
     _getCropperHandleIndicator: function () {
       if (!this._getCropperHandleEditBtnIsFocused() && !this.handlePicked)
         return;
@@ -2518,7 +2533,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       const innerRing = new fabric.Circle({
         radius: size,
-        stroke: this.darkFocusColor,
+        stroke: this.mediumBlueColor,
         ...commonProps,
       });
 
@@ -2530,7 +2545,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       const outerRing = new fabric.Circle({
         radius: size + width * 2,
-        stroke: this.darkFocusColor,
+        stroke: this.mediumBlueColor,
         ...commonProps,
       });
 
@@ -2635,6 +2650,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       };
     },
 
+    /**
+     * Handle click events on the cropper rectangle or cropper handle edit buttons.
+     * @param ev
+     */
     _handleCropperEditBtnClick: function (ev) {
       const $btn = $(ev.target.closest('button'));
       const btnPressed = $btn.attr('aria-pressed') === 'true';
@@ -2650,8 +2669,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Get the position of an item relative to the image.
+     * Get a string containing the position of an item relative to the image.
      * @param item
+     * @returns {string} The message containing the relative position of the item.
      */
     _getRelativePositionMessage: function (item) {
       if (!item.left || !item.top) return;
@@ -2670,6 +2690,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return `Centered at X axis: ${xPercent}%, Y axis: ${yPercent}%.`;
     },
 
+    /**
+     * Get a string containing the size and position of an item relative to the image.
+     * @param item
+     * @returns {string} The message containing the size and relative position of the item.
+     */
     _getSizeAndRelativePositionMessage: function (item) {
       const positionMessage = this._getRelativePositionMessage(item);
       const sizeMessage = `Crop rectangle width: ${item.width}px, height:${item.height}px.`;
@@ -2677,6 +2702,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return `${sizeMessage} ${positionMessage}`;
     },
 
+    /**
+     * Sends a message to the global announcer.
+     * @param {string} message
+     */
     _announce: function (message) {
       if (this.announceTimeout) {
         clearTimeout(this.announceTimeout);
@@ -2688,6 +2717,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
+     * Returns the cropper element type from the edit button.
      * @param $btn
      * @returns {'rectangle'|'tl'|'t'|'tr'|'l'|'r'|'bl'|'b'|'br'}
      */
@@ -2695,10 +2725,19 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return $($btn).attr('data-crop-editor');
     },
 
+    /**
+     * Returns the edit button for a given cropper element handle.
+     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     * @returns {jQuery}
+     */
     _getCropperEditBtnFromElementHandle: function (element) {
       return this.$cropperEditBtn.filter(`[data-crop-editor="${element}"]`);
     },
 
+    /**
+     * Pick up a cropper element given its handle.
+     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     */
     _pickUpCropperElement: function (element) {
       this.cropperPickedUp = false;
       this.handlePicked = false;
@@ -2736,6 +2775,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.renderCropper();
     },
 
+    /**
+     * Drops a cropper element given its handle.
+     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     */
     _dropCropperElement: function (element) {
       const $btn = this._getCropperEditBtnFromElementHandle(element);
       const itemName = $btn.find('[data-item-name]').text();
@@ -2784,7 +2827,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     /**
      * Handle keydown events on the cropper rectangle or cropper handle edit buttons.
      * @param ev
-     * @private
      */
     _handleKeydownOnCropperEditBtn: function (ev) {
       const {target} = ev;
