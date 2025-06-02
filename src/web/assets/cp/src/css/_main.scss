@@ -3043,7 +3043,7 @@ h2 + .actions {
   --pane-y-padding-default: calc(var(--xl) - 2px);
   --pane-x-padding-default: calc(var(--padding) - 2px);
 
-  #content & {
+  #elements & {
     --pane-padding: var(--pane-x-padding-default);
   }
 
