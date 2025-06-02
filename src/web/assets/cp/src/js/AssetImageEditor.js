@@ -90,6 +90,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     saving: false,
     nonDragEditMode: false,
 
+    announcerTimeout: null,
+
     // Rendering proxy functions
     renderImage: null,
     renderCropper: null,
@@ -164,6 +166,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       const root = document.documentElement;
       const rootStyles = window.getComputedStyle(root);
       this.darkFocusColor = rootStyles.getPropertyValue('--blue-500');
+      this.addLiveRegion();
     },
 
     /**
@@ -2674,8 +2677,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return `${sizeMessage} ${positionMessage}`;
     },
 
-    _tempAnnounce: function (message) {
-      console.log(message);
+    _announce: function (message) {
+      if (this.announceTimeout) {
+        clearTimeout(this.announceTimeout);
+      }
+      this.announceTimeout = setTimeout(() => {
+        Craft.cp.announce(message);
+        this.announceTimeout = null;
+      }, 300);
     },
 
     /**
@@ -2719,7 +2728,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         'Use the arrow keys to change position, Tab or Spacebar to drop.'
       );
 
-      this._tempAnnounce(
+      this._announce(
         `${stateMessage} ${positionMessage} ${instructionMessage}`
       );
 
@@ -2744,7 +2753,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         item: itemName,
       });
 
-      this._tempAnnounce(`${stateMessage} ${positionMessage}`);
+      this._announce(`${stateMessage} ${positionMessage}`);
 
       this._redrawCropperElements();
       this.renderCropper();
@@ -3127,7 +3136,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
 
       this._redrawCropperElements();
-      this._tempAnnounce(this._getSizeAndRelativePositionMessage(this.clipper));
+      this._announce(this._getSizeAndRelativePositionMessage(this.clipper));
     },
 
     _getDeltaValuesFromDirection: function (direction) {
@@ -3197,7 +3206,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         top: this.clipper.top + this._moveCropperByDelta._.deltaY,
       });
 
-      this._tempAnnounce(this._getRelativePositionMessage(this.clipper));
+      this._announce(this._getRelativePositionMessage(this.clipper));
 
       this._redrawCropperElements();
       this.storeCropperState();
@@ -3282,10 +3291,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         )
       ) {
         const {farthest, farthestDeltas} =
-          this._getFarthestAllowedDeltasForRectangle(rectangle, {
-            x: this._handleCropperDrag._.deltaX,
-            y: this._handleCropperDrag._.deltaY,
-          });
+          this._getFarthestAllowedDeltasForRectangle(
+            this._handleCropperDrag._.rectangle,
+            {
+              x: this._handleCropperDrag._.deltaX,
+              y: this._handleCropperDrag._.deltaY,
+            }
+          );
 
         // REALLY can't drag along the cursor movement
         if (farthest == 0) {
