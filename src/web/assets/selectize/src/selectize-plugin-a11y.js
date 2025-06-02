@@ -115,7 +115,7 @@ Selectize.define('selectize-plugin-a11y', function (options) {
 
       self.$control.on('keydown', function (e) {
         if (e.keyCode === KEY_RETURN) {
-          $(this).click();
+          $(self).click();
         }
       });
 
