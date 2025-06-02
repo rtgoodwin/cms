@@ -2223,6 +2223,7 @@ return [
     '{filename} isn’t selectable for this field.' => '{filename} isn’t selectable for this field.',
     '{first, number}-{last, number} of {total, number} {total, plural, =1{{item}} other{{items}}}' => '{first, number}–{last, number} of {total, number} {total, plural, =1{{item}} other{{items}}}',
     '{first}-{last} of {total}' => '{first}–{last} of {total}',
+    '{item} dropped.' => '{item} dropped.',
     '{item} picked up.' => '{item} picked up.',
     '{max, plural, =1{Author} other {Authors}}' => '{max, plural, =1{Author} other {Authors}}',
     '{names} {total, plural, =1{is installed as a trial} other{are installed as trials}}.' => '{names} {total, plural, =1{is installed as a trial} other{are installed as trials}}.',
