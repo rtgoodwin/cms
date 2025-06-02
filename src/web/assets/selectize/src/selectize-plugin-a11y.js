@@ -113,12 +113,6 @@ Selectize.define('selectize-plugin-a11y', function (options) {
       var inputId = self.accessibility.helpers.randomId(),
         listboxId = self.accessibility.helpers.randomId();
 
-      self.$control.on('keydown', function (e) {
-        if (e.keyCode === KEY_RETURN) {
-          $(self).click();
-        }
-      });
-
       self.$control_input.attr({
         role: 'combobox',
         'aria-expanded': 'false',
