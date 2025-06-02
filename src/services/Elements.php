@@ -1631,18 +1631,13 @@ class Elements extends Component
                                 throw new InvalidElementException($element, "Skipped resaving $label due to an error obtaining its root element: " . $rootException->getMessage());
                             }
                         }
-                    } catch (InvalidElementException $e) {
-                    }
 
-                    if ($e === null) {
-                        try {
-                            $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
-                        } catch (Throwable $e) {
-                            if (!$continueOnError) {
-                                throw $e;
-                            }
-                            Craft::$app->getErrorHandler()->logException($e);
+                        $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
+                    } catch (Throwable $e) {
+                        if (!$continueOnError) {
+                            throw $e;
                         }
+                        Craft::$app->getErrorHandler()->logException($e);
                     }
 
                     // Fire an 'afterResaveElement' event
@@ -1856,7 +1851,7 @@ class Elements extends Component
         $mainClone->setDirtyFields($dirtyFields, false);
 
         // Check authorization?
-        if ($checkAuthorization && !$this->canSave($mainClone)) {
+        if ($checkAuthorization && !($this->canDuplicate($mainClone) && $this->canSave($mainClone))) {
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
@@ -3125,6 +3120,13 @@ class Elements extends Component
         foreach ($with as $path) {
             // Is this already an EagerLoadPlan object?
             if ($path instanceof EagerLoadPlan) {
+                // Make sure $all is true if $count is false
+                if (!$path->count && !$path->all) {
+                    $path->all = true;
+                }
+                // ...recursively for any nested plans
+                $path->nested = $this->createEagerLoadingPlans($path->nested);
+
                 // Don't index the plan by its alias, as two plans w/ different `when` filters could be using the same alias.
                 // Side effect: mixing EagerLoadPlan objects and arrays could result in redundant element queries,
                 // but that would be a weird thing to do.
@@ -4444,7 +4446,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user))
+        );
     }
 
     /**
@@ -4464,7 +4469,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user))
+        );
     }
 
     /**
@@ -4531,6 +4539,8 @@ SQL;
 
     /**
      * Returns whether a user is authorized to copy the given element, to be duplicated elsewhere.
+     *
+     *  This should always be called in conjunction with [[canView()]].
      *
      * @param ElementInterface $element
      * @param User|null $user
@@ -4631,5 +4641,14 @@ SQL;
 
         $this->trigger($eventName, $event);
         return $event->authorized;
+    }
+
+    private function _siteAuthCheck(ElementInterface $element, User $user): bool
+    {
+        return (
+            !$element::isLocalized() ||
+            !Craft::$app->getIsMultiSite() ||
+            $user->can(sprintf('editSite:%s', $element->getSite()->uid))
+        );
     }
 }

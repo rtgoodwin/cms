@@ -1980,6 +1980,7 @@ Craft.CP.Notification = Garnish.Base.extend(
     $closeBtn: null,
     $main: null,
     $message: null,
+    $detailsContainer: null,
     originalActiveElement: null,
 
     init: function (type, message, settings = {}) {
@@ -2033,11 +2034,11 @@ Craft.CP.Notification = Garnish.Base.extend(
 
       const details = await this.getDetails();
       if (details) {
-        const $detailsContainer = $('<div class="notification-details"/>')
+        this.$detailsContainer = $('<div class="notification-details"/>')
           .append(details)
           .appendTo(this.$main);
 
-        if ($detailsContainer.find('button,input').length) {
+        if (this.$detailsContainer.find('button,input').length) {
           this.originalActiveElement = document.activeElement;
           this.$container.attr('tabindex', '-1').focus();
           this.addListener(this.$container, 'keydown', (ev) => {
@@ -2056,15 +2057,22 @@ Craft.CP.Notification = Garnish.Base.extend(
       this.$container.appendTo(Craft.cp.$notificationContainer);
 
       if (this.settings.animate) {
+        const prop = Craft.notificationPosition.startsWith('start-')
+          ? 'top'
+          : 'bottom';
         this.$container.css({
           opacity: 0,
-          'margin-bottom': this._negMargin(),
+          [`margin-${prop}`]: this._negMargin(),
         });
 
         await Craft.animate(this.$container, {
           opacity: 1,
-          'margin-bottom': 0,
+          [`margin-${prop}`]: 0,
         });
+      }
+
+      if (this.$detailsContainer) {
+        Craft.cp.elementThumbLoader.load(this.$detailsContainer);
       }
 
       if (Craft.notificationDuration && !this.settings.persist) {
@@ -2148,9 +2156,12 @@ Craft.CP.Notification = Garnish.Base.extend(
         $(this.originalActiveElement).focus();
       }
 
+      const prop = Craft.notificationPosition.startsWith('start-')
+        ? 'top'
+        : 'bottom';
       await Craft.animate(this.$container, {
         opacity: 0,
-        'margin-bottom': this._negMargin(),
+        [`margin-${prop}`]: this._negMargin(),
       });
 
       this.destroy();
@@ -2284,7 +2295,6 @@ Craft.CP.ElementCopyNotification = Craft.CP.Notification.extend({
     setTimeout(async () => {
       await Craft.appendHeadHtml(data.headHtml);
       await Craft.appendBodyHtml(data.bodyHtml);
-      Craft.cp.elementThumbLoader.load(this.$main);
     }, 1);
 
     const gap = 4;

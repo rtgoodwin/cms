@@ -860,12 +860,14 @@ class Matrix extends Field implements
     });
   });
 
-  const menu = expandAllBtn.closest('.menu').data('disclosureMenu'); 
-  menu.on('show', () => {
-    const blocks = getBlocks();
-    menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
-    menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
-  });
+  setTimeout(() => {
+    const menu = expandAllBtn.closest('.menu').data('disclosureMenu');
+    menu.on('show', () => {
+      const blocks = getBlocks();
+      menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
+      menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
+    });
+  }, 1);
 })();
 JS, [
                 $view->namespaceInputId($expandAllId),
@@ -1348,7 +1350,10 @@ JS;
                 'fieldId' => $this->id,
                 'allowOwnerDrafts' => true,
                 'allowOwnerRevisions' => true,
-                'revisions' => null,
+                // only include revisions if any of the source elements is a revision
+                // see https://github.com/craftcms/cms/issues/14448 and https://github.com/craftcms/cms/issues/17324
+                'revisions' => Collection::make($sourceElements)
+                    ->contains(fn($sourceElement) => $sourceElement->getIsRevision()),
             ],
         ];
     }

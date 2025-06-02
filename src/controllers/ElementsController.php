@@ -396,7 +396,10 @@ class ElementsController extends Controller
                 $canCreateDrafts,
             ))
             ->toolbarHtml(
-                Html::tag('div', options: ['class' => 'flex-grow']) .
+                // if we're in a slideout, we don't want to add the .flex-grow to the header toolbar
+                // as it'll mess with the width available for the tabs
+                // see https://github.com/craftcms/cms/issues/17260
+                ($this->_isSlideout() ? '' : Html::tag('div', options: ['class' => 'flex-grow'])) .
                 Html::tag('div', options: ['class' => 'activity-container']),
             )
             ->additionalButtonsHtml(fn() => $this->_additionalButtons(
@@ -1352,8 +1355,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || $element->getIsDraft() || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
@@ -1661,15 +1667,8 @@ JS, [
         Craft::$app->getDb()->transaction(function() use ($elementInfo, $newAttributes, &$newElementInfo) {
             $elementsService = Craft::$app->getElements();
             $elementsService->ensureBulkOp(function() use ($elementInfo, $newAttributes, &$newElementInfo, $elementsService) {
-                $user = static::currentUser();
-
                 foreach ($elementInfo as $info) {
                     $element = $this->_element($info);
-                    $authorized = $elementsService->canDuplicate($element, $user);
-                    if (!$authorized) {
-                        throw new ForbiddenHttpException('User not authorized to duplicate this element.');
-                    }
-
                     $safeNewAttributes = Collection::make($newAttributes)
                         ->only($element->safeAttributes())
                         ->all();
@@ -1789,6 +1788,42 @@ JS, [
 
         return $this->_asSuccess(Craft::t('app', '{type} deleted for site.', [
             'type' => $element->getIsDraft() && !$element->isProvisionalDraft ? Craft::t('app', 'Draft') : $element::displayName(),
+        ]), $element);
+    }
+
+    /**
+     * Validates an element.
+     *
+     * @return Response|null
+     * @since 5.8.0
+     */
+    public function actionValidate(): ?Response
+    {
+        $this->requirePostRequest();
+
+        /** @var Element|DraftBehavior|Response|null $element */
+        $element = $this->_element();
+
+        // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
+        // and we hit "create entry" before the autosave kicks in
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $element->setScenario(Element::SCENARIO_LIVE);
+
+        if (!$element->validate()) {
+            return $this->_asFailure($element, Craft::t('app', '{type} validation failed.', [
+                'type' => $element::displayName(),
+            ]));
+        }
+
+        return $this->_asSuccess(Craft::t('app', '{type} validation successful.', [
+            'type' => $element::displayName(),
         ]), $element);
     }
 
@@ -1914,12 +1949,15 @@ JS, [
         if ($this->request->getIsCpRequest()) {
             [$docTitle, $title] = $this->_editElementTitles($element);
             $previewTargets = $element->getPreviewTargets();
-            $data += $this->_fieldLayoutData($element);
+            $data += $this->_fieldLayoutData($element, [
+                'registerDeltas' => true,
+            ]);
             $data += [
                 'docTitle' => $docTitle,
                 'title' => $title,
                 'previewTargets' => $previewTargets,
                 'previewParamValue' => $previewTargets ? Craft::$app->getSecurity()->hashData(StringHelper::randomString(10)) : null,
+                'deltaNames' => Craft::$app->getView()->getDeltaNames(),
                 'initialDeltaValues' => Craft::$app->getView()->getInitialDeltaValues(),
                 'updatedTimestamp' => $element->dateUpdated->getTimestamp(),
                 'canonicalUpdatedTimestamp' => $element->getCanonical()->dateUpdated->getTimestamp(),
@@ -2267,12 +2305,12 @@ JS, [
         return $this->_asSuccess('Field layout updated.', $element, $data, true);
     }
 
-    private function _fieldLayoutData(ElementInterface $element): array
+    private function _fieldLayoutData(ElementInterface $element, array $formConfig = []): array
     {
         $view = Craft::$app->getView();
         $namespace = $this->request->getHeaders()->get('X-Craft-Namespace');
         $fieldLayout = $element->getFieldLayout();
-        $form = $fieldLayout->createForm($element, false, [
+        $form = $fieldLayout->createForm($element, false, $formConfig + [
             'namespace' => $namespace,
             'registerDeltas' => false,
             'visibleElements' => $this->_visibleLayoutElements,

@@ -275,7 +275,7 @@ class UsersController extends Controller
         // if we're impersonating, pass the user we're impersonating to the complete method
         $impersonator = $userSession->getImpersonator();
         if ($impersonator !== null) {
-            $user = $impersonator;
+            $user = Craft::$app->getUser()->getIdentity();
         }
 
         return $this->_completeLogin($user, $duration);
@@ -668,7 +668,10 @@ class UsersController extends Controller
 
             $user = Craft::$app->getUsers()->getUserByUsernameOrEmail($loginName);
 
-            if (!$user || !$user->getIsCredentialed() || !$user->getHasPassword()) {
+            if (
+                !$user?->getIsCredentialed() ||
+                (!$user->getHasPassword() && $user->getHasSsoIdentity())
+            ) {
                 $errors[] = Craft::$app->getConfig()->getGeneral()->useEmailAsUsername
                     ? Craft::t('app', 'Invalid email.')
                     : Craft::t('app', 'Invalid username or email.');
@@ -1176,7 +1179,7 @@ class UsersController extends Controller
             'currentGroupIds' => array_map(fn(UserGroup $group) => $group->id, $user->getGroups()),
         ]);
 
-        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('administrateUsers')) {
+        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('moderateUsers')) {
             $response->additionalButtonsHtml(
                 Html::button(Craft::t('app', 'Save and send activation email'), [
                     'class' => ['btn', 'secondary', 'formsubmit'],
@@ -1323,6 +1326,8 @@ class UsersController extends Controller
             'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
             'disableAutofocus' => $this->request->getBodyParam('disableAutofocus', $user->getPreference('disableAutofocus')),
             'notificationDuration' => $this->request->getBodyParam('notificationDuration', $user->getPreference('notificationDuration')),
+            'notificationPosition' => $this->request->getBodyParam('notificationPosition', $user->getPreference('notificationPosition')),
+            'slideoutPosition' => $this->request->getBodyParam('slideoutPosition', $user->getPreference('slideoutPosition')),
         ];
 
         if ($user->admin) {
@@ -1843,7 +1848,7 @@ JS);
             // Move to our own temp location
             $fileLocation = Assets::tempFilePath($file->getExtension());
             move_uploaded_file($file->tempName, $fileLocation);
-            $users->saveUserPhoto($fileLocation, $user, $file->name);
+            $users->saveUserPhoto($fileLocation, $user, $file->name, $file->type);
 
             return $this->_renderPhotoTemplate($user);
         } catch (Throwable $exception) {
@@ -1918,7 +1923,7 @@ JS);
         }
 
         if (!$user->pending) {
-            $this->requirePermission('administrateUsers');
+            $this->requirePermission('moderateUsers');
         }
 
         $userVariable = $this->request->getValidatedBodyParam('userVariable') ?? 'user';
@@ -2619,12 +2624,14 @@ JS);
         $newPhoto = false;
         $fileLocation = null;
         $filename = null;
+        $mimeType = null;
 
         // Did they upload a new one?
         if ($photo = UploadedFile::getInstanceByName('photo')) {
             $fileLocation = Assets::tempFilePath($photo->getExtension());
             move_uploaded_file($photo->tempName, $fileLocation);
             $filename = $photo->name;
+            $mimeType = $photo->type;
             $newPhoto = true;
         } elseif (($photo = $this->request->getBodyParam('photo')) && is_array($photo)) {
             // base64-encoded photo
@@ -2633,10 +2640,11 @@ JS);
             if (preg_match('/^data:((?<type>[a-z0-9]+\/[a-z0-9\+]+);)?base64,(?<data>.+)/i', $photo['data'] ?? '', $matches)) {
                 $filename = $photo['filename'] ?? null;
                 $extension = $filename ? pathinfo($filename, PATHINFO_EXTENSION) : null;
+                $mimeType = $matches['type'] ?: null;
 
-                if (!$extension && !empty($matches['type'])) {
+                if (!$extension && $mimeType) {
                     try {
-                        $extension = FileHelper::getExtensionByMimeType($matches['type']);
+                        $extension = FileHelper::getExtensionByMimeType($mimeType);
                     } catch (InvalidArgumentException) {
                     }
                 }
@@ -2655,7 +2663,7 @@ JS);
 
         if ($newPhoto) {
             try {
-                $users->saveUserPhoto($fileLocation, $user, $filename);
+                $users->saveUserPhoto($fileLocation, $user, $filename, $mimeType);
             } catch (Throwable $e) {
                 if (file_exists($fileLocation)) {
                     FileHelper::unlink($fileLocation);

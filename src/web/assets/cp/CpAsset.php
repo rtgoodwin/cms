@@ -163,6 +163,7 @@ JS;
             'Content',
             'Continue',
             'Copied to clipboard.',
+            'Copy URL',
             'Copy from',
             'Copy the URL',
             'Copy the reference tag',
@@ -576,7 +577,11 @@ JS;
             'canAccessQueueManager' => Craft::$app->getUtilities()->checkAuthorization(QueueManager::class),
             'dataAttributes' => Html::$dataAttributes,
             'defaultIndexCriteria' => [],
-            'disableAutofocus' => (bool)($currentUser->getPreference('disableAutofocus') ?? false),
+            'disableAutofocus' => (bool)(
+                $currentUser->getPreference('disableAutofocus')
+                ?? $generalConfig->accessibilityDefaults['disableAutofocus']
+                ?? false
+            ),
             'editableCategoryGroups' => $upToDate ? $this->_editableCategoryGroups() : [],
             'edition' => Craft::$app->edition->value,
             'elementTypeNames' => $elementTypeNames,
@@ -588,7 +593,17 @@ JS;
             'isMultiSite' => Craft::$app->getIsMultiSite(),
             'limitAutoSlugsToAscii' => $generalConfig->limitAutoSlugsToAscii,
             'maxUploadSize' => Assets::getMaxUploadSize(),
-            'notificationDuration' => (int)($currentUser->getPreference('notificationDuration') ?? 5000),
+            'notificationDuration' => (int)(
+                $currentUser->getPreference('notificationDuration')
+                ?? $generalConfig->accessibilityDefaults['notificationDuration']
+                ?? 5000
+            ),
+            'notificationPosition' => $currentUser->getPreference('notificationPosition')
+                ?? $generalConfig->accessibilityDefaults['notificationPosition']
+                ?? 'end-start',
+            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
+                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
+                ?? 'end',
             'previewIframeResizerOptions' => $this->_previewIframeResizerOptions($generalConfig),
             'primarySiteId' => $primarySite ? (int)$primarySite->id : null,
             'primarySiteLanguage' => $primarySite->language ?? null,

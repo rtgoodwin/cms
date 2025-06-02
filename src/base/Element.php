@@ -32,6 +32,7 @@ use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\db\NestedElementQueryInterface;
 use craft\elements\ElementCollection;
+use craft\elements\Entry;
 use craft\elements\exporters\Expanded;
 use craft\elements\exporters\Raw;
 use craft\elements\User;
@@ -63,6 +64,7 @@ use craft\events\RegisterElementSortOptionsEvent;
 use craft\events\RegisterElementSourcesEvent;
 use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterPreviewTargetsEvent;
+use craft\events\RenderElementEvent;
 use craft\events\SetEagerLoadedElementsEvent;
 use craft\events\SetElementRouteEvent;
 use craft\fieldlayoutelements\BaseField;
@@ -86,8 +88,10 @@ use craft\validators\SiteIdValidator;
 use craft\validators\SlugValidator;
 use craft\validators\StringValidator;
 use craft\web\UploadedFile;
+use craft\web\View;
 use DateTime;
 use GraphQL\Type\Definition\Type;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use Throwable;
@@ -229,13 +233,13 @@ abstract class Element extends Component implements ElementInterface
      * @event ElementIndexTableAttributeEvent The event that is triggered when preparing an element query for an element index, for each
      * attribute present in the table.
      *
-     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_SET_TABLE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
+     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_DEFINE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
      *
      * ```php
      * use craft\base\Element;
      * use craft\elements\Entry;
      * use craft\events\DefineAttributeHtmlEvent;
-     * use craft\events\PrepareElementQueryForTableAttributeEvent;
+     * use craft\events\ElementIndexTableAttributeEvent;
      * use craft\events\RegisterElementTableAttributesEvent;
      * use craft\helpers\Cp;
      * use yii\base\Event;
@@ -251,7 +255,7 @@ abstract class Element extends Component implements ElementInterface
      * Event::on(
      *     Entry::class,
      *     Element::EVENT_PREP_QUERY_FOR_TABLE_ATTRIBUTE,
-     *     function(PrepareElementQueryForTableAttributeEvent $e) {
+     *     function(ElementIndexTableAttributeEvent $e) {
      *         $query = $e->query;
      *         $attr = $e->attribute;
      *
@@ -263,7 +267,7 @@ abstract class Element extends Component implements ElementInterface
      *
      * Event::on(
      *     Entry::class,
-     *     Element::EVENT_SET_TABLE_ATTRIBUTE_HTML,
+     *     Element::EVENT_DEFINE_ATTRIBUTE_HTML,
      *     function(DefineAttributeHtmlEvent $e) {
      *         $attribute = $e->attribute;
      *
@@ -791,6 +795,26 @@ abstract class Element extends Component implements ElementInterface
      * should be used instead.
      */
     public const EVENT_AFTER_MOVE_IN_STRUCTURE = 'afterMoveInStructure';
+
+    /**
+     * @event RenderElementEvent The event that is triggered before an element is rendered.
+     * @since 5.7.5
+     *
+     * ```php
+     * use craft\base\Element;
+     * use craft\events\RenderElementEvent;
+     * use yii\base\Event;
+     *
+     * Event::on(
+     *     Element::class,
+     *     Element::EVENT_RENDER,
+     *     function(RenderElementEvent $event) {
+     *         $event->output = '…';
+     *     }
+     * );
+     * ```
+     */
+    public const EVENT_RENDER = 'render';
 
     /**
      * @inheritdoc
@@ -1743,32 +1767,44 @@ abstract class Element extends Component implements ElementInterface
             $fieldHandle = $handle;
         }
 
-        $field = null;
+        // Get all the custom fields by that handle
+        $fields = [];
         foreach (static::fieldLayouts(null) as $fieldLayout) {
             if ($providerHandle === null || $fieldLayout->provider?->getHandle() === $providerHandle) {
                 $layoutField = $fieldLayout->getFieldByHandle($fieldHandle);
                 if ($layoutField) {
-                    $field = $layoutField;
-                    break;
+                    $fields[] = $layoutField;
+                    if ($providerHandle !== null) {
+                        break;
+                    }
                 }
             }
         }
 
-        if ($field instanceof EagerLoadingFieldInterface) {
-            // filter out elements, if field is not part of its layout
-            // https://github.com/craftcms/cms/issues/12539
-            $sourceElements = array_values(
-                array_filter($sourceElements, function($sourceElement) use ($field) {
-                    $layoutField = $sourceElement->getFieldLayout()?->getFieldByHandle($field->handle);
-                    return $layoutField && $layoutField->id === $field->id;
-                })
-            );
+        // If there were any matching fields, find the first one that's actually included in
+        // at least one of the source elements’ field layouts
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                if (!$field instanceof EagerLoadingFieldInterface) {
+                    continue;
+                }
 
-            if (empty($sourceElements)) {
-                return false;
+                // filter out elements, if field is not part of its layout
+                // https://github.com/craftcms/cms/issues/12539
+                $fieldSourceElements = array_values(
+                    array_filter($sourceElements, function($sourceElement) use ($field) {
+                        $layoutField = $sourceElement->getFieldLayout()?->getFieldByHandle($field->handle);
+                        return $layoutField && $layoutField->id === $field->id;
+                    })
+                );
+
+                if (!empty($fieldSourceElements)) {
+                    return $field->getEagerLoadingMap($fieldSourceElements);
+                }
             }
 
-            return $field->getEagerLoadingMap($sourceElements);
+            // None of the source elements include any of the matching fields
+            return false;
         }
 
         // Fire a 'defineEagerLoadingMap' event
@@ -3952,6 +3988,46 @@ abstract class Element extends Component implements ElementInterface
     {
         $items = [];
         $elementsService = Craft::$app->getElements();
+        $view = Craft::$app->getView();
+
+        // Validate
+        if (
+            !$this->getIsRevision() &&
+            !Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id')
+        ) {
+            $validateId = sprintf('action-validate-%s', mt_rand());
+            $items[] = [
+                'id' => $validateId,
+                'icon' => 'circle-check',
+                'label' => Craft::t('app', 'Validate {type}', [
+                    'type' => static::lowerDisplayName(),
+                ]),
+            ];
+
+            $view->registerJsWithVars(fn($id) => <<<JS
+(() => {
+  const btn = $('#' + $id);
+  btn.on('activate', () => {
+    const elementId = btn.closest('.menu').data('disclosureMenu').\$trigger
+      .closest('form').data('elementEditor').settings.elementId;
+    const form = Craft.createForm()
+      .addClass('hidden')
+      .append(Craft.getCsrfInput())
+      .appendTo(Garnish.\$bod);
+
+    Craft.submitForm(form, {
+      action: 'elements/validate',
+      retainScroll: true,
+      params: {
+        elementId,
+      },
+    });
+  });
+})();
+JS, [
+                $view->namespaceInputId($validateId),
+            ]);
+        }
 
         // View
         $url = $this->getUrl();
@@ -3971,8 +4047,8 @@ abstract class Element extends Component implements ElementInterface
             ];
         }
 
-        // Edit
         if ($elementsService->canView($this)) {
+            // Edit
             $editId = sprintf('action-edit-%s', mt_rand());
             $items[] = [
                 'id' => $editId,
@@ -3982,7 +4058,6 @@ abstract class Element extends Component implements ElementInterface
                 ])),
             ];
 
-            $view = Craft::$app->getView();
             $view->registerJsWithVars(fn($id, $elementType, $settings) => <<<JS
 $('#' + $id).on('activate', () => {
   Craft.createElementEditor($elementType, $settings);
@@ -3998,39 +4073,39 @@ JS, [
                     'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
                 ],
             ]);
-        }
 
-        // Copy
-        if ($elementsService->canCopy($this)) {
-            $copyId = sprintf('action-copy-%s', mt_rand());
-            $items[] = [
-                'id' => $copyId,
-                'color' => Color::Fuchsia,
-                'icon' => 'clone-dashed',
-                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
-                    'type' => static::lowerDisplayName(),
-                ])),
-            ];
+            // Copy
+            if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
+                $copyId = sprintf('action-copy-%s', mt_rand());
+                $items[] = [
+                    'id' => $copyId,
+                    'color' => Color::Fuchsia,
+                    'icon' => 'clone-dashed',
+                    'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
+                        'type' => static::lowerDisplayName(),
+                    ])),
+                ];
 
-            $view = Craft::$app->getView();
-            $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
+                $view = Craft::$app->getView();
+                $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
 (() => {
   $('#' + $id).on('activate', () => {
     Craft.cp.copyElements([$elementInfo]);
   });
 })();
 JS, [
-                $view->namespaceInputId($copyId),
-                [
-                    'type' => static::class,
-                    'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
-                    'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
-                    'revisionId' => $this->revisionId,
-                    'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
-                    'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
-                    'siteId' => $this->siteId,
-                ],
-            ]);
+                    $view->namespaceInputId($copyId),
+                    [
+                        'type' => static::class,
+                        'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
+                        'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
+                        'revisionId' => $this->revisionId,
+                        'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
+                        'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                        'siteId' => $this->siteId,
+                    ],
+                ]);
+            }
         }
 
         return $items;
@@ -5782,6 +5857,10 @@ JS, [
     protected function attributeHtml(string $attribute): string
     {
         switch ($attribute) {
+            case 'id':
+                return (string)$this->getCanonicalId();
+            case 'uid':
+                return $this->getCanonicalUid();
             case 'ancestors':
                 $element = $this->isProvisionalDraft ? $this->getCanonical() : $this;
                 $ancestors = $element->getAncestors();
@@ -6785,19 +6864,74 @@ JS, [
     }
 
     /**
-     * Renders the element using its partial template.
-     *
-     * If no partial template exists for the element, its string representation will be output instead.
-     *
-     * @param array $variables
-     * @return Markup
-     * @throws InvalidConfigException
-     * @throws NotSupportedException
-     * @see ElementHelper::renderElements()
-     * @since 5.0.0
+     * @inheritdoc
      */
     public function render(array $variables = []): Markup
     {
-        return ElementHelper::renderElements([$this], $variables);
+        $templates = $this->partialTemplatePathCandidates();
+
+        $refHandle = static::refHandle();
+        if ($refHandle !== null) {
+            $variables[$refHandle] = $this;
+        }
+
+        if ($this->hasEventHandlers(self::EVENT_RENDER)) {
+            $event = new RenderElementEvent([
+                'templates' => $templates,
+                'variables' => $variables,
+            ]);
+            $this->trigger(self::EVENT_RENDER, $event);
+            if (isset($event->output)) {
+                return new Markup($event->output, Craft::$app->charset);
+            }
+            $templates = $event->templates;
+            $variables = $event->variables;
+        }
+
+        if (!empty($templates)) {
+            $view = Craft::$app->getView();
+            foreach (Arr::sort($templates, 'priority') as $template) {
+                if ($view->doesTemplateExist($template['template'], View::TEMPLATE_MODE_SITE)) {
+                    $output = $view->renderTemplate($template['template'], $variables, View::TEMPLATE_MODE_SITE);
+                    return new Markup($output, Craft::$app->charset);
+                }
+            }
+        }
+
+        // fallback to the string representation of the element
+        $output = Html::tag('p', Html::encode((string)$this));
+        return new Markup($output, Craft::$app->charset);
+    }
+
+    /**
+     * Returns the template paths to check when rendering the element’s partial template.
+     *
+     * @return array{template:string,priority:int}[]
+     * @since 5.8.0
+     */
+    protected function partialTemplatePathCandidates(): array
+    {
+        $refHandle = static::refHandle();
+        if ($refHandle === null) {
+            return [];
+        }
+
+        $templates = [];
+        $generalConfig = Craft::$app->getConfig()->getGeneral();
+
+        $providerHandle = $this->getFieldLayout()?->provider?->getHandle();
+        if ($providerHandle !== null) {
+            $templates[] = [
+                'template' => sprintf('%s/%s/%s', $generalConfig->partialTemplatesPath, $refHandle, $providerHandle),
+                'priority' => 1,
+            ];
+        }
+
+        $templates[] = [
+            'template' => sprintf('%s/%s', $generalConfig->partialTemplatesPath, $refHandle),
+            'priority' => 10,
+        ];
+
+        return $templates;
     }
 }

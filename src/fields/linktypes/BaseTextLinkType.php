@@ -93,12 +93,13 @@ JS, [
             $linkText = $this->linkLabel($value);
             $html =
                 Html::beginTag('div', [
-                    'class' => ['chip', 'small'],
+                    'class' => ['chip', 'chromeless'],
                 ]) .
                 Html::beginTag('div', [
                     'class' => 'chip-content',
                 ]) .
                 Html::a($linkText, $value, [
+                    'class' => ['truncate'],
                     'target' => '_blank',
                 ]) .
                 Html::beginTag('div', [
