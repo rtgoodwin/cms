@@ -1859,7 +1859,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         var grid = [
           new fabric.Rect({
             strokeWidth: 2,
-            stroke: 'rgba(255,255,255,1)',
+            stroke: this.settings.colors.white,
             originX: 'center',
             originY: 'center',
             width: gridWidth,
@@ -2162,7 +2162,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _setupCropperLayer: function (clipperData) {
       // Set up the canvas for cropper
       this.croppingCanvas = new fabric.StaticCanvas('cropping-canvas', {
-        backgroundColor: 'rgba(0,0,0,0)',
+        backgroundColor: this.settings.colors.transparent,
         hoverCursor: 'default',
         selection: false,
       });
@@ -2190,7 +2190,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         originY: 'center',
         width: this.editorWidth,
         height: this.editorHeight,
-        fill: 'rgba(0,0,0,0.7)',
+        fill: this.settings.colors.transparentBlack,
       });
 
       // Calculate the cropping rectangle size
@@ -2252,7 +2252,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       this._redrawCropperElements._.lineOptions = {
         strokeWidth: 4,
-        stroke: 'rgb(255,255,255)',
+        stroke: this.settings.colors.white,
         fill: false,
       };
 
@@ -2367,7 +2367,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       this._redrawCropperElements._.cropTextTop =
         this.croppingRectangle.top + this.clipper.height / 2 + 12;
-      this._redrawCropperElements._.cropTextBackgroundColor = 'rgba(0,0,0,0)';
+      this._redrawCropperElements._.cropTextBackgroundColor =
+        this.settings.colors.transparent;
 
       if (
         this._redrawCropperElements._.cropTextTop + 12 >
@@ -2421,8 +2422,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       const strokeWidth = 2;
       const width = this.clipper.width;
       const height = this.clipper.height;
-      const rectantleOptions = {
-        fill: 'rgba(0,0,0,0)',
+      const rectangleOptions = {
+        fill: this.settings.colors.transparent,
         top: 0,
         left: 0,
         strokeWidth: strokeWidth,
@@ -2434,21 +2435,21 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         width: width + strokeWidth * 4,
         height: height + strokeWidth * 4,
         stroke: null,
-        ...rectantleOptions,
+        ...rectangleOptions,
       });
 
       const innerOutline = new fabric.Rect({
         width: width + strokeWidth * 2,
         height: height + strokeWidth * 2,
         stroke: null,
-        ...rectantleOptions,
+        ...rectangleOptions,
       });
 
       const cropperRectangle = new fabric.Rect({
         width: width,
         height: height,
-        stroke: 'rgba(255,255,255,1)',
-        ...rectantleOptions,
+        stroke: this.settings.colors.white,
+        ...rectangleOptions,
       });
 
       const group = new fabric.Group(
@@ -2461,19 +2462,32 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         }
       );
 
-      if (this.cropperPickedUp) {
-        group.add(this.moveIcon);
-
-        cropperRectangle.set({
-          fill: 'rgba(0, 0, 0, .8)',
-        });
-      } else if (this._getCroppingRectangleEditBtnIsFocused()) {
+      if (
+        this.cropperPickedUp ||
+        this._getCroppingRectangleEditBtnIsFocused()
+      ) {
         outerOutline.set({
-          stroke: 'rgba(255,255,255,1)',
+          stroke: this.settings.colors.white,
         });
         innerOutline.set({
           stroke: this.darkFocusColor,
         });
+
+        if (this.cropperPickedUp) {
+          // Create a background for the move icon to exist on
+          const moveIconBackground = new fabric.Circle({
+            fill: this.settings.colors.black,
+            top: 0,
+            left: 0,
+            radius: 15,
+            stroke: this.settings.colors.white,
+            strokeWidth: 2,
+            originX: 'center',
+            originY: 'center',
+          });
+          group.add(moveIconBackground);
+          group.add(this.moveIcon);
+        }
       }
 
       return group;
@@ -2507,7 +2521,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       const centerRing = new fabric.Circle({
         radius: size + width,
-        stroke: 'rgba(255,255,255,1)',
+        stroke: this.settings.colors.white,
         ...commonProps,
       });
 
@@ -2528,7 +2542,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         focusRing.add(this.moveIcon);
 
         focusRing.item(0).set({
-          fill: 'rgba(0, 0, 0, .8)',
+          fill: this.settings.colors.transparentBlack,
         });
       }
 
@@ -2746,7 +2760,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         $('.body').css('cursor', 'grabbing');
       } else {
         indicatorStrokeWidth = 0;
-        indicatorFill = 'rgba(0,0,0,0)';
+        indicatorFill = this.settings.colors.transparent;
         $('.body').css('cursor', 'pointer');
       }
 
@@ -4276,6 +4290,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       allowSavingAsNew: true,
       onSave: $.noop,
       allowDegreeFractions: null,
+      colors: {
+        white: 'rgb(255, 255, 255)',
+        black: 'rgb(0, 0, 0)',
+        transparentBlack: 'rgba(0, 0, 0, 0.8)',
+        transparent: 'rgba(0,0,0,0)',
+      },
     },
   }
 );
