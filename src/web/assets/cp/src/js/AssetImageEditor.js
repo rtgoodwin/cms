@@ -3036,7 +3036,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.renderImage();
     },
 
-    _getClipperRectProperties: function (ev) {
+    /**
+     * Returns the rectangle properties of the clipper.
+     * @returns {{left: number, top: number, width: number, height: number}}
+     */
+    _getClipperRectProperties: function () {
       return {
         left: this.clipper.left - this.clipper.width / 2,
         top: this.clipper.top - this.clipper.height / 2,
@@ -3094,6 +3098,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return position;
     },
 
+    /**
+     * Handle keyboard events for editing the cropper.
+     * @param ev
+     */
     _handleCropperKeyboardEdit: function (ev) {
       let direction;
 
@@ -3118,38 +3126,37 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (this.cropperPickedUp) {
         this._moveCropperByDelta(deltaValues.deltaX, deltaValues.deltaY);
       } else if (this.handlePicked) {
-        this._resizeCropperByHandleAndDelta(
-          this.handlePicked,
-          deltaValues.deltaX,
-          deltaValues.deltaY
-        );
+        this._resizeCropperByHandleAndDeltas(this.handlePicked, {
+          x: deltaValues.deltaX,
+          y: deltaValues.deltaY,
+        });
       }
     },
 
-    _resizeCropperByHandleAndDelta: function (handle, deltaX, deltaY) {
-      if (typeof this._resizeCropperByHandleAndDelta._ === 'undefined') {
-        this._resizeCropperByHandleAndDelta._ = {};
+    /**
+     * Handle keyboard events for editing the cropper.
+     * @param ev
+     */
+    _resizeCropperByHandleAndDeltas: function (handle, deltas) {
+      if (typeof this._resizeCropperByHandleAndDeltas._ === 'undefined') {
+        this._resizeCropperByHandleAndDeltas._ = {};
       }
 
       // Translate from center-center origin to absolute coords
-      this._resizeCropperByHandleAndDelta._.startingRectangle = {
-        left: this.clipper.left - this.clipper.width / 2,
-        top: this.clipper.top - this.clipper.height / 2,
-        width: this.clipper.width,
-        height: this.clipper.height,
-      };
+      this._resizeCropperByHandleAndDeltas._.startingRectangle =
+        this._getClipperRectProperties();
 
-      this._resizeCropperByHandleAndDelta._.rectangle =
+      this._resizeCropperByHandleAndDeltas._.rectangle =
         this._calculateNewCropperSizeByDeltas(
-          this._resizeCropperByHandleAndDelta._.startingRectangle,
-          deltaX,
-          deltaY,
+          this._resizeCropperByHandleAndDeltas._.startingRectangle,
+          deltas.x,
+          deltas.y,
           handle
         );
 
       if (
-        this._resizeCropperByHandleAndDelta._.rectangle.height < 30 ||
-        this._resizeCropperByHandleAndDelta._.rectangle.width < 30
+        this._resizeCropperByHandleAndDeltas._.rectangle.height < 30 ||
+        this._resizeCropperByHandleAndDeltas._.rectangle.width < 30
       ) {
         return;
       }
@@ -3157,7 +3164,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       if (
         !this.arePointsInsideRectangle(
           this._getRectangleVertices(
-            this._resizeCropperByHandleAndDelta._.rectangle
+            this._resizeCropperByHandleAndDeltas._.rectangle
           ),
           this.imageVerticeCoords
         )
@@ -3168,13 +3175,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Translate back to center-center origin.
       this.clipper.set({
         top:
-          this._resizeCropperByHandleAndDelta._.rectangle.top +
-          this._resizeCropperByHandleAndDelta._.rectangle.height / 2,
+          this._resizeCropperByHandleAndDeltas._.rectangle.top +
+          this._resizeCropperByHandleAndDeltas._.rectangle.height / 2,
         left:
-          this._resizeCropperByHandleAndDelta._.rectangle.left +
-          this._resizeCropperByHandleAndDelta._.rectangle.width / 2,
-        width: this._resizeCropperByHandleAndDelta._.rectangle.width,
-        height: this._resizeCropperByHandleAndDelta._.rectangle.height,
+          this._resizeCropperByHandleAndDeltas._.rectangle.left +
+          this._resizeCropperByHandleAndDeltas._.rectangle.width / 2,
+        width: this._resizeCropperByHandleAndDeltas._.rectangle.width,
+        height: this._resizeCropperByHandleAndDeltas._.rectangle.height,
       });
 
       this._redrawCropperElements();
@@ -3478,12 +3485,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.animationInProgress = true;
 
       // Mock the clipping rectangle for collision tests
-      this.enforceCroppingConstraint._.rectangle = {
-        left: this.clipper.left - this.clipper.width / 2,
-        top: this.clipper.top - this.clipper.height / 2,
-        width: this.clipper.width,
-        height: this.clipper.height,
-      };
+      this.enforceCroppingConstraint._.rectangle =
+        this._getClipperRectProperties();
 
       // If wider than it should be
       if (this.clipper.width > this.clipper.height * this.croppingConstraint) {
@@ -3592,11 +3595,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         return;
       }
 
-      this._resizeCropperByHandleAndDelta(
-        this.handlePicked,
-        this._handleCropperResize._.deltaX,
-        this._handleCropperResize._.deltaY
-      );
+      this._resizeCropperByHandleAndDeltas(this.handlePicked, {
+        x: this._handleCropperResize._.deltaX,
+        y: this._handleCropperResize._.deltaY,
+      });
     },
 
     _calculateNewCropperSizeByDeltas: function (
