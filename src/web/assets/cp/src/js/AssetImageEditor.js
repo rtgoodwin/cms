@@ -3134,8 +3134,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Handle keyboard events for editing the cropper.
-     * @param ev
+     * Resizes the cropper rectangle by a handle, given an object with deltas.
+     * @param {string} handle - The handle to resize the cropper by.
+     * @param {{x: number, y: number}} deltas
      */
     _resizeCropperByHandleAndDeltas: function (handle, deltas) {
       if (typeof this._resizeCropperByHandleAndDeltas._ === 'undefined') {
@@ -3188,6 +3189,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this._announce(this._getSizeAndRelativePositionMessage(this.clipper));
     },
 
+    /**
+     * Gets the delta values based on the direction.
+     * @param direction
+     * @returns {{deltaX: number, deltaY: number}}
+     */
     _getDeltaValuesFromDirection: function (direction) {
       const base = 5;
 
@@ -3214,6 +3220,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       return values;
     },
 
+    /**
+     * Moves the cropper rectangle by a given delta.
+     * @param deltaX
+     * @param deltaY
+     */
     _moveCropperByDelta: function (deltaX, deltaY) {
       if (typeof this._moveCropperByDelta._ === 'undefined') {
         this._moveCropperByDelta._ = {};
