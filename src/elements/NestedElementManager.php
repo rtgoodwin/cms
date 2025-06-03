@@ -187,6 +187,10 @@ class NestedElementManager extends Component
 
         $query = $owner->getFieldValue($this->field->handle);
 
+        if ($query instanceof ElementCollection) {
+            return $query;
+        }
+
         if (!$query instanceof ElementQueryInterface) {
             $query = $this->nestedElementQuery($owner);
         }
