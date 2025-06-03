@@ -2420,7 +2420,8 @@ JS);
                 }
                 return $this->redirect($loginPath);
             }
-            return $this->redirect('login');
+
+            return $this->redirect(Request::CP_PATH_LOGIN);
         }
 
         $activeMethods = $authService->getActiveMethods($user);
