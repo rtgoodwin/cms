@@ -1002,12 +1002,6 @@ li.breadcrumb-toggle-wrapper {
   grid-template-columns: var(--page-title-columns);
   align-items: center;
   gap: var(--s);
-
-  &.has-toolbar {
-    @media only screen and (min-width: $minHorizontalUiWidth) {
-      min-width: calc(#{$sidebarWidth} - var(--xl) - var(--s)) !important;
-    }
-  }
 }
 
 #content-heading {
@@ -1916,49 +1910,48 @@ li.breadcrumb-toggle-wrapper {
     margin-block-end: 0 !important;
   }
 
-  & > :not(h2, hr, .line-break) {
-    &,
-    &:last-child {
-      position: relative;
-      width: 100%;
+  // Drawn a column separator when two classes starting with `width-` are next to each other
+  [class^='width-'] + [class^='width-'] {
+    // Column separator for multi-column layouts
+    &::before {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: -1px;
+      width: 1px;
+      height: 100%;
+      content: '';
 
-      &::before {
-        position: absolute;
-        inset-block-start: 0;
-        inset-inline-start: -1px;
-        width: 1px;
-        height: 100%;
-        content: '';
-
-        // same BG color as the hairline around the content pane’s 1px shadow
-        background-color: color.adjust(mixins.$grey200, $alpha: -0.5);
-      }
+      // same BG color as the hairline around the content pane’s 1px shadow
+      background-color: color-mix(in srgb, var(--gray-200), transparent 50%);
     }
   }
 
   & > :not(h2, hr, .line-break) {
     &,
     &:last-child {
-      // 4 cols for container width >= 800px
-      @container (min-width: calc(800rem/16)) {
-        &.width-25 {
-          width: 25%;
-        }
+      position: relative;
+      width: 100%;
+    }
 
-        &.width-50 {
-          width: 50%;
-        }
-
-        &.width-75 {
-          width: 75%;
-        }
+    // 4 cols for container width >= 800px
+    @container (min-width: calc(800rem/16)) {
+      &.width-25 {
+        width: 25%;
       }
 
-      // 2 cols when container width >= 400px and < 800px
-      @container (min-width: calc(400rem/16)) and (max-width: calc(800rem/16 - 1px)) {
-        &.width-25 {
-          width: 50%;
-        }
+      &.width-50 {
+        width: 50%;
+      }
+
+      &.width-75 {
+        width: 75%;
+      }
+    }
+
+    // 2 cols when container width >= 400px and < 800px
+    @container (min-width: calc(400rem/16)) and (max-width: calc(800rem/16 - 1px)) {
+      &.width-25 {
+        width: 50%;
       }
     }
   }
