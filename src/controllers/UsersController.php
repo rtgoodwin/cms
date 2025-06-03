@@ -2874,11 +2874,12 @@ JS);
 
         // If the invalidUserTokenPath config setting is set, send them there
         if ($this->request->getIsSiteRequest()) {
-            $url = Craft::$app->getConfig()->getGeneral()->getInvalidUserTokenPath();
+            $generalConfig = Craft::$app->getConfig()->getGeneral();
+            $url = $generalConfig->getInvalidUserTokenPath() ?? $generalConfig->getLoginPath();
             return $this->redirect(UrlHelper::siteUrl($url));
         }
 
-        throw new BadRequestHttpException(Craft::t('app', 'Invalid verification code. Please sign in or reset your password.'));
+        return $this->redirect(Request::CP_PATH_LOGIN);
     }
 
     /**

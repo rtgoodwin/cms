@@ -874,7 +874,6 @@ return [
     'Invalid username or email.' => 'Invalid username or email.',
     'Invalid username or password.' => 'Invalid username or password.',
     'Invalid value “{value}”.' => 'Invalid value “{value}”.',
-    'Invalid verification code. Please sign in or reset your password.' => 'Invalid verification code. Please sign in or reset your password.',
     'Invalid verification code.' => 'Invalid verification code.',
     'Invalidate Data Caches' => 'Invalidate Data Caches',
     'Invalidate caches' => 'Invalidate caches',
