@@ -1980,7 +1980,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function canCopy(User $user): bool
     {
-        return Craft::$app->getElements()->canDuplicate($this, $user);
+        return Craft::$app->getElements()->canView($this, $user);
     }
 
     /**
