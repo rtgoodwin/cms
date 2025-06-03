@@ -2524,7 +2524,7 @@ JS);
      */
     private function _renderSetPasswordTemplate(array $variables): Response
     {
-        return $this->_rerouteWithFallbackTemplate('setpassword.twig', $variables);
+        return $this->_rerouteWithFallbackTemplate('set-password.twig', $variables);
     }
 
     private function _rerouteWithFallbackTemplate(string $cpTemplate, array $variables = []): ?Response
