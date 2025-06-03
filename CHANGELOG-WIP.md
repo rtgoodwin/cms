@@ -51,5 +51,7 @@
 - Deprecated `craft\web\assets\picturefill\PicturefillAsset`. ([#17344](https://github.com/craftcms/cms/pull/17344))
 
 ### System
+- Email verification links now show a form with a “Verify” button, which must be submitted before the email address is actually verified. ([#17392](https://github.com/craftcms/cms/pull/17392))
+- Requests with user verification codes are now redirected to the login page by default. ([#17392](https://github.com/craftcms/cms/pull/17392))
 - Assets now keep track of their MIME types when uploaded, improving the accuracy of `craft\elements\Asset::getMimeType()`. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - Reduced the number of SQL queries executed when fetching entries. ([#17326](https://github.com/craftcms/cms/discussions/17326))
