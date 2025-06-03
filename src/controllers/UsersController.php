@@ -849,7 +849,7 @@ class UsersController extends Controller
         $user = Craft::$app->getUsers()->getUserByUid($uid);
 
         if (!$user) {
-            throw new BadRequestHttpException("Invalid user UID: $uid");
+            throw new BadRequestHttpException("Invalid user UUID: $uid");
         }
 
         // Make sure we still have a valid token.
