@@ -3043,7 +3043,7 @@ h2 + .actions {
   --pane-y-padding-default: calc(var(--xl) - 2px);
   --pane-x-padding-default: calc(var(--padding) - 2px);
 
-  #elements & {
+  #content & {
     --pane-padding: var(--pane-x-padding-default);
   }
 
@@ -4267,6 +4267,14 @@ table {
 
   // table views
   .tableview {
+    margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
+      calc(
+        var(--pane-padding, var(--padding)) * -1 + var(--pane-padding, var(--m))
+      );
+    margin-inline: calc(
+      var(--pane-padding, var(--pane-x-padding-default)) * -1
+    );
+
     th,
     td {
       height: 34px;
