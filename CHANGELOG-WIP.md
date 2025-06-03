@@ -16,8 +16,6 @@
 - Improved the wording of validation errors caused by relational fields’ “Validate related [type]” settings. ([#9960](https://github.com/craftcms/cms/discussions/9960))
 - URL chips within Link fields are now truncated if wider than the container, and have a “Copy URL” action. ([#17339](https://github.com/craftcms/cms/pull/17339))
 - Users with “Moderate users” permission can now send activation emails. ([#17362](https://github.com/craftcms/cms/pull/17362))
-
-### Content Management
 - Element condition builders now show condition rules for custom fields with duplicate names. ([#17361](https://github.com/craftcms/cms/pull/17361))
 
 ### Administration
