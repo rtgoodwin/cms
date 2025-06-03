@@ -163,6 +163,7 @@ JS;
             'Content',
             'Continue',
             'Copied to clipboard.',
+            'Copy URL',
             'Copy from',
             'Copy the URL',
             'Copy the reference tag',
@@ -594,6 +595,12 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['notificationDuration']
                 ?? 5000
             ),
+            'notificationPosition' => $currentUser->getPreference('notificationPosition')
+                ?? $generalConfig->accessibilityDefaults['notificationPosition']
+                ?? 'end-start',
+            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
+                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
+                ?? 'end',
             'previewIframeResizerOptions' => $this->_previewIframeResizerOptions($generalConfig),
             'primarySiteId' => $primarySite ? (int)$primarySite->id : null,
             'primarySiteLanguage' => $primarySite->language ?? null,

@@ -547,6 +547,12 @@ body.dragging .offset-drag-helper {
   padding-inline: 60px 0;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 img {
   max-width: 100%;
 }
@@ -4267,6 +4273,14 @@ table {
 
   // table views
   .tableview {
+    margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
+      calc(
+        var(--pane-padding, var(--padding)) * -1 + var(--pane-padding, var(--m))
+      );
+    margin-inline: calc(
+      var(--pane-padding, var(--pane-x-padding-default)) * -1
+    );
+
     th,
     td {
       height: 34px;
@@ -6393,8 +6407,10 @@ $min2ColWidth: 400px;
     height: 100%;
 
     @media screen and (prefers-reduced-motion: no-preference) {
-      transition: inset-inline-start linear 250ms;
-      will-change: inset-inline-start;
+      transition:
+        inset-inline-start linear 250ms,
+        inset-inline-end linear 250ms;
+      will-change: inset-inline-start, inset-inline-end;
     }
   }
 
@@ -7972,12 +7988,6 @@ textarea.text.fullwidth {
         .chip {
           min-height: calc(34rem / 16);
           padding-inline: var(--s);
-
-          .chip-content {
-            a {
-              word-break: break-word;
-            }
-          }
         }
       }
     }
