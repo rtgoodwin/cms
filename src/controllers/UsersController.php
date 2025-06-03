@@ -922,12 +922,39 @@ class UsersController extends Controller
             $this->response->format = Response::FORMAT_HTML;
         }
 
-        if (!is_array($info = $this->_processTokenRequest())) {
-            return $info;
+        if (!$this->request->getIsPost()) {
+            if (!is_array($info = $this->_processTokenRequest())) {
+                return $info;
+            }
+
+            /** @var User $user */
+            /** @var string $uid */
+            /** @var string $code */
+            [$user, $uid, $code] = $info;
+
+            Craft::$app->getUser()->sendUsernameCookie($user);
+
+            // Send them to the set verify-email template
+            return $this->_rerouteWithFallbackTemplate('verify-email.twig', [
+                'id' => $uid,
+                'code' => $code,
+            ]);
         }
 
-        /** @var User $user */
-        [$user] = $info;
+        // POST request
+        $code = $this->request->getRequiredBodyParam('code');
+        $uid = $this->request->getRequiredParam('uid');
+        $user = Craft::$app->getUsers()->getUserByUid($uid);
+
+        if (!$user) {
+            throw new BadRequestHttpException("Invalid user UUID: $uid");
+        }
+
+        // Make sure we still have a valid token.
+        if (!Craft::$app->getUsers()->isVerificationCodeValidForUser($user, $code)) {
+            return $this->_processInvalidToken($user);
+        }
+
         $pending = $user->pending;
         $usersService = Craft::$app->getUsers();
 

@@ -1952,6 +1952,7 @@ return [
     'Verification successful.' => 'Verification successful.',
     'Verify email addresses' => 'Verify email addresses',
     'Verify with an authentication code.' => 'Verify with an authentication code.',
+    'Verify your email address' => 'Verify your email address',
     'Verify' => 'Verify',
     'Version {version}' => 'Version {version}',
     'Version' => 'Version',
