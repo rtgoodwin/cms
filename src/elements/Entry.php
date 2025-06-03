@@ -1980,17 +1980,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function canCopy(User $user): bool
     {
-        // if it's a nested element and the field has a separate method to check if elements can be copied - use it
-        if (
-            ($field = $this->getField()) instanceof ElementContainerFieldInterface &&
-            method_exists($field::class, 'canCopyElement') &&
-            /** @phpstan-ignore-next-line */
-            $field->canCopyElement($this, $user)
-        ) {
-            return true;
-        }
-
-        return Craft::$app->getElements()->canDuplicate($this, $user);
+        return Craft::$app->getElements()->canView($this, $user);
     }
 
     /**

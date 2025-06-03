@@ -586,26 +586,6 @@ class Matrix extends Field implements
     }
 
     /**
-     * Returns whether the given user is authorized to copy an element.
-     *
-     * This will only be called if the element can be [[canView()|viewed]] and/or [[canSave()|saved]].
-     *
-     * @param NestedElementInterface $element
-     * @param User $user
-     * @return bool|null
-     */
-    public function canCopyElement(NestedElementInterface $element, User $user): ?bool
-    {
-        $owner = $element->getOwner();
-
-        if (!$owner || !Craft::$app->getElements()->canSave($owner, $user)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * @inheritdoc
      */
     public function canDeleteElement(NestedElementInterface $element, User $user): ?bool
