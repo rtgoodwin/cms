@@ -34,6 +34,7 @@ use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
+use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\i18n\Locale;
@@ -1669,6 +1670,12 @@ JS, [
             $elementsService->ensureBulkOp(function() use ($elementInfo, $newAttributes, &$newElementInfo, $elementsService) {
                 foreach ($elementInfo as $info) {
                     $element = $this->_element($info);
+
+                    if (!$element instanceof ElementInterface) {
+                        Craft::warning(sprintf('Unable to duplicate element: %s', Json::encode($info)), __METHOD__);
+                        continue;
+                    }
+
                     $safeNewAttributes = Collection::make($newAttributes)
                         ->only($element->safeAttributes())
                         ->all();
