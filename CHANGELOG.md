@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where it wasn’t possible to copy nested entries within Matrix fields set to cards or element index views, if the Max Entires setting had been reached. ([#17373](https://github.com/craftcms/cms/issues/17373))
+- Fixed a bug where entry type selectors weren’t showing `0` icons. ([#17381](https://github.com/craftcms/cms/pull/17381))
 - Fixed a styling issue. ([#17375](https://github.com/craftcms/cms/issues/17375))
 
 ## 5.7.8.2 - 2025-05-30
