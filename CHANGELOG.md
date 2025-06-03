@@ -1,5 +1,10 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where it wasn’t possible to copy nested entries within Matrix fields set to cards or element index views, if the Max Entires setting had been reached. ([#17373](https://github.com/craftcms/cms/issues/17373))
+- Fixed a styling issue. ([#17375](https://github.com/craftcms/cms/issues/17375))
+
 ## 5.7.8.2 - 2025-05-30
 
 - Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
