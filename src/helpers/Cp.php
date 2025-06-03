@@ -397,7 +397,7 @@ class Cp
             } else {
                 /** @var Chippable&Iconic $component */
                 $icon = $component->getIcon();
-                if ($icon !== null) {
+                if ($icon || $icon === '0') {
                     $html .= Html::tag('div', static::iconSvg($icon), [
                         'class' => array_filter(['thumb', 'cp-icon', $color?->value]),
                     ]);
