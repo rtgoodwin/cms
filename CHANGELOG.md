@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
 - Fixed a styling issue. ([#17393](https://github.com/craftcms/cms/issues/17393))
 
 ## 5.7.9 - 2025-06-03
