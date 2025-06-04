@@ -4265,6 +4265,10 @@ table {
     opacity: 0.25;
   }
 
+  .elementselectormodal & .tableview {
+    margin-block-start: 0;
+  }
+
   // table views
   .tableview {
     margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
