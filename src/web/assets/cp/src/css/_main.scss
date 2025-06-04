@@ -4281,6 +4281,11 @@ table {
       var(--pane-padding, var(--pane-x-padding-default)) * -1
     );
 
+    .elementselectormodal & {
+      margin-block: 0;
+      margin-inline: 0;
+    }
+
     th,
     td {
       height: 34px;
