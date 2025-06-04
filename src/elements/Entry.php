@@ -1259,9 +1259,11 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return [];
         }
 
+        $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
         $requestedSite = Cp::requestedSite();
-        $sections = Collection::make(Craft::$app->getEntries()->getEditableSections())
-            ->filter(fn(Section $s) => !$requestedSite || in_array(Cp::requestedSite()->id, $s->siteIds));
+        if ($requestedSite) {
+            $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
+        }
         /** @var Collection $sectionOptions */
         $sectionOptions = $sections
             ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
