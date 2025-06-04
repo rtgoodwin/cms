@@ -3805,7 +3805,7 @@ table {
       }
     }
 
-    @container (min-width: 500px) {
+    @container (min-width: 200px) {
       grid-template-columns: 1fr auto;
     }
   }
@@ -4273,6 +4273,14 @@ table {
 
   // table views
   .tableview {
+    margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
+      calc(
+        var(--pane-padding, var(--padding)) * -1 + var(--pane-padding, var(--m))
+      );
+    margin-inline: calc(
+      var(--pane-padding, var(--pane-x-padding-default)) * -1
+    );
+
     th,
     td {
       height: 34px;
