@@ -4265,18 +4265,20 @@ table {
     opacity: 0.25;
   }
 
-  :not(.elementselectormodal) .tableview {
+  // table views
+  .tableview {
     margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
       calc(
         var(--pane-padding, var(--padding)) * -1 + var(--pane-padding, var(--m))
       );
-  }
-
-  // table views
-  .tableview {
     margin-inline: calc(
       var(--pane-padding, var(--pane-x-padding-default)) * -1
     );
+
+    .elementselectormodal & {
+      margin-block: 0;
+      margin-inline: 0;
+    }
 
     th,
     td {
