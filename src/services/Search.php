@@ -303,6 +303,7 @@ class Search extends Component
                         // another process must be handling the same job
                         return;
                     }
+                    break;
                 } catch (DbException $e) {
                     if (str_contains($e->getPrevious()?->getMessage(), 'deadlock')) {
                         // A gap lock was probably hit. Try again in one second

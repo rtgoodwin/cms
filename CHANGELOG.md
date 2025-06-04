@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where custom fields’ search keywords weren’t getting indexed. ([#17385](https://github.com/craftcms/cms/issues/17385))
+
 ## 4.15.6.1 - 2025-05-30
 
 - Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
