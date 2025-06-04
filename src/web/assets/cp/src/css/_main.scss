@@ -9705,7 +9705,7 @@ body.licensing-issues {
     }
   }
 
-  & > .fields > .flex-fields > .field {
+  & > .fields > .flex-fields > :not(h2, hr, .line-break) {
     &::before {
       display: none;
     }

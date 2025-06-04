@@ -2,11 +2,18 @@
 
 ## Unreleased
 
+- Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
+- Fixed a bug where the section menu within Edit Entry pages’ breadcrumbs would display sections that weren’t available for the selected site. ([#17395](https://github.com/craftcms/cms/pull/17395))
+- Fixed a styling issue. ([#17393](https://github.com/craftcms/cms/issues/17393))
+
+## 5.7.9 - 2025-06-03
+
 - Fixed a bug where it wasn’t possible to copy nested entries within Matrix fields set to cards or element index views, if the Max Entires setting had been reached. ([#17373](https://github.com/craftcms/cms/issues/17373))
 - Fixed a bug where entry type selectors weren’t showing `0` icons. ([#17381](https://github.com/craftcms/cms/pull/17381))
 - Fixed a bug where Selectize menus could remain visible in the top-left corner of the screen, after selecting an option with the keyboard. ([#17374](https://github.com/craftcms/cms/issues/17374))
 - Fixed a bug where custom fields’ search keywords weren’t getting indexed. ([#17385](https://github.com/craftcms/cms/issues/17385))
-- Fixed styling issues. ([#17375](https://github.com/craftcms/cms/issues/17375), [#17384](https://github.com/craftcms/cms/issues/17384))
+- Fixed an error that could occur when pasting elements. ([#17388](https://github.com/craftcms/cms/issues/17388))
+- Fixed styling issues. ([#17375](https://github.com/craftcms/cms/issues/17375), [#17384](https://github.com/craftcms/cms/issues/17384), [#17389](https://github.com/craftcms/cms/issues/17389))
 
 ## 5.7.8.2 - 2025-05-30
 

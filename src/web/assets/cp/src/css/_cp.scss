@@ -803,7 +803,7 @@ li.breadcrumb-toggle-wrapper {
     inset-block-end: 50px;
   }
 
-  @media only screen and (min-width: $minHorizontalUiWidth) {
+  @media only screen and (min-width: $minDesktopWidth) {
     width: 350px;
   }
 
