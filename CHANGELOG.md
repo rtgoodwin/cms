@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.10 - 2025-06-04
 
 - Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
 - Fixed a bug where the section menu within Edit Entry pages’ breadcrumbs would display sections that weren’t available for the selected site. ([#17395](https://github.com/craftcms/cms/pull/17395))
