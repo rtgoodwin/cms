@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where changes made programatically to elements after save were being overwritten when fully saving an unpublished draft. ([#ckeditor#426](https://github.com/craftcms/ckeditor/issues/426))
+
 ## 5.7.10 - 2025-06-04
 
 - Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
