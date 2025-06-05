@@ -4273,6 +4273,19 @@ table {
 
   // table views
   .tableview {
+    margin-block: calc(var(--pane-padding, var(--pane-y-padding-default)) * -1)
+      calc(
+        var(--pane-padding, var(--padding)) * -1 + var(--pane-padding, var(--m))
+      );
+    margin-inline: calc(
+      var(--pane-padding, var(--pane-x-padding-default)) * -1
+    );
+
+    .elementselectormodal & {
+      margin-block: 0;
+      margin-inline: 0;
+    }
+
     th,
     td {
       height: 34px;
@@ -9703,7 +9716,7 @@ body.licensing-issues {
     }
   }
 
-  & > .fields > .flex-fields > .field {
+  & > .fields > .flex-fields > :not(h2, hr, .line-break) {
     &::before {
       display: none;
     }

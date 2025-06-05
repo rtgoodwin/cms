@@ -18,7 +18,7 @@
 {% endmacro %}
 
 {% set buttonIconHtml = null %}
-{% if selectedOption.icon ?? false %}
+{% if (selectedOption.icon ?? null) or (selectedOption.icon ?? null) is same as('0') %}
     {% set buttonIconHtml %}
         {{ tag('div', {
             class: [
@@ -65,7 +65,7 @@
                 value: option.value,
               },
             }|merge(option.attributes ?? {}, recursive=true) %}
-              {% if option.icon ?? false %}
+              {% if (option.icon ?? null) or (option.icon ?? null) is same as('0') %}
                 {{ tag('span', {
                   class: [
                     'icon',
