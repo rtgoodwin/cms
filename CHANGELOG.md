@@ -1,6 +1,32 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.10 - 2025-06-04
+
+- Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
+- Fixed a bug where the section menu within Edit Entry pages’ breadcrumbs would display sections that weren’t available for the selected site. ([#17395](https://github.com/craftcms/cms/pull/17395))
+- Fixed styling issues. ([#17393](https://github.com/craftcms/cms/issues/17393), [#17396](https://github.com/craftcms/cms/issues/17396))
+
+## 5.7.9 - 2025-06-03
+
+- Fixed a bug where it wasn’t possible to copy nested entries within Matrix fields set to cards or element index views, if the Max Entires setting had been reached. ([#17373](https://github.com/craftcms/cms/issues/17373))
+- Fixed a bug where entry type selectors weren’t showing `0` icons. ([#17381](https://github.com/craftcms/cms/pull/17381))
+- Fixed a bug where Selectize menus could remain visible in the top-left corner of the screen, after selecting an option with the keyboard. ([#17374](https://github.com/craftcms/cms/issues/17374))
+- Fixed a bug where custom fields’ search keywords weren’t getting indexed. ([#17385](https://github.com/craftcms/cms/issues/17385))
+- Fixed an error that could occur when pasting elements. ([#17388](https://github.com/craftcms/cms/issues/17388))
+- Fixed styling issues. ([#17375](https://github.com/craftcms/cms/issues/17375), [#17384](https://github.com/craftcms/cms/issues/17384), [#17389](https://github.com/craftcms/cms/issues/17389))
+
+## 5.7.8.2 - 2025-05-30
+
+- Fixed an error that could occur when saving an element. ([#17268](https://github.com/craftcms/cms/issues/17268))
+- Reduced the likelihood of a deadlock error occurring when updating search indexes. ([#17318](https://github.com/craftcms/cms/issues/17318))
+- Fixed a styling issue. ([#17368](https://github.com/craftcms/cms/issues/17368))
+
+## 5.7.8.1 - 2025-05-29
+
+- Fixed a bug where non-admin users couldn’t edit content on single-site Craft installs. ([#17363](https://github.com/craftcms/cms/issues/17363))
+- Fixed a styling issue. ([#17343](https://github.com/craftcms/cms/issues/17343))
+
+## 5.7.8 - 2025-05-28
 
 - It’s now possible to mutate Table field data via GraphQL using custom column handles, rather than just the column IDs. ([#17298](https://github.com/craftcms/cms/issues/17298))
 - The `update-statuses` action now ensures it is only being run once at a time.
@@ -19,7 +45,11 @@
 - Fixed a bug where Entries and Link fields with “Show unpermitted sections” disabled weren’t factoring in permissions for Single sections. ([#17332](https://github.com/craftcms/cms/pull/17332))
 - Fixed a bug where entry selection modals weren’t showing a sources sidebar for Entries fields with all sources selected and “Show unpermitted sections” disabled. ([#17323](https://github.com/craftcms/cms/issues/17323))
 - Fixed a bug where revisions were getting “Copy” actions. ([#17334](https://github.com/craftcms/cms/pull/17334))
-- Fixed styling issues. ([#17335](https://github.com/craftcms/cms/pull/17335))
+- Fixed a bug where Link fields could show multiple info icons within their advanced fields. ([#17329](https://github.com/craftcms/cms/issues/17329))
+- Fixed a bug where element chips and cards could get hyperlinks, “Edit”, and “Copy” actions, when the current user didn’t have permission to edit content in the element’s site.
+- Fixed a bug where the `up` command was updating project config YAML files when admin changes weren’t allowed. ([#17345](https://github.com/craftcms/cms/issues/17345))
+- Fixed a bug where nested entry revisions were getting included in GraphQL results unexpectedly, for Matrix fields with versioning enabled. ([#17324](https://github.com/craftcms/cms/issues/17324))
+- Fixed styling issues. ([#17335](https://github.com/craftcms/cms/pull/17335), [#17342](https://github.com/craftcms/cms/pull/17342))
 
 ## 5.7.7 - 2025-05-20
 

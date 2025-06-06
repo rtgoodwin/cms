@@ -233,7 +233,7 @@ abstract class Element extends Component implements ElementInterface
      * @event ElementIndexTableAttributeEvent The event that is triggered when preparing an element query for an element index, for each
      * attribute present in the table.
      *
-     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_SET_TABLE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
+     * Paired with [[EVENT_REGISTER_TABLE_ATTRIBUTES]] and [[EVENT_DEFINE_ATTRIBUTE_HTML]], this allows optimization of queries on element indexes.
      *
      * ```php
      * use craft\base\Element;
@@ -267,7 +267,7 @@ abstract class Element extends Component implements ElementInterface
      *
      * Event::on(
      *     Entry::class,
-     *     Element::EVENT_SET_TABLE_ATTRIBUTE_HTML,
+     *     Element::EVENT_DEFINE_ATTRIBUTE_HTML,
      *     function(DefineAttributeHtmlEvent $e) {
      *         $attribute = $e->attribute;
      *
@@ -4047,8 +4047,8 @@ JS, [
             ];
         }
 
-        // Edit
         if ($elementsService->canView($this)) {
+            // Edit
             $editId = sprintf('action-edit-%s', mt_rand());
             $items[] = [
                 'id' => $editId,
@@ -4073,39 +4073,39 @@ JS, [
                     'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
                 ],
             ]);
-        }
 
-        // Copy
-        if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
-            $copyId = sprintf('action-copy-%s', mt_rand());
-            $items[] = [
-                'id' => $copyId,
-                'color' => Color::Fuchsia,
-                'icon' => 'clone-dashed',
-                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
-                    'type' => static::lowerDisplayName(),
-                ])),
-            ];
+            // Copy
+            if (!$this->getIsRevision() && $elementsService->canCopy($this)) {
+                $copyId = sprintf('action-copy-%s', mt_rand());
+                $items[] = [
+                    'id' => $copyId,
+                    'color' => Color::Fuchsia,
+                    'icon' => 'clone-dashed',
+                    'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy {type}', [
+                        'type' => static::lowerDisplayName(),
+                    ])),
+                ];
 
-            $view = Craft::$app->getView();
-            $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
+                $view = Craft::$app->getView();
+                $view->registerJsWithVars(fn($id, $elementInfo) => <<<JS
 (() => {
   $('#' + $id).on('activate', () => {
     Craft.cp.copyElements([$elementInfo]);
   });
 })();
 JS, [
-                $view->namespaceInputId($copyId),
-                [
-                    'type' => static::class,
-                    'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
-                    'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
-                    'revisionId' => $this->revisionId,
-                    'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
-                    'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
-                    'siteId' => $this->siteId,
-                ],
-            ]);
+                    $view->namespaceInputId($copyId),
+                    [
+                        'type' => static::class,
+                        'id' => $this->isProvisionalDraft ? $this->getCanonicalId() : $this->id,
+                        'draftId' => $this->isProvisionalDraft ? null : $this->draftId,
+                        'revisionId' => $this->revisionId,
+                        'fieldId' => $this instanceof NestedElementInterface ? $this->getField()?->id : null,
+                        'ownerId' => $this instanceof NestedElementInterface ? $this->getOwnerId() : null,
+                        'siteId' => $this->siteId,
+                    ],
+                ]);
+            }
         }
 
         return $items;

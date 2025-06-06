@@ -1264,6 +1264,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
+        $requestedSite = Cp::requestedSite();
+        if ($requestedSite) {
+            $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
+        }
         /** @var Collection $sectionOptions */
         $sectionOptions = $sections
             ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
@@ -1990,7 +1994,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function canCopy(User $user): bool
     {
-        return Craft::$app->getElements()->canDuplicate($this, $user);
+        return Craft::$app->getElements()->canView($this, $user);
     }
 
     /**
