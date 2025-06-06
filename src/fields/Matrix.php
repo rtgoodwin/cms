@@ -40,6 +40,7 @@ use craft\gql\resolvers\elements\Entry as EntryResolver;
 use craft\gql\types\generators\EntryType as EntryTypeGenerator;
 use craft\gql\types\input\Matrix as MatrixInputType;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\Gql;
 use craft\helpers\Html;
@@ -54,6 +55,7 @@ use craft\validators\ArrayValidator;
 use craft\validators\StringValidator;
 use craft\validators\UriFormatValidator;
 use craft\web\assets\matrix\MatrixAsset;
+use craft\web\assets\matrixsettings\MatrixSettingsAsset;
 use craft\web\View;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
@@ -649,8 +651,41 @@ class Matrix extends Field implements
 
     private function settingsHtml(bool $readOnly): string
     {
-        return Craft::$app->getView()->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
+        $view = Craft::$app->getView();
+        $view->registerAssetBundle(MatrixSettingsAsset::class);
+
+        $entryTypes = Collection::make($this->getEntryTypes());
+        $entryTypeSelectConfig = [
+            'name' => 'entryTypes[]',
+            'renderDefaultInput' => false,
+            'allowOverrides' => true,
+            'create' => true,
+            'jsClass' => 'Craft.GroupedEntryTypeSelectInput',
+            'errors' => $this->getErrors('entryTypes'),
+            'data' => [
+                'error-key' => 'entryTypes',
+                'disabled' => $readOnly,
+            ],
+        ];
+
+        if (!$readOnly) {
+            $view->startJsBuffer();
+            $namespace = $view->getNamespace();
+            $view->setNamespace(null);
+            $entryTypeSelectHtml = $view->namespaceInputs(fn() => Cp::entryTypeSelectHtml([
+                ...$entryTypeSelectConfig,
+                'id' => 'TEMP_ID',
+            ]), $namespace);
+            $view->setNamespace($namespace);
+            $entryTypeSelectJs = $view->clearJsBuffer();
+        }
+
+        return $view->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
             'field' => $this,
+            'entryTypes' => $entryTypes,
+            'entryTypeSelectConfig' => $entryTypeSelectConfig,
+            'entryTypeSelectHtml' => $entryTypeSelectHtml ?? null,
+            'entryTypeSelectJs' => $entryTypeSelectJs ?? null,
             'defaultTableColumnOptions' => static::defaultTableColumnOptions($this->getEntryTypes()),
             'defaultCreateButtonLabel' => $this->defaultCreateButtonLabel(),
             'indexViewModes' => array_filter(
@@ -1103,6 +1138,7 @@ JS;
 }
 JS,
                 'createAttributes' => array_map(fn(EntryType $entryType) => [
+                    'group' => $entryType->group,
                     'icon' => $entryType->icon,
                     'color' => $entryType->color,
                     'label' => Craft::t('site', $entryType->name),

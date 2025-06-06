@@ -1,17 +1,37 @@
 {% import "_includes/forms" as forms %}
 
-{{ forms.entryTypeSelectField({
+{% embed '_includes/forms/field.twig' with {
   label: 'Entry Types'|t('app'),
   instructions: 'Choose the types of entries that can be created in this field.'|t('app'),
   id: 'entry-types',
-  name: 'entryTypes[]',
-  values: field.getEntryTypes(),
-  allowOverrides: true,
-  create: true,
-  errors: field.getErrors('entryTypes'),
-  data: {'error-key': 'entryTypes'},
-  disabled: readOnly,
-}) }}
+} %}
+  {% block input %}
+    {% import "_includes/forms" as forms %}
+    {% set groupedEntryTypes = entryTypes.groupBy(et => et.group ?? 'General'|t('app')) %}
+    {{ hiddenInput('entryTypes', '') }}
+    <div id="entry-type-manager" class="entry-type-manager">
+      <ul class="entry-type-groups mb-s">
+        {% for groupName, entryTypes in groupedEntryTypes %}
+          {% tag 'li' with {
+            class: 'entry-type-group',
+            data: {
+              name: groupName,
+            },
+          } %}
+            <div class="entry-type-group--titlebar">
+              <span>{{ groupName }}</span>
+            </div>
+            {{ forms.entryTypeSelect(entryTypeSelectConfig|merge({
+              id: "entry-type-select-#{random()}",
+              values: entryTypes,
+              includeGroupInValues: true,
+            })) }}
+          {% endtag %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endblock %}
+{% endembed %}
 
 {% if craft.app.getIsMultiSite() %}
   {{ forms.selectField({
@@ -282,6 +302,17 @@
 {% js %}
   (() => {
     const $defaultColumnsContainer = $("#{{ 'default-table-columns-input'|namespaceInputId }}");
+
+    {% if not readOnly %}
+      const $entryTypesContainer = $("#{{ 'entry-type-manager'|namespaceInputId }}");
+      new Craft.EntryTypeManager($entryTypesContainer, {
+        $defaultColumnsContainer,
+        namespace: {{ view.getNamespace()|json_encode|raw }},
+        entryTypeSelectHtml: {{ entryTypeSelectHtml|json_encode|raw }},
+        entryTypeSelectJs: {{ entryTypeSelectJs|json_encode|raw }},
+      });
+    {% endif %}
+
     const config = {
       name: {{ 'defaultTableColumns'|namespaceInputName|json_encode|raw }},
       options: {{ defaultTableColumnOptions|json_encode|raw }},
@@ -295,25 +326,5 @@
     {% endif %}
 
     Craft.ui.createCheckboxSelect(config).appendTo($defaultColumnsContainer);
-
-    const componentSelect = $('#{{ 'entry-types'|namespaceInputId }}').data('componentSelect');
-
-    componentSelect.on('change', () => {
-      const values = $defaultColumnsContainer.find('input:checked').toArray().map(input => input.value);
-      Craft.sendActionRequest('POST', 'matrix/default-table-column-options', {
-        data: {
-          entryTypeIds: componentSelect.getSelectedComponentIds(),
-        },
-      }).then(({data}) => {
-        $defaultColumnsContainer.empty().append(
-          Craft.ui.createCheckboxSelect({
-            name: {{ 'defaultTableColumns'|namespaceInputName|json_encode|raw }},
-            options: data.options,
-            values: values,
-            sortable: true,
-          })
-        );
-      });
-    });
   })();
 {% endjs %}

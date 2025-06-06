@@ -691,9 +691,9 @@ export default Base.extend(
 
       this.addListener(el, 'activate', () => {
         if (item.onActivate) {
-          item.onActivate();
+          item.onActivate(el);
         } else if (item.callback) {
-          item.callback();
+          item.callback(el);
         }
         setTimeout(() => {
           this.hide();
@@ -755,9 +755,10 @@ export default Base.extend(
       const padded = this.isPadded();
 
       if (heading) {
-        const h6 = document.createElement('h6');
+        const h6 = document.createElement('h3');
+        h6.classList.add('h6');
         if (padded) {
-          h6.className = 'padded';
+          h6.classList.add('padded');
         }
         h6.textContent = heading;
 

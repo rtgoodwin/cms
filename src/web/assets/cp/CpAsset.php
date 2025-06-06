@@ -231,6 +231,7 @@ JS;
             'Found {num, number} {num, plural, =1{error} other{errors}} in this tab.',
             'From {date}',
             'From',
+            'General',
             'Give your tab a name.',
             'Handle',
             'Heading',
