@@ -499,16 +499,20 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     ];
                 }
             }
+        } else {
+            $actions[] = Copy::class;
+        }
 
-            if (
+        if (
+            (
+                $section &&
                 $section->propagationMethod === PropagationMethod::Custom &&
                 $section->getHasMultiSiteEntries() &&
                 $user->can("deleteEntriesForSite:$section->uid")
-            ) {
-                $actions[] = DeleteForSite::class;
-            }
-        } else {
-            $actions[] = Copy::class;
+            ) ||
+            (!$section && str_starts_with($source, 'custom:'))
+        ) {
+            $actions[] = DeleteForSite::class;
         }
 
         // Restore
