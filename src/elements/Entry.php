@@ -510,7 +510,13 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 $section->getHasMultiSiteEntries() &&
                 $user->can("deleteEntriesForSite:$section->uid")
             ) ||
-            (!$section && str_starts_with($source, 'custom:'))
+            (
+                !$section &&
+                str_starts_with($source, 'custom:') &&
+                Craft::$app->getIsMultiSite() &&
+                Collection::make(Craft::$app->getEntries()->getEditableSections())
+                    ->contains(fn(Section $section) => $section->propagationMethod === PropagationMethod::Custom)
+            )
         ) {
             $actions[] = DeleteForSite::class;
         }
