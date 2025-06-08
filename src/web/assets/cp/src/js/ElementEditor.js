@@ -2398,7 +2398,7 @@ Craft.ElementEditor = Garnish.Base.extend(
                 }
 
                 // hide any tooltips that are no longer relevant
-                for (let userId of Object.keys(this.activityTooltips)) {
+                for (const userId of Object.keys(this.activityTooltips)) {
                   if (
                     !data.activity.find((activity) => activity.userId == userId)
                   ) {

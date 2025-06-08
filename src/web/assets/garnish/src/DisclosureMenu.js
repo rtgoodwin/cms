@@ -653,7 +653,7 @@ export default Base.extend(
         el.setAttribute('data-redirect', item.redirect);
       }
       if (item.attributes) {
-        for (let name in item.attributes) {
+        for (const name in item.attributes) {
           el.setAttribute(name, item.attributes[name]);
         }
       }
