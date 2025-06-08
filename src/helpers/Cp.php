@@ -661,19 +661,15 @@ JS, [
         }
 
         $color = $element instanceof Colorable ? $element->getColor() : null;
+        $thumbAlignment = $element->getThumbAlignment();
 
-        $classes = ['card'];
+        $classes = [
+            'card',
+            "thumb-$thumbAlignment",
+        ];
+
         if ($element->hasErrors()) {
             $classes[] = 'error';
-        }
-
-        $thumb = $element->getThumbHtml(120);
-        if ($thumb) {
-            $thumbAlignment = $element->getThumbAlignment();
-
-            if ($thumbAlignment) {
-                $classes[] = 'thumb-' . $thumbAlignment;
-            }
         }
 
         $attributes = ArrayHelper::merge(
@@ -801,12 +797,23 @@ JS, [
             Html::endTag('div') . // .card-actions
             Html::endTag('div') . // .card-actions-container
             Html::endTag('div') . // .card-titlebar
-            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-main']);
+
+        $contentHtml =
             Html::beginTag('div', ['class' => 'card-content']) .
             ($headingContent !== '' ? Html::tag('div', $headingContent, ['class' => 'card-heading']) : '') .
             ($bodyContent !== '' ? Html::tag('div', $bodyContent, ['class' => 'card-body']) : '') .
-            Html::endTag('div') . // .card-content
-            ($thumb ?? '') .
+            Html::endTag('div'); // .card-content
+
+        $thumbHtml = $element->getThumbHtml(120);
+
+        if ($thumbAlignment === 'start') {
+            $html .= $thumbHtml . $contentHtml;
+        } else {
+            $html .= $contentHtml . $thumbHtml;
+        }
+
+        $html .=
             Html::endTag('div'); // .card-main
 
         if ($config['context'] === 'field' && $config['inputName'] !== null) {
@@ -2914,7 +2921,9 @@ JS, [
 
         $previewHtml .=
             Html::tag('div', options: ['class' => 'card-titlebar']) .
-            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-main']);
+
+        $contentHtml =
             Html::beginTag('div', ['class' => 'card-content']) .
             Html::tag('div', $heading, ['class' => 'card-heading']) .
             Html::beginTag('div', ['class' => 'card-body']);
@@ -2924,26 +2933,26 @@ JS, [
 
         foreach ($cardElements as $cardElement) {
             if ($cardElement instanceof CustomField) {
-                $previewHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
+                $contentHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
-                $previewHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+                $contentHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
             } else {
                 $html = $elementType::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
                     $html = $html();
                 }
-                $previewHtml .= Html::tag('div', $html);
+                $contentHtml .= Html::tag('div', $html);
             }
         }
 
         if (!empty(array_filter($labels))) {
-            $previewHtml .= Html::ul($labels, [
+            $contentHtml .= Html::ul($labels, [
                 'class' => ['flex', 'gap-xs'],
                 'encode' => false,
             ]);
         }
 
-        $previewHtml .=
+        $contentHtml .=
             Html::endTag('div') . // .card-body
             Html::endTag('div'); // .card-content
 
@@ -2954,7 +2963,15 @@ JS, [
                 ['class' => 'cvd-thumbnail']
             );
 
-            $previewHtml .= Html::tag('div', $previewThumb, ['class' => ['thumb']]);
+            $thumbHtml = Html::tag('div', $previewThumb, ['class' => ['thumb']]);
+        } else {
+            $thumbHtml = '';
+        }
+
+        if ($thumbAlignment === 'start') {
+            $previewHtml .= $thumbHtml . $contentHtml;
+        } else {
+            $previewHtml .= $contentHtml . $thumbHtml;
         }
 
         $previewHtml .=

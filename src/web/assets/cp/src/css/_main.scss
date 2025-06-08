@@ -3811,7 +3811,9 @@ table {
   }
 
   &.thumb-start > .card-main {
-    flex-direction: row-reverse;
+    @container (min-width: 200px) {
+      grid-template-columns: auto 1fr;
+    }
   }
 
   .ck-content & {
