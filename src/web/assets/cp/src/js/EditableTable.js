@@ -603,12 +603,21 @@ Craft.EditableTable = Garnish.Base.extend(
               break;
 
             default:
-              $('<textarea/>', {
+              const $textarea = $('<textarea/>', {
                 name: name,
                 rows: col.rows || 1,
                 val: typeof value !== 'object' ? value : null,
                 placeholder: col.placeholder,
               }).appendTo($cell);
+
+              if (col.code) {
+                $textarea.attr({
+                  autocomplete: 'off',
+                  autocorrect: 'off',
+                  autocapitalize: 'off',
+                  spellcheck: 'false',
+                });
+              }
           }
         }
 
