@@ -19,6 +19,7 @@
 - Element condition builders now show condition rules for custom fields with duplicate names. ([#17361](https://github.com/craftcms/cms/pull/17361))
 
 ### Administration
+- It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
@@ -39,7 +40,9 @@
 - Added `craft\fields\data\OptionData::$icon`.
 - Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
+- Added `craft\models\FieldLayout::getCardThumbAlignment()`.
 - Added `craft\models\FieldLayout::resetUids()`.
+- Added `craft\models\FieldLayout::setCardThumbAlignment()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
 - `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - `craft\fields\data\ColorData` now extends `craft\base\Model` and includes `blue`, `green`, `hex`, `luma`, `red`, and `rgb` attributes in its array keys. ([#17265](https://github.com/craftcms/cms/issues/17265))
