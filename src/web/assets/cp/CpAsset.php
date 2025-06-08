@@ -163,6 +163,7 @@ JS;
             'Content',
             'Continue',
             'Copied to clipboard.',
+            'Copy URL',
             'Copy from',
             'Copy the URL',
             'Copy the reference tag',

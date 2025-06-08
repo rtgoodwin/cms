@@ -1504,6 +1504,38 @@ Craft.ElementEditor = Garnish.Base.extend(
             this._afterSaveDraft();
             this.settings.previewParamValue = response.data.previewParamValue;
             this._afterUpdateFieldLayout(data, selectedTabId, response);
+            const newInitialDeltaValues = {};
+
+            if (response.data.deltaNames?.length) {
+              let deltaNames = this.$container.data('delta-names');
+              deltaNames = Array.isArray(deltaNames) ? [...deltaNames] : [];
+              const newDeltaNames = [];
+              for (const name of response.data.deltaNames) {
+                if (deltaNames.indexOf(name) === -1) {
+                  deltaNames.push(name);
+                  newDeltaNames.push(name);
+                }
+              }
+              if (newDeltaNames.length) {
+                this.$container.data('delta-names', deltaNames);
+
+                // update the initial delta values with the initial values of the new field inputs
+                const groupedParams = Craft.groupParams(
+                  this.serializeForm(),
+                  newDeltaNames
+                );
+                for (const [deltaName, params] of Object.entries(
+                  groupedParams
+                )) {
+                  for (const param of params) {
+                    const [name, value] = param.split('=', 2);
+                    newInitialDeltaValues[decodeURIComponent(name)] =
+                      decodeURIComponent(value);
+                  }
+                }
+              }
+            }
+
             this._handleSaveDraftResponse(response);
 
             if ($.isPlainObject(response.data.draftElementUids)) {
@@ -1546,7 +1578,7 @@ Craft.ElementEditor = Garnish.Base.extend(
               );
             }
 
-            this.afterUpdate(data);
+            this.afterUpdate(data, newInitialDeltaValues);
             this.trigger('afterSaveDraft', {response});
 
             if (Craft.broadcaster) {
@@ -2019,9 +2051,9 @@ Craft.ElementEditor = Garnish.Base.extend(
       this.handleDismissibleTips();
     },
 
-    afterUpdate: function (data) {
+    afterUpdate: function (data, newInitialDeltaValues = {}) {
       this.$container.data('initialSerializedValue', data);
-      this.$container.data('initial-delta-values', {});
+      this.$container.data('initial-delta-values', newInitialDeltaValues);
 
       const $statusIcons = this.statusIcons()
         .velocity('stop')

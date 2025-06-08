@@ -1851,7 +1851,7 @@ class Elements extends Component
         $mainClone->setDirtyFields($dirtyFields, false);
 
         // Check authorization?
-        if ($checkAuthorization && !$this->canSave($mainClone)) {
+        if ($checkAuthorization && !($this->canDuplicate($mainClone) && $this->canSave($mainClone))) {
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
@@ -4446,7 +4446,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user))
+        );
     }
 
     /**
@@ -4466,7 +4469,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user))
+        );
     }
 
     /**
@@ -4533,6 +4539,8 @@ SQL;
 
     /**
      * Returns whether a user is authorized to copy the given element, to be duplicated elsewhere.
+     *
+     *  This should always be called in conjunction with [[canView()]].
      *
      * @param ElementInterface $element
      * @param User|null $user
@@ -4633,5 +4641,14 @@ SQL;
 
         $this->trigger($eventName, $event);
         return $event->authorized;
+    }
+
+    private function _siteAuthCheck(ElementInterface $element, User $user): bool
+    {
+        return (
+            !$element::isLocalized() ||
+            !Craft::$app->getIsMultiSite() ||
+            $user->can(sprintf('editSite:%s', $element->getSite()->uid))
+        );
     }
 }

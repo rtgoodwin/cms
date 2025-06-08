@@ -19,6 +19,11 @@ use craft\base\Event;
 class RenderElementEvent extends Event
 {
     /**
+     * @var array{template:string,priority:int}[] The template paths to check when rendering the element’s partial template
+     */
+    public array $templates;
+
+    /**
      * @var array Additional variables to be passed to the template
      */
     public array $variables;

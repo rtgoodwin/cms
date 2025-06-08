@@ -2031,7 +2031,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       try {
         const newElementInfo = await Craft.cp.pasteElements(
-          this.pasteAttributes()
+          Object.assign({}, this.pasteAttributes(), {
+            siteId: this.siteId,
+          })
         );
         if (!newElementInfo.length) {
           return;
