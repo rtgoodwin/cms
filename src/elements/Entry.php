@@ -11,6 +11,7 @@ use Craft;
 use craft\base\Colorable;
 use craft\base\Element;
 use craft\base\ElementContainerFieldInterface;
+use craft\base\ElementInterface;
 use craft\base\ExpirableElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
@@ -21,6 +22,7 @@ use craft\behaviors\DraftBehavior;
 use craft\controllers\ElementIndexesController;
 use craft\db\Connection;
 use craft\db\FixedOrderExpression;
+use craft\db\Query;
 use craft\db\Table;
 use craft\elements\actions\Copy;
 use craft\elements\actions\Delete;
@@ -731,19 +733,17 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         switch ($handle) {
             case 'author':
             case 'authors':
-                $map = [];
+                $entryIds = array_map(fn(ElementInterface $entry) => $entry->id, $sourceElements);
+                $map = (new Query())
+                    ->select([
+                        'source' => 'entryId',
+                        'target' => 'authorId',
+                    ])
+                    ->from(Table::ENTRIES_AUTHORS)
+                    ->where(['entryId' => $entryIds])
+                    ->orderBy(['sortOrder' => SORT_ASC])
+                    ->all();
 
-                /** @var self[] $sourceElements */
-                foreach ($sourceElements as $entry) {
-                    foreach ($entry->getAuthorIds() as $authorId) {
-                        $map[] = [
-                            'source' => $entry->id,
-                            'target' => $authorId,
-                        ];
-                    }
-                }
-
-                /** @phpstan-ignore-next-line */
                 return [
                     'elementType' => User::class,
                     'map' => $map,
@@ -1060,7 +1060,8 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         } catch (InvalidArgumentException) {
             return true;
         }
-        return $titleField->required;
+
+        return $titleField->required && $titleField->showInForm($this);
     }
 
     /**
@@ -1259,6 +1260,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
+        $requestedSite = Cp::requestedSite();
+        if ($requestedSite) {
+            $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
+        }
         /** @var Collection $sectionOptions */
         $sectionOptions = $sections
             ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
@@ -1592,7 +1597,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                 if (!$entryType) {
                     // Maybe the section/field no longer allows this type,
                     // so get it directly from the Entries service instead
-                    $entryType = Craft::$app->getEntries()->getEntryTypeById($this->_typeId);
+                    $entryType = Craft::$app->getEntries()->getEntryTypeById($this->_typeId, true);
                     if (!$entryType) {
                         throw new InvalidConfigException("Invalid entry type ID: $this->_typeId");
                     }
@@ -1744,6 +1749,12 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                     ->status(null)
                     ->all();
             } else {
+                if (isset($this->elementQueryResult) && count($this->elementQueryResult) > 1) {
+                    // eager-load authors for all queried entries
+                    Craft::$app->getElements()->eagerLoadElements(self::class, $this->elementQueryResult, ['authors']);
+                    return $this->_authors ?? [];
+                }
+
                 $authors = User::find()
                     ->authorOf($this)
                     ->status(null)
@@ -1979,7 +1990,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
      */
     public function canCopy(User $user): bool
     {
-        return Craft::$app->getElements()->canDuplicate($this, $user);
+        return Craft::$app->getElements()->canView($this, $user);
     }
 
     /**
@@ -2555,6 +2566,7 @@ JS;
     {
         $entryType = $this->getType();
 
+        // Leave the title alone if the layout has a Title field, and it's already set to something
         if ($entryType->hasTitleField && trim($this->title ?? '') !== '') {
             return;
         }
@@ -3043,5 +3055,25 @@ JS;
                 }
             }
         }
+    }
+
+    protected function partialTemplatePathCandidates(): array
+    {
+        $templates = parent::partialTemplatePathCandidates();
+
+        $entryType = $this->getType();
+        if (isset($entryType->original) && $entryType->original->handle !== $entryType->handle) {
+            $templates[] = [
+                'template' => sprintf(
+                    '%s/%s/%s',
+                    Craft::$app->getConfig()->getGeneral()->partialTemplatesPath,
+                    static::refHandle(),
+                    $entryType->original->handle,
+                ),
+                'priority' => 5,
+            ];
+        }
+
+        return $templates;
     }
 }

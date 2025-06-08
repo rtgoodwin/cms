@@ -397,7 +397,7 @@ class Cp
             } else {
                 /** @var Chippable&Iconic $component */
                 $icon = $component->getIcon();
-                if ($icon) {
+                if ($icon || $icon === '0') {
                     $html .= Html::tag('div', static::iconSvg($icon), [
                         'class' => array_filter(['thumb', 'cp-icon', $color?->value]),
                     ]);
@@ -631,7 +631,14 @@ $('#' + $id).on('activate', (ev) => {
   } else {
     // focus on the button so that when the slideout is closed, it's returned to the button
     $(ev.currentTarget).focus();
-    Craft.createElementEditor($elementType, $settings);
+
+    const settings = $settings;
+    // if settings have draftId but the replaced card doesn't have the data-draft-id attribute anymore,
+    // remove the draftId from the settings before creating element editor, so the correct element can be retrieved
+    if (settings.draftId && !Garnish.hasAttr($(ev.currentTarget).parents('.card'), 'data-draft-id')) {
+      delete settings.draftId;
+    }
+    Craft.createElementEditor($elementType, settings);
   }
 });
 JS, [
@@ -1816,6 +1823,33 @@ JS, [
     }
 
     /**
+     * Renders a button group.
+     *
+     * @param array $config
+     * @return string
+     * @since 5.8.0
+     */
+    public static function buttonGroupHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
+     * Renders a button group field’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @since 5.8.0
+     */
+    public static function buttonGroupFieldHtml(array $config): string
+    {
+        $config['id'] ??= 'buttongroup' . mt_rand();
+        $config['fieldset'] = true;
+        return static::fieldHtml('template:_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
      * Renders a checkbox field’s HTML.
      *
      * Note that unlike the `checkboxField` macro in `_includes/forms.html`, you must set the checkbox label via
@@ -2020,33 +2054,6 @@ JS, [
     {
         $config['id'] ??= 'range' . mt_rand();
         return static::fieldHtml('template:_includes/forms/range.twig', $config);
-    }
-
-    /**
-     * Renders a button group input’s HTML.
-     *
-     * @param array $config
-     * @return string
-     * @throws TemplateLoaderException
-     * @since 5.8.0
-     */
-    public static function buttonGroupHtml(array $config): string
-    {
-        return static::renderTemplate('_includes/forms/buttonGroup.twig', $config);
-    }
-
-    /**
-     * Renders a button group field’s HTML.
-     *
-     * @param array $config
-     * @return string
-     * @throws TemplateLoaderException
-     * @since 5.8.0
-     */
-    public static function buttonGroupFieldHtml(array $config): string
-    {
-        $config['id'] ??= 'buttongroup' . mt_rand();
-        return static::fieldHtml('template:_includes/forms/buttonGroup.twig', $config);
     }
 
     /**

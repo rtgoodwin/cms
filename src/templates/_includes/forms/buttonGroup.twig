@@ -25,10 +25,9 @@
         {%- set option = {label: option, value: key} %}
       {%- endif %}
       {% set selected = option.value is defined and option.value == value %}
-      {{ forms.button({
+      {{ forms.button(option|merge({
         type: 'button',
-        icon: option.icon,
-        class: selected ? 'active' : null,
+        class: (selected ? ['active'] : [])|merge((option.class ?? [])|explodeClass),
         attributes: {
           aria: {
             pressed: selected ? 'true' : 'false',
@@ -39,7 +38,7 @@
           tabindex: disabled ? '-1' : '0',
         }|merge(option.attributes ?? {}, recursive=true),
         readOnly: disabled,
-      }) }}
+      })) }}
     {% endfor %}
   {% endtag %}
 </div>
