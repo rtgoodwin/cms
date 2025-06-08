@@ -2439,7 +2439,7 @@ JS, [
                 $addressesService->getUsedSubdivisionFields($address->countryCode),
             )) + $requiredFields;
 
-        $parents = self::_getSubdivisionParents($address, $visibleFields);
+        $parents = self::_subdivisionParents($address, $visibleFields);
 
         return
             static::textFieldHtml([
@@ -2574,7 +2574,7 @@ JS, [
      * @param array $visibleFields
      * @return array
      */
-    private static function _getSubdivisionParents(Address $address, array $visibleFields): array
+    private static function _subdivisionParents(Address $address, array $visibleFields): array
     {
         $baseSubdivisionRepository = new BaseSubdivisionRepository();
 
@@ -2794,7 +2794,7 @@ JS, [
             Html::endTag('div') . // .cvd-preview-container
             Html::endTag('div') . // .cvd-preview
             Html::endTag('div') . // .cvd-container
-            self::_getThumbManagementHtml($fieldLayout, $config) .
+            self::_thumbManagementHtml($fieldLayout, $config) .
             Html::endTag('div'); // .card-view-designer
     }
 
@@ -2806,7 +2806,7 @@ JS, [
      * @return string
      * @throws TemplateLoaderException
      */
-    private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
+    private static function _thumbManagementHtml(FieldLayout $fieldLayout, array $config): string
     {
         $readOnly = isset($config['config']['disabled']) && $config['config']['disabled'];
         if ((new ($fieldLayout['type']))->hasThumbs()) {
@@ -3066,22 +3066,23 @@ JS;
         self::_setLayoutOnElements($availableNativeFields, $fieldLayout);
         self::_setLayoutOnElements($availableUiElements, $fieldLayout);
 
-        // Don't call FieldLayout::getConfig() here because we want to include *all* tabs, not just non-empty ones
         $fieldLayoutConfig = [
             'uid' => $fieldLayout->uid,
-            'tabs' => array_map(function(FieldLayoutTab $tab) {
-                $config = $tab->getConfig();
-                foreach ($config['elements'] as &$elementConfig) {
+            ...(array)$fieldLayout->getConfig(),
+        ];
+
+        // Default `dateAdded` to a minute ago for each element, so there’s no chance that an element that predated 5.3
+        // would get the same timestamp as a newly-added element, if the layout was saved within a minute of being
+        // edited, after updating to Craft 5.3+.
+        if (isset($fieldLayoutConfig['tabs'])) {
+            foreach ($fieldLayoutConfig['tabs'] as &$tabConfig) {
+                foreach ($tabConfig['elements'] as &$elementConfig) {
                     if (!isset($elementConfig['dateAdded'])) {
-                        // Default `dateAdded` to a minute ago, so there’s no chance that an element that predated 5.3 would get
-                        // the same timestamp as a newly-added element, if the layout was saved within a minute of being edited,
-                        // after updating to Craft 5.3+.
                         $elementConfig['dateAdded'] = DateTimeHelper::toIso8601((new DateTime())->modify('-1 minute'));
                     }
                 }
-                return $config;
-            }, $tabs),
-        ];
+            }
+        }
 
         if ($fieldLayout->id) {
             $fieldLayoutConfig['id'] = $fieldLayout->id;
