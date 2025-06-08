@@ -3066,22 +3066,23 @@ JS;
         self::_setLayoutOnElements($availableNativeFields, $fieldLayout);
         self::_setLayoutOnElements($availableUiElements, $fieldLayout);
 
-        // Don't call FieldLayout::getConfig() here because we want to include *all* tabs, not just non-empty ones
         $fieldLayoutConfig = [
             'uid' => $fieldLayout->uid,
-            'tabs' => array_map(function(FieldLayoutTab $tab) {
-                $config = $tab->getConfig();
-                foreach ($config['elements'] as &$elementConfig) {
+            ...(array)$fieldLayout->getConfig(),
+        ];
+
+        // Default `dateAdded` to a minute ago for each element, so there’s no chance that an element that predated 5.3
+        // would get the same timestamp as a newly-added element, if the layout was saved within a minute of being
+        // edited, after updating to Craft 5.3+.
+        if (isset($fieldLayoutConfig['tabs'])) {
+            foreach ($fieldLayoutConfig['tabs'] as &$tabConfig) {
+                foreach ($tabConfig['elements'] as &$elementConfig) {
                     if (!isset($elementConfig['dateAdded'])) {
-                        // Default `dateAdded` to a minute ago, so there’s no chance that an element that predated 5.3 would get
-                        // the same timestamp as a newly-added element, if the layout was saved within a minute of being edited,
-                        // after updating to Craft 5.3+.
                         $elementConfig['dateAdded'] = DateTimeHelper::toIso8601((new DateTime())->modify('-1 minute'));
                     }
                 }
-                return $config;
-            }, $tabs),
-        ];
+            }
+        }
 
         if ($fieldLayout->id) {
             $fieldLayoutConfig['id'] = $fieldLayout->id;
