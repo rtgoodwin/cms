@@ -2439,7 +2439,7 @@ JS, [
                 $addressesService->getUsedSubdivisionFields($address->countryCode),
             )) + $requiredFields;
 
-        $parents = self::_getSubdivisionParents($address, $visibleFields);
+        $parents = self::_subdivisionParents($address, $visibleFields);
 
         return
             static::textFieldHtml([
@@ -2574,7 +2574,7 @@ JS, [
      * @param array $visibleFields
      * @return array
      */
-    private static function _getSubdivisionParents(Address $address, array $visibleFields): array
+    private static function _subdivisionParents(Address $address, array $visibleFields): array
     {
         $baseSubdivisionRepository = new BaseSubdivisionRepository();
 
@@ -2794,7 +2794,7 @@ JS, [
             Html::endTag('div') . // .cvd-preview-container
             Html::endTag('div') . // .cvd-preview
             Html::endTag('div') . // .cvd-container
-            self::_getThumbManagementHtml($fieldLayout, $config) .
+            self::_thumbManagementHtml($fieldLayout, $config) .
             Html::endTag('div'); // .card-view-designer
     }
 
@@ -2806,7 +2806,7 @@ JS, [
      * @return string
      * @throws TemplateLoaderException
      */
-    private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
+    private static function _thumbManagementHtml(FieldLayout $fieldLayout, array $config): string
     {
         $readOnly = isset($config['config']['disabled']) && $config['config']['disabled'];
         if ((new ($fieldLayout['type']))->hasThumbs()) {
