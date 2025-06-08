@@ -661,8 +661,13 @@ JS, [
         }
 
         $color = $element instanceof Colorable ? $element->getColor() : null;
+        $thumbAlignment = $element->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
 
-        $classes = ['card'];
+        $classes = [
+            'card',
+            "thumb-$thumbAlignment",
+        ];
+
         if ($element->hasErrors()) {
             $classes[] = 'error';
         }
@@ -739,7 +744,6 @@ JS, [
                 Html::endTag('div');
         }
 
-        $thumb = $element->getThumbHtml(120);
         $icon = $element instanceof Iconic ? $element->getIcon() : null;
         $title = $element->getCardTitle();
 
@@ -793,12 +797,23 @@ JS, [
             Html::endTag('div') . // .card-actions
             Html::endTag('div') . // .card-actions-container
             Html::endTag('div') . // .card-titlebar
-            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-main']);
+
+        $contentHtml =
             Html::beginTag('div', ['class' => 'card-content']) .
             ($headingContent !== '' ? Html::tag('div', $headingContent, ['class' => 'card-heading']) : '') .
             ($bodyContent !== '' ? Html::tag('div', $bodyContent, ['class' => 'card-body']) : '') .
-            Html::endTag('div') . // .card-content
-            ($thumb ?? '') .
+            Html::endTag('div'); // .card-content
+
+        $thumbHtml = $element->getThumbHtml(120);
+
+        if ($thumbAlignment === 'start') {
+            $html .= $thumbHtml . $contentHtml;
+        } else {
+            $html .= $contentHtml . $thumbHtml;
+        }
+
+        $html .=
             Html::endTag('div'); // .card-main
 
         if ($config['context'] === 'field' && $config['inputName'] !== null) {
@@ -2035,7 +2050,7 @@ JS, [
     }
 
     /**
-     * Renders a lightswitch field’s HTML.
+     * Renders a range field’s HTML.
      *
      * @param array $config
      * @return string
@@ -2779,7 +2794,94 @@ JS, [
             Html::endTag('div') . // .cvd-preview-container
             Html::endTag('div') . // .cvd-preview
             Html::endTag('div') . // .cvd-container
+            self::_getThumbManagementHtml($fieldLayout, $config) .
             Html::endTag('div'); // .card-view-designer
+    }
+
+    /**
+     * Return HTML for managing thumbnail provider and position.
+     *
+     * @param FieldLayout $fieldLayout
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     */
+    private static function _getThumbManagementHtml(FieldLayout $fieldLayout, array $config): string
+    {
+        $readOnly = isset($config['config']['disabled']) && $config['config']['disabled'];
+        if ((new ($fieldLayout['type']))->hasThumbs()) {
+            $options = [
+                ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
+            ];
+        } else {
+            $options = [
+                ['label' => Craft::t('app', 'None'), 'value' => '__none__'],
+            ];
+        }
+        $elementThumbnail = $fieldLayout->getThumbField()?->uid;
+        $thumbnailAlignment = $fieldLayout->getCardThumbAlignment();
+
+        $thumbableElements = array_filter(
+            $fieldLayout->getAllElements(),
+            fn($element) => $element instanceof BaseField && $element->thumbable()
+        );
+
+        foreach ($thumbableElements as $thumbableElement) {
+            $options[] = ['label' => $thumbableElement->label(), 'value' => $thumbableElement->uid];
+        }
+
+        $thumbHtml = Html::beginTag('div', ['class' => 'thumb-management']) .
+            Html::tag('h2', Craft::t('app', 'Manage element thumbnails'), ['class' => 'visually-hidden']) .
+            Html::beginTag('div', ['class' => ['flex', 'flex-nowrap', 'items-start']]);
+
+        // dropdown field that contains all thumbable fields + 'None' option
+        $thumbHtml .= self::selectFieldHtml([
+            'label' => Craft::t('app', 'Thumbnail Source'),
+            'id' => 'thumb-source',
+            'name' => 'thumbSource',
+            'options' => $options,
+            'value' => $elementThumbnail,
+            'disabled' => $readOnly,
+        ]);
+
+        // radio button switch that lets you choose whether the thumb alignment should be start or end
+        $orientation = Craft::$app->getLocale()->getOrientation();
+        $thumbHtml .= self::buttonGroupFieldHtml([
+            'label' => Craft::t('app', 'Thumbnail Alignment'),
+            'id' => 'thumb-alignment',
+            'fieldClass' => $elementThumbnail === null ? 'hidden' : false,
+            'name' => 'thumbAlignment',
+            'options' => [
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-left' : 'slideout-right',
+                    'value' => 'start',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        ],
+                    ],
+                ],
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-right' : 'slideout-left',
+                    'value' => 'end',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        ],
+                    ],
+                ],
+            ],
+            'value' => $thumbnailAlignment,
+            'disabled' => $readOnly,
+        ]);
+
+
+        $thumbHtml .= Html::endTag('div') . // .flex
+            Html::endTag('div'); // .thumb-management
+
+        return $thumbHtml;
     }
 
     /**
@@ -2792,6 +2894,9 @@ JS, [
      */
     public static function cardPreviewHtml(FieldLayout $fieldLayout, array $cardElements = [], $showThumb = false): string
     {
+        $hasThumb = $showThumb ?? $fieldLayout->getThumbField() !== null ? true : (new ($fieldLayout['type']))->hasThumbs();
+        $thumbAlignment = $fieldLayout->getCardThumbAlignment();
+
         // get heading
         $heading = Html::tag('craft-element-label',
             Html::tag('a', Html::tag('span', Craft::t('app', 'Title')), [
@@ -2811,12 +2916,18 @@ JS, [
 
         $previewHtml =
             Html::beginTag('div', [
-                'class' => ['element', 'card'],
+                'class' => array_filter([
+                    'element',
+                    'card',
+                    $hasThumb ? "thumb-$thumbAlignment" : null,
+                ]),
             ]);
 
         $previewHtml .=
             Html::tag('div', options: ['class' => 'card-titlebar']) .
-            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-main']);
+
+        $contentHtml =
             Html::beginTag('div', ['class' => 'card-content']) .
             Html::tag('div', $heading, ['class' => 'card-heading']) .
             Html::beginTag('div', ['class' => 'card-body']);
@@ -2826,37 +2937,45 @@ JS, [
 
         foreach ($cardElements as $cardElement) {
             if ($cardElement instanceof CustomField) {
-                $previewHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
+                $contentHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
-                $previewHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+                $contentHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
             } else {
                 $html = $elementType::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
                     $html = $html();
                 }
-                $previewHtml .= Html::tag('div', $html);
+                $contentHtml .= Html::tag('div', $html);
             }
         }
 
         if (!empty(array_filter($labels))) {
-            $previewHtml .= Html::ul($labels, [
+            $contentHtml .= Html::ul($labels, [
                 'class' => ['flex', 'gap-xs'],
                 'encode' => false,
             ]);
         }
 
-        $previewHtml .=
+        $contentHtml .=
             Html::endTag('div') . // .card-body
             Html::endTag('div'); // .card-content
 
         // get thumb placeholder
-        if ($showThumb ?? $fieldLayout->getThumbField() !== null) {
+        if ($hasThumb) {
             $previewThumb = Html::tag('div',
                 Html::tag('div', Cp::iconSvg('image'), ['class' => 'cp-icon']),
                 ['class' => 'cvd-thumbnail']
             );
 
-            $previewHtml .= Html::tag('div', $previewThumb, ['class' => ['thumb']]);
+            $thumbHtml = Html::tag('div', $previewThumb, ['class' => ['thumb']]);
+        } else {
+            $thumbHtml = '';
+        }
+
+        if ($thumbAlignment === 'start') {
+            $previewHtml .= $thumbHtml . $contentHtml;
+        } else {
+            $previewHtml .= $contentHtml . $thumbHtml;
         }
 
         $previewHtml .=
@@ -2926,6 +3045,7 @@ JS, [
             'customizableTabs' => $config['customizableTabs'],
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
+            'alwaysShowThumbAlignmentBtns' => (new ($fieldLayout['type']))->hasThumbs(),
             'readOnly' => $readOnly,
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
