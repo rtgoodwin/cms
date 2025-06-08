@@ -2720,12 +2720,9 @@ JS, [
             'name' => 'cardView',
             'options' => $options,
             'values' => array_keys($selectedOptions),
-            'required' => true,
-            //'targetPrefix' => 'cardView-',
             'sortable' => true,
             'disabled' => $disabled,
         ]);
-
 
         // js is initiated via Craft.FieldLayoutDesigner
         $previewHtml = self::cardPreviewHtml($fieldLayout, showThumb: $fieldLayout->getThumbField() !== null);
