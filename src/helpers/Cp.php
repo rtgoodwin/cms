@@ -2825,11 +2825,11 @@ JS, [
 
         $thumbHtml = Html::beginTag('div', ['class' => 'thumb-management']) .
             Html::tag('h2', Craft::t('app', 'Manage element thumbnails'), ['class' => 'visually-hidden']) .
-            Html::beginTag('div', ['class' => 'flex flex-nowrap']);
+            Html::beginTag('div', ['class' => ['flex', 'flex-nowrap', 'items-start']]);
 
         // dropdown field that contains all thumbable fields + 'No thumbnail' option
         $thumbHtml .= self::selectFieldHtml([
-            'label' => Craft::t('app', 'Use for element thumbnails'),
+            'label' => Craft::t('app', 'Thumbnail Source'),
             'id' => 'thumb-source',
             'name' => 'thumbSource',
             'options' => $options,
@@ -2840,7 +2840,7 @@ JS, [
         // radio button switch that lets you choose whether the thumb alignment should be start or end
         $orientation = Craft::$app->getLocale()->getOrientation();
         $thumbHtml .= self::buttonGroupFieldHtml([
-            'label' => Craft::t('app', 'Thumbnail alignment'),
+            'label' => Craft::t('app', 'Thumbnail Alignment'),
             'id' => 'thumb-alignment',
             'fieldClass' => $elementThumbnail === null ? 'hidden' : false,
             'name' => 'thumbAlignment',
