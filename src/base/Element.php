@@ -4369,14 +4369,6 @@ JS, [
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getThumbAlignment(): string
-    {
-        return $this->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
-    }
-
-    /**
      * Returns the URL to the element’s thumbnail, if it has one.
      *
      * @param int $size The maximum width and height the thumbnail should have.

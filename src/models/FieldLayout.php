@@ -434,9 +434,9 @@ class FieldLayout extends Model
     }
 
     /**
-     * Returns the layout’s card view thumbnail alignment.
+     * Returns the thumbnail alignment that should be used in element cards.
      *
-     * @return string The layout’s card view thumbnail alignment.
+     * @return string `start` or `end`
      * @since 5.8.0
      */
     public function getCardThumbAlignment(): string
@@ -449,9 +449,9 @@ class FieldLayout extends Model
     }
 
     /**
-     * Sets the layout’s card view thumbnail alignment.
+     * Sets the thumbnail alignment that should be used in element cards.
      *
-     * @param string|null $alignment The alignment of the card view thumbnail.
+     * @param string|null $alignment `start` or `end`
      * @since 5.8.0
      */
     public function setCardThumbAlignment(?string $alignment = null): void

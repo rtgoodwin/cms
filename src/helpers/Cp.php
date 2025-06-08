@@ -661,7 +661,7 @@ JS, [
         }
 
         $color = $element instanceof Colorable ? $element->getColor() : null;
-        $thumbAlignment = $element->getThumbAlignment();
+        $thumbAlignment = $element->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
 
         $classes = [
             'card',
@@ -2815,7 +2815,7 @@ JS, [
             ];
         } else {
             $options = [
-                ['label' => Craft::t('app', 'No thumbnail'), 'value' => '__none__'],
+                ['label' => Craft::t('app', 'None'), 'value' => '__none__'],
             ];
         }
         $elementThumbnail = $fieldLayout->getThumbField()?->uid;
@@ -2834,7 +2834,7 @@ JS, [
             Html::tag('h2', Craft::t('app', 'Manage element thumbnails'), ['class' => 'visually-hidden']) .
             Html::beginTag('div', ['class' => ['flex', 'flex-nowrap', 'items-start']]);
 
-        // dropdown field that contains all thumbable fields + 'No thumbnail' option
+        // dropdown field that contains all thumbable fields + 'None' option
         $thumbHtml .= self::selectFieldHtml([
             'label' => Craft::t('app', 'Thumbnail Source'),
             'id' => 'thumb-source',
@@ -2916,7 +2916,11 @@ JS, [
 
         $previewHtml =
             Html::beginTag('div', [
-                'class' => ['element', 'card', $hasThumb ? 'thumb-' . $thumbAlignment : null],
+                'class' => array_filter([
+                    'element',
+                    'card',
+                    $hasThumb ? "thumb-$thumbAlignment" : null,
+                ]),
             ]);
 
         $previewHtml .=

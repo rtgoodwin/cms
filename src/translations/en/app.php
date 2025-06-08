@@ -1115,7 +1115,6 @@ return [
     'No sources exist yet.' => 'No sources exist yet.',
     'No tag groups exist yet.' => 'No tag groups exist yet.',
     'No template path has been chosen yet.' => 'No template path has been chosen yet.',
-    'No thumbnail' => 'No thumbnail',
     'No usages' => 'No usages',
     'No user groups exist yet.' => 'No user groups exist yet.',
     'No volumes exist yet.' => 'No volumes exist yet.',
