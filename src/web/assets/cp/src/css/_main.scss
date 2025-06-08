@@ -3809,6 +3809,12 @@ table {
     }
   }
 
+  &.thumb-start > .card-main {
+    @container (min-width: 200px) {
+      grid-template-columns: auto 1fr;
+    }
+  }
+
   .ck-content & {
     ul {
       padding-inline: 0 !important;

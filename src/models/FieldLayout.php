@@ -254,6 +254,13 @@ class FieldLayout extends Model
     private array $_cardView;
 
     /**
+     * @var string
+     * @see getCardThumbAlignment()
+     * @see setCardThumbAlignment()
+     */
+    private string $_cardThumbAlignment;
+
+    /**
      * @inheritdoc
      */
     public function init(): void
@@ -275,6 +282,10 @@ class FieldLayout extends Model
             } else {
                 $this->setCardView([]);
             }
+        }
+
+        if (!isset($this->_cardThumbAlignment)) {
+            $this->setCardThumbAlignment();
         }
     }
 
@@ -420,6 +431,38 @@ class FieldLayout extends Model
 
         // Clear caches
         $this->reset();
+    }
+
+    /**
+     * Returns the thumbnail alignment that should be used in element cards.
+     *
+     * @return string `start` or `end`
+     * @since 5.8.0
+     */
+    public function getCardThumbAlignment(): string
+    {
+        if (!isset($this->_cardThumbAlignment)) {
+            $this->setCardThumbAlignment();
+        }
+
+        return $this->_cardThumbAlignment;
+    }
+
+    /**
+     * Sets the thumbnail alignment that should be used in element cards.
+     *
+     * @param string|null $alignment `start` or `end`
+     * @since 5.8.0
+     */
+    public function setCardThumbAlignment(?string $alignment = null): void
+    {
+        $validOptions = ['start', 'end'];
+
+        if (!in_array($alignment, $validOptions)) {
+            $alignment = null;
+        }
+
+        $this->_cardThumbAlignment = $alignment ?? 'end';
     }
 
     /**
@@ -603,14 +646,17 @@ class FieldLayout extends Model
         ));
 
         $cardViewConfig = $this->getCardView();
+        $cardThumbAlignment = $this->getCardThumbAlignment();
 
         if (empty($tabConfigs) && empty($cardViewConfig)) {
+            // no point bothering with the thumb alignment if we don't have the card view
             return null;
         }
 
         return [
             'tabs' => $tabConfigs,
             'cardView' => $cardViewConfig,
+            'cardThumbAlignment' => $cardThumbAlignment,
         ];
     }
 
