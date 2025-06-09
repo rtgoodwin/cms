@@ -34,7 +34,7 @@
       }|filter|keys,
     } %}
         {% if selectable %}
-            {% set checkboxLabelId = "checkbox-label-#{element.id}" %}
+            {% set checkboxLabelId = "checkbox-label-#{random()}" %}
             <td class="checkbox-cell">
                 {{ tag('div', {
                     class: 'checkbox',
