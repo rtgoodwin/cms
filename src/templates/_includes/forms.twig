@@ -383,6 +383,8 @@
         id: config.id ?? "autosuggest#{random()}",
     }) %}
 
+    {{ config.id }}
+
     {# Suggest an environment variable / alias? #}
     {% if (config.suggestEnvVars ?? false) %}
         {% set value = config.value ?? '' %}

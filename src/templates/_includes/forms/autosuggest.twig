@@ -80,8 +80,8 @@ new Vue({
                 disabled: disabled ?? false,
                 title: title ?? '',
                 placeholder: placeholder ?? '',
-                'aria-describedby': describedBy ?? false,
-                'aria-labelledby': labelledBy ?? false,
+                'aria-describedby': (describedBy ?? false) ? describedBy|split(' ')|map(id => id|namespaceInputId)|join(' ') : null,
+                'aria-labelledby': (labelledBy ?? false) ? labelledBy|split(' ')|map(id => id|namespaceInputId)|join(' ') : null,
             }|merge(inputProps ?? inputAttributes ?? [], recursive=true)|filter,
             limit: limit ?? 5
         }|json_encode|raw }};
