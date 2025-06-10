@@ -179,6 +179,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      *
      * @param string $value
      * @return bool
+     * @since 5.7.11
      */
     public static function isBrandsIcon(string $value): bool
     {
