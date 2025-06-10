@@ -839,9 +839,22 @@ class Matrix extends Field implements
             if ($this->viewMode === self::VIEW_MODE_CARDS) {
                 $view->registerJsWithVars(fn($copyAllId, $fieldId) => <<<JS
 (() => {
+  const copyAllBtn = $('#' + $copyAllId);
+  
   $('#' + $copyAllId).on('activate', () => {
     Craft.cp.copyElements($('#' + $fieldId + ' > .nested-element-cards > .elements > li > .element'));
   });
+  
+  setTimeout(() => {
+    const menu = copyAllBtn.closest('.menu').data('disclosureMenu');
+    const trigger = menu.\$trigger; 
+    const isElementFieldTrigger = trigger.parents('div.field').length;
+    
+    // only show the copy all button if the trigger is part of an element's field
+    menu.on('show', () => {
+      menu.toggleItem(copyAllBtn[0], isElementFieldTrigger);
+    });
+  }, 1);
 })();
 JS, [
                     $view->namespaceInputId($copyAllId),
