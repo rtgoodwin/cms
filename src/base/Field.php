@@ -542,9 +542,9 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
     /**
      * @inheritdoc
      */
-    public function getActionMenuItems(): array
+    public function getActionMenuItems(?ElementInterface $element = null, bool $static = false): array
     {
-        $items = $this->actionMenuItems();
+        $items = $this->actionMenuItems($element, $static);
 
         // Fire a 'defineActionMenuItems' event
         if ($this->hasEventHandlers(self::EVENT_DEFINE_ACTION_MENU_ITEMS)) {
@@ -558,7 +558,7 @@ abstract class Field extends SavableComponent implements FieldInterface, Iconic,
         return $items;
     }
 
-    protected function actionMenuItems(): array
+    protected function actionMenuItems(?ElementInterface $element = null, bool $static = false): array
     {
         $items = [];
         $userSessionService = Craft::$app->getUser();
