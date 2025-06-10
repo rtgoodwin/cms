@@ -17,6 +17,7 @@ use craft\base\ThumbableFieldInterface;
 use craft\elements\Entry;
 use craft\helpers\Cp;
 use craft\helpers\Html;
+use Illuminate\Support\Collection;
 use yii\db\Schema;
 
 /**
@@ -64,6 +65,11 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      * @since 5.3.0
      */
     public bool $includeProIcons = false;
+
+    /**
+     * @var Collection|null A collection of all the available icons.
+     */
+    private static ?Collection $_icons = null;
 
     /**
      * @inheritdoc
@@ -166,5 +172,24 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
     public function getThumbHtml(mixed $value, ElementInterface $element, int $size): ?string
     {
         return $value ? Html::tag('div', Cp::iconSvg($value), ['class' => 'cp-icon']) : null;
+    }
+
+    /**
+     * Returns whether the given icon value is a Font Awesome Brands icon.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public static function isBrandsIcon(string $value): bool
+    {
+        if (!self::$_icons) {
+            $indexPath = '@app/icons/index.php';
+            $icons = require Craft::getAlias($indexPath);
+            self::$_icons = Collection::make($icons);
+        }
+
+        $match = self::$_icons->first(fn($icon, $key) => (string)$key == $value);
+
+        return $match && $match['brands'];
     }
 }
