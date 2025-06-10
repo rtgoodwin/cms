@@ -92,4 +92,17 @@ abstract class BaseLinkType extends ConfigurableComponent
      * @return bool
      */
     abstract public function validateValue(string $value, ?string &$error = null): bool;
+
+    /**
+     * Returns whether given value is empty.
+     *
+     * @param string $value
+     * @param string|null $error
+     * @return bool
+     * @since 5.7.11
+     */
+    public function isValueEmpty(string $value, ?string &$error = null): bool
+    {
+        return empty($value);
+    }
 }

@@ -226,6 +226,30 @@ JS, [
     /**
      * @inheritdoc
      */
+    public function isValueEmpty(string $value, ?string &$error = null): bool
+    {
+        // check if the element we're linking to still exists (e.g. it wasn't deleted)
+        // we already validated the link type, so getting the element type as string
+        // (instead of getting all element types ref handles) should be fine
+        preg_match("/^{(?P<elementType>(?:\w+)):(?P<elementId>\d+)(?:@(?P<siteId>\d+))?/", $value, $matches);
+
+        // if we couldn't get an element ID, treat the value as not empty
+        // as we already checked for empty string, null and empty array in base\Field::isValueEmpty()
+        if (empty($matches['elementId'])) {
+            return false;
+        }
+
+        $element = Craft::$app->getElements()->getElementById(
+            (int)$matches['elementId'],
+            siteId: $matches['siteId'] ?? null,
+        );
+
+        return $element === null;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function normalizeValue(ElementInterface|int|string $value): string
     {
         if ($value instanceof ElementInterface) {
