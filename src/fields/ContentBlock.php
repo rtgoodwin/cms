@@ -50,16 +50,10 @@ use yii\base\InvalidConfigException;
 class ContentBlock extends Field implements
     ElementContainerFieldInterface,
     FieldLayoutProviderInterface
-//    GqlInlineFragmentFieldInterface
 {
     private const VIEW_MODE_GROUPED = 'grouped';
     private const VIEW_MODE_PANE = 'pane';
     private const VIEW_MODE_INLINE = 'inline';
-
-    public function getCustomFields()
-    {
-        $test = true;
-    }
 
     /**
      * @inheritdoc
@@ -697,22 +691,6 @@ JS, [
     {
         return ContentBlockInputType::getType($this);
     }
-
-    /**
-     * @inheritdoc
-     */
-//    public function getGqlFragmentEntityByName(string $fragmentName): GqlInlineFragmentInterface
-//    {
-//        $entryTypeHandle = StringHelper::removeLeft(StringHelper::removeRight($fragmentName, '_Entry'), $this->handle . '_');
-//
-//        $entryType = ArrayHelper::firstWhere($this->getEntryTypes(), 'handle', $entryTypeHandle);
-//
-//        if (!$entryType) {
-//            throw new InvalidArgumentException('Invalid fragment name: ' . $fragmentName);
-//        }
-//
-//        return $entryType;
-//    }
 
     // Events
     // -------------------------------------------------------------------------
