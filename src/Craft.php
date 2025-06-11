@@ -12,7 +12,6 @@ use craft\helpers\ArrayHelper;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\FileHelper;
 use craft\helpers\StringHelper;
-use craft\models\FieldLayout;
 use GuzzleHttp\Client;
 use Symfony\Component\VarDumper\Cloner\VarCloner;
 use yii\base\ExitException;
@@ -239,34 +238,36 @@ class Craft extends Yii
             return;
         }
 
-        $fields = self::_fields();
+        [$fields, $generatedFieldHandles] = self::_fields();
 
-        if (empty($fields)) {
-            // Write and load it simultaneously since there are no custom fields to worry about
-            self::_generateCustomFieldBehavior([], $filePath, true, true);
-        } else {
-            // First generate a basic version without real field value types, and load it into memory
-            $fieldHandles = [];
-            foreach ($fields as $field) {
-                $fieldHandles[$field->handle]['mixed'] = true;
-            }
-            self::_generateCustomFieldBehavior($fieldHandles, $filePath, false, true);
-
-            // Now generate it again, this time with the correct field value types
-            $fieldHandles = [];
-            foreach ($fields as $field) {
-                $types = explode('|', $field::phpType());
-                foreach ($types as $type) {
-                    $type = trim($type, ' \\');
-                    // Add a leading `\` if it’s not a variable, self-reference, or primitive type
-                    if (!preg_match('/^(\$.*|(self|static|bool|boolean|int|integer|float|double|string|array|object|callable|callback|iterable|resource|null|mixed|number|void)(\[\])?)$/i', $type)) {
-                        $type = '\\' . $type;
-                    }
-                    $fieldHandles[$field->handle][$type] = true;
-                }
-            }
-            self::_generateCustomFieldBehavior($fieldHandles, $filePath, true, false);
+        // First generate a basic version without real field value types, and load it into memory
+        $fieldHandles = [];
+        foreach ($fields as $field) {
+            $fieldHandles[$field->handle]['mixed'] = true;
         }
+        foreach ($generatedFieldHandles as $handle) {
+            $fieldHandles[$handle]['mixed'] = true;
+        }
+        self::_generateCustomFieldBehavior($fieldHandles, $filePath, false, true);
+
+        // Now generate it again, this time with the correct field value types
+        $fieldHandles = [];
+        foreach ($fields as $field) {
+            $types = explode('|', $field::phpType());
+            foreach ($types as $type) {
+                $type = trim($type, ' \\');
+                // Add a leading `\` if it’s not a variable, self-reference, or primitive type
+                if (!preg_match('/^(\$.*|(self|static|bool|boolean|int|integer|float|double|string|array|object|callable|callback|iterable|resource|null|mixed|number|void)(\[\])?)$/i', $type)) {
+                    $type = '\\' . $type;
+                }
+                $fieldHandles[$field->handle][$type] = true;
+            }
+        }
+        foreach ($generatedFieldHandles as $handle) {
+            $fieldHandles[$handle]['string'] = true;
+            $fieldHandles[$handle]['null'] = true;
+        }
+        self::_generateCustomFieldBehavior($fieldHandles, $filePath, true, false);
 
         // Generate a new field version if we need one
         if (!$fieldVersionExists) {
@@ -358,23 +359,35 @@ EOD;
     }
 
     /**
-     * @return FieldInterface[]
+     * @return array{0:FieldInterface[],1:string[]}
      */
     private static function _fields(): array
     {
-        // Return all fields merged with all layouts' field instances, to be sure we're not missing anything
-        $fields = array_merge(
-            static::$app->getFields()->getAllFields(false),
-            ...array_map(
-                fn(FieldLayout $fieldLayout) => $fieldLayout->getCustomFields(),
-                Craft::$app->getFields()->getAllLayouts(),
-            ),
-        );
+        $fieldsService = static::$app->getFields();
+        /** @var FieldInterface[] $fields */
+        $fields = $fieldsService->getAllFields(false);
+        $fieldHandles = array_map(fn(FieldInterface $field) => $field->handle, $fields);
+        $generatedFieldHandles = [];
 
-        // Sort by handle
-        usort($fields, fn(FieldInterface $a, FieldInterface $b) => $a->handle <=> $b->handle);
+        foreach ($fieldsService->getAllLayouts() as $layout) {
+            foreach ($layout->getCustomFields() as $field) {
+                if ($field->handle !== $field->layoutElement->handle) {
+                    $fields[] = $field;
+                    $fieldHandles[] = $field->handle;
+                }
+            }
+            foreach ($layout->getGeneratedFields() as $generatedField) {
+                $handle = $generatedField['handle'] ?? '';
+                if ($handle !== '') {
+                    $generatedFieldHandles[$handle] = true;
+                }
+            }
+        }
 
-        return $fields;
+        // Sort custom fields by handle
+        array_multisort($fieldHandles, SORT_ASC, $fields);
+
+        return [$fields, array_keys($generatedFieldHandles)];
     }
 
     /**

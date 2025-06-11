@@ -855,7 +855,7 @@ Craft.EditableTable.Row = Garnish.Base.extend(
         }
       }
 
-      const $deleteBtn = this.$tr.children().last().find('.delete');
+      const $deleteBtn = this.$tr.children('td.action').find('.delete');
       this.addListener($deleteBtn, 'click', 'deleteRow');
 
       const $inputs = this.$tr.find('input,textarea,select,.lightswitch');

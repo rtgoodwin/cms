@@ -214,6 +214,20 @@ class ContentBlock extends Field implements
     }
 
     /**
+     * Sets the generated fields on the field layout.
+     *
+     * @param mixed $fields
+     */
+    public function setGeneratedFields(mixed $fields): void
+    {
+        if (!is_array($fields)) {
+            $fields = null;
+        }
+
+        $this->getFieldLayout()->setGeneratedFields($fields);
+    }
+
+    /**
      * Returns the field layout’s UUID.
      */
     public function getFieldLayoutUid(): string

@@ -2393,6 +2393,14 @@ class ElementQuery extends Query implements ElementQueryInterface
         $element ??= new $class($row);
         $element->attachBehaviors($behaviors);
 
+        $generatedFieldValues = [];
+        foreach ($element->getFieldLayout()?->getGeneratedFields() ?? [] as $field) {
+            if (($field['handle'] ?? '') !== '' && isset($field['uid'])) {
+                $generatedFieldValues[$field['handle']] = $content[$field['uid']] ?? null;
+            }
+        }
+        $element->setGeneratedFieldValues($generatedFieldValues);
+
         // Fire an 'afterPopulateElement' event
         if ($this->hasEventHandlers(self::EVENT_AFTER_POPULATE_ELEMENT)) {
             $event = new PopulateElementEvent([

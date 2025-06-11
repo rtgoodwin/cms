@@ -1622,6 +1622,21 @@ interface ElementInterface extends
     public function getFieldContext(): string;
 
     /**
+     * Returns the generated field values for the element, indexed by handle.
+     *
+     * @return array<string,string>
+     * @since 5.8.0
+     */
+    public function getGeneratedFieldValues(): array;
+
+    /**
+     * Sets the generated field values for the element, indexed by handle.
+     *
+     * @param array<string,string|null> $values
+     */
+    public function setGeneratedFieldValues(array $values): void;
+
+    /**
      * Returns the element’s invalid nested element IDs.
      *
      * @return int[]
