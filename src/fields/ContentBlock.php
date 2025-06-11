@@ -183,7 +183,10 @@ class ContentBlock extends Field implements
     public function getFieldLayout(): FieldLayout
     {
         if (!isset($this->_fieldLayout)) {
-            $this->_fieldLayout = new FieldLayout(['type' => ContentBlockElement::class]);
+            $this->_fieldLayout = new FieldLayout([
+                'type' => ContentBlockElement::class,
+                'provider' => $this,
+            ]);
         }
 
         return $this->_fieldLayout;
@@ -212,6 +215,7 @@ class ContentBlock extends Field implements
             }
         }
 
+        $layout->provider = $this;
         $this->_fieldLayout = $layout;
     }
 
@@ -234,6 +238,7 @@ class ContentBlock extends Field implements
         if (!$layout) {
             throw new InvalidArgumentException("Invalid field layout UUID: $uid");
         }
+        $layout->provider = $this;
         $this->_fieldLayout = $layout;
     }
 
