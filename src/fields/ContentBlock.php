@@ -50,16 +50,10 @@ use yii\base\InvalidConfigException;
 class ContentBlock extends Field implements
     ElementContainerFieldInterface,
     FieldLayoutProviderInterface
-//    GqlInlineFragmentFieldInterface
 {
     private const VIEW_MODE_GROUPED = 'grouped';
     private const VIEW_MODE_PANE = 'pane';
     private const VIEW_MODE_INLINE = 'inline';
-
-    public function getCustomFields()
-    {
-        $test = true;
-    }
 
     /**
      * @inheritdoc
@@ -183,7 +177,10 @@ class ContentBlock extends Field implements
     public function getFieldLayout(): FieldLayout
     {
         if (!isset($this->_fieldLayout)) {
-            $this->_fieldLayout = new FieldLayout(['type' => ContentBlockElement::class]);
+            $this->_fieldLayout = new FieldLayout([
+                'type' => ContentBlockElement::class,
+                'provider' => $this,
+            ]);
         }
 
         return $this->_fieldLayout;
@@ -212,6 +209,7 @@ class ContentBlock extends Field implements
             }
         }
 
+        $layout->provider = $this;
         $this->_fieldLayout = $layout;
     }
 
@@ -234,6 +232,7 @@ class ContentBlock extends Field implements
         if (!$layout) {
             throw new InvalidArgumentException("Invalid field layout UUID: $uid");
         }
+        $layout->provider = $this;
         $this->_fieldLayout = $layout;
     }
 
@@ -692,22 +691,6 @@ JS, [
     {
         return ContentBlockInputType::getType($this);
     }
-
-    /**
-     * @inheritdoc
-     */
-//    public function getGqlFragmentEntityByName(string $fragmentName): GqlInlineFragmentInterface
-//    {
-//        $entryTypeHandle = StringHelper::removeLeft(StringHelper::removeRight($fragmentName, '_Entry'), $this->handle . '_');
-//
-//        $entryType = ArrayHelper::firstWhere($this->getEntryTypes(), 'handle', $entryTypeHandle);
-//
-//        if (!$entryType) {
-//            throw new InvalidArgumentException('Invalid fragment name: ' . $fragmentName);
-//        }
-//
-//        return $entryType;
-//    }
 
     // Events
     // -------------------------------------------------------------------------
