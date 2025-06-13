@@ -137,34 +137,36 @@
                 }) }}
             </legend>
             <div id="move-icon-wrapper" style="display: none;">{{ iconSvg('up-down-left-right') }}</div>
-            <div>
-                {{ _self.cropperButton({
-                    label: 'Cropping Rectangle'|t('app'),
-                    id: 'cropper-handle',
-                    buttonAttributes: {
-                        data: {
-                            'crop-editor': 'rectangle',
-                        },
-                        class: ['cropper-edit__btn']
-                    }
-                }) }}
-            </div>
-
-            <div>
-                {% for button in cropHandleBtns %}
-                    {% if loop.index == 5 %}
-                        <div></div>
-                    {% endif %}
+            <div role="application">
+                <div>
                     {{ _self.cropperButton({
-                        label: button.label,
+                        label: 'Cropping Rectangle'|t('app'),
+                        id: 'cropper-handle',
                         buttonAttributes: {
                             data: {
-                                'crop-editor': button.handle,
+                                'crop-editor': 'rectangle',
                             },
                             class: ['cropper-edit__btn']
                         }
                     }) }}
-                {% endfor %}
+                </div>
+
+                <div>
+                    {% for button in cropHandleBtns %}
+                        {% if loop.index == 5 %}
+                            <div></div>
+                        {% endif %}
+                        {{ _self.cropperButton({
+                            label: button.label,
+                            buttonAttributes: {
+                                data: {
+                                    'crop-editor': button.handle,
+                                },
+                                class: ['cropper-edit__btn']
+                            }
+                        }) }}
+                    {% endfor %}
+                </div>
             </div>
         </fieldset>
     </div>
