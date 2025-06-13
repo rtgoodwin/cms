@@ -1561,7 +1561,7 @@ Craft.ElementEditor = Garnish.Base.extend(
                   .parentsUntil(this.$container, '.flex-fields > .field')
               )
               .add(this.$sidebar?.find(selector).closest('.field'))
-              .not(':has(> .status-badge)');
+              .not('.no-status,:has(> .status-badge)');
 
             for (let i = 0; i < $modifiedFields.length; i++) {
               $modifiedFields.eq(i).prepend(

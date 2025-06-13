@@ -5616,8 +5616,14 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
   }
 
-  &.no-border {
+  &.no-border,
+  &.chromeless {
     border: none !important;
+  }
+
+  &.chromeless {
+    background-color: transparent !important;
+    box-shadow: none;
   }
 
   &.padding-xs {

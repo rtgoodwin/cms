@@ -668,6 +668,14 @@ JS, [
     /**
      * @inheritdoc
      */
+    public function showStatus(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getStatus(ElementInterface $element): ?array
     {
         if ($element->isFieldModified($this->handle)) {
