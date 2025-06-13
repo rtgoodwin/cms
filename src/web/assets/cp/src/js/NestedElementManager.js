@@ -182,7 +182,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
         });
       }
 
-      for (let element of this.$elements.children().toArray()) {
+      for (const element of this.$elements.children().toArray()) {
         this.initElement($(element).children('.element'));
       }
     },
@@ -900,7 +900,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
       let $cards = $();
 
-      for (let elementInfo of elements) {
+      for (const elementInfo of elements) {
         for (const card of data.elements[elementInfo.id] || []) {
           const $li = $('<li/>').appendTo(this.$elements);
           const $card = $(card).appendTo($li);

@@ -2,11 +2,11 @@
 
 ## Unreleased
 
-- Fixed a bug where changes made programatically to elements after save were being overwritten when fully saving an unpublished draft. ([#ckeditor#426](https://github.com/craftcms/ckeditor/issues/426))
+- Fixed a PHP error that could occur when rendering a field layout’s form, if it didn’t have customizable tabs.
 
 ## 5.7.10 - 2025-06-04
 
-- Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/issues/17394))
+- Fixed a bug where addresses’ Latitude and Longitude fields weren’t validating their values. ([#17394](https://github.com/craftcms/cms/isfisues/17394))
 - Fixed a bug where the section menu within Edit Entry pages’ breadcrumbs would display sections that weren’t available for the selected site. ([#17395](https://github.com/craftcms/cms/pull/17395))
 - Fixed styling issues. ([#17393](https://github.com/craftcms/cms/issues/17393), [#17396](https://github.com/craftcms/cms/issues/17396))
 
