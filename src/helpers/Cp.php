@@ -3334,13 +3334,11 @@ JS;
         $cols = [
             'name' => [
                 'heading' => Craft::t('app', 'Name'),
-                'info' => Craft::t('app', 'The author-facing name shown in condition builders.'),
                 'type' => 'singleline',
                 'width' => '15%',
             ],
             'handle' => [
                 'heading' => Craft::t('app', 'Handle'),
-                'info' => Craft::t('app', 'The handle used to reference this field within templates and GraphQL queries.'),
                 'type' => 'singleline',
                 'code' => true,
                 'width' => '15%',
