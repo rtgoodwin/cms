@@ -3919,16 +3919,19 @@ class Elements extends Component
                             }
                         }
 
+                        $generatedFieldValues = [];
                         foreach ($generatedFields as $field) {
-                            if (isset($field['uid'])) {
-                                $value = $view->renderObjectTemplate($field['template'] ?? '', $element);
-                                if ($value !== '') {
-                                    $content[$field['uid']] = $value;
-                                } elseif (!$saveContent) {
-                                    unset($oldContent[$field['uid']]);
+                            $value = $view->renderObjectTemplate($field['template'] ?? '', $element);
+                            if ($value !== '') {
+                                $content[$field['uid']] = $value;
+                                if (($field['handle'] ?? '') !== '') {
+                                    $generatedFieldValues[$field['handle']] = $value;
                                 }
+                            } elseif (!$saveContent) {
+                                unset($oldContent[$field['uid']]);
                             }
                         }
+                        $element->setGeneratedFieldValues($generatedFieldValues);
                     }
 
                     // if we're only saving dirty fields, we need to merge the new dirty values with what's already in the db
