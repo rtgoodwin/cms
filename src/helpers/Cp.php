@@ -1992,7 +1992,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 5.8.0
      */
     public static function editableTableHtml(array $config): string
