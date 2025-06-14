@@ -20,6 +20,8 @@
 
 ### Administration
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
+- Matrix fields’ entry type selections can now be grouped. ([#17425](https://github.com/craftcms/cms/pull/17425))
+- Matrix fields with multiple selected entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
@@ -52,6 +54,7 @@
 - Added `craft\gql\types\input\ContentBlock`.
 - Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
+- Added `craft\models\EntryType::$group`.
 - Added `craft\models\FieldLayout::getCardThumbAlignment()`.
 - Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\models\FieldLayout::setCardThumbAlignment()`.
