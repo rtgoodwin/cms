@@ -1634,6 +1634,7 @@ interface ElementInterface extends
      * Sets the generated field values for the element, indexed by handle.
      *
      * @param array<string,string|null> $values
+     * @since 5.8.0
      */
     public function setGeneratedFieldValues(array $values): void;
 
