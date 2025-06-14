@@ -55,7 +55,6 @@ use craft\validators\ArrayValidator;
 use craft\validators\StringValidator;
 use craft\validators\UriFormatValidator;
 use craft\web\assets\matrix\MatrixAsset;
-use craft\web\assets\matrixsettings\MatrixSettingsAsset;
 use craft\web\View;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
@@ -653,7 +652,6 @@ class Matrix extends Field implements
     private function settingsHtml(bool $readOnly): string
     {
         $view = Craft::$app->getView();
-        $view->registerAssetBundle(MatrixSettingsAsset::class);
 
         $entryTypes = Collection::make($this->getEntryTypes());
         $entryTypeSelectConfig = [

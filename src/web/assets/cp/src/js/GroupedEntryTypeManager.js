@@ -4,7 +4,7 @@
   /**
    * Matrix settings class
    */
-  Craft.EntryTypeManager = Garnish.Base.extend(
+  Craft.GroupedEntryTypeManager = Garnish.Base.extend(
     {
       $container: null,
       $groupsContainer: null,
@@ -15,7 +15,7 @@
 
       init: function ($container, settings = {}) {
         this.$container = $container;
-        this.setSettings(settings, Craft.EntryTypeManager.defaults);
+        this.setSettings(settings, Craft.GroupedEntryTypeManager.defaults);
 
         this.$container.data('entryTypeManager', this);
 
@@ -56,7 +56,7 @@
         const $groups = this.$groupsContainer.children('.entry-type-group');
         $groups.each((i, container) => {
           this.groups.push(
-            new Craft.EntryTypeManager.Group(this, $(container))
+            new Craft.GroupedEntryTypeManager.Group(this, $(container))
           );
         });
 
@@ -95,7 +95,7 @@
         );
         $(selectContainerHtml).appendTo($container);
         await Craft.appendBodyHtml(selectContainerJs);
-        const group = new Craft.EntryTypeManager.Group(this, $container);
+        const group = new Craft.GroupedEntryTypeManager.Group(this, $container);
         this.groups.push(group);
 
         this.groups
@@ -149,7 +149,7 @@
     }
   );
 
-  Craft.EntryTypeManager.Group = Garnish.Base.extend({
+  Craft.GroupedEntryTypeManager.Group = Garnish.Base.extend({
     manager: null,
     $container: null,
     $titlebar: null,

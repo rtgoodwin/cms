@@ -10,7 +10,7 @@
     },
 
     /**
-     * @returns {Craft.EntryTypeManager.Group|null}
+     * @returns {Craft.GroupedEntryTypeManager.Group|null}
      */
     get group() {
       return this.$container
@@ -19,7 +19,7 @@
     },
 
     /**
-     * @returns {Craft.EntryTypeManager|null}
+     * @returns {Craft.GroupedEntryTypeManager|null}
      */
     get manager() {
       return this.group?.manager;
