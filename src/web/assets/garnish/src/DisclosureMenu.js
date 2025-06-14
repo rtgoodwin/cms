@@ -141,6 +141,7 @@ export default Base.extend(
           $options.removeClass('filtered');
         }
 
+        this.updateVisibility();
         this.setContainerPosition();
       });
 
@@ -720,6 +721,7 @@ export default Base.extend(
 
       // show or hide it (show, in case the UL is already hidden)
       this.toggleItem(el, !item.hidden);
+      this.updateVisibility();
 
       return el;
     },
@@ -783,7 +785,8 @@ export default Base.extend(
       if (addHrs) {
         if (
           ul.previousElementSibling &&
-          ul.previousElementSibling.nodeName !== 'HR'
+          ul.previousElementSibling.nodeName !== 'HR' &&
+          !ul.previousElementSibling.classList.contains('search-container')
         ) {
           this.addHr(ul);
         }
@@ -792,7 +795,7 @@ export default Base.extend(
         }
       }
 
-      this.updateHrVisibility();
+      this.updateVisibility();
 
       return ul;
     },
@@ -812,12 +815,8 @@ export default Base.extend(
     showItem(el) {
       const li = el.parentNode;
       li.classList.remove('hidden');
-      const ul = li.parentNode;
-      if (ul.classList.contains('hidden')) {
-        ul.classList.remove('hidden');
-      }
 
-      this.updateHrVisibility();
+      this.updateVisibility();
 
       if (this.isExpanded()) {
         this.setContainerPosition();
@@ -827,15 +826,19 @@ export default Base.extend(
     hideItem(el) {
       const li = el.parentNode;
       li.classList.add('hidden');
-      const ul = li.parentNode;
-      if (ul.querySelectorAll(':scope > li:not(.hidden)').length === 0) {
-        ul.classList.add('hidden');
-      }
 
-      this.updateHrVisibility();
+      this.updateVisibility();
 
       if (this.isExpanded()) {
         this.setContainerPosition();
+      }
+    },
+
+    toggleGroup(group) {
+      if (group.querySelectorAll('li:not(.hidden):not(.filtered)').length) {
+        group.classList.remove('hidden');
+      } else {
+        group.classList.add('hidden');
       }
     },
 
@@ -846,30 +849,35 @@ export default Base.extend(
       if (ul.querySelectorAll(':scope > li').length === 0) {
         ul.remove();
       }
-      if (ul.querySelectorAll(':scope > li:not(.hidden)').length === 0) {
-        ul.classList.add('hidden');
-      }
 
-      this.updateHrVisibility();
+      this.updateVisibility();
 
       if (this.isExpanded()) {
         this.setContainerPosition();
       }
     },
 
+    /**
+     * @deprecated
+     */
     updateHrVisibility() {
-      const $children = this.$container.children();
-      let foundVisibleGroup = false;
-      $children.each((i, child) => {
-        if (child.nodeName === 'HR') {
-          if (foundVisibleGroup) {
-            child.classList.remove('hidden');
-            foundVisibleGroup = false;
-          } else {
-            child.classList.add('hidden');
-          }
-        } else if (!child.classList.contains('hidden')) {
-          foundVisibleGroup = true;
+      this.updateVisibility();
+    },
+
+    updateVisibility() {
+      this.$container.children('ul,.menu-group').each((i, el) => {
+        this.toggleGroup(el);
+      });
+
+      this.$container.find('h3,hr').each((i, el) => {
+        const $el = $(el);
+        const $visibleItems = $el
+          .nextUntil('h3,hr')
+          .filter(':not(.hidden):not(.filtered)');
+        if ($visibleItems.length) {
+          $el.removeClass('hidden');
+        } else {
+          $el.addClass('hidden');
         }
       });
     },
