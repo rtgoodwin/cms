@@ -2309,7 +2309,6 @@ return [
     '“{handle}” is a reserved word.' => '“{handle}” is a reserved word.',
     '“{handle}” isn’t a valid handle.' => '“{handle}” isn’t a valid handle.',
     '“{name}” deleted.' => '“{name}” deleted.',
-    'Ungrouped' => 'Ungrouped',
     'Add Group' => 'Add Group',
     'Move to the next group' => 'Move to the next group',
     'Move to the previous group' => 'Move to the previous group',
