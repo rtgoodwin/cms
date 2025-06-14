@@ -74,6 +74,8 @@ import './js/VolumeFolderSelectorModal.js';
 import './js/FieldToggle.js';
 import './js/GeneratedFieldsTable.js';
 import './js/Grid.js';
+import './js/GroupedEntryTypeManager.js';
+import './js/GroupedEntryTypeSelectInput.js';
 import './js/HandleGenerator.js';
 import './js/IconPicker.js';
 import './js/ImageUpload.js';

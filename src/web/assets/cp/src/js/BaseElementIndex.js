@@ -3393,7 +3393,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
               this.actions = [];
             }
 
-            for (const action of this.settings.actions) {
+            for (let action of this.settings.actions) {
               // clone it so bodyHtml doesn't make it into this.actions
               action = Object.assign({}, action);
               if (action.bodyHtml) {

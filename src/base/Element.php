@@ -152,6 +152,7 @@ use yii\web\Response;
  * @property string|null $url The element’s full URL
  * @property-write int|null $revisionCreatorId revision creator ID to be saved
  * @property-write string|null $revisionNotes revision notes to be saved
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -1734,6 +1735,7 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
     {
@@ -2413,11 +2415,11 @@ abstract class Element extends Component implements ElementInterface
     private bool $_allDirty = false;
 
     /**
-     * @var string[]|null Record of dirty attributes.
+     * @var array<string, int|string|bool> Record of dirty attributes.
      * @see getDirtyAttributes()
      * @see isAttributeDirty()
      */
-    private ?array $_dirtyAttributes = [];
+    private array $_dirtyAttributes = [];
 
     /**
      * @var string|null The initial title value, if there was one.
@@ -2610,7 +2612,7 @@ abstract class Element extends Component implements ElementInterface
     public function __isset($name): bool
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->fieldByHandle(substr($name, 6)) !== null;
         }
 
@@ -2628,7 +2630,7 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->getFieldValue(substr($name, 6));
         }
 
@@ -2650,7 +2652,7 @@ abstract class Element extends Component implements ElementInterface
     public function __set($name, $value)
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             $this->setFieldValue(substr($name, 6), $value);
             return;
         }
@@ -2672,7 +2674,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function __call($name, $params)
     {
-        if (strncmp($name, 'isFieldEmpty:', 13) === 0) {
+        if (str_starts_with($name, 'isFieldEmpty:')) {
             return $this->isFieldEmpty(substr($name, 13));
         }
 
@@ -2860,7 +2862,7 @@ abstract class Element extends Component implements ElementInterface
     public function getAttributeLabel($attribute): string
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 
@@ -3129,7 +3131,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function addError($attribute, $error = ''): void
     {
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 
@@ -4966,7 +4968,6 @@ JS, [
     public function offsetExists($offset): bool
     {
         return (
-            /** @phpstan-ignore-next-line */
             $offset === 'title' ||
             /** @phpstan-ignore-next-line */
             ($this->hasEagerLoadedElements($offset) && !($this->_lazyEagerLoadedElements[$offset] ?? false)) ||
@@ -6246,7 +6247,10 @@ JS, [
     protected function notesFieldHtml(): string
     {
         // todo: this should accept a $static arg
-        /** @var static|DraftBehavior $this */
+        /**
+         * @var static|DraftBehavior $this
+         * @phpstan-ignore varTag.nativeType
+         */
         return Cp::textareaFieldHtml([
             'label' => Craft::t('app', 'Notes about your changes'),
             'labelClass' => 'h6',

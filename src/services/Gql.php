@@ -631,7 +631,6 @@ class Gql extends Component
      * Sets the active GraphQL schema.
      *
      * @param GqlSchema|null $schema The schema, or `null` to unset the active schema
-     * @throws Exception
      */
     public function setActiveSchema(?GqlSchema $schema = null): void
     {

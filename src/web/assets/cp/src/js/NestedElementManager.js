@@ -67,6 +67,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
           $('<div/>', {
             id: createMenuId,
             class: 'menu menu--disclosure',
+            'data-with-search-input': 'true',
           }).insertAfter(this.$createBtn);
           this.$createBtn
             .attr('aria-controls', createMenuId)

@@ -305,7 +305,7 @@
 
     {% if not readOnly %}
       const $entryTypesContainer = $("#{{ 'entry-type-manager'|namespaceInputId }}");
-      new Craft.EntryTypeManager($entryTypesContainer, {
+      new Craft.GroupedEntryTypeManager($entryTypesContainer, {
         $defaultColumnsContainer,
         namespace: {{ view.getNamespace()|json_encode|raw }},
         entryTypeSelectHtml: {{ entryTypeSelectHtml|json_encode|raw }},

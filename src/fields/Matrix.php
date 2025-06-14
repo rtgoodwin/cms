@@ -55,7 +55,6 @@ use craft\validators\ArrayValidator;
 use craft\validators\StringValidator;
 use craft\validators\UriFormatValidator;
 use craft\web\assets\matrix\MatrixAsset;
-use craft\web\assets\matrixsettings\MatrixSettingsAsset;
 use craft\web\View;
 use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
@@ -66,6 +65,7 @@ use yii\db\Expression;
 /**
  * Matrix field type
  *
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -652,7 +652,6 @@ class Matrix extends Field implements
     private function settingsHtml(bool $readOnly): string
     {
         $view = Craft::$app->getView();
-        $view->registerAssetBundle(MatrixSettingsAsset::class);
 
         $entryTypes = Collection::make($this->getEntryTypes());
         $entryTypeSelectConfig = [
@@ -1011,7 +1010,7 @@ JS, [
             return Html::tag('div', $message, ['class' => 'pane no-border zilch small']);
         }
 
-        if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
+        if ($element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         }
 
@@ -1353,6 +1352,7 @@ JS;
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public function getEagerLoadingMap(array $sourceElements): array|null|false
     {

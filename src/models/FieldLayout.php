@@ -437,7 +437,7 @@ class FieldLayout extends Model
         }
 
         if (!empty($missingFields)) {
-            $this->prependElements(array_values($missingFields));
+            $this->prependElements($missingFields);
         }
 
         // Clear caches

@@ -1773,7 +1773,7 @@ class ElementQuery extends Query implements ElementQueryInterface
             } catch (ReflectionException) {
                 $ref = null;
             }
-            /** @var ReflectionClass|null $ref */
+            /** @phpstan-ignore-next-line */
             if ($ref && !$ref->isAbstract()) {
                 $this->subQuery->andWhere(['elements.type' => $this->elementType]);
             }
