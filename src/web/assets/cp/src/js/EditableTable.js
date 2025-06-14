@@ -265,6 +265,7 @@ Craft.EditableTable = Garnish.Base.extend(
 
       // onDeleteRow callback
       this.settings.onDeleteRow(row.$tr);
+      this.trigger('deleteRow', {$tr: row.$tr});
 
       row.destroy();
     },
@@ -317,6 +318,7 @@ Craft.EditableTable = Garnish.Base.extend(
 
       // onAddRow callback
       this.settings.onAddRow($tr);
+      this.trigger('addRow', {$tr});
 
       return row;
     },

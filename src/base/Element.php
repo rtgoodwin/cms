@@ -3625,9 +3625,14 @@ abstract class Element extends Component implements ElementInterface
         $html = '';
 
         foreach ($this->getFieldLayout()?->getCardBodyElements($this) ?? [] as $item) {
-            $itemHtml = $item instanceof BaseField
-                ? $item->previewHtml($this)
-                : $this->getAttributeHtml($item['value']);
+            if ($item instanceof BaseField) {
+                $itemHtml = $item->previewHtml($this);
+            } elseif (is_array($item) && isset($item['html'])) {
+                $itemHtml = $item['html'];
+            } else {
+                $itemHtml = $this->getAttributeHtml($item['value']);
+            }
+
             if ($itemHtml !== '') {
                 $html .= Html::tag('div', $itemHtml, [
                     'class' => 'card-attribute-preview',

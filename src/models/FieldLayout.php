@@ -456,6 +456,23 @@ class FieldLayout extends Model
     }
 
     /**
+     * Returns a generated field by its UUID.
+     *
+     * @return array|null
+     * @since 5.8.0
+     */
+    public function getGeneratedFieldByUid(string $uid): ?array
+    {
+        foreach ($this->getGeneratedFields() as $field) {
+            if ($field['uid'] === $uid) {
+                return $field;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Sets the layout’s generated fields.
      *
      * @param array|null $fields An array of the layout’s generated fields.
@@ -1009,13 +1026,17 @@ class FieldLayout extends Model
         $layoutElements = [];
 
         if (empty($cardElements)) {
-            // get field layout elements that should show in a card
-            $layoutElements = $this->getCardBodyFields($element);
-
             // index field layout elements by prefix + uid
-            foreach ($layoutElements as $key => $layoutElement) {
-                unset($layoutElements[$key]);
-                $layoutElements['layoutElement:' . $layoutElement->uid] = $layoutElement;
+            foreach ($this->getCardBodyFields($element) as $key => $layoutElement) {
+                $layoutElements["layoutElement:$layoutElement->uid"] = $layoutElement;
+            }
+
+            foreach ($this->getGeneratedFields() as $field) {
+                if (($field['name'] ?? '') !== '') {
+                    $layoutElements["generatedField:{$field['uid']}"] = [
+                        'html' => $element ? ($element->getGeneratedFieldValues()[$field['uid']] ?? '') : Html::encode($field['name']),
+                    ];
+                }
             }
         } else {
             // we only need to worry about body fields as the attributes are taken care of via getCardBodyAttributes()
@@ -1040,6 +1061,14 @@ class FieldLayout extends Model
                     }
 
                     $layoutElements[$cardElement['value']] = $layoutElement;
+                } elseif (str_starts_with($cardElement['value'], 'generatedField:')) {
+                    $uid = str_replace('generatedField:', '', $cardElement['value']);
+                    $field = $this->getGeneratedFieldByUid($uid);
+                    if ($field) {
+                        $layoutElements[$cardElement['value']] = [
+                            'html' => $element ? ($element->getGeneratedFieldValues()[$uid] ?? '') : Html::encode($field['name']),
+                        ];
+                    }
                 }
             }
         }

@@ -1661,9 +1661,7 @@ class ElementQuery extends Query implements ElementQueryInterface
                     $this->customFields[] = $field;
                 }
                 foreach ($fieldLayout->getGeneratedFields() as $field) {
-                    if (($field['handle'] ?? '') !== '') {
-                        $this->generatedFields[] = $field;
-                    }
+                    $this->generatedFields[] = $field;
                 }
             }
         }
@@ -2358,7 +2356,10 @@ class ElementQuery extends Query implements ElementQueryInterface
 
             foreach ($this->generatedFields as $field) {
                 if (isset($content[$field['uid']])) {
-                    $row['generatedFieldValues'][$field['handle']] = $content[$field['uid']];
+                    $row['generatedFieldValues'][$field['uid']] = $content[$field['uid']];
+                    if (($field['handle'] ?? '') !== '') {
+                        $row['generatedFieldValues'][$field['handle']] = $content[$field['uid']];
+                    }
                 }
             }
         }
@@ -2754,7 +2755,9 @@ class ElementQuery extends Query implements ElementQueryInterface
         if (!empty($this->generatedFields)) {
             $qb = $db->getQueryBuilder();
             foreach ($this->generatedFields as $field) {
-                $this->_columnMap[$field['handle']] = $qb->jsonExtract('elements_sites.content', [$field['uid']]);
+                if (($field['handle'] ?? '') !== '') {
+                    $this->_columnMap[$field['handle']] = $qb->jsonExtract('elements_sites.content', [$field['uid']]);
+                }
             }
         }
     }
@@ -2833,8 +2836,8 @@ class ElementQuery extends Query implements ElementQueryInterface
         if (!empty($this->generatedFields)) {
             $qb = Craft::$app->getDb()->getQueryBuilder();
             foreach ($this->generatedFields as $field) {
-                $handle = $field['handle'];
-                if (isset($fieldAttributes->$handle) && !isset($fieldsByHandle[$handle])) {
+                $handle = $field['handle'] ?? '';
+                if ($handle !== '' && isset($fieldAttributes->$handle) && !isset($fieldsByHandle[$handle])) {
                     $column = $qb->jsonExtract('elements_sites.content', [$field['uid']]);
                     $this->subQuery->andWhere(Db::parseParam($column, $fieldAttributes->$handle));
                 }

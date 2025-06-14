@@ -2711,68 +2711,50 @@ JS, [
             'disabled' => false,
         ];
 
-        // get the attributes that are set to be visible in the card body
-        $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
-
-        // get remaining attributes
         /** @var ElementInterface $elementType */
         $elementType = new ($fieldLayout['type']);
-        $remainingItems = $elementType::cardAttributes();
-        foreach ($remainingItems as $key => $cardAttributes) {
-            if (isset($selectedCardAttributes[$key])) {
-                unset($remainingItems[$key]);
-            } else {
-                $remainingItems[$key]['value'] = $key;
-            }
-        }
+        $allOptions = $elementType::cardAttributes();
 
-        // get all the previewable fields
-        // and split them between those visible in the card's body and remaining ones
-        $fldOptions = [];
         foreach ($fieldLayout->getAllElements() as $layoutElement) {
-            if (
-                $layoutElement instanceof BaseField &&
-                $layoutElement->previewable()
-            ) {
-                if ($layoutElement->includeInCards) {
-                    $fldOptions['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                } else {
-                    $remainingItems['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                }
+            if ($layoutElement instanceof BaseField && $layoutElement->previewable()) {
+                $allOptions["layoutElement:$layoutElement->uid"] = [
+                    'label' => $layoutElement->label(),
+                ];
             }
         }
 
-        // merge selected card attributes with selected fields
-        $selectedOptions = array_merge($fldOptions, $selectedCardAttributes);
+        foreach ($fieldLayout->getGeneratedFields() as $field) {
+            if (($field['name'] ?? '') !== '') {
+                $allOptions["generatedField:{$field['uid']}"] = [
+                    'label' => $field['name'],
+                ];
+            }
+        }
 
-        // make sure we don't have any cardViewValues that are no longer allowed to show in cards
-        $cardViewValues = $fieldLayout->getCardView();
-        $cardViewValues = array_filter($cardViewValues, fn($value) => isset($selectedOptions[$value]));
+        foreach ($allOptions as $key => &$option) {
+            if (!isset($option['value'])) {
+                $option['value'] = $key;
+            }
+        }
 
-        // sort all selected options by the cardView order
-        $selectedOptions = array_replace(
-            array_flip($cardViewValues),
-            $selectedOptions
-        );
+        $selectedOptions = [];
+        $remainingOptions = [...$allOptions];
+
+        foreach ($fieldLayout->getCardView() as $key) {
+            if (isset($allOptions[$key])) {
+                $selectedOptions[$key] = $allOptions[$key];
+                unset($remainingOptions[$key]);
+            }
+        }
 
         // sort the remaining attributes alphabetically, by label
-        $labels = array_column($remainingItems, 'label');
-        array_multisort($labels, SORT_ASC, $remainingItems);
-
-        // and now that both parts are sorted, merge them
-        $options = array_values(array_merge($selectedOptions, $remainingItems));
+        usort($remainingOptions, fn(array $a, array $b) => $a['label'] <=> $b['label']);
 
         $checkboxSelect = self::checkboxSelectFieldHtml([
             'label' => Craft::t('app', 'Card Attributes'),
             'id' => $config['id'],
             'name' => 'cardView',
-            'options' => $options,
+            'options' => [...$selectedOptions, ...$remainingOptions],
             'values' => array_keys($selectedOptions),
             'sortable' => true,
             'disabled' => $config['disabled'],
@@ -2952,6 +2934,8 @@ JS, [
                 $contentHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
                 $contentHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+            } elseif (is_array($cardElement) && isset($cardElement['html'])) {
+                $contentHtml .= Html::tag('div', $cardElement['html']);
             } else {
                 $html = $elementType::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
