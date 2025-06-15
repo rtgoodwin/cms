@@ -1068,6 +1068,10 @@ class FieldLayout extends Model
                         $layoutElements[$cardElement['value']] = [
                             'html' => $element ? ($element->getGeneratedFieldValues()[$uid] ?? '') : Html::encode($field['name']),
                         ];
+                    } elseif (isset($cardElement['fieldLabel'])) {
+                        $layoutElements[$cardElement['value']] = [
+                            'html' => Html::encode($cardElement['fieldLabel']),
+                        ];
                     }
                 }
             }
