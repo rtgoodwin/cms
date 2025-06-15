@@ -385,11 +385,7 @@ Craft.FieldLayoutDesigner = Garnish.Base.extend(
       const tab = hud.$trigger.closest('.fld-tab').data('fld-tab');
       $element.insertBefore(hud.$trigger);
       const element = tab.initElement($element);
-      element.$container.attr('data-uid', element.uid);
-
-      tab.designer.$cvd?.data('cvd').addCheckbox(element);
-      tab.designer.$cvd?.data('cvd').updateThumbnailsDropdown(element, 'add');
-
+      element.onSelect();
       element.updatePositionInConfig();
       this.tabGrid.refreshCols(true);
     },
@@ -1086,6 +1082,31 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     });
   },
 
+  onSelect() {
+    this.$container.attr('data-uid', this.uid);
+
+    if (Garnish.hasAttr(this.$container, 'data-previewable')) {
+      const cvd = this.tab.designer.$cvd?.data('cvd');
+      if (cvd) {
+        const label = this.getLabel();
+        cvd.addCheckbox({
+          value: `layoutElement:${this.uid}`,
+          label: label,
+          data: {
+            'field-id': this.fieldId,
+            'field-label': label,
+          },
+        });
+        cvd.updateThumbnailsDropdown(this, 'add');
+      }
+    }
+  },
+
+  getLabel() {
+    const label = this.$container.find('.fld-element-label').text();
+    return label !== '' ? label : this.$container.data('attribute');
+  },
+
   async createSettings() {
     let data;
     try {
@@ -1302,12 +1323,14 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
     this.initUi();
 
     if (this.tab.designer.settings.withCardViewDesigner) {
-      // update label in cvd checkboxes
-      this.tab.designer.$cvd.data('cvd').updateLabel(this.$container);
-      // update label in the element thumbnails dropdown
-      this.tab.designer.$cvd
-        .data('cvd')
-        .updateThumbnailsDropdownOptionLabel(this.$container);
+      const cvd = this.tab.designer.$cvd.data('cvd');
+      if (cvd) {
+        // update label in cvd checkboxes
+        cvd.updateCheckboxLabel(this.$container.data('uid'), this.getLabel());
+
+        // update label in the element thumbnails dropdown
+        cvd.updateThumbnailsDropdownOptionLabel(this.$container);
+      }
     }
 
     const designer = this.tab.designer;
@@ -1410,7 +1433,7 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
       let cvd = this.tab.designer.$cvd?.data('cvd');
       cvd.showThumb = false;
 
-      cvd.removeCheckbox(this);
+      cvd.removeCheckbox(this.uid);
       cvd.updateThumbnailsDropdown(this, 'remove');
 
       cvd.updatePreview();
@@ -1883,11 +1906,7 @@ Craft.FieldLayoutDesigner.ElementDrag =
 
         if (this.draggingLibraryElement) {
           element = tab.initElement(this.$draggee);
-          element.$container.attr('data-uid', element.uid);
-          tab.designer.$cvd?.data('cvd').addCheckbox(element);
-          tab.designer.$cvd
-            ?.data('cvd')
-            .updateThumbnailsDropdown(element, 'add');
+          element.onSelect();
         } else {
           element = this.$draggee.data('fld-element');
 
@@ -2089,30 +2108,23 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     return cardElements;
   },
 
-  addCheckbox: function (element) {
-    if (this.$libraryContainer.length == 0) {
-      return null;
+  addCheckbox: function (config = {}) {
+    if (!this.$libraryContainer.length) {
+      return;
     }
 
-    if (!Garnish.hasAttr(element.$container, 'data-previewable')) {
-      return null;
-    }
-
-    let $draggable = $('<div class="checkbox-select-item"/>');
-    let $moveIcon = $(
-      '<a class="move icon draggable-handle disabled"/>'
-    ).appendTo($draggable);
-    let $checkboxContainer = Craft.ui
-      .createCheckbox({
-        name: 'cardView[]',
-        value: 'layoutElement:' + element.uid,
-        label: this.getCheckboxLabel(element.$container),
-        checked: false,
-        data: {
-          'field-id': element.fieldId,
-          'field-label': this.getCheckboxLabel(element.$container),
-        },
-      })
+    const $draggable = $('<div class="checkbox-select-item"/>');
+    $('<a class="move icon draggable-handle disabled"/>').appendTo($draggable);
+    Craft.ui
+      .createCheckbox(
+        Object.assign(
+          {
+            name: 'cardView[]',
+            checked: false,
+          },
+          config
+        )
+      )
       .appendTo($draggable);
 
     $draggable.appendTo(this.$libraryContainer);
@@ -2121,44 +2133,33 @@ Craft.FieldLayoutDesigner.CardViewDesigner = Garnish.Base.extend({
     this.initDrag($draggable);
   },
 
-  removeCheckbox: function (element) {
-    if (!Garnish.hasAttr(element.$container, 'data-previewable')) {
-      return null;
+  updateCheckboxLabel: function (uid, label) {
+    const $draggable = this.findCheckboxByUid(uid);
+    if ($draggable?.length) {
+      $draggable.find('input').attr('data-field-label', label);
+      $draggable.find('label').text(label);
     }
-
-    let $draggable = this.findCheckboxByUid(element.uid);
-    if ($draggable !== null) {
-      $draggable.find('input[type="checkbox"]').prop('checked', false);
-      $draggable.remove();
-    }
-
-    // and now make a call to update the card preview
-    this.updatePreview();
   },
 
-  getCheckboxLabel: function ($container) {
-    return $container.find('.fld-element-label').text() ?? this.attribute;
+  removeCheckbox: function (uid) {
+    let $draggable = this.findCheckboxByUid(uid);
+    if ($draggable?.length) {
+      $draggable.find('input[type="checkbox"]').prop('checked', false);
+      $draggable.remove();
+
+      // and now make a call to update the card preview
+      this.updatePreview();
+    }
   },
 
   findCheckboxByUid: function (uid) {
-    if (this.$libraryContainer.length == 0) {
+    if (!this.$libraryContainer.length) {
       return null;
     }
 
     return this.$libraryContainer
-      .find('input[value="layoutElement:' + uid + '"]')
+      .find(`input[value$=":${uid}"]`)
       .parents('.checkbox-select-item');
-  },
-
-  updateLabel: function ($container) {
-    let $draggable = this.findCheckboxByUid($container.data('uid'));
-
-    if ($draggable === null) {
-      return null;
-    }
-
-    let label = this.getCheckboxLabel($container);
-    $draggable.find('label').text(label);
   },
 
   /** THUMBNAILS **/

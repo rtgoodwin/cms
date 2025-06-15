@@ -72,6 +72,7 @@ import './js/FieldLayoutDesigner.js';
 import './js/FormObserver.js';
 import './js/VolumeFolderSelectorModal.js';
 import './js/FieldToggle.js';
+import './js/GeneratedFieldsTable.js';
 import './js/Grid.js';
 import './js/GroupedEntryTypeManager.js';
 import './js/GroupedEntryTypeSelectInput.js';

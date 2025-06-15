@@ -2400,6 +2400,13 @@ abstract class Element extends Component implements ElementInterface
     private ?array $_normalizedFieldValues = null;
 
     /**
+     * @var array
+     * @see getGeneratedFieldValues()
+     * @see setGeneratedFieldValues()
+     */
+    private array $_generatedFieldValues;
+
+    /**
      * @var bool Whether all attributes and field values should be considered dirty.
      * @see getDirtyAttributes()
      * @see getDirtyFields()
@@ -2630,6 +2637,10 @@ abstract class Element extends Component implements ElementInterface
         // If this is a field, make sure the value has been normalized before returning the CustomFieldBehavior value
         if ($this->fieldByHandle($name) !== null) {
             return $this->clonedFieldValue($name);
+        }
+
+        if (isset($this->_generatedFieldValues) && array_key_exists($name, $this->_generatedFieldValues)) {
+            return $this->_generatedFieldValues[$name];
         }
 
         return parent::__get($name);
@@ -3614,9 +3625,14 @@ abstract class Element extends Component implements ElementInterface
         $html = '';
 
         foreach ($this->getFieldLayout()?->getCardBodyElements($this) ?? [] as $item) {
-            $itemHtml = $item instanceof BaseField
-                ? $item->previewHtml($this)
-                : $this->getAttributeHtml($item['value']);
+            if ($item instanceof BaseField) {
+                $itemHtml = $item->previewHtml($this);
+            } elseif (is_array($item) && isset($item['html'])) {
+                $itemHtml = $item['html'];
+            } else {
+                $itemHtml = $this->getAttributeHtml($item['value']);
+            }
+
             if ($itemHtml !== '') {
                 $html .= Html::tag('div', $itemHtml, [
                     'class' => 'card-attribute-preview',
@@ -5532,6 +5548,22 @@ JS, [
     public function getFieldContext(): string
     {
         return Craft::$app->getFields()->fieldContext;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getGeneratedFieldValues(): array
+    {
+        return $this->_generatedFieldValues ?? [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setGeneratedFieldValues(array $values): void
+    {
+        $this->_generatedFieldValues = $values;
     }
 
     /**

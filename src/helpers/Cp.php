@@ -1988,6 +1988,19 @@ JS, [
     }
 
     /**
+     * Renders an editable table’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     * @since 5.8.0
+     */
+    public static function editableTableHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/editableTable.twig', $config);
+    }
+
+    /**
      * Renders an editable table field’s HTML.
      *
      * @param array $config
@@ -2695,75 +2708,56 @@ JS, [
     {
         $config += [
             'id' => 'cvd' . mt_rand(),
+            'disabled' => false,
         ];
 
-        $disabled = isset($config['config']['disabled']) && $config['config']['disabled'];
-
-        // get the attributes that are set to be visible in the card body
-        $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
-
-        // get remaining attributes
         /** @var ElementInterface $elementType */
         $elementType = new ($fieldLayout['type']);
-        $remainingItems = $elementType::cardAttributes();
-        foreach ($remainingItems as $key => $cardAttributes) {
-            if (isset($selectedCardAttributes[$key])) {
-                unset($remainingItems[$key]);
-            } else {
-                $remainingItems[$key]['value'] = $key;
-            }
-        }
+        $allOptions = $elementType::cardAttributes();
 
-        // get all the previewable fields
-        // and split them between those visible in the card's body and remaining ones
-        $fldOptions = [];
         foreach ($fieldLayout->getAllElements() as $layoutElement) {
-            if (
-                $layoutElement instanceof BaseField &&
-                $layoutElement->previewable()
-            ) {
-                if ($layoutElement->includeInCards) {
-                    $fldOptions['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                } else {
-                    $remainingItems['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                }
+            if ($layoutElement instanceof BaseField && $layoutElement->previewable()) {
+                $allOptions["layoutElement:$layoutElement->uid"] = [
+                    'label' => $layoutElement->label(),
+                ];
             }
         }
 
-        // merge selected card attributes with selected fields
-        $selectedOptions = array_merge($fldOptions, $selectedCardAttributes);
+        foreach ($fieldLayout->getGeneratedFields() as $field) {
+            if (($field['name'] ?? '') !== '') {
+                $allOptions["generatedField:{$field['uid']}"] = [
+                    'label' => $field['name'],
+                ];
+            }
+        }
 
-        // make sure we don't have any cardViewValues that are no longer allowed to show in cards
-        $cardViewValues = $fieldLayout->getCardView();
-        $cardViewValues = array_filter($cardViewValues, fn($value) => isset($selectedOptions[$value]));
+        foreach ($allOptions as $key => &$option) {
+            if (!isset($option['value'])) {
+                $option['value'] = $key;
+            }
+        }
 
-        // sort all selected options by the cardView order
-        $selectedOptions = array_replace(
-            array_flip($cardViewValues),
-            $selectedOptions
-        );
+        $selectedOptions = [];
+        $remainingOptions = [...$allOptions];
+
+        foreach ($fieldLayout->getCardView() as $key) {
+            if (isset($allOptions[$key])) {
+                $selectedOptions[$key] = $allOptions[$key];
+                unset($remainingOptions[$key]);
+            }
+        }
 
         // sort the remaining attributes alphabetically, by label
-        $labels = array_column($remainingItems, 'label');
-        array_multisort($labels, SORT_ASC, $remainingItems);
-
-        // and now that both parts are sorted, merge them
-        $options = array_values(array_merge($selectedOptions, $remainingItems));
+        usort($remainingOptions, fn(array $a, array $b) => $a['label'] <=> $b['label']);
 
         $checkboxSelect = self::checkboxSelectFieldHtml([
             'label' => Craft::t('app', 'Card Attributes'),
             'id' => $config['id'],
             'name' => 'cardView',
-            'options' => $options,
+            'options' => [...$selectedOptions, ...$remainingOptions],
             'values' => array_keys($selectedOptions),
             'sortable' => true,
-            'disabled' => $disabled,
+            'disabled' => $config['disabled'],
         ]);
 
         // js is initiated via Craft.FieldLayoutDesigner
@@ -2805,7 +2799,10 @@ JS, [
      */
     private static function _thumbManagementHtml(FieldLayout $fieldLayout, array $config): string
     {
-        $readOnly = isset($config['config']['disabled']) && $config['config']['disabled'];
+        $config += [
+            'disabled' => false,
+        ];
+
         if ((new ($fieldLayout['type']))->hasThumbs()) {
             $options = [
                 ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
@@ -2838,7 +2835,7 @@ JS, [
             'name' => 'thumbSource',
             'options' => $options,
             'value' => $elementThumbnail,
-            'disabled' => $readOnly,
+            'disabled' => $config['disabled'],
         ]);
 
         // radio button switch that lets you choose whether the thumb alignment should be start or end
@@ -2871,7 +2868,7 @@ JS, [
                 ],
             ],
             'value' => $thumbnailAlignment,
-            'disabled' => $readOnly,
+            'disabled' => $config['disabled'],
         ]);
 
 
@@ -2937,6 +2934,8 @@ JS, [
                 $contentHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
                 $contentHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+            } elseif (is_array($cardElement) && isset($cardElement['html'])) {
+                $contentHtml .= Html::tag('div', $cardElement['html']);
             } else {
                 $html = $elementType::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
@@ -2993,11 +2992,11 @@ JS, [
      */
     public static function fieldLayoutDesignerHtml(FieldLayout $fieldLayout, array $config = []): string
     {
-        $readOnly = isset($config['disabled']) && $config['disabled'];
         $config += [
             'id' => 'fld' . mt_rand(),
             'customizableTabs' => true,
             'customizableUi' => true,
+            'disabled' => false,
         ];
 
         $tabs = array_values($fieldLayout->getTabs());
@@ -3043,7 +3042,7 @@ JS, [
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
             'alwaysShowThumbAlignmentBtns' => (new ($fieldLayout['type']))->hasThumbs(),
-            'readOnly' => $readOnly,
+            'readOnly' => $config['disabled'],
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
 
@@ -3100,13 +3099,16 @@ JS;
             Html::beginTag('div', ['class' => 'fld-container']) .
             Html::beginTag('div', ['class' => 'fld-workspace']) .
             Html::beginTag('div', ['class' => 'fld-tabs']) .
-            implode('', array_map(fn(FieldLayoutTab $tab) => self::_fldTabHtml($tab, $config['customizableTabs'], $readOnly), $tabs)) .
+            implode('', array_map(
+                fn(FieldLayoutTab $tab) => self::_fldTabHtml($tab, $config['customizableTabs'], $config['disabled']),
+                $tabs,
+            )) .
             Html::endTag('div') . // .fld-tabs
             ($config['customizableTabs']
                 ? Html::button(Craft::t('app', 'New Tab'), [
                     'type' => 'button',
                     'class' => ['fld-new-tab-btn', 'btn', 'add', 'icon'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ])
                 : '') .
             Html::endTag('div') . // .fld-workspace
@@ -3121,14 +3123,14 @@ JS;
                     'class' => ['btn', 'small', 'active'],
                     'aria' => ['pressed' => 'true'],
                     'data' => ['library' => 'field'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ]) .
                 Html::button(Craft::t('app', 'UI Elements'), [
                     'type' => 'button',
                     'class' => ['btn', 'small'],
                     'aria' => ['pressed' => 'false'],
                     'data' => ['library' => 'ui'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ]) .
                 Html::endTag('section') // .btngroup
                 : '') .
@@ -3138,7 +3140,7 @@ JS;
                 'class' => 'fullwidth',
                 'inputmode' => 'search',
                 'placeholder' => Craft::t('app', 'Search'),
-                'disabled' => $readOnly,
+                'disabled' => $config['disabled'],
             ]) .
             Html::tag('div', '', [
                 'class' => ['clear-btn', 'hidden'],
@@ -3295,6 +3297,80 @@ JS;
                 return $field->attribute() === $attribute;
             })
         );
+    }
+
+    /**
+     * Renders a Generated Fields table for a field layout
+     *
+     * @param FieldLayout $fieldLayout
+     * @param array $config
+     * @return string
+     */
+    public static function generatedFieldsTableHtml(FieldLayout $fieldLayout, array $config = []): string
+    {
+        $config += [
+            'id' => sprintf('generated-fields-table-%s', mt_rand()),
+            'disabled' => false,
+        ];
+
+        $name = 'generatedFields';
+
+        $cols = [
+            'name' => [
+                'heading' => Craft::t('app', 'Name'),
+                'type' => 'singleline',
+                'width' => '15%',
+            ],
+            'handle' => [
+                'heading' => Craft::t('app', 'Handle'),
+                'type' => 'singleline',
+                'code' => true,
+                'width' => '15%',
+            ],
+            'template' => [
+                'heading' => Craft::t('app', 'Template'),
+                'type' => 'multiline',
+                'code' => true,
+            ],
+        ];
+
+        $rows = array_map(function(array $field) {
+            if (isset($field['uid'])) {
+                $field['hiddenInputs'] = [
+                    'uid' => $field['uid'],
+                ];
+            }
+            return $field;
+        }, $fieldLayout->getGeneratedFields());
+
+        $settings = [
+            'allowAdd' => true,
+            'allowReorder' => true,
+            'allowDelete' => true,
+        ];
+
+        $view = Craft::$app->getView();
+        $view->registerJsWithVars(fn($id, $name, $cols, $settings) => <<<JS
+(() => {
+  new Craft.GeneratedFieldsTable($id, $name, $cols, $settings);
+})();
+JS, [
+            $view->namespaceInputId($config['id']),
+            $view->namespaceInputName($name),
+            $cols,
+            $settings,
+        ]);
+
+        return static::editableTableHtml([
+            'id' => $config['id'],
+            'name' => $name,
+            'cols' => $cols,
+            'rows' => $rows,
+            'addRowLabel' => Craft::t('app', 'Add a field'),
+            'static' => $config['disabled'],
+            'initJs' => false,
+            ...$settings,
+        ]);
     }
 
     /**

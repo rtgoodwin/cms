@@ -3888,14 +3888,17 @@ class Elements extends Component
                 }
 
                 $saveContent = $saveContent || $element->isNewForSite;
+                $generatedFields = $fieldLayout?->getGeneratedFields() ?? [];
 
-                if ($saveContent || !empty($dirtyFields)) {
+                if ($saveContent || !empty($dirtyFields) || !empty($generatedFields)) {
                     $oldContent = $siteSettingsRecord->content ?? []; // we'll need that if we're not saving all the content
                     if (is_string($oldContent)) {
                         $oldContent = $oldContent !== '' ? Json::decode($oldContent) : [];
                     }
 
                     $content = [];
+                    $view = Craft::$app->getView();
+
                     if ($fieldLayout) {
                         foreach ($fieldLayout->getCustomFields() as $field) {
                             if (($saveContent || in_array($field->handle, $dirtyFields)) && $field::dbType() !== null) {
@@ -3915,6 +3918,20 @@ class Elements extends Component
                                 }
                             }
                         }
+
+                        $generatedFieldValues = [];
+                        foreach ($generatedFields as $field) {
+                            $value = $view->renderObjectTemplate($field['template'] ?? '', $element);
+                            if ($value !== '') {
+                                $content[$field['uid']] = $value;
+                                if (($field['handle'] ?? '') !== '') {
+                                    $generatedFieldValues[$field['handle']] = $value;
+                                }
+                            } elseif (!$saveContent) {
+                                unset($oldContent[$field['uid']]);
+                            }
+                        }
+                        $element->setGeneratedFieldValues($generatedFieldValues);
                     }
 
                     // if we're only saving dirty fields, we need to merge the new dirty values with what's already in the db

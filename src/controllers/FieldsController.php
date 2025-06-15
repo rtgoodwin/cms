@@ -624,7 +624,7 @@ JS, [
         }
 
         if (!$fieldLayout) {
-            throw new BadRequestHttpException("Invalid field layout");
+            throw new BadRequestHttpException('Invalid field layout');
         }
 
         $fieldLayout->setCardView(

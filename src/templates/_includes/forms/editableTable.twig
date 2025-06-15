@@ -282,6 +282,9 @@
                         }) }}
                     </td>
                 {%- endif -%}
+                {% for inputName, value in row.hiddenInputs ?? [] %}
+                    {{ hiddenInput("#{name}[#{rowId}][#{inputName}]", value) }}
+                {% endfor %}
             </tr>
         {% endfor %}
     </tbody>
