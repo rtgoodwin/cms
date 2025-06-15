@@ -35,7 +35,10 @@
 - Element edit pages now support being passed a hashed `returnUrl` query string param. ([#17137](https://github.com/craftcms/cms/discussions/17137))
 - Added `craft\base\Element::EVENT_RENDER`. ([#17188](https://github.com/craftcms/cms/discussions/17188))
 - Added `craft\base\Element::partialTemplatePathCandidates()`.
+- Added `craft\base\ElementInterface::getGeneratedFieldValues()`.
 - Added `craft\base\ElementInterface::render()`.
+- Added `craft\base\ElementInterface::setGeneratedFieldValues()`.
+- Added `craft\base\Field::RESERVED_HANDLES`.
 - Added `craft\base\FieldInterface::showStatus()`.
 - Added `craft\elements\Asset::setMimeType()`.
 - Added `craft\elements\ContentBlock`.
@@ -43,6 +46,7 @@
 - Added `craft\events\RenderElementEvent`. ([#`17188`](https://github.com/craftcms/cms/discussions/17188))
 - Added `craft\fieldlayoutelements\BaseField::showStatus()`.
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
+- Added `craft\fields\conditions\GeneratedFieldConditionRule`.
 - Added `craft\fields\conditions\LinkFieldConditionRule`.
 - Added `craft\fields\data\OptionData::$color`.
 - Added `craft\fields\data\OptionData::$icon`.
@@ -54,21 +58,29 @@
 - Added `craft\gql\types\input\ContentBlock`.
 - Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
+- Added `craft\helpers\Cp::editableTableHtml()`.
+- Added `craft\helpers\Cp::generatedFieldsTableHtml()`.
 - Added `craft\models\EntryType::$group`.
 - Added `craft\models\FieldLayout::getCardThumbAlignment()`.
+- Added `craft\models\FieldLayout::getGeneratedFieldByUid()`.
+- Added `craft\models\FieldLayout::getGeneratedFields()`.
 - Added `craft\models\FieldLayout::resetUids()`.
 - Added `craft\models\FieldLayout::setCardThumbAlignment()`.
+- Added `craft\models\FieldLayout::setGeneratedFields()`.
 - Added `craft\records\ContentBlock`.
+- Added `craft\services\Gql::defineContentArgumentsForGeneratedFields()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
 - `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - `craft\fields\data\ColorData` now extends `craft\base\Model` and includes `blue`, `green`, `hex`, `luma`, `red`, and `rgb` attributes in its array keys. ([#17265](https://github.com/craftcms/cms/issues/17265))
 - `craft\services\Assets::replaceAssetFile()` now has a `$mimeType` argument.
 - `craft\services\Users::saveUserPhoto()` now has a `$mimeType` argument.
+- `craft\validators\HandleValidator` now supports `validateValue()`.
 - Added the `buttonGroup` and `buttonGroupField` macros to the `_includes/forms.twig` template.
 - Added the `_includes/forms/buttonGroup.twig` template.
 - `Craft.CpScreenSlideout` now supports overriding the `closeOnEsc`, `closeOnShadeClick`, `containerElement`, and `containerAttributes` settings. Slideouts with a non-`<form>` container element won’t get a “Save” button, and the close button will be labelled “Close” rather than “Cancel”. ([#13593](https://github.com/craftcms/cms/discussions/13593))
 - `Craft.EntryTypeSelectInput` now triggers an `applySettings` event. ([#17387](https://github.com/craftcms/cms/pull/17387))
 - Deprecated `craft\web\assets\picturefill\PicturefillAsset`. ([#17344](https://github.com/craftcms/cms/pull/17344))
+- Deprecated `craft\elements\db\ElementQuery::customFields()`.
 
 ### System
 - Email verification links now show a form with a “Verify” button, which must be submitted before the email address is actually verified. ([#17392](https://github.com/craftcms/cms/pull/17392))
