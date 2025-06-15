@@ -1188,7 +1188,6 @@ i em {
 
 .light {
   color: var(--medium-text-color) !important;
-  font-weight: normal;
 }
 
 .extralight {
@@ -3475,7 +3474,7 @@ table {
     content: '';
     inset: 0;
     border-radius: var(--large-border-radius);
-    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-150));
+    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-200));
     pointer-events: none;
     z-index: 1;
   }
