@@ -23,6 +23,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     $croppingCanvas: null,
     $cropperMoveBtn: null,
     $cropperEditBtn: null,
+    $fabricElementEditBtn: null,
     $spinner: null,
     $constraintContainer: null,
     $constraintRadioInputs: null,
@@ -87,7 +88,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     constraintOrientation: 'landscape',
     showingCustomConstraint: false,
     saving: false,
-    nonDragEditMode: false,
+    nonDragEditMode: true,
 
     announcerTimeout: null,
 
@@ -213,6 +214,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Keyboard accessibility
       this.$cropperMoveBtn = $('#cropper-handle', this.$body);
       this.$cropperEditBtn = $('[data-crop-editor]', this.$body);
+      this.$fabricElementEditBtn = $('[data-fabric-element]', this.$body);
 
       // Get SVG to use for move/active indicator
       const $moveSvg = $('#move-icon-wrapper svg').prop('outerHTML');
@@ -661,11 +663,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     toggleFocalPoint: function () {
       if (!this.focalPoint) {
         this._createFocalPoint();
-        this.$focalPointBtn.attr('aria-pressed', 'true');
       } else {
         this.canvas.remove(this.focalPoint);
         this.focalPoint = null;
-        this.$focalPointBtn.attr('aria-pressed', 'false');
       }
 
       this.renderImage();
@@ -878,9 +878,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         }
       });
 
-      // Focal point
-      this.addListener(this.$focalPointBtn, 'click', this.toggleFocalPoint);
-
       // Rotate controls
       this.addListener($('.rotate-left'), 'click', function () {
         this.rotateImage(-90);
@@ -895,13 +892,15 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this.flipImage('x');
       });
 
+      // FabricJS canvas
+      this.addListener(this.$fabricElementEditBtn, 'click', (ev) => {
+        this._handleFabricElementEditBtnClick(ev);
+      });
+      this.addListener(this.$fabricElementEditBtn, 'keydown', (ev) => {
+        this._handleKeydownOnFabricElementEditBtn(ev);
+      });
+
       // Cropper
-      this.addListener(this.$cropperEditBtn, 'click', (ev) => {
-        this._handleCropperEditBtnClick(ev);
-      });
-      this.addListener(this.$cropperEditBtn, 'keydown', (ev) => {
-        this._handleKeydownOnCropperEditBtn(ev);
-      });
       this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
         this._handleCropperEditBtnBlur(ev);
         this._redrawCropperElements();
@@ -2397,7 +2396,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _getCroppingRectangleEditBtnIsFocused: function () {
       if (this.cropperEditBtnFocused) {
         // Check button properties. If rectangle, use rectangle styles
-        const cropperElement = this._getCropperElementFromEditBtn(
+        const cropperElement = this._getFabricElementFromEditBtn(
           this.cropperEditBtnFocused
         );
 
@@ -2416,11 +2415,11 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     _getCropperHandleEditBtnIsFocused: function () {
       if (this.cropperEditBtnFocused) {
         // Check button properties. If rectangle, use rectangle styles
-        const cropperElement = this._getCropperElementFromEditBtn(
+        const cropperElement = this._getFabricElementFromEditBtn(
           this.cropperEditBtnFocused
         );
 
-        if (cropperElement !== 'rectangle') {
+        if (cropperElement !== 'rectangle' && cropperElement !== 'focalpoint') {
           return true;
         }
 
@@ -2517,7 +2516,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       const handle = this.handlePicked
         ? this.handlePicked
-        : this._getCropperElementFromEditBtn(this.cropperEditBtnFocused);
+        : this._getFabricElementFromEditBtn(this.cropperEditBtnFocused);
 
       let handleCoordinates = this._getClipperHandlePosition(handle);
       const size = 12;
@@ -2654,17 +2653,19 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Handle click events on the cropper rectangle or cropper handle edit buttons.
      * @param ev
      */
-    _handleCropperEditBtnClick: function (ev) {
+    _handleFabricElementEditBtnClick: function (ev) {
       const $btn = $(ev.target.closest('button'));
       const btnPressed = $btn.attr('aria-pressed') === 'true';
-      const itemPicked = this._getCropperElementFromEditBtn($btn);
+      const itemPicked = this._getFabricElementFromEditBtn($btn);
+
+      if (itemPicked === 'focalpoint') {
+        this.toggleFocalPoint();
+      }
 
       if (btnPressed) {
-        this.nonDragEditMode = false;
-        this._dropCropperElement(itemPicked);
+        this._dropFabricElement(itemPicked);
       } else {
-        this.nonDragEditMode = true;
-        this._pickUpCropperElement(itemPicked);
+        this._pickUpFabricElement(itemPicked);
       }
     },
 
@@ -2707,6 +2708,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param {string} message
      */
     _announce: function (message) {
+      console.log(message);
       if (this.announceTimeout) {
         clearTimeout(this.announceTimeout);
       }
@@ -2721,8 +2723,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param $btn
      * @returns {'rectangle'|'tl'|'t'|'tr'|'l'|'r'|'bl'|'b'|'br'}
      */
-    _getCropperElementFromEditBtn: function ($btn) {
-      return $($btn).attr('data-crop-editor');
+    _getFabricElementFromEditBtn: function ($btn) {
+      return $($btn).attr('data-fabric-element');
     },
 
     /**
@@ -2738,9 +2740,13 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Pick up a cropper element given its handle.
      * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
      */
-    _pickUpCropperElement: function (element) {
+    _pickUpFabricElement: function (element) {
+      console.log('helllooooo');
       this.cropperPickedUp = false;
       this.handlePicked = false;
+      this.focalPickedUp = false;
+
+      console.log(element);
 
       let stateMessage = '';
       let positionMessage = '';
@@ -2748,11 +2754,14 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       const $btn = this._getCropperEditBtnFromElementHandle(element);
       $btn.attr('aria-pressed', 'true');
-      const itemName = $btn.find('[data-item-name]').text();
+      const itemName = $btn.attr('[data-item-name]');
 
       if (element === 'rectangle') {
         this.cropperPickedUp = true;
         positionMessage = this._getRelativePositionMessage(this.clipper);
+      } else if (element === 'focalpoint') {
+        this.focalPickedUp = true;
+        positionMessage = this._getRelativePositionMessage(this.focalPoint);
       } else {
         $btn.attr('aria-pressed', 'true');
         this.handlePicked = element;
@@ -2779,7 +2788,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Drops a cropper element given its handle.
      * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
      */
-    _dropCropperElement: function (element) {
+    _dropFabricElement: function (element) {
       const $btn = this._getCropperEditBtnFromElementHandle(element);
       const itemName = $btn.find('[data-item-name]').text();
 
@@ -2790,6 +2799,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       // Defaults
       this.cropperPickedUp = false;
       this.handlePicked = false;
+      this.focalPickedUp = false;
       $btn.attr('aria-pressed', 'false');
 
       stateMessage = Craft.t('app', '{item} dropped.', {
@@ -2828,7 +2838,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Handle keydown events on the cropper rectangle or cropper handle edit buttons.
      * @param ev
      */
-    _handleKeydownOnCropperEditBtn: function (ev) {
+    _handleKeydownOnFabricElementEditBtn: function (ev) {
       const {target} = ev;
 
       if (!this.focalPoint && !this.cropperPickedUp && !this.handlePicked)
@@ -2846,7 +2856,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       event.preventDefault();
 
       if (this.croppingCanvas) {
-        this._handleCropperKeyboardEdit(ev);
+        this._handleFabricElementKeyboardEdit(ev);
       }
     },
 
@@ -2858,8 +2868,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       this.nonDragEditMode = false;
 
       if (btnPressed) {
-        const elementToDrop = this._getCropperElementFromEditBtn($btn);
-        this._dropCropperElement(elementToDrop);
+        const elementToDrop = this._getFabricElementFromEditBtn($btn);
+        this._dropFabricElement(elementToDrop);
       }
     },
 
@@ -2875,6 +2885,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       var handle = this.croppingCanvas && this._cropperHandleHitTest(ev);
 
       if (handle || move || focal) {
+        this.nonDragEditMode = true;
         this.previousMouseX = ev.pageX;
         this.previousMouseY = ev.pageY;
 
@@ -3102,7 +3113,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Handle keyboard events for editing the cropper.
      * @param ev
      */
-    _handleCropperKeyboardEdit: function (ev) {
+    _handleFabricElementKeyboardEdit: function (ev) {
       let direction;
 
       // Figure out which direction to move the cropper
@@ -3120,6 +3131,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           direction = 'down';
           break;
       }
+      console.log(this.focalPickedUp);
 
       const deltaValues = this._getDeltaValuesFromDirection(direction);
 
@@ -3130,6 +3142,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           x: deltaValues.deltaX,
           y: deltaValues.deltaY,
         });
+      } else if (this.focalPickedUp) {
+        console.log('Focal point moved by', deltaValues);
       }
     },
 
