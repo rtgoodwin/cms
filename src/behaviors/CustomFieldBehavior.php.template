@@ -39,7 +39,7 @@ class CustomFieldBehavior extends Behavior
      * @var array<string,bool> List of generated field handles.
      */
     public static $generatedFieldHandles = [
-        /* GENERATED HANDLES */
+/* GENERATED HANDLES */
     ];
 
 /* PROPERTIES */
