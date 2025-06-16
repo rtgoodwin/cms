@@ -3132,7 +3132,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           direction = 'down';
           break;
       }
-      console.log(this.focalPickedUp);
 
       const deltaValues = this._getDeltaValuesFromDirection(direction);
 
