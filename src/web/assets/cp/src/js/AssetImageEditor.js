@@ -2419,7 +2419,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           this.cropperEditBtnFocused
         );
 
-        if (cropperElement !== 'rectangle' && cropperElement !== 'focalpoint') {
+        if (cropperElement !== 'rectangle') {
           return true;
         }
 
@@ -2728,33 +2728,32 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
-     * Returns the edit button for a given cropper element handle.
-     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     * Returns the edit button for a given fabric element handle.
+     * @param {string} element - The fabric element handle, e.g. 'rectangle', 'tl', 't', etc.
      * @returns {jQuery}
      */
-    _getCropperEditBtnFromElementHandle: function (element) {
-      return this.$cropperEditBtn.filter(`[data-crop-editor="${element}"]`);
+    _getFabricElementEditBtnFromElementHandle: function (element) {
+      return this.$fabricElementEditBtn.filter(
+        `[data-fabric-element="${element}"]`
+      );
     },
 
     /**
-     * Pick up a cropper element given its handle.
-     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     * Pick up a fabric element given its handle.
+     * @param {string} element - The fabric element handle, e.g. 'rectangle', 'tl', 't', etc.
      */
     _pickUpFabricElement: function (element) {
-      console.log('helllooooo');
       this.cropperPickedUp = false;
       this.handlePicked = false;
       this.focalPickedUp = false;
-
-      console.log(element);
 
       let stateMessage = '';
       let positionMessage = '';
       let instructionMessage = '';
 
-      const $btn = this._getCropperEditBtnFromElementHandle(element);
+      const $btn = this._getFabricElementEditBtnFromElementHandle(element);
       $btn.attr('aria-pressed', 'true');
-      const itemName = $btn.attr('[data-item-name]');
+      const itemName = $btn.attr('data-item-name');
 
       if (element === 'rectangle') {
         this.cropperPickedUp = true;
@@ -2780,16 +2779,18 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         `${stateMessage} ${positionMessage} ${instructionMessage}`
       );
 
-      this._redrawCropperElements();
-      this.renderCropper();
+      if (element !== 'focalpoint') {
+        this._redrawCropperElements();
+        this.renderCropper();
+      }
     },
 
     /**
-     * Drops a cropper element given its handle.
-     * @param {string} element - The cropper element handle, e.g. 'rectangle', 'tl', 't', etc.
+     * Drops a fabric element given its handle.
+     * @param {string} element - The fabric element handle, e.g. 'rectangle', 'tl', 't', etc.
      */
     _dropFabricElement: function (element) {
-      const $btn = this._getCropperEditBtnFromElementHandle(element);
+      const $btn = this._getFabricElementEditBtnFromElementHandle(element);
       const itemName = $btn.find('[data-item-name]').text();
 
       // Messages
@@ -3143,7 +3144,9 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           y: deltaValues.deltaY,
         });
       } else if (this.focalPickedUp) {
-        console.log('Focal point moved by', deltaValues);
+        this._moveFocalPointByDelta(deltaValues.deltaX, deltaValues.deltaY);
+        this.storeFocalPointState();
+        this.renderImage();
       }
     },
 
@@ -3288,6 +3291,62 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     },
 
     /**
+     * Moves the cropper rectangle by a given delta.
+     * @param deltaX
+     * @param deltaY
+     */
+    _moveFocalPointByDelta: function (deltaX, deltaY) {
+      if (typeof this._moveFocalPointByDelta._ === 'undefined') {
+        this._moveFocalPointByDelta._ = {};
+      }
+
+      if (this.focalPoint) {
+        if (
+          deltaX === 0 &&
+          deltaY === 0
+        ) {
+          return;
+        }
+
+        this._moveFocalPointByDelta._.newX =
+          this.focalPoint.left + deltaX;
+        this._moveFocalPointByDelta._.newY =
+          this.focalPoint.top + deltaY;
+
+        // Just make sure that the focal point stays inside the image
+        if (this.currentView === 'crop') {
+          if (
+            !this.arePointsInsideRectangle(
+              [
+                {
+                  x: this._moveFocalPointByDelta._.newX,
+                  y: this._moveFocalPointByDelta._.newY,
+                },
+              ],
+              this.imageVerticeCoords
+            )
+          ) {
+            return;
+          }
+        } else {
+          if (
+            !this.isPointInsideViewport({
+              x: this._moveFocalPointByDelta._.newX,
+              y: this._moveFocalPointByDelta._.newY,
+            })
+          ) {
+            return;
+          }
+        }
+
+        this.focalPoint.set({
+          left: this.focalPoint.left + deltaX,
+          top: this.focalPoint.top + deltaY,
+        });
+      }
+    },
+
+    /**
      * Try to find the farthest possible placement based on the proposed move.
      * @param moveObj
      */
@@ -3402,48 +3461,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this._handleFocalDrag._.deltaX = ev.pageX - this.previousMouseX;
         this._handleFocalDrag._.deltaY = ev.pageY - this.previousMouseY;
 
-        if (
-          this._handleFocalDrag._.deltaX === 0 &&
-          this._handleFocalDrag._.deltaY === 0
-        ) {
-          return;
-        }
-
-        this._handleFocalDrag._.newX =
-          this.focalPoint.left + this._handleFocalDrag._.deltaX;
-        this._handleFocalDrag._.newY =
-          this.focalPoint.top + this._handleFocalDrag._.deltaY;
-
-        // Just make sure that the focal point stays inside the image
-        if (this.currentView === 'crop') {
-          if (
-            !this.arePointsInsideRectangle(
-              [
-                {
-                  x: this._handleFocalDrag._.newX,
-                  y: this._handleFocalDrag._.newY,
-                },
-              ],
-              this.imageVerticeCoords
-            )
-          ) {
-            return;
-          }
-        } else {
-          if (
-            !this.isPointInsideViewport({
-              x: this._handleFocalDrag._.newX,
-              y: this._handleFocalDrag._.newY,
-            })
-          ) {
-            return;
-          }
-        }
-
-        this.focalPoint.set({
-          left: this.focalPoint.left + this._handleFocalDrag._.deltaX,
-          top: this.focalPoint.top + this._handleFocalDrag._.deltaY,
-        });
+        this._moveFocalPointByDelta(this._handleFocalDrag._.deltaX, this._handleFocalDrag._.deltaY);
       }
     },
 
