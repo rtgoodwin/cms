@@ -392,7 +392,7 @@ EOD;
 
         foreach ($fieldsService->getAllLayouts() as $layout) {
             foreach ($layout->getCustomFields() as $field) {
-                if ($field->handle !== $field->layoutElement->handle) {
+                if ($field->handle !== $field->layoutElement->getOriginalHandle()) {
                     $fields[] = $field;
                     $fieldHandles[] = $field->handle;
                 }
