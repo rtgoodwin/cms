@@ -1342,7 +1342,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       }
 
       if (typeof key === 'object') {
-        for (let k in key) {
+        for (const k in key) {
           if (key.hasOwnProperty(k)) {
             if (key[k] !== null) {
               viewState[k] = key[k];
@@ -3245,7 +3245,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         this.hideActionTriggers();
 
         if (this.triggers) {
-          for (let trigger of this.triggers) {
+          for (const trigger of this.triggers) {
             trigger.destroy();
           }
         }
@@ -3519,7 +3519,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     },
 
     _updateBadgeCounts: function (badgeCounts) {
-      for (let sourceKey in badgeCounts) {
+      for (const sourceKey in badgeCounts) {
         if (badgeCounts.hasOwnProperty(sourceKey)) {
           const $source = this.getSourceByKey(sourceKey);
           if ($source) {
@@ -3815,7 +3815,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       if (actions && actions.length) {
         const $ul = $('<ul/>');
 
-        for (let action of actions) {
+        for (const action of actions) {
           $('<li/>')
             .append(
               $('<a/>', {

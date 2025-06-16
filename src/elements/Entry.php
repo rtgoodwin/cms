@@ -964,7 +964,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         return array_merge(parent::attributeLabels(), [
             'authorIds' => Craft::t('app', '{max, plural, =1{Author} other {Authors}}', [
-                'max' => $this->getSection()?->maxAuthors ?? PHP_INT_MAX,
+                'max' => $this->getSection()->maxAuthors ?? PHP_INT_MAX,
             ]),
             'postDate' => Craft::t('app', 'Post Date'),
             'expiryDate' => Craft::t('app', 'Expiry Date'),
@@ -1391,7 +1391,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         return array_map(function($previewTarget) {
             $previewTarget['label'] = Craft::t('site', $previewTarget['label']);
             return $previewTarget;
-        }, $this->getSection()?->previewTargets ?? []);
+        }, $this->getSection()->previewTargets ?? []);
     }
 
     /**
@@ -1887,7 +1887,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("viewPeerEntryDrafts:$section->uid")
@@ -1924,7 +1927,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("savePeerEntryDrafts:$section->uid")
@@ -2013,7 +2019,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("deletePeerEntryDrafts:$section->uid")
@@ -2264,7 +2273,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("savePeerEntryDrafts:$section->uid")

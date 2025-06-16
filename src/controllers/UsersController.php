@@ -1163,7 +1163,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = $this->editedUser($userId);
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_ADDRESSES);
 
         $response->contentHtml(function() use ($user) {
@@ -1197,7 +1200,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = $this->editedUser($userId);
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PERMISSIONS);
 
         $response->action('users/save-permissions');
@@ -1296,7 +1302,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PREFERENCES);
 
         $i18n = Craft::$app->getI18n();
@@ -1384,7 +1393,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user ??= static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PASSWORD);
 
         $this->getView()->registerAssetBundle(AuthMethodSetupAsset::class);
@@ -1445,7 +1457,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PASSKEYS);
 
         $view = $this->getView();
@@ -1679,7 +1694,7 @@ JS);
             if (!empty($groups)) {
                 $user->setGroups($groups);
             }
-            
+
             // keep track of which site they registered from
             // (do this even if it's not a multi-site install, in case it becomes one later.)
             $user->affiliatedSiteId = Craft::$app->getSites()->getCurrentSite()->id;
