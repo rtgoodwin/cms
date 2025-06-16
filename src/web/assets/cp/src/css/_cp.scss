@@ -1660,16 +1660,6 @@ li.breadcrumb-toggle-wrapper {
   margin-block-end: var(--s);
 }
 
-.has-active-child {
-  --icon-color: var(--white);
-
-  .source-item__toggle {
-    background-color: var(--gray-500);
-    color: var(--white);
-    border-radius: 4px;
-  }
-}
-
 .source-item--heading {
   @extend %type-heading-small;
 }
@@ -1886,7 +1876,7 @@ li.breadcrumb-toggle-wrapper {
         & > ul {
           display: block;
 
-          &[data-state='collapsed'] {
+          &[data-state='collapsed'] a:not(.sel) {
             display: none;
           }
         }

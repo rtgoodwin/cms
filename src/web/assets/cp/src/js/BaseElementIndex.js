@@ -3974,36 +3974,11 @@ const SourceNav = Garnish.Base.extend(
     $items: null,
     $selectedItem: null,
     $disclosures: null,
-    activeChildClass: null,
 
     init: function (container, settings) {
       this.$container = $(container);
       this.setSettings(settings, SourceNav.defaults);
       this.$items = $();
-      this.initDisclosures();
-    },
-
-    initDisclosures: function () {
-      const self = this;
-      this.$disclosures = this.$container.find('craft-disclosure');
-      this.$disclosures.on('open', function () {
-        $(this)
-          .closest(`.${self.settings.activeChildClass}`)
-          .removeClass(self.settings.activeChildClass);
-      });
-
-      this.$disclosures.on('close', function () {
-        const disclosure = $(this)[0];
-        const target = disclosure.target;
-
-        if (target.querySelector(`.${self.settings.selectedClass}`)) {
-          $(disclosure.trigger)
-            .closest('.source-item')
-            .addClass(self.settings.activeChildClass)
-            .closest('li')
-            .attr('aria-current', 'true');
-        }
-      });
     },
 
     addItems: function (items) {
@@ -4076,17 +4051,6 @@ const SourceNav = Garnish.Base.extend(
         .attr('aria-current', 'true')
         .addClass(this.settings.selectedClass);
 
-      /**
-       * Makes sure the toggle is active when a disclosure is closed
-       * on initial page load.
-       */
-      this.$selectedItem
-        .closest('[data-state="collapsed"]')
-        .siblings('.source-item')
-        .addClass(this.settings.activeChildClass)
-        .closest('li')
-        .attr('aria-current', 'true');
-
       this.onSelectionChange();
     },
 
@@ -4094,11 +4058,6 @@ const SourceNav = Garnish.Base.extend(
       this.$items
         .attr('aria-current', 'false')
         .removeClass(this.settings.selectedClass);
-
-      // Reset all disclosures
-      $(`.${this.settings.activeChildClass}`).removeClass(
-        this.settings.activeChildClass
-      );
 
       this.onSelectionChange();
     },
@@ -4161,7 +4120,6 @@ const SourceNav = Garnish.Base.extend(
   },
   {
     defaults: {
-      activeChildClass: 'has-active-child',
       selectedClass: 'sel',
       onSelectionChange: $.noop,
       handleCtrlClicks: false,

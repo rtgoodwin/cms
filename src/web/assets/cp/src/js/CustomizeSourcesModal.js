@@ -1112,7 +1112,6 @@ Craft.CustomizeSourcesModal.Heading =
             ? Craft.escapeHtml(val)
             : `<em>${Craft.t('app', '(blank)')}</em>`) + '&nbsp;'
         );
-      // this.$itemInput.val(val);
     },
 
     getIndexSourceItem: function () {
