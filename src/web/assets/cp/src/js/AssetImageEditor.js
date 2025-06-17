@@ -2886,7 +2886,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       var handle = this.croppingCanvas && this._cropperHandleHitTest(ev);
 
       if (handle || move || focal) {
-
         this.previousMouseX = ev.pageX;
         this.previousMouseY = ev.pageY;
 
@@ -3300,17 +3299,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       }
 
       if (this.focalPoint) {
-        if (
-          deltaX === 0 &&
-          deltaY === 0
-        ) {
+        if (deltaX === 0 && deltaY === 0) {
           return;
         }
 
-        this._moveFocalPointByDelta._.newX =
-          this.focalPoint.left + deltaX;
-        this._moveFocalPointByDelta._.newY =
-          this.focalPoint.top + deltaY;
+        this._moveFocalPointByDelta._.newX = this.focalPoint.left + deltaX;
+        this._moveFocalPointByDelta._.newY = this.focalPoint.top + deltaY;
 
         // Just make sure that the focal point stays inside the image
         if (this.currentView === 'crop') {
@@ -3462,7 +3456,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         this._handleFocalDrag._.deltaX = ev.pageX - this.previousMouseX;
         this._handleFocalDrag._.deltaY = ev.pageY - this.previousMouseY;
 
-        this._moveFocalPointByDelta(this._handleFocalDrag._.deltaX, this._handleFocalDrag._.deltaY);
+        this._moveFocalPointByDelta(
+          this._handleFocalDrag._.deltaX,
+          this._handleFocalDrag._.deltaY
+        );
       }
     },
 
