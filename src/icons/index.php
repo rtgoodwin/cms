@@ -1010,6 +1010,12 @@ return array(
     'pro' => true,
     'family' => null,
   ),
+  'block' =>
+  array(
+    'name' => ' block ',
+    'terms' => ' block brick empty mystery super mario ',
+    'pro' => true,
+  ),
   'block-brick' =>
   array(
     'name' => ' block brick ',

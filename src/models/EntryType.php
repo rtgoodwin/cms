@@ -146,6 +146,12 @@ class EntryType extends Model implements
     public bool $validateHandleUniqueness = true;
 
     /**
+     * @var string|null The group name
+     * @since 5.8.0
+     */
+    public ?string $group = null;
+
+    /**
      * @var ?self The original entry type without an overridden name and handle
      * @since 5.6.0
      */
@@ -463,6 +469,9 @@ JS, [
             }
             if ($this->handle !== $this->original->handle) {
                 $config['handle'] = $this->handle;
+            }
+            if (isset($this->group)) {
+                $config['group'] = $this->group;
             }
         }
         return $config;

@@ -1481,7 +1481,7 @@ class User extends Element implements IdentityInterface
             return false;
         }
 
-        if (is_object($group) && $group instanceof UserGroup) {
+        if ($group instanceof UserGroup) {
             $group = $group->id;
         }
 
@@ -1692,7 +1692,7 @@ XML;
      */
     protected function thumbAlt(): ?string
     {
-        return $this->getPhoto()?->alt ?? $this->getName();
+        return $this->getPhoto()->alt ?? $this->getName();
     }
 
     /**
@@ -1950,7 +1950,7 @@ XML;
                 case self::STATUS_PENDING:
                     // Only provide activation actions if they have an email address
                     if ($this->email) {
-                        if ($this->pending || $canAdministrateUsers) {
+                        if ($this->pending || $canModerateUsers) {
                             $statusItems[] = [
                                 'icon' => 'paperplane',
                                 'label' => Craft::t('app', 'Send activation email'),
@@ -2392,7 +2392,7 @@ JS, [
                         ],
                     ]);
                 }
-                
+
                 // no break
             case 'isCredentialed':
                 $value = $this->getIsCredentialed();
