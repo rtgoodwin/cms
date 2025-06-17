@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a PHP error that could occur when rendering a field layout’s form, if it didn’t have customizable tabs.
+- Fixed an error that could occur when loading control panel resources on the front end.
 
 ## 5.7.10 - 2025-06-04
 
