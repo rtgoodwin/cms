@@ -18,7 +18,6 @@ use craft\elements\Asset;
 use craft\elements\ElementCollection;
 use craft\elements\User;
 use craft\errors\AssetException;
-use craft\fields\Icon;
 use craft\helpers\App;
 use craft\helpers\ArrayHelper;
 use craft\helpers\DateTimeHelper;
@@ -1385,7 +1384,6 @@ class Extension extends AbstractExtension implements GlobalsInterface
         return [
             new TwigFunction('actionUrl', [UrlHelper::class, 'actionUrl']),
             new TwigFunction('alias', [Craft::class, 'getAlias']),
-            new TwigFunction('brandsIcon', [Icon::class, 'isBrandsIcon']),
             new TwigFunction('ceil', 'ceil'),
             new TwigFunction('className', 'get_class'),
             new TwigFunction('clone', [$this, 'cloneFunction']),

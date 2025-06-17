@@ -15,8 +15,12 @@ use craft\base\InlineEditableFieldInterface;
 use craft\base\MergeableFieldInterface;
 use craft\base\ThumbableFieldInterface;
 use craft\elements\Entry;
+use craft\fields\data\IconData;
+use craft\gql\types\generators\IconDataType;
+use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Html;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use yii\db\Schema;
 
@@ -49,7 +53,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      */
     public static function phpType(): string
     {
-        return 'string|null';
+        return sprintf('\\%s|null', IconData::class);
     }
 
     /**
@@ -67,6 +71,12 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
     public bool $includeProIcons = false;
 
     /**
+     * @var bool Whether GraphQL values should be returned as objects with `family` and `value` keys.
+     * @since 5.8.0
+     */
+    public bool $fullGraphqlData = true;
+
+    /**
      * @var Collection|null A collection of all the available icons.
      */
     private static ?Collection $_icons = null;
@@ -79,6 +89,15 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
         // Default includeProIcons to true for existing Icon fields
         if (isset($config['id']) && !isset($config['includeProIcons'])) {
             $config['includeProIcons'] = true;
+        }
+
+        if (isset($config['graphqlMode'])) {
+            $config['fullGraphqlData'] = ArrayHelper::remove($config, 'graphqlMode') === 'full';
+        }
+
+        // Default fullGraphqlData to false for existing fields
+        if (isset($config['id']) && !isset($config['fullGraphqlData'])) {
+            $config['fullGraphqlData'] = false;
         }
 
         parent::__construct($config);
@@ -102,7 +121,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
 
     private function settingsHtml(bool $readOnly): string
     {
-        return Cp::lightswitchFieldHtml([
+        $html = Cp::lightswitchFieldHtml([
             'label' => Craft::t('app', 'Include Pro icons'),
             'instructions' => Craft::t('app', 'Should icons that are exclusive to Font Awesome Pro be selectable? (<a href="{url}">View pricing</a>)', [
                 'url' => 'https://fontawesome.com/plans',
@@ -111,6 +130,35 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
             'on' => $this->includeProIcons,
             'disabled' => $readOnly,
         ]);
+
+        if (Craft::$app->getConfig()->getGeneral()->enableGql) {
+            $html .= Html::tag('hr') .
+            Html::button(Craft::t('app', 'Advanced'), options: [
+                'class' => 'fieldtoggle',
+                'data' => ['target' => 'advanced'],
+            ]) .
+            Html::beginTag('div', [
+                'id' => 'advanced',
+                'class' => 'hidden',
+            ]);
+
+            $html .=
+                Cp::selectFieldHtml([
+                    'label' => Craft::t('app', 'GraphQL Mode'),
+                    'id' => 'graphql-mode',
+                    'name' => 'graphqlMode',
+                    'options' => [
+                        ['label' => Craft::t('app', 'Full data'), 'value' => 'full'],
+                        ['label' => Craft::t('app', 'Icon only'), 'value' => 'icon'],
+                    ],
+                    'value' => $this->fullGraphqlData ? 'full' : 'icon',
+                    'disabled' => $readOnly,
+                ]);
+
+            $html .= Html::endTag('div');
+        }
+
+        return $html;
     }
 
     /**
@@ -118,7 +166,20 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      */
     public function normalizeValue(mixed $value, ?ElementInterface $element): mixed
     {
-        return ($value || $value === '0') ? $value : null;
+        if ($value instanceof IconData) {
+            return $value;
+        }
+
+        $normalizedValue = null;
+        if (is_string($value) && $value !== '') {
+            $normalizedValue = new IconData($value, self::iconFamily($value));
+        }
+
+        if (is_array($value)) {
+            $normalizedValue = new IconData($value['value'], $value['family'] ?? null);
+        }
+
+        return $normalizedValue;
     }
 
     /**
@@ -130,7 +191,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
             'id' => $this->getInputId(),
             'describedBy' => $this->describedBy,
             'name' => $this->handle,
-            'value' => $value,
+            'value' => $value?->value,
             'freeOnly' => !$this->includeProIcons,
         ]);
     }
@@ -142,7 +203,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
     {
         return Cp::iconPickerHtml([
             'static' => true,
-            'value' => $value,
+            'value' => $value?->value,
         ]);
     }
 
@@ -151,7 +212,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      */
     public function getPreviewHtml(mixed $value, ElementInterface $element): string
     {
-        return $value ? Html::tag('div', Cp::iconSvg($value), ['class' => 'cp-icon']) : '';
+        return $value ? Html::tag('div', Cp::iconSvg($value->value), ['class' => 'cp-icon']) : '';
     }
 
     /**
@@ -160,7 +221,7 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
     public function previewPlaceholderHtml(mixed $value, ?ElementInterface $element): string
     {
         if (!$value) {
-            $value = 'info';
+            $value = new IconData('info', null);
         }
 
         return $this->getPreviewHtml($value, $element ?? new Entry());
@@ -171,17 +232,17 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
      */
     public function getThumbHtml(mixed $value, ElementInterface $element, int $size): ?string
     {
-        return $value ? Html::tag('div', Cp::iconSvg($value), ['class' => 'cp-icon']) : null;
+        return $value ? Html::tag('div', Cp::iconSvg($value->value), ['class' => 'cp-icon']) : null;
     }
 
     /**
-     * Returns whether the given icon value is a Font Awesome Brands icon.
+     * Returns a list of families supported by given Font Awesome icon (e.g. brands, solid, regular).
      *
      * @param string $value
-     * @return bool
-     * @since 5.7.11
+     * @return array|null
+     * @since 5.8.0
      */
-    public static function isBrandsIcon(string $value): bool
+    public static function iconFamily(string $value): ?array
     {
         if (!self::$_icons) {
             $indexPath = '@app/icons/index.php';
@@ -191,6 +252,23 @@ class Icon extends Field implements InlineEditableFieldInterface, ThumbableField
 
         $match = self::$_icons->first(fn($icon, $key) => (string)$key == $value);
 
-        return $match && $match['brands'];
+        if ($match) {
+            return $match['family'];
+        }
+
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     * @since 5.8.0
+     */
+    public function getContentGqlType(): Type|array
+    {
+        if (!$this->fullGraphqlData) {
+            return parent::getContentGqlType();
+        }
+
+        return IconDataType::generateType($this);
     }
 }

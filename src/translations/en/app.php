@@ -824,6 +824,7 @@ return [
     'How-to’s and other questions' => 'How-to’s and other questions',
     'ID' => 'ID',
     'Icon' => 'Icon',
+    'Icon only' => 'Icon only',
     'Icons only' => 'Icons only',
     'If the URI looks like this' => 'If the URI looks like this',
     'Image Format' => 'Image Format',
