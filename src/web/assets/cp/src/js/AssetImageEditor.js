@@ -2795,21 +2795,17 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       const $btn = this._getFabricElementEditBtnFromElementHandle(element);
       const itemName = $btn.attr('data-item-name');
 
-      // Messages
-      let stateMessage = '';
-      let positionMessage = '';
-
       // Defaults
       this.cropperPickedUp = false;
       this.handlePicked = false;
       this.focalPickedUp = false;
       $btn.attr('aria-pressed', 'false');
 
-      stateMessage = Craft.t('app', '{item} dropped.', {
+      const stateMessage = Craft.t('app', '{item} dropped.', {
         item: itemName,
       });
 
-      this._announce(`${stateMessage} ${positionMessage}`);
+      this._announce(stateMessage);
 
       if (this.renderCropper) {
         this._redrawCropperElements();
@@ -3346,6 +3342,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
           left: this.focalPoint.left + deltaX,
           top: this.focalPoint.top + deltaY,
         });
+
+        this._announce(this._getRelativePositionMessage(this.focalPoint));
       }
     },
 
