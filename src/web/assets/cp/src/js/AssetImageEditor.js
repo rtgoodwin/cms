@@ -2236,6 +2236,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * Redraw the cropper boundaries
      */
     _redrawCropperElements: function () {
+      if (!this.croppingCanvas) return;
+
       if (typeof this._redrawCropperElements._ === 'undefined') {
         this._redrawCropperElements._ = {};
       }
@@ -2779,7 +2781,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         `${stateMessage} ${positionMessage} ${instructionMessage}`
       );
 
-      if (element !== 'focalpoint') {
+      if (this.renderCropper) {
         this._redrawCropperElements();
         this.renderCropper();
       }
@@ -2791,7 +2793,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      */
     _dropFabricElement: function (element) {
       const $btn = this._getFabricElementEditBtnFromElementHandle(element);
-      const itemName = $btn.find('[data-item-name]').text();
+      const itemName = $btn.attr('data-item-name');
 
       // Messages
       let stateMessage = '';
@@ -2809,8 +2811,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       this._announce(`${stateMessage} ${positionMessage}`);
 
-      this._redrawCropperElements();
-      this.renderCropper();
+      if (this.renderCropper) {
+        this._redrawCropperElements();
+        this.renderCropper();
+      }
     },
 
     _toggleFocalModeStyles: function () {
@@ -2886,7 +2890,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       var handle = this.croppingCanvas && this._cropperHandleHitTest(ev);
 
       if (handle || move || focal) {
-        this.nonDragEditMode = true;
+
         this.previousMouseX = ev.pageX;
         this.previousMouseY = ev.pageY;
 
@@ -2906,7 +2910,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param {Object} ev
      */
     _handleMouseMove: function (ev) {
-      if (this.nonDragEditMode) return;
+      this.nonDragEditMode = true;
 
       if (this.mouseMoveEvent !== null) {
         Garnish.requestAnimationFrame(this._handleMouseMoveInternal.bind(this));
