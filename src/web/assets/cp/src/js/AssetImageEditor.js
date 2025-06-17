@@ -88,7 +88,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
     constraintOrientation: 'landscape',
     showingCustomConstraint: false,
     saving: false,
-    nonDragEditMode: true,
+    dragEditMode: true,
 
     announcerTimeout: null,
 
@@ -898,6 +898,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
       this.addListener(this.$fabricElementEditBtn, 'keydown', (ev) => {
         this._handleKeydownOnFabricElementEditBtn(ev);
+        this.dragEditMode = false;
       });
 
       // Cropper
@@ -2864,7 +2865,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       const btnPressed = $btn.attr('aria-pressed') !== 'false';
 
       this.cropperEditBtnFocused = null;
-      this.nonDragEditMode = false;
 
       if (btnPressed) {
         const elementToDrop = this._getFabricElementFromEditBtn($btn);
@@ -2878,6 +2878,8 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param {Object} ev
      */
     _handleMouseDown: function (ev) {
+      this.dragEditMode = true;
+
       // Focal before resize before dragging
       var focal = this.focalPoint && this._isMouseOver(ev, this.focalPoint);
       var move = this.croppingCanvas && this._isMouseOver(ev, this.clipper);
@@ -2903,8 +2905,6 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
      * @param {Object} ev
      */
     _handleMouseMove: function (ev) {
-      this.nonDragEditMode = true;
-
       if (this.mouseMoveEvent !== null) {
         Garnish.requestAnimationFrame(this._handleMouseMoveInternal.bind(this));
       }
@@ -2916,27 +2916,29 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         return;
       }
 
-      if (this.focalPoint && this.focalClicked) {
-        this.draggingFocal = true;
-        this._handleFocalDrag(this.mouseMoveEvent);
-        this.storeFocalPointState();
-        this.renderImage();
-      } else if (this.cropperClicked || this.handlePicked) {
-        if (this.cropperClicked) {
-          this.draggingCropper = true;
-          this._handleCropperDrag(this.mouseMoveEvent);
-        } else {
-          this.scalingCropper = true;
-          this._handleCropperResize(this.mouseMoveEvent);
+      if (this.dragEditMode) {
+        if (this.focalPoint && this.focalClicked) {
+          this.draggingFocal = true;
+          this._handleFocalDrag(this.mouseMoveEvent);
+          this.storeFocalPointState();
+          this.renderImage();
+        } else if (this.cropperClicked || this.handlePicked) {
+          if (this.cropperClicked) {
+            this.draggingCropper = true;
+            this._handleCropperDrag(this.mouseMoveEvent);
+          } else {
+            this.scalingCropper = true;
+            this._handleCropperResize(this.mouseMoveEvent);
+          }
+
+          this._redrawCropperElements();
+
+          this.storeCropperState();
+          this.renderCropper();
         }
-
-        this._redrawCropperElements();
-
-        this.storeCropperState();
-        this.renderCropper();
-      } else {
-        this._setMouseCursor(this.mouseMoveEvent);
       }
+
+      this._setMouseCursor(this.mouseMoveEvent);
 
       this.previousMouseX = this.mouseMoveEvent.pageX;
       this.previousMouseY = this.mouseMoveEvent.pageY;
