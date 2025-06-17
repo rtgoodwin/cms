@@ -25,6 +25,7 @@
 - It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
+- Added the “Delete entries for site” and “Delete other users’ entries for site” user permissions, for sections with a propagation method set to “Let each entry choose which sites it should be saved to”. ([#17313](https://github.com/craftcms/cms/pull/17313)) 
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
 - Added the `block` icon.
 
@@ -60,6 +61,7 @@
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
 - Added `craft\helpers\Cp::editableTableHtml()`.
 - Added `craft\helpers\Cp::generatedFieldsTableHtml()`.
+- Added `craft\helpers\ElementHelper::isMultiSite()`.
 - Added `craft\models\EntryType::$group`.
 - Added `craft\models\FieldLayout::getCardThumbAlignment()`.
 - Added `craft\models\FieldLayout::getGeneratedFieldByUid()`.
