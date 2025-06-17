@@ -2070,7 +2070,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
 
         if ($section->propagationMethod === PropagationMethod::Custom) {
             if ($this->getIsDraft()) {
-                /** @var static|DraftBehavior $this */
+                /**
+                 * @var static|DraftBehavior $this
+                 * @phpstan-ignore varTag.nativeType
+                 */
                 return (
                     $this->creatorId === $user->id ||
                     $user->can("deletePeerEntryDrafts:$section->uid")
