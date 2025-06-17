@@ -2856,9 +2856,7 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
 
       event.preventDefault();
 
-      if (this.croppingCanvas) {
-        this._handleFabricElementKeyboardEdit(ev);
-      }
+      this._handleFabricElementKeyboardEdit(ev);
     },
 
     _handleCropperEditBtnBlur: function (ev) {
