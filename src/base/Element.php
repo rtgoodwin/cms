@@ -4174,7 +4174,7 @@ JS, [
         $canDeleteCanonical = $elementsService->canDelete($canonical, $user);
         $canDeleteCanonicalForSite = $elementsService->canDeleteForSite($canonical, $user);
         $canDeleteForSite = (
-            ElementHelper::isElementMultisite($this) &&
+            ElementHelper::isMultiSite($this) &&
             (($isCurrent && $canDeleteCanonicalForSite) || ($canDeleteDraft && $isNewSite)) &&
             $elementsService->canDeleteForSite($this, $user)
         );

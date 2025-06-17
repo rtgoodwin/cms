@@ -1065,20 +1065,22 @@ class ElementHelper
     }
 
     /**
-     * Return if element is multisite - supported and propagated to more than one site.
+     * Returns whether the given element is a multi-site element.
      *
      * @param ElementInterface $element
      * @return bool
      * @throws Exception
+     * @since 5.8.0
      */
-    public static function isElementMultisite(ElementInterface $element): bool
+    public static function isMultiSite(ElementInterface $element): bool
     {
         // Site info
         $supportedSites = self::supportedSitesForElement($element, true);
-        $propSites = array_values(array_filter($supportedSites, fn($site) => $site['propagate']));
-        $propSiteIds = array_column($propSites, 'siteId');
-        $isMultiSiteElement = count($supportedSites) > 1;
+        if (count($supportedSites) <= 1) {
+            return false;
+        }
 
-        return $isMultiSiteElement && count($propSiteIds) > 1;
+        $propSites = array_filter($supportedSites, fn($site) => $site['propagate']);
+        return count($propSites) > 1;
     }
 }
