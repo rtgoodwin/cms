@@ -902,11 +902,12 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
       });
 
       // Cropper
-      this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
-        this._handleCropperEditBtnBlur(ev);
-        this._redrawCropperElements();
-        this.renderCropper();
-      });
+
+      // this.addListener(this.$cropperEditBtn, 'blur', (ev) => {
+      //   this._handleCropperEditBtnBlur(ev);
+      //   this._redrawCropperElements();
+      //   this.renderCropper();
+      // });
       this.addListener(this.$cropperEditBtn, 'focus', (ev) => {
         this.cropperEditBtnFocused = $(ev.target);
         this._redrawCropperElements();
@@ -2853,11 +2854,10 @@ Craft.AssetImageEditor = Garnish.Modal.extend(
         Garnish.DOWN_KEY,
       ].includes(ev.keyCode);
 
-      if (!isDirectionalKey) return;
-
-      event.preventDefault();
-
-      this._handleFabricElementKeyboardEdit(ev);
+      if (isDirectionalKey) {
+        event.preventDefault();
+        this._handleFabricElementKeyboardEdit(ev);
+      }
     },
 
     _handleCropperEditBtnBlur: function (ev) {
