@@ -1053,6 +1053,7 @@ return [
     'Multi-select' => 'Multi-select',
     'My Account' => 'My Account',
     'My Drafts' => 'My Drafts',
+    'Name only' => 'Name only',
     'Name' => 'Name',
     'Native Fields' => 'Native Fields',
     'Neighborhood' => 'Neighborhood',

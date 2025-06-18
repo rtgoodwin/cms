@@ -22,6 +22,8 @@
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
 - Matrix fields’ entry type selections can now be grouped. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - Matrix fields with multiple selected entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
+- Icon fields now expose the Font Awesome icon styles supported by the selected icon. ([#17419](https://github.com/craftcms/cms/pull/17419))
+- Icon fields now have a “GraphQL Mode” setting, with “Full data” and “Name only” options. ([#17419](https://github.com/craftcms/cms/pull/17419))
 - It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
 - Assets and Categories fields no longer have “Show the site menu” settings. ([#17156](https://github.com/craftcms/cms/issues/17156))
 - Entry type edit pages now have a “Save as a new entry type” action. ([#15977](https://github.com/craftcms/cms/discussions/15977))
@@ -49,13 +51,16 @@
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
 - Added `craft\fields\conditions\GeneratedFieldConditionRule`.
 - Added `craft\fields\conditions\LinkFieldConditionRule`.
+- Added `craft\fields\data\IconData`.
 - Added `craft\fields\data\OptionData::$color`.
 - Added `craft\fields\data\OptionData::$icon`.
 - Added `craft\gql\arguments\elements\ContentBlock`.
 - Added `craft\gql\interfaces\elements\ContentBlock`.
 - Added `craft\gql\resolvers\elements\ContentBlock`.
+- Added `craft\gql\types\IconData`.
 - Added `craft\gql\types\elements\ContentBlock`.
 - Added `craft\gql\types\generators\ContentBlock`.
+- Added `craft\gql\types\generators\IconDataType`.
 - Added `craft\gql\types\input\ContentBlock`.
 - Added `craft\helpers\Cp::buttonGroupFieldHtml()`.
 - Added `craft\helpers\Cp::buttonGroupHtml()`.
