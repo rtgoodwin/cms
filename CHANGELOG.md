@@ -7,6 +7,7 @@
 - Fixed a PHP error that could occur when rendering a field layout’s form, if it didn’t have customizable tabs.
 - Fixed an error that could occur when loading control panel resources on the front end.
 - Fixed a bug where entries’ section breadcrumbs were getting hyperlinked even if the section’s source was disabled. ([#17411](https://github.com/craftcms/cms/issues/17411))
+- Fixed a bug where entries that were pasted within a Matrix field were losing custom field translations for other sites. ([17414](https://github.com/craftcms/cms/issues/17414))
 
 ## 5.7.10 - 2025-06-04
 
