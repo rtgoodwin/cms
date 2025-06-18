@@ -1259,36 +1259,48 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return [];
         }
 
-        $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
-        /** @var Collection $sectionOptions */
-        $sectionOptions = $sections
-            ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
-            ->map(fn(Section $s) => [
-                'label' => Craft::t('site', $s->name),
-                'url' => "entries/$s->handle",
-                'selected' => $s->id === $section->id,
-            ]);
-
-        if ($sections->contains(fn(Section $s) => $s->type === Section::TYPE_SINGLE)) {
-            $sectionOptions->prepend([
-                'label' => Craft::t('app', 'Singles'),
-                'url' => 'entries/singles',
-                'selected' => $section->type === Section::TYPE_SINGLE,
-            ]);
-        }
-
         $crumbs = [
             [
                 'label' => Craft::t('app', 'Entries'),
                 'url' => 'entries',
             ],
-            [
+        ];
+
+        // If the section’s source is disabled, just show its name w/o a link
+        if (Craft::$app->getElementSources()->sourceExists(Entry::class, "section:$section->uid")) {
+            $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
+            $requestedSite = Cp::requestedSite();
+            if ($requestedSite) {
+                $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
+            }
+            /** @var Collection $sectionOptions */
+            $sectionOptions = $sections
+                ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
+                ->map(fn(Section $s) => [
+                    'label' => Craft::t('site', $s->name),
+                    'url' => "entries/$s->handle",
+                    'selected' => $s->id === $section->id,
+                ]);
+
+            if ($sections->contains(fn(Section $s) => $s->type === Section::TYPE_SINGLE)) {
+                $sectionOptions->prepend([
+                    'label' => Craft::t('app', 'Singles'),
+                    'url' => 'entries/singles',
+                    'selected' => $section->type === Section::TYPE_SINGLE,
+                ]);
+            }
+
+            $crumbs[] = [
                 'menu' => [
                     'label' => Craft::t('app', 'Select section'),
                     'items' => $sectionOptions->all(),
                 ],
-            ],
-        ];
+            ];
+        } else {
+            $crumbs[] = [
+                'label' => Craft::t('site', $section->name),
+            ];
+        }
 
         if ($section->type === Section::TYPE_STRUCTURE) {
             $elementsService = Craft::$app->getElements();
