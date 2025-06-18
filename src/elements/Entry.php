@@ -498,13 +498,27 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                         'withDescendants' => true,
                     ];
                 }
-
-                if ($section->propagationMethod === PropagationMethod::Custom && $section->getHasMultiSiteEntries()) {
-                    $actions[] = DeleteForSite::class;
-                }
             }
         } else {
             $actions[] = Copy::class;
+        }
+
+        if (
+            (
+                $section &&
+                $section->propagationMethod === PropagationMethod::Custom &&
+                $section->getHasMultiSiteEntries() &&
+                $user->can("deleteEntriesForSite:$section->uid")
+            ) ||
+            (
+                !$section &&
+                str_starts_with($source, 'custom:') &&
+                Craft::$app->getIsMultiSite() &&
+                Collection::make(Craft::$app->getEntries()->getEditableSections())
+                    ->contains(fn(Section $section) => $section->propagationMethod === PropagationMethod::Custom)
+            )
+        ) {
+            $actions[] = DeleteForSite::class;
         }
 
         // Restore
@@ -964,7 +978,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     {
         return array_merge(parent::attributeLabels(), [
             'authorIds' => Craft::t('app', '{max, plural, =1{Author} other {Authors}}', [
-                'max' => $this->getSection()?->maxAuthors ?? PHP_INT_MAX,
+                'max' => $this->getSection()->maxAuthors ?? PHP_INT_MAX,
             ]),
             'postDate' => Craft::t('app', 'Post Date'),
             'expiryDate' => Craft::t('app', 'Expiry Date'),
@@ -1391,7 +1405,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         return array_map(function($previewTarget) {
             $previewTarget['label'] = Craft::t('site', $previewTarget['label']);
             return $previewTarget;
-        }, $this->getSection()?->previewTargets ?? []);
+        }, $this->getSection()->previewTargets ?? []);
     }
 
     /**
@@ -1887,7 +1901,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("viewPeerEntryDrafts:$section->uid")
@@ -1924,7 +1941,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("savePeerEntryDrafts:$section->uid")
@@ -2013,7 +2033,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("deletePeerEntryDrafts:$section->uid")
@@ -2045,7 +2068,29 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return false;
         }
 
-        return $section->propagationMethod === PropagationMethod::Custom;
+        if ($section->propagationMethod === PropagationMethod::Custom) {
+            if ($this->getIsDraft()) {
+                /**
+                 * @var static|DraftBehavior $this
+                 * @phpstan-ignore varTag.nativeType
+                 */
+                return (
+                    $this->creatorId === $user->id ||
+                    $user->can("deletePeerEntryDrafts:$section->uid")
+                );
+            }
+
+            if (!$user->can("deleteEntriesForSite:$section->uid")) {
+                return false;
+            }
+
+            return (
+                in_array($user->id, $this->getAuthorIds(), true) ||
+                $user->can("deletePeerEntriesForSite:$section->uid")
+            );
+        }
+
+        return false;
     }
 
     /**
@@ -2264,7 +2309,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
         }
 
         if ($this->getIsDraft()) {
-            /** @var static|DraftBehavior $this */
+            /**
+             * @var static|DraftBehavior $this
+             * @phpstan-ignore-next-line
+             */
             return (
                 $this->creatorId === $user->id ||
                 $user->can("savePeerEntryDrafts:$section->uid")

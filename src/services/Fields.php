@@ -34,6 +34,7 @@ use craft\fields\ButtonGroup;
 use craft\fields\Categories as CategoriesField;
 use craft\fields\Checkboxes;
 use craft\fields\Color;
+use craft\fields\ContentBlock;
 use craft\fields\Country;
 use craft\fields\Date;
 use craft\fields\Dropdown;
@@ -228,6 +229,7 @@ class Fields extends Component
             CategoriesField::class,
             Checkboxes::class,
             Color::class,
+            ContentBlock::class,
             Country::class,
             Date::class,
             Dropdown::class,
@@ -1123,9 +1125,10 @@ class Fields extends Component
     public function assembleLayoutFromPost(?string $namespace = null): FieldLayout
     {
         $paramPrefix = $namespace ? rtrim($namespace, '.') . '.' : '';
-        $config = JsonHelper::decode(Craft::$app->getRequest()->getBodyParam($paramPrefix . 'fieldLayout'));
-        $cardView = Craft::$app->getRequest()->getBodyParam($paramPrefix . 'cardView');
-        $config['cardView'] = empty($cardView) ? null : $cardView;
+        $request = Craft::$app->getRequest();
+        $config = JsonHelper::decode($request->getBodyParam("{$paramPrefix}fieldLayout"));
+        $config['generatedFields'] = $request->getBodyParam("{$paramPrefix}generatedFields") ?: null;
+        $config['cardView'] = $request->getBodyParam("{$paramPrefix}cardView") ?: null;
         $config['cardThumbAlignment'] = Craft::$app->getRequest()->getBodyParam($paramPrefix . 'thumbAlignment');
         $layout = $this->createLayout($config);
 

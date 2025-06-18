@@ -152,6 +152,7 @@ use yii\web\Response;
  * @property string|null $url The element’s full URL
  * @property-write int|null $revisionCreatorId revision creator ID to be saved
  * @property-write string|null $revisionNotes revision notes to be saved
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -1734,6 +1735,7 @@ abstract class Element extends Component implements ElementInterface
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
     {
@@ -2398,6 +2400,13 @@ abstract class Element extends Component implements ElementInterface
     private ?array $_normalizedFieldValues = null;
 
     /**
+     * @var array
+     * @see getGeneratedFieldValues()
+     * @see setGeneratedFieldValues()
+     */
+    private array $_generatedFieldValues;
+
+    /**
      * @var bool Whether all attributes and field values should be considered dirty.
      * @see getDirtyAttributes()
      * @see getDirtyFields()
@@ -2406,11 +2415,11 @@ abstract class Element extends Component implements ElementInterface
     private bool $_allDirty = false;
 
     /**
-     * @var string[]|null Record of dirty attributes.
+     * @var array<string, int|string|bool> Record of dirty attributes.
      * @see getDirtyAttributes()
      * @see isAttributeDirty()
      */
-    private ?array $_dirtyAttributes = [];
+    private array $_dirtyAttributes = [];
 
     /**
      * @var string|null The initial title value, if there was one.
@@ -2603,7 +2612,7 @@ abstract class Element extends Component implements ElementInterface
     public function __isset($name): bool
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->fieldByHandle(substr($name, 6)) !== null;
         }
 
@@ -2621,13 +2630,17 @@ abstract class Element extends Component implements ElementInterface
         }
 
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             return $this->getFieldValue(substr($name, 6));
         }
 
         // If this is a field, make sure the value has been normalized before returning the CustomFieldBehavior value
         if ($this->fieldByHandle($name) !== null) {
             return $this->clonedFieldValue($name);
+        }
+
+        if (isset($this->_generatedFieldValues) && array_key_exists($name, $this->_generatedFieldValues)) {
+            return $this->_generatedFieldValues[$name];
         }
 
         return parent::__get($name);
@@ -2639,7 +2652,7 @@ abstract class Element extends Component implements ElementInterface
     public function __set($name, $value)
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($name, 'field:', 6) === 0) {
+        if (str_starts_with($name, 'field:')) {
             $this->setFieldValue(substr($name, 6), $value);
             return;
         }
@@ -2661,7 +2674,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function __call($name, $params)
     {
-        if (strncmp($name, 'isFieldEmpty:', 13) === 0) {
+        if (str_starts_with($name, 'isFieldEmpty:')) {
             return $this->isFieldEmpty(substr($name, 13));
         }
 
@@ -2849,7 +2862,7 @@ abstract class Element extends Component implements ElementInterface
     public function getAttributeLabel($attribute): string
     {
         // Is this the "field:handle" syntax?
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 
@@ -3118,7 +3131,7 @@ abstract class Element extends Component implements ElementInterface
      */
     public function addError($attribute, $error = ''): void
     {
-        if (strncmp($attribute, 'field:', 6) === 0) {
+        if (str_starts_with($attribute, 'field:')) {
             $attribute = substr($attribute, 6);
         }
 
@@ -3612,9 +3625,14 @@ abstract class Element extends Component implements ElementInterface
         $html = '';
 
         foreach ($this->getFieldLayout()?->getCardBodyElements($this) ?? [] as $item) {
-            $itemHtml = $item instanceof BaseField
-                ? $item->previewHtml($this)
-                : $this->getAttributeHtml($item['value']);
+            if ($item instanceof BaseField) {
+                $itemHtml = $item->previewHtml($this);
+            } elseif (is_array($item) && isset($item['html'])) {
+                $itemHtml = $item['html'];
+            } else {
+                $itemHtml = $this->getAttributeHtml($item['value']);
+            }
+
             if ($itemHtml !== '') {
                 $html .= Html::tag('div', $itemHtml, [
                     'class' => 'card-attribute-preview',
@@ -4138,12 +4156,6 @@ JS, [
         $canonical = $this->getCanonical(true);
         $redirectUrl = ElementHelper::postEditUrl($this);
 
-        // Site info
-        $supportedSites = ElementHelper::supportedSitesForElement($this, true);
-        $propSites = array_values(array_filter($supportedSites, fn($site) => $site['propagate']));
-        $propSiteIds = array_column($propSites, 'siteId');
-        $isMultiSiteElement = count($supportedSites) > 1;
-
         // Is this a new site that isn’t supported by the canonical element yet?
         if ($isUnpublishedDraft) {
             $isNewSite = true;
@@ -4160,10 +4172,10 @@ JS, [
         // Permissions
         $canDeleteDraft = $isDraft && !$this->isProvisionalDraft && $elementsService->canDelete($this, $user);
         $canDeleteCanonical = $elementsService->canDelete($canonical, $user);
+        $canDeleteCanonicalForSite = $elementsService->canDeleteForSite($canonical, $user);
         $canDeleteForSite = (
-            $isMultiSiteElement &&
-            count($propSiteIds) > 1 &&
-            (($isCurrent && $canDeleteCanonical) || ($canDeleteDraft && $isNewSite)) &&
+            ElementHelper::isMultiSite($this) &&
+            (($isCurrent && $canDeleteCanonicalForSite) || ($canDeleteDraft && $isNewSite)) &&
             $elementsService->canDeleteForSite($this, $user)
         );
 
@@ -4955,7 +4967,6 @@ JS, [
     public function offsetExists($offset): bool
     {
         return (
-            /** @phpstan-ignore-next-line */
             $offset === 'title' ||
             /** @phpstan-ignore-next-line */
             ($this->hasEagerLoadedElements($offset) && !($this->_lazyEagerLoadedElements[$offset] ?? false)) ||
@@ -5531,6 +5542,22 @@ JS, [
     public function getFieldContext(): string
     {
         return Craft::$app->getFields()->fieldContext;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getGeneratedFieldValues(): array
+    {
+        return $this->_generatedFieldValues ?? [];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setGeneratedFieldValues(array $values): void
+    {
+        $this->_generatedFieldValues = $values;
     }
 
     /**
@@ -6219,7 +6246,10 @@ JS, [
     protected function notesFieldHtml(): string
     {
         // todo: this should accept a $static arg
-        /** @var static|DraftBehavior $this */
+        /**
+         * @var static|DraftBehavior $this
+         * @phpstan-ignore varTag.nativeType
+         */
         return Cp::textareaFieldHtml([
             'label' => Craft::t('app', 'Notes about your changes'),
             'labelClass' => 'h6',

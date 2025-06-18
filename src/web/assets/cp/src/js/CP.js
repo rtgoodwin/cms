@@ -1306,7 +1306,7 @@ Craft.CP = Garnish.Base.extend(
       if (Array.isArray(alerts) && alerts.length) {
         this.$alerts = $('<ul id="alerts"/>').prependTo(this.$pageContainer);
 
-        for (let alert of alerts) {
+        for (const alert of alerts) {
           if (!$.isPlainObject(alert)) {
             alert = {
               content: alert,
@@ -1509,7 +1509,7 @@ Craft.CP = Garnish.Base.extend(
             const callbacks = this.checkForUpdatesFailureCallbacks;
             this.checkForUpdatesFailureCallbacks = null;
 
-            for (let callback of callbacks) {
+            for (const callback of callbacks) {
               callback();
             }
           }
@@ -1524,7 +1524,7 @@ Craft.CP = Garnish.Base.extend(
           const callbacks = this.checkForUpdatesCallbacks;
           this.checkForUpdatesCallbacks = null;
 
-          for (let callback of callbacks) {
+          for (const callback of callbacks) {
             callback(info);
           }
         }
@@ -1933,7 +1933,7 @@ Craft.CP = Garnish.Base.extend(
       history.replaceState({}, '', url);
 
       // update the site--x body class
-      for (let className of document.body.classList) {
+      for (const className of document.body.classList) {
         if (className.match(/^site--/)) {
           document.body.classList.remove(className);
         }
@@ -2301,7 +2301,7 @@ Craft.CP.ElementCopyNotification = Craft.CP.Notification.extend({
     this.$copiedElements = $('<div class="copied-elements"/>');
     let $chips = $();
 
-    for (let elementInfo of this.elementInfo) {
+    for (const elementInfo of this.elementInfo) {
       for (const chip of data.elements[elementInfo.id] || []) {
         $chips = $chips.add(chip);
       }
