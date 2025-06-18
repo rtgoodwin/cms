@@ -226,7 +226,7 @@ JS, [
     /**
      * @inheritdoc
      */
-    public function isValueEmpty(string $value, ?string &$error = null): bool
+    public function isValueEmpty(string $value): bool
     {
         // check if the element we're linking to still exists (e.g. it wasn't deleted)
         // we already validated the link type, so getting the element type as string

@@ -875,7 +875,7 @@ JS;
         $linkType = $linkTypes[$value->type];
         $value = $value->serialize()['value'];
 
-        return $linkType->isValueEmpty($value, $error);
+        return $linkType->isValueEmpty($value);
     }
 
     /**

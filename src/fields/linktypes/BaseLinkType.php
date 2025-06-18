@@ -97,11 +97,10 @@ abstract class BaseLinkType extends ConfigurableComponent
      * Returns whether given value is empty.
      *
      * @param string $value
-     * @param string|null $error
      * @return bool
      * @since 5.7.11
      */
-    public function isValueEmpty(string $value, ?string &$error = null): bool
+    public function isValueEmpty(string $value): bool
     {
         return empty($value);
     }
