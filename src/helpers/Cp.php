@@ -1039,6 +1039,12 @@ JS, [
                     'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
                     'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
                     'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
+                    'deletable-for-site' => (
+                        $editable &&
+                        self::contextIsAdministrative($config['context']) &&
+                        ElementHelper::isMultiSite($element) &&
+                        $elementsService->canDeleteForSite($element, $user)
+                    ),
                 ]),
             ],
         );
