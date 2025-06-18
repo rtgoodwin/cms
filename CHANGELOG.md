@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Added `craft\services\ElementSources::sourceExists()`.
+- Updated yii2-debug to 2.1.27. ([#17115](https://github.com/craftcms/cms/issues/17115))
 - Fixed a PHP error that could occur when rendering a field layout’s form, if it didn’t have customizable tabs.
 - Fixed an error that could occur when loading control panel resources on the front end.
 - Fixed a bug where entries’ section breadcrumbs were getting hyperlinked even if the section’s source was disabled. ([#17411](https://github.com/craftcms/cms/issues/17411))
