@@ -837,56 +837,51 @@ class Matrix extends Field implements
             ];
 
             if ($this->viewMode === self::VIEW_MODE_CARDS) {
-                $view->registerJsWithVars(fn($copyAllId, $fieldId) => <<<JS
+                $copyAllJs = <<<JS
+copyAllBtn.on('activate', () => {
+  Craft.cp.copyElements(field.find('> .nested-element-cards > .elements > li > .element'));
+});
+JS;
+            } else {
+                $baseInfo = Json::encode([
+                    'type' => Entry::class,
+                    'fieldId' => $this->id,
+                ]);
+                $copyAllJs = <<<JS
+copyAllBtn.on('activate', () => {
+  const elementInfo = [];
+  field.find('> .blocks > .matrixblock').each((i, element) => {
+    element = $(element);
+    elementInfo.push(Object.assign({
+        id: element.data('id'),
+        draftId: element.data('draftId'),
+        revisionId: element.data('revisionId'),
+        ownerId: element.data('ownerId'),
+        siteId: element.data('siteId'),
+      }, $baseInfo));
+  });
+  Craft.cp.copyElements(elementInfo);
+});
+JS;
+            }
+
+            $view->registerJsWithVars(fn($copyAllId, $fieldId) => <<<JS
 (() => {
   const copyAllBtn = $('#' + $copyAllId);
-  
-  $('#' + $copyAllId).on('activate', () => {
-    Craft.cp.copyElements($('#' + $fieldId + ' > .nested-element-cards > .elements > li > .element'));
-  });
-  
-  setTimeout(() => {
-    const menu = copyAllBtn.closest('.menu').data('disclosureMenu');
-    const trigger = menu.\$trigger; 
-    const isElementFieldTrigger = trigger.parents('div.field').length;
-    
-    // only show the copy all button if the trigger is part of an element's field
-    menu.on('show', () => {
-      menu.toggleItem(copyAllBtn[0], isElementFieldTrigger);
-    });
-  }, 1);
+  const field = $('#' + $fieldId);
+  if (field.length) {
+    $copyAllJs
+  } else {
+    setTimeout(() => {
+      const menu = copyAllBtn.closest('.menu').data('disclosureMenu');
+      menu.removeItem(copyAllBtn[0]);
+    }, 1);
+  }
 })();
 JS, [
-                    $view->namespaceInputId($copyAllId),
-                    $view->namespaceInputId($this->getInputId()),
-                ]);
-            } else {
-                $view->registerJsWithVars(fn($copyAllId, $fieldId, $baseInfo) => <<<JS
-(() => {
-  $('#' + $copyAllId).on('activate', () => {
-    const elementInfo = [];
-    $('#' + $fieldId + ' > .blocks > .matrixblock').each((i, element) => {
-      element = $(element);
-      elementInfo.push(Object.assign({
-          id: element.data('id'),
-          draftId: element.data('draftId'),
-          revisionId: element.data('revisionId'),
-          ownerId: element.data('ownerId'),
-          siteId: element.data('siteId'),
-        }, $baseInfo));
-    });
-    Craft.cp.copyElements(elementInfo);
-  });
-})();
-JS, [
-                    $view->namespaceInputId($copyAllId),
-                    $view->namespaceInputId($this->getInputId()),
-                    [
-                        'type' => Entry::class,
-                        'fieldId' => $this->id,
-                    ],
-                ]);
-            }
+                $view->namespaceInputId($copyAllId),
+                $view->namespaceInputId($this->getInputId()),
+            ]);
         }
 
         $parentItems = parent::actionMenuItems();
