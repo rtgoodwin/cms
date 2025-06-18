@@ -6,7 +6,6 @@
   /* Background */
   --bg-primary: var(--red-600);
   --bg-secondary: var(--gray-500);
-  --bg-input: hsl(212deg 25% 50%); // @TODO should probably be --fg-input
   --bg-selection-light: var(--gray-200);
   --bg-selection-dark: var(--gray-500);
   --bg-error: var(--red-100);
@@ -23,6 +22,7 @@
   --fg-warning: var(--amber-700);
   --fg-success: var(--teal-700);
   --fg-notice: var(--sky-700);
+  --fg-input: hsl(212deg 25% 50%);
 
   /* Borders */
   --border-primary: var(--red-600);
@@ -99,10 +99,10 @@
   --ui-control-fg: var(--fg-subtle);
   --ui-control-fg-hover: var(--gray-600);
   --ui-control-fg-active: var(--gray-700);
-  --ui-control-bg: rgb(from var(--bg-input) r g b / 25%);
+  --ui-control-bg: rgb(from var(--fg-input) r g b / 25%);
   --ui-control-bg-static: var(--ui-control-bg);
-  --ui-control-bg-hover: rgb(from var(--bg-input) r g b / 30%);
-  --ui-control-bg-active: rgb(from var(--bg-input) r g b / 50%);
+  --ui-control-bg-hover: rgb(from var(--fg-input) r g b / 30%);
+  --ui-control-bg-active: rgb(from var(--fg-input) r g b / 50%);
   --ui-control-border: var(--ui-control-fg);
   --ui-control-radius: var(--radius-lg);
   --ui-control-height: calc(34rem / 16);
