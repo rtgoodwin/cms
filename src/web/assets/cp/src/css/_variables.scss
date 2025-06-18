@@ -1,6 +1,3 @@
-@use 'sass:color';
-@use '@craftcms/sass/mixins';
-
 /**
 These variables will be removed in the next major version and area only provided for compatibility.
 Use the new values in the `tokens.scss` file instead.
@@ -61,7 +58,6 @@ Use the new values in the `tokens.scss` file instead.
   --small-border-radius: var(--radius-sm);
   --medium-border-radius: var(--radius-md);
   --large-border-radius: var(--radius-lg);
-  --menu-border-radius: var(--radius-md); // @TODO
 
   // Variables from _main.scss
   --ui-control-color: var(--ui-control-fg);
