@@ -661,15 +661,19 @@ JS, [
         }
 
         $color = $element instanceof Colorable ? $element->getColor() : null;
-        $thumbAlignment = $element->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
 
-        $classes = [
-            'card',
-            "thumb-$thumbAlignment",
-        ];
-
+        $classes = ['card'];
         if ($element->hasErrors()) {
             $classes[] = 'error';
+        }
+
+        $thumb = $element->getThumbHtml(120);
+        $thumbAlignment = $element->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
+
+        if ($thumb) {
+            if ($thumbAlignment) {
+                $classes[] = 'thumb-' . $thumbAlignment;
+            }
         }
 
         $attributes = ArrayHelper::merge(
@@ -2925,9 +2929,7 @@ JS, [
 
         $previewHtml .=
             Html::tag('div', options: ['class' => 'card-titlebar']) .
-            Html::beginTag('div', ['class' => 'card-main']);
-
-        $contentHtml =
+            Html::beginTag('div', ['class' => 'card-main']) .
             Html::beginTag('div', ['class' => 'card-content']) .
             Html::tag('div', $heading, ['class' => 'card-heading']) .
             Html::beginTag('div', ['class' => 'card-body']);
@@ -2937,28 +2939,28 @@ JS, [
 
         foreach ($cardElements as $cardElement) {
             if ($cardElement instanceof CustomField) {
-                $contentHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
+                $previewHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
-                $contentHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+                $previewHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
             } elseif (is_array($cardElement) && isset($cardElement['html'])) {
-                $contentHtml .= Html::tag('div', $cardElement['html']);
+                $previewHtml .= Html::tag('div', $cardElement['html']);
             } else {
                 $html = $elementType::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
                     $html = $html();
                 }
-                $contentHtml .= Html::tag('div', $html);
+                $previewHtml .= Html::tag('div', $html);
             }
         }
 
         if (!empty(array_filter($labels))) {
-            $contentHtml .= Html::ul($labels, [
+            $previewHtml .= Html::ul($labels, [
                 'class' => ['flex', 'gap-xs'],
                 'encode' => false,
             ]);
         }
 
-        $contentHtml .=
+        $previewHtml .=
             Html::endTag('div') . // .card-body
             Html::endTag('div'); // .card-content
 
@@ -2969,15 +2971,7 @@ JS, [
                 ['class' => 'cvd-thumbnail']
             );
 
-            $thumbHtml = Html::tag('div', $previewThumb, ['class' => ['thumb']]);
-        } else {
-            $thumbHtml = '';
-        }
-
-        if ($thumbAlignment === 'start') {
-            $previewHtml .= $thumbHtml . $contentHtml;
-        } else {
-            $previewHtml .= $contentHtml . $thumbHtml;
+            $previewHtml .= Html::tag('div', $previewThumb, ['class' => ['thumb']]);
         }
 
         $previewHtml .=
