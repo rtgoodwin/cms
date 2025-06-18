@@ -30,8 +30,7 @@
 
       .cs-screen-home {
         .cs-opt {
-          --focus-ring: inset 0 0 0 1px var(--focus-ring-color),
-            inset 0 0 0 3px var(--focus-ring-color);
+          --focus-ring: var(--focus-ring-inner);
           display: block;
           padding: 24px;
           text-align: center;
