@@ -24,9 +24,9 @@ Use the new values in the `tokens.scss` file instead.
   --dark-hairline-color: var(--border-hairline-dark);
 
   // focus colors
-  --light-focus-color: var(--focus-light);
-  --medium-focus-color: var(--focus-medium);
-  --dark-focus-color: var(--focus-dark);
+  --light-focus-color: var(--focus-outline-light);
+  --medium-focus-color: var(--focus-outline-medium);
+  --dark-focus-color: var(--focus-outline-dark);
 
   // focus rings
   --light-focus-ring: var(--focus-ring-light);
@@ -62,4 +62,32 @@ Use the new values in the `tokens.scss` file instead.
   --medium-border-radius: var(--radius-md);
   --large-border-radius: var(--radius-lg);
   --menu-border-radius: var(--radius-md); // @TODO
+
+  // Variables from _main.scss
+  --ui-control-color: var(--ui-control-fg);
+  --ui-control-hover-color: var(--ui-control-fg-hover);
+  --ui-control-active-color: var(--ui-control-fg-active);
+  --ui-control-static-bg-color: var(--ui-control-bg-static);
+  --ui-control-bg-color: var(--ui-control-bg);
+  --ui-control-hover-bg-color: var(--ui-control-bg-hover);
+  --ui-control-active-bg-color: var(--ui-control-bg-active);
+  --ui-control-border-radius: var(--ui-control-radius);
+  --ui-control-height--small: var(--ui-control-height-small);
+  --light-focus-hsl: 212deg, 96%, 78%;
+  --dark-focus-hsl: 203deg, 84%, 38%;
+  --inner-focus-ring: var(--focus-ring-inner);
+  --touch-target-size: var(--size-touch-target);
+  --icon-size: var(--size-icon);
+  --lh: var(--size-line-height);
+
+  // Sidebar
+  --sidebar-bgColor: var(--sidebar-bg);
+
+  // Nav items (compatibility)
+  --nav-item-badge-bgColor: var(--nav-item-badge-bg);
+  --nav-item-badge-fgColor: var(--nav-item-badge-fg);
+  --nav-item-fgColor-active: var(--nav-item-fg-active);
+  --nav-item-bgColor-active: var(--nav-item-bg-active);
+  --nav-item-fgColor-hover: var(--nav-item-fg-hover);
+  --nav-item-bgColor-hover: var(--nav-item-bg-hover);
 }

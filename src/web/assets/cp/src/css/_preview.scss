@@ -76,7 +76,7 @@
         }
 
         .menubtn:not(.action-btn) {
-          --focus-ring: var(--inner-focus-ring);
+          --focus-ring: var(--focus-ring-inner);
           margin-inline: 0;
 
           &:not(:empty, .btn-empty)::after {

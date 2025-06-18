@@ -45,41 +45,6 @@
 /*  Basic stuff
 /* ---------------------------------------- */
 
-:root {
-  --ui-control-color: var(--gray-550);
-  --ui-control-hover-color: var(--gray-600);
-  --ui-control-active-color: var(--gray-700);
-  --ui-control-static-bg-color: #{color.adjust(
-      mixins.$inputColor,
-      $alpha: -0.75
-    )};
-  --ui-control-bg-color: var(--ui-control-static-bg-color);
-  --ui-control-hover-bg-color: #{color.adjust(mixins.$inputColor, $alpha: -0.7)};
-  --ui-control-active-bg-color: #{color.adjust(mixins.$inputColor, $alpha: -0.5)};
-  --ui-control-border-radius: var(--radius-lg);
-  --ui-control-height: calc(34rem / 16);
-  --ui-control-height--small: calc(30rem / 16);
-  --focus-ring-alpha: 0.85;
-  --light-focus-hsl: #{color.hue(mixins.$lightFocusColor)},
-    #{color.saturation(mixins.$lightFocusColor)},
-    #{color.lightness(mixins.$lightFocusColor)};
-  --dark-focus-hsl: #{color.hue(mixins.$darkFocusColor)},
-    #{color.saturation(mixins.$darkFocusColor)},
-    #{color.lightness(mixins.$darkFocusColor)};
-  --focus-ring: 0 0 0 2px var(--focus-ring-color),
-    0 0 5px 1px
-      hsl(from var(--focus-ring-color) h s l / var(--focus-ring-alpha));
-  --focus-ring-outset: 0 0 0 1px currentcolor, 0 0 0 3px var(--focus-ring-color),
-    0 0 6px 2px
-      hsl(from var(--focus-ring-color) h s l / var(--focus-ring-alpha));
-  --inner-focus-ring: inset 0 0 0 1px var(--focus-ring-color),
-    inset 0 0 0 3px
-      hsl(from var(--focus-ring-color) h s l / var(--focus-ring-alpha));
-  --touch-target-size: calc(24rem / 16);
-  --icon-size: 1rem;
-  --lh: 1.42em;
-}
-
 body,
 html {
   background: var(--body-bg);
@@ -2610,8 +2575,8 @@ div.btn.submit input {
     }
 
     &.current-step {
+      --focus-ring: var(--focus-ring-light);
       @include mixins.light-on-dark-text;
-      @include mixins.light-focus-ring;
     }
 
     &:focus-visible {
@@ -3253,9 +3218,7 @@ table {
             --light-text-color: var(--white);
             --link-color: var(--white);
             --ui-control-color: var(--white);
-            @include mixins.custom-color-focus-ring(
-              hsl(var(--light-focus-hsl))
-            );
+            --focus-ring: 0 0 0 3px hsl(--focus-light);
 
             .status-label .status-label-text {
               --status-label-text-color: var(--white) !important;
@@ -3478,7 +3441,7 @@ table {
     --link-color: var(--white);
     --ui-control-color: var(--white);
     --custom-border-color: rgb(0 0 0 / 10%) !important;
-    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
+    --focus-ring: 0 0 0 3px hsl(var(--focus-outline-light));
     color: var(--white);
 
     &:not(.chromeless) {
@@ -3810,7 +3773,7 @@ table {
     overflow: hidden;
     position: relative;
 
-    --focus-ring: var(--inner-focus-ring);
+    --focus-ring: var(--focus-ring-inner);
 
     .card-heading {
       display: flex;
@@ -3847,7 +3810,7 @@ table {
     --light-text-color: var(--white);
     --link-color: var(--white);
     --ui-control-color: var(--white);
-    @include mixins.custom-color-focus-ring(hsl(var(--light-focus-hsl)));
+    --focus-ring: 0 0 0 3px hsl(var(--focus-outline-light));
     color: var(--white);
     background-color: var(
       --custom-sel-bg-color,
@@ -4009,7 +3972,7 @@ table {
       text-overflow: ellipsis;
 
       &:focus {
-        box-shadow: var(--inner-focus-ring);
+        box-shadow: var(--focus-ring-inner);
       }
     }
 
@@ -5722,7 +5685,7 @@ table.data tbody tr:not(.disabled).active-drop-target {
 
       &:focus-visible {
         .tab-label {
-          box-shadow: var(--inner-focus-ring);
+          box-shadow: var(--focus-ring-inner);
         }
       }
 
@@ -7682,7 +7645,7 @@ $min2ColWidth: 400px;
     & > a:not(.crumb-link),
     & > .menu-item,
     & > .menu-option {
-      --focus-ring: var(--inner-focus-ring);
+      --focus-ring: var(--focus-ring-inner);
 
       &:hover {
         @include mixins.disclosure-link-hover-styles;
@@ -9341,7 +9304,7 @@ body {
         overflow: auto;
 
         .icon-picker--icon {
-          --focus-ring: var(--inner-focus-ring);
+          --focus-ring: var(--focus-ring-inner);
 
           &:hover {
             border-color: var(--link-color);
