@@ -49,8 +49,8 @@ class IconDataType implements GeneratorInterface, SingleGeneratorInterface
             'name' => $typeName,
             'fields' => function() use ($typeName) {
                 $fields = [
-                    'value' => Type::string(),
-                    'family' => Type::listOf(Type::string()),
+                    'name' => Type::string(),
+                    'styles' => Type::listOf(Type::string()),
                 ];
 
                 return Craft::$app->getGql()->prepareFieldDefinitions($fields, $typeName);

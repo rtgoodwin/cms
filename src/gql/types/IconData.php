@@ -24,12 +24,8 @@ class IconData extends ObjectType
      */
     protected function resolve(mixed $source, array $arguments, mixed $context, ResolveInfo $resolveInfo): mixed
     {
-        /** @var FieldIconData $source */
         $fieldName = $resolveInfo->fieldName;
-        return match ($fieldName) {
-            'value' => $source->getValue(),
-            'family' => $source->getFamily(),
-            default => $source->$fieldName,
-        };
+        /** @var FieldIconData $source */
+        return $source->$fieldName;
     }
 }

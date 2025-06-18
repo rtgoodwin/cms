@@ -18,25 +18,15 @@ use craft\base\Serializable;
 class IconData implements Serializable
 {
     /**
-     * @var array|null
-     */
-    public ?array $family = null;
-
-    /**
-     * @var string|null
-     */
-    public ?string $value = null;
-
-    /**
      * Constructor
      *
-     * @param string|null $value
-     * @param array|null $family
+     * @param string $name The icon name
+     * @param string[] $styles The Font Awesome styles the icon is available in
      */
-    public function __construct(?string $value, ?array $family = null)
-    {
-        $this->value = $value;
-        $this->family = $family;
+    public function __construct(
+        public string $name,
+        public array $styles,
+    ) {
     }
 
     /**
@@ -44,32 +34,14 @@ class IconData implements Serializable
      */
     public function __toString(): string
     {
-        return $this->getValue();
+        return $this->name;
     }
 
     /**
      * @inheritdoc
      */
-    public function serialize(): mixed
+    public function serialize(): string
     {
-        return $this->getValue();
-    }
-
-    /**
-     * Returns the array of families this icon belongs to.
-     *
-     * @return ?array
-     */
-    public function getFamily(): ?array
-    {
-        return $this->family;
-    }
-
-    /**
-     * Returns the icon field value.
-     */
-    public function getValue(): string
-    {
-        return $this->value;
+        return $this->name;
     }
 }
