@@ -547,6 +547,12 @@ body.dragging .offset-drag-helper {
   padding-inline: 60px 0;
 }
 
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 img {
   max-width: 100%;
 }
@@ -1182,7 +1188,6 @@ i em {
 
 .light {
   color: var(--medium-text-color) !important;
-  font-weight: normal;
 }
 
 .extralight {
@@ -3469,7 +3474,7 @@ table {
     content: '';
     inset: 0;
     border-radius: var(--large-border-radius);
-    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-150));
+    box-shadow: inset 0 0 0 1px var(--custom-border-color, var(--gray-200));
     pointer-events: none;
     z-index: 1;
   }
@@ -3782,7 +3787,13 @@ table {
     width: 100%;
     overflow: hidden;
 
+    @container (min-width: 200px) {
+      grid-template-areas: 'content thumb';
+      grid-template-columns: 1fr auto;
+    }
+
     & > .thumb {
+      grid-area: thumb;
       display: flex;
       justify-content: center;
       flex: 0 0 120px;
@@ -3799,9 +3810,14 @@ table {
       }
     }
 
-    @container (min-width: 200px) {
-      grid-template-columns: 1fr auto;
+    & > .card-content {
+      grid-area: content;
     }
+  }
+
+  &.thumb-start > .card-main {
+    grid-template-areas: 'thumb content';
+    grid-template-columns: auto 1fr;
   }
 
   .ck-content & {
@@ -5604,8 +5620,14 @@ table.data tbody tr:not(.disabled).active-drop-target {
     border: 1px solid #{color.adjust(mixins.$inputColor, $alpha: -0.75)} !important;
   }
 
-  &.no-border {
+  &.no-border,
+  &.chromeless {
     border: none !important;
+  }
+
+  &.chromeless {
+    background-color: transparent !important;
+    box-shadow: none;
   }
 
   &.padding-xs {
@@ -6406,8 +6428,10 @@ $min2ColWidth: 400px;
     height: 100%;
 
     @media screen and (prefers-reduced-motion: no-preference) {
-      transition: inset-inline-start linear 250ms;
-      will-change: inset-inline-start;
+      transition:
+        inset-inline-start linear 250ms,
+        inset-inline-end linear 250ms;
+      will-change: inset-inline-start, inset-inline-end;
     }
   }
 
@@ -7985,12 +8009,6 @@ textarea.text.fullwidth {
         .chip {
           min-height: calc(34rem / 16);
           padding-inline: var(--s);
-
-          .chip-content {
-            a {
-              word-break: break-word;
-            }
-          }
         }
       }
     }

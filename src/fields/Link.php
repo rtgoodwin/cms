@@ -19,7 +19,7 @@ use craft\base\RelationalFieldTrait;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry as EntryElement;
 use craft\events\RegisterComponentTypesEvent;
-use craft\fields\conditions\TextFieldConditionRule;
+use craft\fields\conditions\LinkFieldConditionRule;
 use craft\fields\data\LinkData;
 use craft\fields\linktypes\Asset;
 use craft\fields\linktypes\BaseLinkType;
@@ -863,9 +863,27 @@ JS;
     /**
      * @inheritdoc
      */
+    public function isValueEmpty(mixed $value, ElementInterface $element): bool
+    {
+        if (parent::isValueEmpty($value, $element)) {
+            return true;
+        }
+
+        /** @var LinkData $value */
+        $value = $element->getFieldValue($this->handle);
+        $linkTypes = $this->getLinkTypes();
+        $linkType = $linkTypes[$value->type];
+        $value = $value->serialize()['value'];
+
+        return $linkType->isValueEmpty($value);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getElementConditionRuleType(): array|string|null
     {
-        return TextFieldConditionRule::class;
+        return LinkFieldConditionRule::class;
     }
 
     /**
