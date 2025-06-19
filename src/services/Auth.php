@@ -233,6 +233,7 @@ class Auth extends Component
      *
      * @param string|null $defaultMessage
      * @return string
+     * @since 5.7.11
      */
     public function getAuthErrorMessage(?string $defaultMessage = null): string
     {
