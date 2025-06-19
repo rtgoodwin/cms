@@ -2199,24 +2199,26 @@ JS, [
             ]);
 
             // Section settings
-            $sectionEditId = sprintf('edit-section-%s', mt_rand());
-            $actions[] = [
-                'id' => $sectionEditId,
-                'icon' => 'gear',
-                'label' => Craft::t('app', 'Section settings'),
-            ];
+            if (!empty($this->sectionId)) {
+                $sectionEditId = sprintf('edit-section-%s', mt_rand());
+                $actions[] = [
+                    'id' => $sectionEditId,
+                    'icon' => 'gear',
+                    'label' => Craft::t('app', 'Section settings'),
+                ];
 
-            $view = Craft::$app->getView();
-            $view->registerJsWithVars(fn($id, $params) => <<<JS
-(() => {
-  $('#' + $id).on('activate', function() {
-    new Craft.CpScreenSlideout('sections/edit-section', {params: $params});
-  });
-})();
-JS, [
-                $view->namespaceInputId($sectionEditId),
-                ['sectionId' => $this->sectionId],
-            ]);
+                $view = Craft::$app->getView();
+                $view->registerJsWithVars(fn($id, $params) => <<<JS
+    (() => {
+      $('#' + $id).on('activate', function() {
+        new Craft.CpScreenSlideout('sections/edit-section', {params: $params});
+      });
+    })();
+    JS, [
+                    $view->namespaceInputId($sectionEditId),
+                    ['sectionId' => $this->sectionId],
+                ]);
+            }
         }
 
         return $actions;
