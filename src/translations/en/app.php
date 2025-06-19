@@ -1468,6 +1468,7 @@ return [
     'Section - {section}' => 'Section - {section}',
     'Section Type' => 'Section Type',
     'Section saved.' => 'Section saved.',
+    'Section settings' => 'Section settings',
     'Section' => 'Section',
     'Sections' => 'Sections',
     'Secure credential' => 'Secure credential',

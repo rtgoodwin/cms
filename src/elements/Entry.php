@@ -2173,9 +2173,10 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             Craft::$app->getUser()->getIsAdmin() &&
             Craft::$app->getConfig()->getGeneral()->allowAdminChanges
         ) {
-            $editId = sprintf('edit-entry-type-%s', mt_rand());
+            // Entry type settings
+            $entryTypeEditId = sprintf('edit-entry-type-%s', mt_rand());
             $actions[] = [
-                'id' => $editId,
+                'id' => $entryTypeEditId,
                 'icon' => 'gear',
                 'label' => Craft::t('app', 'Entry type settings'),
             ];
@@ -2193,8 +2194,28 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
   });
 })();
 JS, [
-                $view->namespaceInputId($editId),
+                $view->namespaceInputId($entryTypeEditId),
                 ['entryTypeId' => $this->typeId],
+            ]);
+
+            // Section settings
+            $sectionEditId = sprintf('edit-section-%s', mt_rand());
+            $actions[] = [
+                'id' => $sectionEditId,
+                'icon' => 'gear',
+                'label' => Craft::t('app', 'Section settings'),
+            ];
+
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $params) => <<<JS
+(() => {
+  $('#' + $id).on('activate', function() {
+    new Craft.CpScreenSlideout('sections/edit-section', {params: $params});
+  });
+})();
+JS, [
+                $view->namespaceInputId($sectionEditId),
+                ['sectionId' => $this->sectionId],
             ]);
         }
 
