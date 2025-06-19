@@ -2164,6 +2164,45 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
 
     /**
      * @inheritdoc
+     */
+    protected function safeActionMenuItems(): array
+    {
+        $actions = parent::safeActionMenuItems();
+
+        if (
+            Craft::$app->getUser()->getIsAdmin() &&
+            Craft::$app->getConfig()->getGeneral()->allowAdminChanges
+        ) {
+            $editId = sprintf('edit-entry-type-%s', mt_rand());
+            $actions[] = [
+                'id' => $editId,
+                'icon' => 'gear',
+                'label' => Craft::t('app', 'Entry type settings'),
+            ];
+
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $params) => <<<JS
+(() => {
+  $('#' + $id).on('activate', function() {
+    const params = $params;
+    const input = $(this).closest('.menu').data('disclosureMenu').\$trigger.closest('form').find('.entry-type-select').find('input');
+    if (input.length) {
+      params.entryTypeId = input.val();
+    }
+    new Craft.CpScreenSlideout('entry-types/edit', {params});
+  });
+})();
+JS, [
+                $view->namespaceInputId($editId),
+                ['entryTypeId' => $this->typeId],
+            ]);
+        }
+
+        return $actions;
+    }
+
+    /**
+     * @inheritdoc
      * @since 3.3.0
      */
     public function getGqlTypeName(): string
@@ -2383,6 +2422,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             }
 
             return Cp::customSelectFieldHtml([
+                'fieldClass' => 'entry-type-select',
                 'status' => $this->getAttributeStatus('typeId'),
                 'label' => Craft::t('app', 'Entry Type'),
                 'id' => 'entryType',
