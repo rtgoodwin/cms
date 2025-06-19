@@ -498,13 +498,27 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
                         'withDescendants' => true,
                     ];
                 }
-
-                if ($section->propagationMethod === PropagationMethod::Custom && $section->getHasMultiSiteEntries()) {
-                    $actions[] = DeleteForSite::class;
-                }
             }
         } else {
             $actions[] = Copy::class;
+        }
+
+        if (
+            (
+                $section &&
+                $section->propagationMethod === PropagationMethod::Custom &&
+                $section->getHasMultiSiteEntries() &&
+                $user->can("deleteEntriesForSite:$section->uid")
+            ) ||
+            (
+                !$section &&
+                str_starts_with($source, 'custom:') &&
+                Craft::$app->getIsMultiSite() &&
+                Collection::make(Craft::$app->getEntries()->getEditableSections())
+                    ->contains(fn(Section $section) => $section->propagationMethod === PropagationMethod::Custom)
+            )
+        ) {
+            $actions[] = DeleteForSite::class;
         }
 
         // Restore
@@ -1259,40 +1273,48 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return [];
         }
 
-        $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
-        $requestedSite = Cp::requestedSite();
-        if ($requestedSite) {
-            $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
-        }
-        /** @var Collection $sectionOptions */
-        $sectionOptions = $sections
-            ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
-            ->map(fn(Section $s) => [
-                'label' => Craft::t('site', $s->name),
-                'url' => "entries/$s->handle",
-                'selected' => $s->id === $section->id,
-            ]);
-
-        if ($sections->contains(fn(Section $s) => $s->type === Section::TYPE_SINGLE)) {
-            $sectionOptions->prepend([
-                'label' => Craft::t('app', 'Singles'),
-                'url' => 'entries/singles',
-                'selected' => $section->type === Section::TYPE_SINGLE,
-            ]);
-        }
-
         $crumbs = [
             [
                 'label' => Craft::t('app', 'Entries'),
                 'url' => 'entries',
             ],
-            [
+        ];
+
+        // If the section’s source is disabled, just show its name w/o a link
+        if (Craft::$app->getElementSources()->sourceExists(Entry::class, "section:$section->uid")) {
+            $sections = Collection::make(Craft::$app->getEntries()->getEditableSections());
+            $requestedSite = Cp::requestedSite();
+            if ($requestedSite) {
+                $sections = $sections->filter(fn(Section $s) => in_array($requestedSite->id, $s->getSiteIds()));
+            }
+            /** @var Collection $sectionOptions */
+            $sectionOptions = $sections
+                ->filter(fn(Section $s) => $s->type !== Section::TYPE_SINGLE)
+                ->map(fn(Section $s) => [
+                    'label' => Craft::t('site', $s->name),
+                    'url' => "entries/$s->handle",
+                    'selected' => $s->id === $section->id,
+                ]);
+
+            if ($sections->contains(fn(Section $s) => $s->type === Section::TYPE_SINGLE)) {
+                $sectionOptions->prepend([
+                    'label' => Craft::t('app', 'Singles'),
+                    'url' => 'entries/singles',
+                    'selected' => $section->type === Section::TYPE_SINGLE,
+                ]);
+            }
+
+            $crumbs[] = [
                 'menu' => [
                     'label' => Craft::t('app', 'Select section'),
                     'items' => $sectionOptions->all(),
                 ],
-            ],
-        ];
+            ];
+        } else {
+            $crumbs[] = [
+                'label' => Craft::t('site', $section->name),
+            ];
+        }
 
         if ($section->type === Section::TYPE_STRUCTURE) {
             $elementsService = Craft::$app->getElements();
@@ -2054,7 +2076,29 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             return false;
         }
 
-        return $section->propagationMethod === PropagationMethod::Custom;
+        if ($section->propagationMethod === PropagationMethod::Custom) {
+            if ($this->getIsDraft()) {
+                /**
+                 * @var static|DraftBehavior $this
+                 * @phpstan-ignore varTag.nativeType
+                 */
+                return (
+                    $this->creatorId === $user->id ||
+                    $user->can("deletePeerEntryDrafts:$section->uid")
+                );
+            }
+
+            if (!$user->can("deleteEntriesForSite:$section->uid")) {
+                return false;
+            }
+
+            return (
+                in_array($user->id, $this->getAuthorIds(), true) ||
+                $user->can("deletePeerEntriesForSite:$section->uid")
+            );
+        }
+
+        return false;
     }
 
     /**
@@ -2116,6 +2160,66 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
     protected function cpRevisionsUrl(): ?string
     {
         return sprintf('%s/revisions', $this->cpEditUrl());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function safeActionMenuItems(): array
+    {
+        $actions = parent::safeActionMenuItems();
+
+        if (
+            Craft::$app->getUser()->getIsAdmin() &&
+            Craft::$app->getConfig()->getGeneral()->allowAdminChanges
+        ) {
+            // Entry type settings
+            $entryTypeEditId = sprintf('edit-entry-type-%s', mt_rand());
+            $actions[] = [
+                'id' => $entryTypeEditId,
+                'icon' => 'gear',
+                'label' => Craft::t('app', 'Entry type settings'),
+            ];
+
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $params) => <<<JS
+(() => {
+  $('#' + $id).on('activate', function() {
+    const params = $params;
+    const input = $(this).closest('.menu').data('disclosureMenu').\$trigger.closest('form').find('.entry-type-select').find('input');
+    if (input.length) {
+      params.entryTypeId = input.val();
+    }
+    new Craft.CpScreenSlideout('entry-types/edit', {params});
+  });
+})();
+JS, [
+                $view->namespaceInputId($entryTypeEditId),
+                ['entryTypeId' => $this->typeId],
+            ]);
+
+            // Section settings
+            $sectionEditId = sprintf('edit-section-%s', mt_rand());
+            $actions[] = [
+                'id' => $sectionEditId,
+                'icon' => 'gear',
+                'label' => Craft::t('app', 'Section settings'),
+            ];
+
+            $view = Craft::$app->getView();
+            $view->registerJsWithVars(fn($id, $params) => <<<JS
+(() => {
+  $('#' + $id).on('activate', function() {
+    new Craft.CpScreenSlideout('sections/edit-section', {params: $params});
+  });
+})();
+JS, [
+                $view->namespaceInputId($sectionEditId),
+                ['sectionId' => $this->sectionId],
+            ]);
+        }
+
+        return $actions;
     }
 
     /**
@@ -2339,6 +2443,7 @@ class Entry extends Element implements NestedElementInterface, ExpirableElementI
             }
 
             return Cp::customSelectFieldHtml([
+                'fieldClass' => 'entry-type-select',
                 'status' => $this->getAttributeStatus('typeId'),
                 'label' => Craft::t('app', 'Entry Type'),
                 'id' => 'entryType',
