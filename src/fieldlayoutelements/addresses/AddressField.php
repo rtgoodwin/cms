@@ -94,7 +94,7 @@ class AddressField extends BaseField
         ];
         for (let name of fieldNames) {
             fields[name] = $('#' + Craft.namespaceId(name, $namespace));
-            if (values) {
+            if (values && values[name] !== null) {
                 fields[name].val(values[name]);
             }
         }
