@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Table fields with “Static Rows” enabled now get populated with the default row values when their value is `null`. ([#17452](https://github.com/craftcms/cms/pull/17452))
 - Added `craft\fields\linktypes\BaseLinkType::isValueEmpty()`.
 - Added `craft\services\Auth::getAuthErrorMessage()`.
 - Added `craft\services\ElementSources::sourceExists()`.
