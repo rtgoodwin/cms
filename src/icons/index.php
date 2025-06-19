@@ -2444,6 +2444,12 @@ return array(
       4 => 'duotone',
     ),
   ),
+  'burger-soda' =>
+  array(
+    'name' => ' burger soda ',
+    'terms' => ' bacon beef cheeseburger fast food grill ground beef hamburger junk food pop sandwich slider ',
+    'pro' => true,
+  ),
   'burrito' =>
   array(
     'name' => ' burrito ',
@@ -8870,6 +8876,12 @@ return array(
       4 => 'duotone',
     ),
   ),
+  'grill-hot' =>
+  array(
+    'name' => ' grill hot ',
+    'terms' => ' barbecue barbeque bbq burger charcoal cook cookout hot smoke ',
+    'pro' => true,
+  ),
   'guitar' =>
   array(
     'name' => ' guitar ',
@@ -11856,6 +11868,12 @@ return array(
       4 => 'duotone',
     ),
   ),
+  'mobile-retro' =>
+  array(
+    'name' => ' mobile retro ',
+    'terms' => ' cellphone cellular phone ',
+    'pro' => false,
+  ),
   'money-bill' =>
   array(
     'name' => ' money bill ',
@@ -13143,6 +13161,12 @@ return array(
       3 => 'thin',
       4 => 'duotone',
     ),
+  ),
+  'people-simple' =>
+  array(
+    'name' => ' people simple ',
+    'terms' => ' together uer users people ',
+    'pro' => true,
   ),
   'pepper' =>
   array(
@@ -17557,6 +17581,12 @@ return array(
       3 => 'thin',
       4 => 'duotone',
     ),
+  ),
+  'temperature-three-quarters' =>
+  array(
+    'name' => ' temperature three quarters ',
+    'terms' => ' mercury status temperature ',
+    'pro' => false,
   ),
   'tennis-ball' =>
   array(
