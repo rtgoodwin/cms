@@ -695,6 +695,7 @@ return [
     'Everything in {edition}, plus…' => 'Everything in {edition}, plus…',
     'Existing {type}' => 'Existing {type}',
     'Expand all blocks' => 'Expand all blocks',
+    'Expand {heading} sources' => 'Expand {heading} sources',
     'Expand' => 'Expand',
     'Expanded' => 'Expanded',
     'Expired' => 'Expired',
