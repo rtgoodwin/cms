@@ -32,21 +32,29 @@ export class Cookies {
     domain: null,
     secure: false,
     sameSite: "strict",
-    prefix: 'Craft'
+    prefix: "Craft",
   };
   config: CookieOptions;
 
-  constructor(options: CookieOptions) {
+  constructor(options: CookieOptions = {}) {
     this.config = {
       ...Cookies.defaultCookieOptions,
-      ...options
+      ...options,
     };
   }
 
   /**
    * Sets a cookie value.
    */
-  public set(name: string, value: string, {path, domain, maxAge, expires, secure}: CookieOptions = {}) {
+  public set(name: string, value: string, overrides: CookieOptions = {}) {
+    const config = Object.assign(
+      {},
+      this.config,
+      overrides,
+    );
+
+    const {path, domain, maxAge, expires, secure, sameSite, prefix} = config;
+
     let cookie = `${this.config.prefix}:${name}=${encodeURIComponent(value)}`;
     if (path) {
       cookie += `;path=${path}`;
@@ -73,9 +81,9 @@ export class Cookies {
     // Adapted from https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
     return document.cookie.replace(
       new RegExp(
-        `(?:(?:^|.*;\\s*)${this.config.prefix}:${name}\\s*\\=\\s*([^;]*).*$)|^.*$`
+        `(?:(?:^|.*;\\s*)${this.config.prefix}:${name}\\s*\\=\\s*([^;]*).*$)|^.*$`,
       ),
-      "$1"
+      "$1",
     );
   }
 
@@ -83,4 +91,3 @@ export class Cookies {
     this.set(name, "", { expires: new Date("1970-01-01T00:00:00") });
   }
 }
-
