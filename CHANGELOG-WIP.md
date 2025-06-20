@@ -92,6 +92,7 @@
 - `Craft.EntryTypeSelectInput` now triggers an `applySettings` event. ([#17387](https://github.com/craftcms/cms/pull/17387))
 - Deprecated `craft\web\assets\picturefill\PicturefillAsset`. ([#17344](https://github.com/craftcms/cms/pull/17344))
 - Deprecated `craft\elements\db\ElementQuery::customFields()`.
+- Improved control panel CSS variable names. ([#17465](https://github.com/craftcms/cms/pull/17465))
 
 ### System
 - Email verification links now show a form with a “Verify” button, which must be submitted before the email address is actually verified. ([#17392](https://github.com/craftcms/cms/pull/17392))
