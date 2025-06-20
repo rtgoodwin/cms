@@ -14,6 +14,7 @@
 - Fixed a bug where entries that were pasted within a Matrix field were losing custom field translations for other sites. ([17414](https://github.com/craftcms/cms/issues/17414))
 - Fixed a bug where Matrix fields’ chips were getting “Copy all entries” actions. ([#17404](https://github.com/craftcms/cms/issues/17404))
 - Fixed a bug where Link fields were validating if a deleted element was selected. ([#17409](https://github.com/craftcms/cms/issues/17409))
+- Fixed a bug where copy buttons weren’t working on table rows that had been reordered. ([#17459](https://github.com/craftcms/cms/issues/17459))
 - Users’ maximum invalid login counts now factor in invalid two-step verification attempts. ([#17454](https://github.com/craftcms/cms/pull/17454))
 
 ## 5.7.10 - 2025-06-04
