@@ -23,6 +23,7 @@ use craft\enums\Color;
 use craft\enums\PropagationMethod;
 use craft\events\BulkElementsEvent;
 use craft\events\DuplicateNestedElementsEvent;
+use craft\fields\Matrix;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Db;
@@ -1174,10 +1175,13 @@ JS, [
         $map = [];
 
         foreach ($elements as $element) {
+            $field = $element->getField();
+            $enableVersioning = $field instanceof Matrix && $field->enableVersioning;
+
             $elementRevisionId = $elementRevisionIds[] = $revisionsService->createRevision($element, null, null, [
                 'primaryOwnerId' => $revision->id,
                 'saveOwnership' => false,
-            ]);
+            ], force: !$enableVersioning);
             $ownershipData[] = [$elementRevisionId, $revision->id, $element->getSortOrder()];
             $map[$element->id] = $elementRevisionId;
         }
