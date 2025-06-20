@@ -1,4 +1,5 @@
 import * as d3 from 'd3';
+import {Cookies} from '@craftcms/craftcms/utilities/cookies';
 
 /** global: Craft */
 /** global: Garnish */
@@ -13,6 +14,12 @@ var rxhtmlTag =
 jQuery.htmlPrefilter = function (html) {
   return html.replace(rxhtmlTag, '<$1></$2>');
 };
+
+// Initialize the cookies service
+const cookies = new Cookies({
+  ...Craft.defaultCookieOptions,
+  prefix: `Craft-${Craft.systemUid}`,
+});
 
 // Set all the standard Craft.* stuff
 $.extend(Craft, {
@@ -2370,13 +2377,7 @@ $.extend(Craft, {
    * @returns {(string|boolean)}
    */
   getCookie: function (name) {
-    // Adapted from https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
-    return document.cookie.replace(
-      new RegExp(
-        `(?:(?:^|.*;\\s*)Craft-${Craft.systemUid}:${name}\\s*\\=\\s*([^;]*).*$)|^.*$`
-      ),
-      '$1'
-    );
+    return cookies.get(name);
   },
 
   /**
@@ -2394,25 +2395,7 @@ $.extend(Craft, {
    * `sameSiteCookieValue` config setting.
    */
   setCookie: function (name, value, options) {
-    options = $.extend({}, this.defaultCookieOptions, options);
-    let cookie = `Craft-${Craft.systemUid}:${name}=${encodeURIComponent(
-      value
-    )}`;
-    if (options.path) {
-      cookie += `;path=${options.path}`;
-    }
-    if (options.domain) {
-      cookie += `;domain=${options.domain}`;
-    }
-    if (options.maxAge) {
-      cookie += `;max-age-in-seconds=${options.maxAge}`;
-    } else if (options.expires) {
-      cookie += `;expires=${options.expires.toUTCString()}`;
-    }
-    if (options.secure) {
-      cookie += ';secure';
-    }
-    document.cookie = cookie;
+    cookies.set(name, value, options);
   },
 
   /**
@@ -2420,7 +2403,7 @@ $.extend(Craft, {
    * @param {string} name
    */
   removeCookie: function (name) {
-    this.setCookie(name, '', new Date('1970-01-01T00:00:00'));
+    cookies.remove(name);
   },
 
   /**

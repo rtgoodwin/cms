@@ -1,0 +1,52 @@
+{
+  "name": "@craftcms/craftcms",
+  "version": "1.0.0",
+  "description": "Javascript package for Craft CMS",
+  "type": "module",
+  "main": "dist/index.js",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.2",
+    "@chromatic-com/storybook": "^4.0.0",
+    "@storybook/addon-docs": "^9.0.12",
+    "@storybook/web-components-vite": "^9.0.12",
+    "@total-typescript/tsconfig": "^1.0.4",
+    "globby": "^14.1.0",
+    "lit": "^3.3.0",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "storybook": "^9.0.12",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rimraf ./dist",
+    "dev": "npm run clean && tsup --watch",
+    "build": "npm run clean && tsup",
+    "format": "prettier --write .",
+    "check:format": "prettier --check .",
+    "check:exports": "attw --pack .",
+    "check:types": "tsc --noEmit",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./utilities/*": "./dist/utilities/*",
+    "./components/*": "./dist/components/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craftcms/cms.git"
+  },
+  "author": "Pixel & Tonic, Inc. <support@pixelandtonic.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/craftcms/cms/issues"
+  },
+  "homepage": "https://github.com/craftcms/cms#readme"
+}
