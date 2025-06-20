@@ -1,8 +1,14 @@
+@use 'sass:color';
+@use '@craftcms/sass/mixins';
+
 /**
 These variables will be removed in the next major version and area only provided for compatibility.
 Use the new values in the `tokens.scss` file instead.
 */
 :root {
+  --bg-color: var(--body-bg);
+  --bg-color-hsl: 212deg, 50%, 93%;
+
   // submit button colors
   --primary-color: var(--bg-primary);
   --secondary-color: var(--bg-secondary);
@@ -58,6 +64,7 @@ Use the new values in the `tokens.scss` file instead.
   --small-border-radius: var(--radius-sm);
   --medium-border-radius: var(--radius-md);
   --large-border-radius: var(--radius-lg);
+  --menu-border-radius: var(--medium-border-radius);
 
   // Variables from _main.scss
   --ui-control-color: var(--ui-control-fg);
