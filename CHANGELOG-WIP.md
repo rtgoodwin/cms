@@ -23,7 +23,7 @@
 ### Administration
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
 - Matrix fields’ entry type selections can now be grouped. ([#17425](https://github.com/craftcms/cms/pull/17425))
-- Matrix fields with multiple selected entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
+- Matrix fields with more than five entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - Icon fields now expose the Font Awesome icon styles supported by the selected icon. ([#17419](https://github.com/craftcms/cms/pull/17419))
 - Icon fields now have a “GraphQL Mode” setting, with “Full data” and “Name only” options. ([#17419](https://github.com/craftcms/cms/pull/17419))
 - It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
