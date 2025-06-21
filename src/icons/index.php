@@ -1045,6 +1045,12 @@ return array(
     'terms' => ' bacon beef burger burger king cheeseburger fast food grill ground beef mcdonalds sandwich ',
     'pro' => false,
   ),
+  'burger-soda' =>
+  array(
+    'name' => ' burger soda ',
+    'terms' => ' bacon beef cheeseburger fast food grill ground beef hamburger junk food pop sandwich slider ',
+    'pro' => true,
+  ),
   'burrito' =>
   array(
     'name' => ' burrito ',
@@ -3811,6 +3817,12 @@ return array(
     'terms' => ' barbecue barbeque bbq burger charcoal cook cookout hot smoke ',
     'pro' => true,
   ),
+  'grill-hot' =>
+  array(
+    'name' => ' grill hot ',
+    'terms' => ' barbecue barbeque bbq burger charcoal cook cookout hot smoke ',
+    'pro' => true,
+  ),
   'guitar' =>
   array(
     'name' => ' guitar ',
@@ -5101,6 +5113,12 @@ return array(
     'terms' => ' android call cell cell phone device mobile mobile phone number phone screen telephone text ',
     'pro' => false,
   ),
+  'mobile-retro' =>
+  array(
+    'name' => ' mobile retro ',
+    'terms' => ' cellphone cellular phone ',
+    'pro' => false,
+  ),
   'money-bill' =>
   array(
     'name' => ' money bill ',
@@ -5651,6 +5669,12 @@ return array(
   array(
     'name' => ' people ',
     'terms' => ' couple hand hold holding hands man together uer users people woman woman and man holding hands ',
+    'pro' => true,
+  ),
+  'people-simple' =>
+  array(
+    'name' => ' people simple ',
+    'terms' => ' together uer users people ',
     'pro' => true,
   ),
   'pepper' =>
@@ -7554,6 +7578,12 @@ return array(
     'name' => ' telescope ',
     'terms' => ' astronomy knowledge lens look microscope observatory science scope search space telescope tool view ',
     'pro' => true,
+  ),
+  'temperature-three-quarters' =>
+  array(
+    'name' => ' temperature three quarters ',
+    'terms' => ' mercury status temperature ',
+    'pro' => false,
   ),
   'tennis-ball' =>
   array(
