@@ -9,6 +9,7 @@ namespace craft\fields\linktypes;
 
 use Craft;
 use craft\helpers\Cp;
+use craft\validators\UrlValidator;
 use League\Uri\Uri;
 
 /**
@@ -98,8 +99,7 @@ class Url extends BaseTextLinkType
 
     protected function pattern(): string
     {
-        // Don't use the URL validator's pattern, as that doesn't require a TLD
-        $pattern = 'https?:\/\/(([A-Z0-9][A-Z0-9_-]*)(\.[A-Z0-9][A-Z0-9_-]*)+)(?::\d{1,5})?(?:$|[?\/#])';
+        $pattern = trim(str_replace('{schemes}', '(' . implode('|', ['http', 'https']) . ')', UrlValidator::URL_PATTERN), '^$');
 
         if ($this->allowRootRelativeUrls) {
             $pattern .= '|\/';
