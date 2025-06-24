@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.15.7 - 2025-06-24
 
 - Table fields with “Static Rows” enabled now get populated with the default row values when their value is `null`. ([#17452](https://github.com/craftcms/cms/pull/17452))
 - Updated yii2-debug to 2.1.27. ([#17115](https://github.com/craftcms/cms/issues/17115))
