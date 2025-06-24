@@ -113,7 +113,7 @@
     }
   },
   "scripts": {
-    "copy-icons": "php ./scripts/copyicons.php && ecs check src/icons/index.php --fix",
+    "copy-icons": "php ./scripts/copyicons.php",
     "check-cs": "ecs check --ansi",
     "fix-cs": "ecs check --ansi --fix",
     "codecept-build": "codecept build",
