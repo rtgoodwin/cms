@@ -21,6 +21,7 @@
 - Fixed a bug where bulk actions weren’t working within embedded element indexes, when shown within a slideout. ([#17468](https://github.com/craftcms/cms/pull/17468))
 - Fixed a bug where autosuggest inputs weren’t getting correct `aria-describedby` and `aria-labelledby` values. ([#17413](https://github.com/craftcms/cms/pull/17413))
 - Fixed a bug where Matrix fields’ entry types were retaining their original names and handles as override values, if the entry type was edited via a slideout from the Matrix field settings. ([#17471](https://github.com/craftcms/cms/issues/17471))
+- Fixed a bug where nested Matrix entries could be missing when rendering an element form with validation errors. ([#17470](https://github.com/craftcms/cms/pull/17470))
 - Users’ maximum invalid login counts now factor in invalid two-step verification attempts. ([#17454](https://github.com/craftcms/cms/pull/17454))
 
 ## 5.7.10 - 2025-06-04
