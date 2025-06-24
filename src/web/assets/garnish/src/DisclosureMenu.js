@@ -32,6 +32,8 @@ export default Base.extend(
     searchStr: '',
     clearSearchStrTimeout: null,
 
+    infoIconActivated: false,
+
     /**
      * Constructor
      */
@@ -249,6 +251,18 @@ export default Base.extend(
 
     handleMousedown: function (event) {
       const newTarget = event.target;
+
+      // if the info icon was previously activated, reset the activation status,
+      // and don't count this mouse down as one in the disclosure menu
+      if (this.infoIconActivated) {
+        this.infoIconActivated = false;
+        return;
+      }
+
+      if (event.target.classList.contains('info')) {
+        this.infoIconActivated = true;
+      }
+
       const triggerButton = $(newTarget).closest('[data-disclosure-trigger]');
       const newTargetIsInsideDisclosure =
         this.$container[0] === event.target ||

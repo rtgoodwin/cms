@@ -3534,6 +3534,10 @@ table {
     gap: var(--s);
     width: 100%;
 
+    .infoicon-container {
+      margin-inline-start: var(--xs);
+    }
+
     .status,
     .icon {
       margin-inline-end: 0;
@@ -7532,6 +7536,13 @@ $min2ColWidth: 400px;
           box-shadow:
             0 0 0 1px color.adjust(mixins.$grey600, $alpha: -0.75),
             0 1px 3px -1px color.adjust(mixins.$grey600, $alpha: -0.5);
+        }
+
+        .infoicon-container {
+          display: inline-flex;
+          align-items: flex-start;
+          margin-inline-start: var(--s);
+          font-size: 0.8em;
         }
       }
     }
