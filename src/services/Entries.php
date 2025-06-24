@@ -1950,16 +1950,22 @@ SQL)->execute();
 
         foreach ($entryTypes as $entryType) {
             $label = $entryType->getUiLabel();
-            $tableData[] = [
-                'id' => $entryType->id,
-                'title' => $label,
-                'chip' => Cp::chipHtml($entryType, [
+            $chipCellContent = Html::beginTag('div', ['class' => 'inline-chips']) .
+                Cp::chipHtml($entryType, [
                     'labelHtml' => Html::a($label, $entryType->getCpEditUrl(), [
                         'class' => ['chip-label', 'cell-bold'],
                     ]),
-                ]),
+                ]);
+            if ($entryType->description) {
+                $chipCellContent .= Html::tag('span', $entryType->description, ['class' => 'info']);
+            }
+            $chipCellContent .= Html::endTag('div');
+
+            $tableData[] = [
+                'id' => $entryType->id,
+                'title' => $label,
+                'chip' => $chipCellContent,
                 'handle' => $entryType->handle,
-                'description' => $entryType->description,
                 'usages' => Cp::componentPreviewHtml($usages[$entryType->id] ?? []),
             ];
         }
