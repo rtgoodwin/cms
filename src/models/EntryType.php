@@ -225,7 +225,9 @@ class EntryType extends Model implements
         return $this->id;
     }
 
-
+    /**
+     * @inheritdoc
+     */
     public function getDescription(): ?string
     {
         return $this->description;
