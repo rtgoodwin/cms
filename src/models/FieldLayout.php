@@ -19,6 +19,7 @@ use craft\events\DefineFieldLayoutCustomFieldsEvent;
 use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\fieldlayoutelements\BaseField;
+use craft\fieldlayoutelements\BaseUiElement;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\Heading;
 use craft\fieldlayoutelements\HorizontalRule;
@@ -681,6 +682,27 @@ class FieldLayout extends Model
         } catch (InvalidArgumentException) {
             return false;
         }
+    }
+
+    /**
+     * Returns whether UI Element is included in the field layout.
+     *
+     * @param callable $filter
+     * @return bool
+     * @since 5.7.12
+     */
+    public function isUiElementIncluded(callable $filter): bool
+    {
+        $element = $this->_element(fn(FieldLayoutElement $layoutElement) => (
+            $layoutElement instanceof BaseUiElement &&
+            $filter($layoutElement)
+        ));
+
+        if (!$element) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
