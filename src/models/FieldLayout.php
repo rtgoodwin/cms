@@ -551,6 +551,7 @@ class FieldLayout extends Model
      *
      * @param callable $filter
      * @return bool
+     * @since 5.7.12
      */
     public function isUiElementIncluded(callable $filter): bool
     {
