@@ -125,7 +125,17 @@
             onLabel: 'On',
             offLabel: 'Off'
         }) }}
-    </div>
+
+        <div class="pane">
+            {{ forms.lightswitchField({
+                label: 'With Background'|t('app'),
+                on: true,
+            }) }}
+            {{ forms.lightswitchField({
+                label: 'With Background'|t('app'),
+                on: false,
+            }) }}
+        </div>
     <hr/>
 {% endblock %}
 
