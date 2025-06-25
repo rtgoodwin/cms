@@ -275,7 +275,7 @@ class UsersController extends Controller
         // if we're impersonating, pass the user we're impersonating to the complete method
         $impersonator = $userSession->getImpersonator();
         if ($impersonator !== null) {
-            $user = Craft::$app->getUser()->getIdentity();
+            $user = Craft::$app->getUser()->getIdentity() ?? $user;
         }
 
         return $this->_completeLogin($user, $duration);

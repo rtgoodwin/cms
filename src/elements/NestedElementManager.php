@@ -14,6 +14,7 @@ use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\base\NestedElementInterface;
 use craft\behaviors\DraftBehavior;
+use craft\db\Query;
 use craft\db\Table;
 use craft\elements\actions\ChangeSortOrder;
 use craft\elements\actions\MoveDown;
@@ -1314,6 +1315,22 @@ JS, [
             $elements = $query->all();
 
             foreach ($elements as $element) {
+                // If the element is a revision, see if we can reassign it to a new primary owner
+                if ($element->getIsRevision()) {
+                    $newOwnerId = (new Query())
+                        ->select(['ownerId'])
+                        ->from(Table::ELEMENTS_OWNERS)
+                        ->where(['elementId' => $element->id])
+                        ->andWhere(['not', ['ownerId' => $owner->id]])
+                        ->orderBy(['ownerId' => SORT_ASC])
+                        ->scalar();
+                    if ($newOwnerId) {
+                        $element->setPrimaryOwnerId($newOwnerId);
+                        $elementsService->saveElement($element);
+                        continue;
+                    }
+                }
+
                 $element->deletedWithOwner = true;
                 $elementsService->deleteElement($element, $hardDelete);
             }

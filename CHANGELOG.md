@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.7.11 - 2025-06-24
 
 - Table fields with “Static Rows” enabled now get populated with the default row values when their value is `null`. ([#17452](https://github.com/craftcms/cms/pull/17452))
 - Added `craft\fields\linktypes\BaseLinkType::isValueEmpty()`.
@@ -21,6 +21,9 @@
 - Fixed a bug where bulk actions weren’t working within embedded element indexes, when shown within a slideout. ([#17468](https://github.com/craftcms/cms/pull/17468))
 - Fixed a bug where autosuggest inputs weren’t getting correct `aria-describedby` and `aria-labelledby` values. ([#17413](https://github.com/craftcms/cms/pull/17413))
 - Fixed a bug where Matrix fields’ entry types were retaining their original names and handles as override values, if the entry type was edited via a slideout from the Matrix field settings. ([#17471](https://github.com/craftcms/cms/issues/17471))
+- Fixed a bug where nested Matrix entries could be missing when rendering an element form with validation errors. ([#17470](https://github.com/craftcms/cms/pull/17470))
+- Fixed a bug where nested entry revisions were getting deleted when their owner revision was pruned, even if they also belonged to other owner revisions. ([#16443](https://github.com/craftcms/cms/issues/16443))
+- Fixed a bug where private plugins’ icons were linking to the Plugin Store from the Plugins index page. ([#17486](https://github.com/craftcms/cms/issues/17486))
 - Users’ maximum invalid login counts now factor in invalid two-step verification attempts. ([#17454](https://github.com/craftcms/cms/pull/17454))
 
 ## 5.7.10 - 2025-06-04
