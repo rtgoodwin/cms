@@ -1428,6 +1428,16 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
           this.defaultHandle || this.attribute
         );
       }
+    } else {
+      // if it's not a field (so a ui element) and it's not multi instance, make it visible for selection again
+      if (!this.isMultiInstance) {
+        let uiLibraryElement = this.tab.designer.$uiLibraryElements.filter(
+          `[data-type="${this.$container.data('type')}"]:first`
+        );
+        if (uiLibraryElement.length) {
+          $(uiLibraryElement[0]).removeClass('hidden');
+        }
+      }
     }
 
     this.tab.designer.$cvd?.data('cvd').removeCheckbox(this);
