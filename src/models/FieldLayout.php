@@ -546,6 +546,26 @@ class FieldLayout extends Model
     }
 
     /**
+     * Returns whether UI Element is included in the field layout.
+     *
+     * @param callable $filter
+     * @return bool
+     */
+    public function isUiElementIncluded(callable $filter): bool
+    {
+        $element = $this->_element(fn(FieldLayoutElement $layoutElement) => (
+            $layoutElement instanceof FieldLayoutElement &&
+            $filter($layoutElement)
+        ));
+
+        if (!$element) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns a field that’s included in the layout by a callback or its attribute name.
      *
      * @param callable|string $filter
