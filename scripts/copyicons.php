@@ -3,7 +3,6 @@
 use craft\helpers\Search;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
-$app = require(dirname(__DIR__) . '/bootstrap/console.php');
 
 $lightIcons = [
     'earth-africa',
@@ -77,8 +76,8 @@ foreach ($meta as $name => $info) {
     if ($style !== 'custom') {
         $terms = $meta[$name]['search']['terms'] ?? [];
         $index[$name] = [
-            'name' => sprintf(" %s ", Search::normalizeKeywords($name)),
-            'terms' => sprintf(" %s ", Search::normalizeKeywords($terms)),
+            'name' => sprintf(" %s ", Search::normalizeKeywords($name, language: 'en-US')),
+            'terms' => sprintf(" %s ", Search::normalizeKeywords($terms, language: 'en-US')),
             'pro' => empty($meta[$name]['free']),
             'styles' => $meta[$name]['styles'] ?? [],
         ];
