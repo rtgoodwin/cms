@@ -3156,9 +3156,9 @@ JS;
     private static function _showFldUiElementSelector(FieldLayout $fieldLayout, FieldLayoutElement $uiElement): bool
     {
         return $uiElement->isMultiInstance() ||
-            !$fieldLayout->isUiElementIncluded(function(FieldLayoutElement $element) use ($uiElement) {
-                return $uiElement->selectorHtml() === $element->selectorHtml();
-            });
+            !$fieldLayout->isUiElementIncluded(
+                fn(FieldLayoutElement $element) => $uiElement::class === $element::class
+            );
     }
 
     /**
