@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where single-instance UI elements could be added to field layouts multiple times. ([#17485](https://github.com/craftcms/cms/issues/17485))
+
 ## 5.7.11 - 2025-06-24
 
 - Table fields with “Static Rows” enabled now get populated with the default row values when their value is `null`. ([#17452](https://github.com/craftcms/cms/pull/17452))
