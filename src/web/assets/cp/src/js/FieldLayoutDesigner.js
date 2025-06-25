@@ -1438,7 +1438,6 @@ Craft.FieldLayoutDesigner.Element = Garnish.Base.extend({
           $(uiLibraryElement[0]).removeClass('hidden');
         }
       }
-
     }
 
     this.tab.designer.$cvd?.data('cvd').removeCheckbox(this);
