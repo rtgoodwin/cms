@@ -2884,8 +2884,8 @@ div.btn.submit input {
   &.indeterminate {
     background-image: linear-gradient(
       to right,
-      var(--enabled-color),
-      var(--gray-300)
+      var(--enabled-color) 40%,
+      var(--gray-200) 60%
     );
   }
 

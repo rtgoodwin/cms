@@ -100,6 +100,15 @@
         }) }}
 
         {{ forms.lightswitchField({
+            label: 'Default'|t('app'),
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: 'Small'|t('app'),
+            small: true,
+        }) }}
+
+        {{ forms.lightswitchField({
             label: 'Indeterminate'|t('app'),
             indeterminate: true,
         }) }}
