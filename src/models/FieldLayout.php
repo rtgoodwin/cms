@@ -18,6 +18,7 @@ use craft\events\DefineFieldLayoutCustomFieldsEvent;
 use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\DefineFieldLayoutFieldsEvent;
 use craft\fieldlayoutelements\BaseField;
+use craft\fieldlayoutelements\BaseUiElement;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\Heading;
 use craft\fieldlayoutelements\HorizontalRule;
@@ -554,7 +555,7 @@ class FieldLayout extends Model
     public function isUiElementIncluded(callable $filter): bool
     {
         $element = $this->_element(fn(FieldLayoutElement $layoutElement) => (
-            $layoutElement instanceof FieldLayoutElement &&
+            $layoutElement instanceof BaseUiElement &&
             $filter($layoutElement)
         ));
 
