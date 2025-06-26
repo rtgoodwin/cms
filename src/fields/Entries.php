@@ -120,9 +120,10 @@ class Entries extends BaseRelationField
     {
         $variables = parent::inputTemplateVariables($value, $element);
 
-        if (!$this->hasSelectionCondition()) {
+        if (!$this->hasSelectionCondition() && $this->showSearchInput($element)) {
+            /** @var string[] $sources */
             $sources = $this->getInputSources($element);
-            if (count($sources) === 1 && preg_match('/^section:(.+)$/', reset($sources), $matches)) {
+            if (preg_match('/^section:(.+)$/', reset($sources), $matches)) {
                 $section = Craft::$app->getEntries()->getSectionByUid($matches[1]);
                 $variables['jsSettings']['sectionId'] = $section->id;
             }

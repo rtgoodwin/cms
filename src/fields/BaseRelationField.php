@@ -284,6 +284,12 @@ abstract class BaseRelationField extends Field implements
     public ?int $maxRelations = null;
 
     /**
+     * @var bool Whether to show a search input.
+     * @since 5.8.0
+     */
+    public bool $showSearchInput = true;
+
+    /**
      * @var string|null The label that should be used on the selection input
      */
     public ?string $selectionLabel = null;
@@ -470,6 +476,7 @@ abstract class BaseRelationField extends Field implements
         $attributes[] = 'maxRelations';
         $attributes[] = 'minRelations';
         $attributes[] = 'selectionLabel';
+        $attributes[] = 'showSearchInput';
         $attributes[] = 'showSiteMenu';
         $attributes[] = 'source';
         $attributes[] = 'sources';
@@ -1486,7 +1493,7 @@ JS, [
         $sources = $this->getInputSources($element);
         $searchCriteria = null;
 
-        if (count($sources) === 1) {
+        if ($this->showSearchInput($element)) {
             $source = ElementHelper::findSource($elementType, reset($sources), 'field');
             if (!empty($source['criteria'])) {
                 $searchCriteria = $source['criteria'];
@@ -1525,6 +1532,23 @@ JS, [
                 'defaultSiteId' => $element->siteId ?? null,
             ],
         ];
+    }
+
+    /**
+     * Returns whether the search input should be shown.
+     *
+     * @param ElementInterface|null $element
+     * @return bool
+     * @since 5.8.0
+     */
+    protected function showSearchInput(?ElementInterface $element): bool
+    {
+        if (!$this->showSearchInput) {
+            return false;
+        }
+
+        $sources = $this->getInputSources($element);
+        return is_array($sources) && count($sources) === 1;
     }
 
     /**
