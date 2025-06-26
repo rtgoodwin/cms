@@ -54,7 +54,10 @@
 - Added `craft\elements\db\ContentBlockQuery`.
 - Added `craft\events\RenderElementEvent`. ([#`17188`](https://github.com/craftcms/cms/discussions/17188))
 - Added `craft\fieldlayoutelements\BaseField::showStatus()`.
+- Added `craft\fields\BaseRelationField::$showSearchInput`.
 - Added `craft\fields\BaseRelationField::canShowSiteMenu()`.
+- Added `craft\fields\BaseRelationField::hasSelectionCondition()`.
+- Added `craft\fields\BaseRelationField::showSearchInput()`.
 - Added `craft\fields\conditions\GeneratedFieldConditionRule`.
 - Added `craft\fields\conditions\LinkFieldConditionRule`.
 - Added `craft\fields\data\IconData`.
@@ -83,9 +86,6 @@
 - Added `craft\records\ContentBlock`.
 - Added `craft\services\Gql::defineContentArgumentsForGeneratedFields()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
-- Added `craft\fields\BaseRelationField::$showSearchInput`.
-- Added `craft\fields\BaseRelationField::showSearchInput()`.
-- Added `craft\fields\BaseRelationField::hasSelectionCondition()`.
 - `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - `craft\fields\data\ColorData` now extends `craft\base\Model` and includes `blue`, `green`, `hex`, `luma`, `red`, and `rgb` attributes in its array keys. ([#17265](https://github.com/craftcms/cms/issues/17265))
 - `craft\services\Assets::replaceAssetFile()` now has a `$mimeType` argument.
