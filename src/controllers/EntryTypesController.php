@@ -128,6 +128,13 @@ class EntryTypesController extends Controller
                     'shortcut' => true,
                     'retainScroll' => true,
                 ]);
+
+            if ($entryType->id) {
+                $response->addAltAction(Craft::t('app', 'Save as a new entry type'), [
+                    'params' => ['saveAsNew' => true],
+                    'redirect' => 'settings/entry-types/{id}',
+                ]);
+            }
         } else {
             $response->noticeHtml(Cp::readOnlyNoticeHtml());
         }
@@ -189,11 +196,19 @@ class EntryTypesController extends Controller
 
         $sectionsService = Craft::$app->getEntries();
         $entryTypeId = $this->request->getBodyParam('entryTypeId');
+        $saveAsNew = $this->request->getBodyParam('saveAsNew');
 
         if ($entryTypeId) {
             $entryType = $sectionsService->getEntryTypeById($entryTypeId);
             if (!$entryType) {
                 throw new BadRequestHttpException("Invalid entry type ID: $entryTypeId");
+            }
+
+            if ($saveAsNew) {
+                $oldId = $entryType->id;
+                $oldUid = $entryType->uid;
+                $entryType = clone $entryType;
+                $entryType->id = $entryType->uid = null;
             }
         } else {
             $entryType = new EntryType();
@@ -202,6 +217,7 @@ class EntryTypesController extends Controller
         // Set the simple stuff
         $entryType->name = $this->request->getBodyParam('name', $entryType->name);
         $entryType->handle = $this->request->getBodyParam('handle', $entryType->handle);
+        $entryType->description = $this->request->getBodyParam('description', $entryType->description);
         $entryType->icon = $this->request->getBodyParam('icon', $entryType->icon);
         $color = $this->request->getBodyParam('color', $entryType->color?->value);
         $entryType->color = $color && $color !== '__blank__' ? Color::from($color) : null;
@@ -218,11 +234,21 @@ class EntryTypesController extends Controller
         $fieldLayout->type = Entry::class;
         $entryType->setFieldLayout($fieldLayout);
 
-        // Save it
-        if (!$sectionsService->saveEntryType($entryType)) {
+        if (!$entryType->validate()) {
+            if (isset($oldId, $oldUid)) {
+                $entryType->id = $oldId;
+                $entryType->uid = $oldUid;
+            }
+
             return $this->asModelFailure($entryType, Craft::t('app', 'Couldn’t save entry type.'), 'entryType');
         }
 
+        if ($saveAsNew) {
+            $fieldLayout->resetUids();
+        }
+
+        // Save it
+        $sectionsService->saveEntryType($entryType, false);
         return $this->asModelSuccess($entryType, Craft::t('app', 'Entry type saved.'), 'entryType');
     }
 
@@ -298,6 +324,7 @@ class EntryTypesController extends Controller
         $entryType = $this->_entryTypeForSelectInput();
         $entryType->name = $this->request->getBodyParam('name') ?? $entryType->name;
         $entryType->handle = $this->request->getBodyParam('handle') ?? $entryType->handle;
+        $entryType->description = $this->request->getBodyParam('description') ?? $entryType->description;
 
         $namespace = StringHelper::randomString(10);
         $view = Craft::$app->getView();
@@ -344,10 +371,11 @@ class EntryTypesController extends Controller
         $chipHtml = Cp::chipHtml($entryType, [
             'showHandle' => true,
             'showIndicators' => true,
+            'showDescription' => true,
         ]);
 
         return $this->asJson([
-            'config' => $entryType->toArray(['id', 'name', 'handle']),
+            'config' => $entryType->toArray(['id', 'name', 'handle', 'description']),
             'chipHtml' => $chipHtml,
         ]);
     }

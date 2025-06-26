@@ -269,7 +269,10 @@ class ElementsController extends Controller
 
         if ($element === null) {
             $this->_elementId = $elementId ?? $this->_elementId;
-            /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
+            /**
+             * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+             * @phpstan-ignore varTag.nativeType
+             */
             $element = $this->_element(checkForProvisionalDraft: true, strictSite: $strictSite);
 
             if ($element instanceof Response) {
@@ -356,7 +359,7 @@ class ElementsController extends Controller
         [$docTitle, $title] = $this->_editElementTitles($element);
         $enabledForSite = $element->getEnabledForSite();
         $hasRoute = $element->getRoute() !== null;
-        $redirectUrl = ElementHelper::postEditUrl($element);
+        $redirectUrl = $this->request->getValidatedQueryParam('returnUrl') ?? ElementHelper::postEditUrl($element);
 
         // Site statuses
         if ($canEditMultipleSites) {
@@ -513,7 +516,10 @@ class ElementsController extends Controller
         $this->requireCpRequest();
 
         $this->_elementId = $elementId;
-        /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element(checkForProvisionalDraft: true);
 
         if ($element instanceof Response) {
@@ -646,7 +652,10 @@ JS, [
         $this->requireCpRequest();
 
         $this->_elementId = $elementId;
-        /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         if (!$element) {
@@ -707,14 +716,14 @@ JS, [
         $docTitle = $element->getUiLabel();
 
         if ($element->getIsDraft() && !$element->getIsUnpublishedDraft()) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             if ($element->isProvisionalDraft) {
                 $docTitle .= ' — ' . Craft::t('app', 'Edited');
             } else {
                 $docTitle .= " ($element->draftName)";
             }
         } elseif ($element->getIsRevision()) {
-            /** @var ElementInterface|RevisionBehavior $element */
+            /** @var ElementInterface&RevisionBehavior $element */
             $docTitle .= ' (' . $element->getRevisionLabel() . ')';
         }
 
@@ -823,7 +832,7 @@ JS, [
             'revisionId' => null,
         ]);
 
-        /** @var ElementInterface|RevisionBehavior|null $revision */
+        /** @var (ElementInterface&RevisionBehavior)|null $revision */
         $revision = $element->getCurrentRevision();
         $creator = $revision?->getCreator();
         $timestamp = $formatter->asTimestamp($revision->dateCreated ?? $element->dateUpdated, Locale::LENGTH_SHORT, true);
@@ -857,7 +866,7 @@ JS, [
                 'heading' => Craft::t('app', 'Drafts'),
                 'listAttributes' => ['class' => ['revision-group-drafts']],
                 'items' => array_map(function($draft) use ($element, $formatter, $cpEditUrl, $baseParams) {
-                    /** @var ElementInterface|DraftBehavior $draft */
+                    /** @var ElementInterface&DraftBehavior $draft */
                     $creator = $draft->getCreator();
                     $timestamp = $formatter->asTimestamp($draft->dateUpdated, Locale::LENGTH_SHORT, true);
 
@@ -885,7 +894,7 @@ JS, [
                 'heading' => Craft::t('app', 'Recent Revisions'),
                 'listAttributes' => ['class' => ['revision-group-revisions']],
                 'items' => array_map(function($revision) use ($element, $formatter, $cpEditUrl, $baseParams) {
-                    /** @var ElementInterface|RevisionBehavior $revision */
+                    /** @var ElementInterface&RevisionBehavior $revision */
                     $creator = $revision->getCreator();
                     $timestamp = $formatter->asTimestamp($revision->dateCreated, Locale::LENGTH_SHORT, true);
 
@@ -1249,7 +1258,6 @@ JS, [
                 Html::endTag('div');
         }
 
-        /** @var ElementInterface|DraftBehavior|RevisionBehavior $element */
         $components[] = $element->getSidebarHtml(!$canSave);
 
         if ($this->id) {
@@ -1588,7 +1596,7 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
+        /** @var (ElementInterface&DraftBehavior)|null $element */
         $element = $this->_element();
 
         if (!$element || $element->getIsRevision()) {
@@ -1799,6 +1807,45 @@ JS, [
     }
 
     /**
+     * Validates an element.
+     *
+     * @return Response|null
+     * @since 5.8.0
+     */
+    public function actionValidate(): ?Response
+    {
+        $this->requirePostRequest();
+
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
+        $element = $this->_element();
+
+        // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
+        // and we hit "create entry" before the autosave kicks in
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $element->setScenario(Element::SCENARIO_LIVE);
+
+        if (!$element->validate()) {
+            return $this->_asFailure($element, Craft::t('app', '{type} validation failed.', [
+                'type' => $element::displayName(),
+            ]));
+        }
+
+        return $this->_asSuccess(Craft::t('app', '{type} validation successful.', [
+            'type' => $element::displayName(),
+        ]), $element);
+    }
+
+    /**
      * Saves a draft.
      *
      * @return Response|null
@@ -1811,7 +1858,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
@@ -1953,7 +2003,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
+        /**
+         * @var Element|DraftBehavior|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element(checkForProvisionalDraft: true);
 
         if (!$element || $element->getIsRevision()) {
@@ -2012,7 +2065,10 @@ JS, [
         $this->requirePostRequest();
         $elementsService = Craft::$app->getElements();
 
-        /** @var Element|DraftBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         // this can happen if creating element via slideout, and we hit "create entry" before the autosave kicks in
@@ -2193,7 +2249,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|RevisionBehavior|null $element */
+        /**
+         * @var Element|RevisionBehavior|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         if (!$element || !$element->getIsRevision()) {
@@ -2242,8 +2301,11 @@ JS, [
             $element->validate();
         }
 
-        /** @var Element|DraftBehavior|Response|null $element */
-        // see https://github.com/craftcms/cms/issues/14635#issuecomment-2349006694 for details
+        /**
+         * see https://github.com/craftcms/cms/issues/14635#issuecomment-2349006694 for details
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         if ($element instanceof Response) {
             return $element;
         }
@@ -2734,7 +2796,7 @@ JS, [
         }
 
         if ($element->getIsDraft()) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             if (isset($this->_draftName)) {
                 $element->draftName = $this->_draftName;
             }

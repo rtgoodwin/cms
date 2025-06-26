@@ -711,7 +711,7 @@ class Entries extends Component
             Db::delete(Table::SECTIONS_ENTRYTYPES, ['sectionId' => $sectionRecord->id]);
             Db::batchInsert(
                 Table::SECTIONS_ENTRYTYPES,
-                ['sectionId', 'typeId', 'sortOrder', 'name', 'handle'],
+                ['sectionId', 'typeId', 'sortOrder', 'name', 'handle', 'description'],
                 Collection::make($data['entryTypes'] ?? [])
                     ->map(fn($entryType) => $this->getEntryType($entryType))
                     ->filter()
@@ -721,6 +721,7 @@ class Entries extends Component
                         $i + 1,
                         isset($entryType->original) && $entryType->name !== $entryType->original->name ? $entryType->name : null,
                         isset($entryType->original) && $entryType->handle !== $entryType->original->handle ? $entryType->handle : null,
+                        isset($entryType->original) && $entryType->description !== $entryType->original->description ? $entryType->description : null,
                     ])
                     ->all(),
             );
@@ -1374,7 +1375,7 @@ SQL)->execute();
         }
 
         $entryTypes = (new Query())
-            ->select(['id' => 'typeId', 'name', 'handle'])
+            ->select(['id' => 'typeId', 'name', 'handle', 'description'])
             ->from(Table::SECTIONS_ENTRYTYPES)
             ->where(['sectionId' => $sectionId])
             ->orderBy(['sortOrder' => SORT_ASC])
@@ -1434,6 +1435,9 @@ SQL)->execute();
         if ($db->columnExists(Table::ENTRYTYPES, 'showSlugField')) {
             $query->addSelect('showSlugField');
         }
+        if ($db->columnExists(Table::ENTRYTYPES, 'description')) {
+            $query->addSelect('description');
+        }
         if ($db->columnExists(Table::ENTRYTYPES, 'icon')) {
             $query->addSelect('icon');
         }
@@ -1486,6 +1490,7 @@ SQL)->execute();
                     'fieldLayoutId',
                     'name',
                     'handle',
+                    'description',
                     'hasTitleField',
                     'titleTranslationMethod',
                     'titleTranslationKeyFormat',
@@ -1566,11 +1571,13 @@ SQL)->execute();
             return null;
         }
 
-        if (isset($config['name']) || isset($config['handle'])) {
+        if (isset($config['name']) || isset($config['handle']) || isset($config['description']) || isset($config['group'])) {
             $original = $entryType;
             $entryType = clone $original;
             $entryType->name = $config['name'] ?? $original->name;
             $entryType->handle = $config['handle'] ?? $original->handle;
+            $entryType->description = $config['description'] ?? $original->description;
+            $entryType->group = $config['group'] ?? null;
             $entryType->original = $original;
         }
 
@@ -1645,6 +1652,7 @@ SQL)->execute();
 
             $entryTypeRecord->name = $data['name'];
             $entryTypeRecord->handle = $data['handle'];
+            $entryTypeRecord->description = $data['description'] ?? null;
             $entryTypeRecord->icon = $data['icon'] ?? null;
             $entryTypeRecord->color = $data['color'] ?? null;
             $entryTypeRecord->hasTitleField = $data['hasTitleField'];
@@ -1942,14 +1950,21 @@ SQL)->execute();
 
         foreach ($entryTypes as $entryType) {
             $label = $entryType->getUiLabel();
-            $tableData[] = [
-                'id' => $entryType->id,
-                'title' => $label,
-                'chip' => Cp::chipHtml($entryType, [
+            $chipCellContent = Html::beginTag('div', ['class' => 'inline-chips']) .
+                Cp::chipHtml($entryType, [
                     'labelHtml' => Html::a($label, $entryType->getCpEditUrl(), [
                         'class' => ['chip-label', 'cell-bold'],
                     ]),
-                ]),
+                ]);
+            if ($entryType->description) {
+                $chipCellContent .= Html::tag('span', $entryType->description, ['class' => 'info']);
+            }
+            $chipCellContent .= Html::endTag('div');
+
+            $tableData[] = [
+                'id' => $entryType->id,
+                'title' => $label,
+                'chip' => $chipCellContent,
                 'handle' => $entryType->handle,
                 'usages' => Cp::componentPreviewHtml($usages[$entryType->id] ?? []),
             ];
