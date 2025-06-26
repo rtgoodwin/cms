@@ -618,6 +618,7 @@ JS;
             'slugWordSeparator' => $generalConfig->slugWordSeparator,
             'userEmail' => $currentUser->email,
             'userHasPasskeys' => Craft::$app->getAuth()->hasPasskeys($userSession->getImpersonator() ?? $currentUser),
+            'userId' => $currentUser->id,
             'userIsAdmin' => $currentUser->admin,
             'username' => $currentUser->username,
         ];
