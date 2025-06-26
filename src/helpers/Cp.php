@@ -3169,7 +3169,11 @@ JS;
             Html::endTag('div') . // .fld-field-library
             ($config['customizableUi']
                 ? Html::beginTag('div', ['class' => ['fld-ui-library', 'hidden']]) .
-                implode('', array_map(fn(FieldLayoutElement $element) => self::layoutElementSelectorHtml($element, true), $availableUiElements)) .
+                implode('', array_map(fn(FieldLayoutElement $element) => self::layoutElementSelectorHtml($element, true, [
+                    'class' => array_filter([
+                        !self::_showFldUiElementSelector($fieldLayout, $element) ? 'hidden' : null,
+                    ]),
+                ]), $availableUiElements)) .
                 Html::endTag('div') // .fld-ui-library
                 : '') .
             Html::endTag('div') . // .fld-library
@@ -3313,6 +3317,14 @@ JS;
                 return $field->attribute() === $attribute;
             })
         );
+    }
+
+    private static function _showFldUiElementSelector(FieldLayout $fieldLayout, FieldLayoutElement $uiElement): bool
+    {
+        return $uiElement->isMultiInstance() ||
+            !$fieldLayout->isUiElementIncluded(
+                fn(FieldLayoutElement $element) => $uiElement::class === $element::class
+            );
     }
 
     /**

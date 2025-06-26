@@ -9,6 +9,7 @@
 ### Content Management
 - Element edit pages now have “Validate [type]” actions. ([#17316](https://github.com/craftcms/cms/pull/17316))
 - Matrix fields set to the “inline-editable blocks” view mode now have “Expand all blocks” and “Collapse all blocks” actions. ([#17141](https://github.com/craftcms/cms/pull/17141))
+- Relation fields set to a single element source will now show a search input by default. ([#17497](https://github.com/craftcms/cms/pull/17497))
 - Link fields’ condition rules now have an “is of type” operator. ([#17277](https://github.com/craftcms/cms/pull/17277))
 - Link fields now allow URLs without TLDs. ([#17450](https://github.com/craftcms/cms/issues/17450))
 - Content previews for Plain Text fields are now shown in a fixed-width font if “Use a monospaced font” is enabled. ([#17447](https://github.com/craftcms/cms/pull/17447))
@@ -25,6 +26,7 @@
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
 - Matrix fields’ entry type selections can now be grouped. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - Matrix fields with more than five entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
+- Relation fields set to a single element source now have a “Show the search input” setting. ([#17497](https://github.com/craftcms/cms/pull/17497))
 - Icon fields now expose the Font Awesome icon styles supported by the selected icon. ([#17419](https://github.com/craftcms/cms/pull/17419))
 - Icon fields now have a “GraphQL Mode” setting, with “Full data” and “Name only” options. ([#17419](https://github.com/craftcms/cms/pull/17419))
 - It’s now possible to customize the thumbnail alignment within element cards. ([#17193](https://github.com/craftcms/cms/pull/17193))
@@ -81,6 +83,9 @@
 - Added `craft\records\ContentBlock`.
 - Added `craft\services\Gql::defineContentArgumentsForGeneratedFields()`.
 - Added `craft\web\Request::getValidatedQueryParam()`.
+- Added `craft\fields\BaseRelationField::$showSearchInput`.
+- Added `craft\fields\BaseRelationField::showSearchInput()`.
+- Added `craft\fields\BaseRelationField::hasSelectionCondition()`.
 - `craft\elements\Asset::getMimeType()` now returns the file’s actual MIME type (rather than the MIME type associated with the file’s extension), for locally-stored assets. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - `craft\fields\data\ColorData` now extends `craft\base\Model` and includes `blue`, `green`, `hex`, `luma`, `red`, and `rgb` attributes in its array keys. ([#17265](https://github.com/craftcms/cms/issues/17265))
 - `craft\services\Assets::replaceAssetFile()` now has a `$mimeType` argument.
