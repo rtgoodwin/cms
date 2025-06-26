@@ -44,7 +44,7 @@ abstract class BaseTextLinkType extends BaseLinkType
     {
         $value = str_replace(' ', '+', $value);
 
-        if ($this->supports($value)) {
+        if (str_contains($value, ':') || $this->supports($value)) {
             return $value;
         }
 
@@ -99,6 +99,7 @@ JS, [
                     'class' => 'chip-content',
                 ]) .
                 Html::a($linkText, $value, [
+                    'class' => ['truncate'],
                     'target' => '_blank',
                 ]) .
                 Html::beginTag('div', [
