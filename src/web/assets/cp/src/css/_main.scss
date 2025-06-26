@@ -2838,6 +2838,13 @@ div.btn.submit input {
   transition: background-image linear 100ms;
   box-shadow: inset 0 0 0 1px var(--_lightswitch-border-color);
 
+  &[disabled] {
+    --_lightswitch-border-color: var(
+      --lightswitch-border-color-disabled,
+      hsl(from var(--input-border-color) h s l / 30%)
+    );
+  }
+
   &.on {
     background-image: linear-gradient(
       to right,
