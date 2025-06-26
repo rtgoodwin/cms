@@ -10,6 +10,7 @@ namespace craft\fields;
 use Craft;
 use craft\base\ElementInterface;
 use craft\elements\conditions\ElementCondition;
+use craft\elements\db\ElementQueryInterface;
 use craft\elements\db\EntryQuery;
 use craft\elements\ElementCollection;
 use craft\elements\Entry;
@@ -52,6 +53,11 @@ class Entries extends BaseRelationField
      * @inheritdoc
      */
     protected string $settingsTemplate = '_components/fieldtypes/Entries/settings.twig';
+
+    /**
+     * @inheritdoc
+     */
+    protected ?string $inputJsClass = 'Craft.EntrySelectInput';
 
     /**
      * @inheritdoc
@@ -105,6 +111,24 @@ class Entries extends BaseRelationField
         }
 
         parent::__construct($config);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function inputTemplateVariables(array|ElementQueryInterface $value = null, ?ElementInterface $element = null): array
+    {
+        $variables = parent::inputTemplateVariables($value, $element);
+
+        if (!$this->hasSelectionCondition()) {
+            $sources = $this->getInputSources($element);
+            if (count($sources) === 1 && preg_match('/^section:(.+)$/', reset($sources), $matches)) {
+                $section = Craft::$app->getEntries()->getSectionByUid($matches[1]);
+                $variables['jsSettings']['sectionId'] = $section->id;
+            }
+        }
+
+        return $variables;
     }
 
     /**

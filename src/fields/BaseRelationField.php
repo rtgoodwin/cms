@@ -1453,6 +1453,7 @@ JS, [
             }
         }
 
+        $elementType = static::elementType();
         $selectionCriteria = $this->getInputSelectionCriteria();
         $selectionCriteria['siteId'] = $this->targetSiteId($element);
 
@@ -1482,16 +1483,28 @@ JS, [
             $selectionCondition->referenceElement = $element;
         }
 
+        $sources = $this->getInputSources($element);
+        $searchCriteria = null;
+
+        if (count($sources) === 1) {
+            $source = ElementHelper::findSource($elementType, reset($sources), 'field');
+            if (!empty($source['criteria'])) {
+                $searchCriteria = $source['criteria'];
+            }
+        }
+
         return [
             'jsClass' => $this->inputJsClass,
-            'elementType' => static::elementType(),
+            'elementType' => $elementType,
             'id' => $this->getInputId(),
             'fieldId' => $this->id,
             'storageKey' => 'field.' . $this->id,
             'describedBy' => $this->describedBy,
+            'labelId' => $this->getLabelId(),
             'name' => $this->handle,
             'elements' => $value,
-            'sources' => $this->getInputSources($element),
+            'sources' => $sources,
+            'searchCriteria' => $searchCriteria,
             'condition' => $selectionCondition,
             'referenceElement' => $element,
             'criteria' => $selectionCriteria,
@@ -1597,6 +1610,17 @@ JS, [
     protected function createSelectionCondition(): ?ElementConditionInterface
     {
         return null;
+    }
+
+    /**
+     * Returns whether the field is configured with a selection condition.
+     *
+     * @return bool
+     * @since 5.8.0
+     */
+    protected function hasSelectionCondition(): bool
+    {
+        return isset($this->_selectionCondition);
     }
 
     /**
