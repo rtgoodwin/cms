@@ -9,6 +9,8 @@ namespace craft\controllers;
 
 use Craft;
 use craft\base\ElementInterface;
+use craft\elements\conditions\ElementCondition;
+use craft\elements\conditions\ElementConditionInterface;
 use craft\errors\InvalidTypeException;
 use craft\helpers\Component;
 use craft\helpers\Cp;
@@ -41,7 +43,9 @@ class ElementSearchController extends Controller
         /** @var class-string<ElementInterface> $elementType */
         $elementType = $this->request->getBodyParam('elementType');
         $siteId = $this->request->getBodyParam('siteId');
-        $criteria = $this->request->getBodyParam('criteria') ?? [];
+        $criteria = $this->request->getBodyParam('criteria');
+        /** @var array{class:class-string<ElementConditionInterface>}|null $conditionConfig */
+        $conditionConfig = $this->request->getBodyParam('condition');
         $excludeIds = $this->request->getBodyParam('excludeIds') ?? [];
         $search = trim($this->request->getBodyParam('search'));
 
@@ -56,7 +60,32 @@ class ElementSearchController extends Controller
             ->orderBy(['LENGTH([[title]])' => SORT_ASC])
             ->limit(5);
 
-        Craft::configure($query, Component::cleanseConfig($criteria));
+        if ($criteria) {
+            Craft::configure($query, Component::cleanseConfig($criteria));
+        }
+
+        if ($conditionConfig) {
+            $condition = Craft::$app->getConditions()->createCondition($conditionConfig);
+
+            if ($condition instanceof ElementCondition) {
+                $referenceElementId = $this->request->getBodyParam('referenceElementId');
+                if ($referenceElementId) {
+                    $ownerId = $this->request->getBodyParam('referenceElementOwnerId');
+                    $siteId = $this->request->getBodyParam('referenceElementSiteId');
+                    $criteria = [];
+                    if ($ownerId) {
+                        $criteria['ownerId'] = $ownerId;
+                    }
+                    $condition->referenceElement = Craft::$app->getElements()->getElementById(
+                        (int)$referenceElementId,
+                        siteId: $siteId,
+                        criteria: $criteria,
+                    );
+                }
+
+                $condition->modifyQuery($query);
+            }
+        }
 
         $elements = $query->all();
 

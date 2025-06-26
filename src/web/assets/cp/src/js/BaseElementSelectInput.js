@@ -1254,21 +1254,33 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
           excludeIds.push(this.settings.sourceElementId);
         }
 
-        const data = {
-          elementType: this.settings.elementType,
-          siteId: this.settings.criteria.siteId,
-          search: this.$searchInput.val(),
-          criteria: this.settings.searchCriteria,
-          excludeIds,
-        };
-
         let response;
 
         try {
           response = await Craft.sendActionRequest(
             'POST',
             'element-search/search',
-            {data}
+            {
+              data: {
+                elementType: this.settings.elementType,
+                siteId: this.settings.criteria.siteId,
+                search: this.$searchInput.val(),
+                criteria: this.settings.searchCriteria,
+                condition: this.settings.condition,
+                referenceElementId: this.settings.referenceElementId
+                  ? this.elementEditor?.getDraftElementId(
+                      this.settings.referenceElementId
+                    ) || this.settings.referenceElementId
+                  : null,
+                referenceElementOwnerId: this.settings.referenceElementOwnerId
+                  ? this.elementEditor?.getDraftElementId(
+                      this.settings.referenceElementOwnerId
+                    ) || this.settings.referenceElementOwnerId
+                  : null,
+                referenceElementSiteId: this.settings.referenceElementSiteId,
+                excludeIds,
+              },
+            }
           );
         } finally {
           // Just in case
