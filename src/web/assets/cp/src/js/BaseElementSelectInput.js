@@ -1277,7 +1277,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
               data: {
                 elementType: this.settings.elementType,
                 siteId: this.settings.criteria.siteId,
-                search: this.$searchInput.val(),
+                search: val,
                 criteria: this.settings.searchCriteria,
                 condition: this.settings.condition,
                 referenceElementId: this.settings.referenceElementId
@@ -1332,12 +1332,12 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
             type:
               Craft.elementTypeNames[this.settings.elementType][2] ??
               Craft.t('app', 'element'),
-          })}: ${data.search}`;
+          })}: ${val}`;
           $li.attr('aria-label', optionLabel);
 
           $('<div class="menu-item" data-icon="plus"/>')
             .appendTo($li)
-            .text(data.search);
+            .text(val);
         }
 
         $ul.find('.menu-item:not(.disabled):first').addClass('hover');
