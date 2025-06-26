@@ -109,6 +109,11 @@
         }) }}
 
         {{ forms.lightswitchField({
+            label: 'Disabled'|t('app'),
+            disabled: true,
+        }) }}
+
+        {{ forms.lightswitchField({
             label: 'Indeterminate'|t('app'),
             indeterminate: true,
         }) }}
@@ -134,6 +139,10 @@
             {{ forms.lightswitchField({
                 label: 'With Background'|t('app'),
                 on: false,
+            }) }}
+            {{ forms.lightswitchField({
+                label: 'Disabled'|t('app'),
+                disabled: true,
             }) }}
         </div>
     <hr/>
