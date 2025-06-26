@@ -2839,10 +2839,12 @@ div.btn.submit input {
   box-shadow: inset 0 0 0 1px var(--_lightswitch-border-color);
 
   &[disabled] {
-    --_lightswitch-border-color: var(
-      --lightswitch-border-color-disabled,
-      hsl(from var(--input-border-color) h s l / 30%)
-    );
+    .lightswitch-container .handle {
+      --_lightswitch-border-color: var(
+        --lightswitch-border-color-disabled,
+        hsl(from var(--input-border-color) h s l / 30%)
+      );
+    }
   }
 
   &.on {
