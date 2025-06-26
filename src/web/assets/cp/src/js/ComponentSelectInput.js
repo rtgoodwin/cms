@@ -517,11 +517,13 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       );
 
       const canAdd = this.canAddMoreComponents();
+      let $item = false;
 
       if (canAdd) {
         const $component = $(data.components[type][id][0]);
         this.insertComponent($component);
         this.addComponents($component);
+        $item = $component;
       }
 
       if (addToMenu && disclosureMenu) {
@@ -530,6 +532,7 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
         if (canAdd) {
           disclosureMenu.hideItem($menuItem.children()[0]);
         }
+        $item = $menuItem;
         this.addListener($menuItem.find('button'), 'activate', () => {
           this.addComponent(type, id);
         });
@@ -537,6 +540,10 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
 
       await Craft.appendHeadHtml(data.headHtml);
       await Craft.appendBodyHtml(data.bodyHtml);
+
+      if (this.settings.showDescription && $item) {
+        Craft.initUiElements($item);
+      }
     },
 
     insertComponent: function ($component) {
@@ -547,6 +554,7 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       return {
         showActionMenu: this.settings.showActionMenus,
         showHandle: this.settings.showHandles,
+        showDescription: this.settings.showDescription,
         inputName: this.settings.name,
         hyperlink: this.settings.hyperlinks,
       };
@@ -566,6 +574,7 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       name: null,
       limit: null,
       showHandles: false,
+      showDescription: false,
       sortable: true,
       selectable: true,
       showActionMenus: true,

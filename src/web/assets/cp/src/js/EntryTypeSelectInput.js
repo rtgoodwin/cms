@@ -183,6 +183,7 @@ Craft.EntryTypeSelectInput = Craft.ComponentSelectInput.extend(
           .find('.chip-label')
           .replaceWith($newContainer.find('.chip-label'));
         $component.find('input').val(JSON.stringify(data.config));
+        Craft.initUiElements($component);
 
         this.trigger('applySettings');
 

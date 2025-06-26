@@ -13,6 +13,7 @@ use craft\base\Actionable;
 use craft\base\Chippable;
 use craft\base\Colorable;
 use craft\base\CpEditable;
+use craft\base\Describable;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\FieldLayoutElement;
@@ -346,6 +347,7 @@ class Cp
             'showStatus' => true,
             'showThumb' => true,
             'showIndicators' => false,
+            'showDescription' => false,
             'size' => self::CHIP_SIZE_SMALL,
             'sortable' => false,
         ];
@@ -355,6 +357,7 @@ class Cp
         $config['showStatus'] = $config['showStatus'] && $component instanceof Statusable;
         $config['showThumb'] = $config['showThumb'] && ($component instanceof Thumbable || $component instanceof Iconic);
         $config['showIndicators'] = $config['showIndicators'] && $component instanceof Indicative;
+        $config['showDescription'] = $config['showDescription'] && $component instanceof Describable;
 
         $color = $component instanceof Colorable ? $component->getColor() : null;
 
@@ -382,6 +385,7 @@ class Cp
                     'showHandle' => $config['showHandle'],
                     'showStatus' => $config['showStatus'],
                     'showThumb' => $config['showThumb'],
+                    'showDescription' => $config['showDescription'],
                     'size' => $config['size'],
                     'ui' => 'chip',
                 ] : false,
@@ -426,7 +430,19 @@ class Cp
                     $labelHtml = Html::a($labelHtml, $url);
                 }
             }
+
+            if ($config['showDescription']) {
+                /** @var Chippable&Describable $component */
+                $description = $component->getDescription();
+                if ($description) {
+                    $labelHtml .= Html::tag('span', $description, [
+                        'class' => 'info',
+                    ]);
+                }
+            }
+
             $labelHtml = Html::tag('div', $labelHtml);
+
             if ($config['showHandle']) {
                 /** @var Chippable&Grippable $component */
                 $handle = $component->getHandle();
