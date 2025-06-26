@@ -44,7 +44,7 @@ abstract class BaseTextLinkType extends BaseLinkType
     {
         $value = str_replace(' ', '+', $value);
 
-        if ($this->supports($value)) {
+        if (str_contains($value, ':') || $this->supports($value)) {
             return $value;
         }
 

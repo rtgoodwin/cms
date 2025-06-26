@@ -1001,7 +1001,8 @@ class ElementHelper
     /**
      * Swaps out any canonical elements with provisional drafts, when they exist.
      *
-     * @param ElementInterface[] $elements
+     * @template T of ElementInterface
+     * @param T[] $elements
      * @since 5.2.0
      */
     public static function swapInProvisionalDrafts(array &$elements): void
@@ -1024,6 +1025,7 @@ class ElementHelper
 
         $first = reset($canonicalElements);
 
+        /** @var T[] $drafts */
         $drafts = $first::find()
             ->draftOf($canonicalElements)
             ->draftCreator($user)
@@ -1060,5 +1062,25 @@ class ElementHelper
                 $elements[$i] = $draft;
             }
         }
+    }
+
+    /**
+     * Returns whether the given element is a multi-site element.
+     *
+     * @param ElementInterface $element
+     * @return bool
+     * @throws Exception
+     * @since 5.8.0
+     */
+    public static function isMultiSite(ElementInterface $element): bool
+    {
+        // Site info
+        $supportedSites = self::supportedSitesForElement($element, true);
+        if (count($supportedSites) <= 1) {
+            return false;
+        }
+
+        $propSites = array_filter($supportedSites, fn($site) => $site['propagate']);
+        return count($propSites) > 1;
     }
 }

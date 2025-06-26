@@ -1334,6 +1334,23 @@ class User extends Element implements IdentityInterface
     }
 
     /**
+     * Handles an invalid login for a user and sets the authError param.
+     *
+     * @return void
+     */
+    public function handleInvalidLoginParam(): void
+    {
+        Craft::$app->getUsers()->handleInvalidLogin($this);
+        // Was that one bad password/2fa code/passkey too many?
+        if ($this->locked && !Craft::$app->getConfig()->getGeneral()->preventUserEnumeration) {
+            // Will set the authError to either AccountCooldown or AccountLocked
+            $this->authError = $this->_getAuthError();
+        } else {
+            $this->authError = self::AUTH_INVALID_CREDENTIALS;
+        }
+    }
+
+    /**
      * Determines whether the user is allowed to be logged in with a given password.
      *
      * @param string $password The user’s plain text password.
@@ -1363,14 +1380,7 @@ class User extends Element implements IdentityInterface
         }
 
         if (!$passwordValid) {
-            Craft::$app->getUsers()->handleInvalidLogin($this);
-            // Was that one bad password too many?
-            if ($this->locked && !Craft::$app->getConfig()->getGeneral()->preventUserEnumeration) {
-                // Will set the authError to either AccountCooldown or AccountLocked
-                $this->authError = $this->_getAuthError();
-            } else {
-                $this->authError = self::AUTH_INVALID_CREDENTIALS;
-            }
+            $this->handleInvalidLoginParam();
             return false;
         }
 
@@ -1421,7 +1431,7 @@ class User extends Element implements IdentityInterface
         }
 
         if (!$keyValid) {
-            $this->authError = self::AUTH_INVALID_CREDENTIALS;
+            $this->handleInvalidLoginParam();
             return false;
         }
 
@@ -1481,7 +1491,7 @@ class User extends Element implements IdentityInterface
             return false;
         }
 
-        if (is_object($group) && $group instanceof UserGroup) {
+        if ($group instanceof UserGroup) {
             $group = $group->id;
         }
 
@@ -1692,7 +1702,7 @@ XML;
      */
     protected function thumbAlt(): ?string
     {
-        return $this->getPhoto()?->alt ?? $this->getName();
+        return $this->getPhoto()->alt ?? $this->getName();
     }
 
     /**
@@ -2191,12 +2201,6 @@ JS,
         return $items;
     }
 
-//    public function prepareEditScreen(Response $response, string $containerId): void
-//    {
-//        $cpScreen = $response->getBehavior('cp-screen');
-//        $t = 1;
-//    }
-
     private function _copyPasswordResetUrlActionItem(string $label, View $view): array
     {
         $id = sprintf('action-copy-password-reset-url-%s', mt_rand());
@@ -2392,7 +2396,7 @@ JS, [
                         ],
                     ]);
                 }
-                
+
                 // no break
             case 'isCredentialed':
                 $value = $this->getIsCredentialed();
