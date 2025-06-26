@@ -20,6 +20,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
     searchTimeout: null,
     searchMenu: null,
+    $searchContainer: null,
     $searchInput: null,
     $searchSpinner: null,
     _ignoreSearchBlur: false,
@@ -87,6 +88,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       this.$elementsContainer = this.getElementsContainer();
       this.$addElementBtn = this.getAddElementsBtn();
       this.$spinner = this.getSpinner();
+      this.$searchContainer = this.getSearchContainer();
       this.$searchInput = this.getSearchInput();
       this.$searchSpinner = this.getSearchSpinner();
 
@@ -142,12 +144,16 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
       }
     },
 
+    getSearchContainer: function () {
+      return this.$container.find('.elementselect__search-input-wrapper');
+    },
+
     getSearchInput: function () {
-      return this.$container.find('.elementselect__search-input-wrapper input');
+      return this.$searchContainer.find('input');
     },
 
     getSearchSpinner: function () {
-      return this.$searchInput.next('.spinner');
+      return this.$searchContainer.find('.spinner');
     },
 
     getAddElementsBtn: function () {
@@ -261,6 +267,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     enableAddElementsBtn: function () {
       if (this.settings.allowAdd && this.$addElementBtn.length) {
         this.$addElementBtn.removeClass('hidden');
+        this.$searchContainer.removeClass('hidden');
       }
 
       this.updateButtonContainer();
@@ -269,6 +276,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
     disableAddElementsBtn: function () {
       if (this.$addElementBtn.length) {
         this.$addElementBtn.addClass('hidden');
+        this.$searchContainer.addClass('hidden');
       }
 
       this.updateButtonContainer();
@@ -304,12 +312,17 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
     focusNextLogicalElement: function () {
       if (this.canAddMoreElements()) {
-        // If can add more elements, focus ADD button
+        // If can add more elements, focus on search input or add button
         if (
+          this.$searchContainer.length &&
+          !this.$searchContainer.hasClass('hidden')
+        ) {
+          this.$searchInput.focus();
+        } else if (
           this.$addElementBtn.length &&
           !this.$addElementBtn.hasClass('hidden')
         ) {
-          this.$addElementBtn.get(0).focus();
+          this.$addElementBtn.focus();
         }
       } else {
         // If can't add more elements, focus on the final remove
@@ -1264,7 +1277,7 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
               data: {
                 elementType: this.settings.elementType,
                 siteId: this.settings.criteria.siteId,
-                search: this.$searchInput.val(),
+                search: val,
                 criteria: this.settings.searchCriteria,
                 condition: this.settings.condition,
                 referenceElementId: this.settings.referenceElementId
@@ -1319,12 +1332,12 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
             type:
               Craft.elementTypeNames[this.settings.elementType][2] ??
               Craft.t('app', 'element'),
-          })}: ${data.search}`;
+          })}: ${val}`;
           $li.attr('aria-label', optionLabel);
 
           $('<div class="menu-item" data-icon="plus"/>')
             .appendTo($li)
-            .text(data.search);
+            .text(val);
         }
 
         $ul.find('.menu-item:not(.disabled):first').addClass('hover');
@@ -1411,7 +1424,9 @@ Craft.BaseElementSelectInput = Garnish.Base.extend(
 
       this.killSearchMenu();
       this.$searchInput.val('');
-      this.$searchInput.focus();
+      setTimeout(() => {
+        this.focusNextLogicalElement();
+      }, 200);
     },
 
     killSearchMenu: function () {
