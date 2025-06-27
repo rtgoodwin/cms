@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Added `craft\models\FieldLayout::isUiElementIncluded()`.
 - Fixed a bug where single-instance UI elements could be added to field layouts multiple times. ([#17485](https://github.com/craftcms/cms/issues/17485))
 
 ## 5.7.11 - 2025-06-24
