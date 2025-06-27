@@ -481,6 +481,7 @@
             label: 'Field Layout'|t('app'),
             fieldset: true,
             errors: (config.fieldLayout ?? false) ? config.fieldLayout.getErrorSummary(true),
+            data: {'error-key': 'fieldLayout.fields'},
         }|merge(config), 'template:_includes/forms/fieldLayoutDesigner') }}
 
         {% if config.withCardViewDesigner is defined and config.withCardViewDesigner %}
