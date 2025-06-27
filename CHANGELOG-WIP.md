@@ -46,6 +46,7 @@
 
 ### Development
 - Added `<handle>Entry` GraphQL queries for each Single section, which resolve to the single entry within them. ([#17278](https://github.com/craftcms/cms/issues/17278))  
+- GraphQL requests now return error messages for client-safe exceptions, even if Dev Mode is disabled. ([#17504](https://github.com/craftcms/cms/pull/17504))
 
 ### Extensibility
 - Element edit pages now support being passed a hashed `returnUrl` query string param. ([#17137](https://github.com/craftcms/cms/discussions/17137))
