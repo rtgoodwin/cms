@@ -1,9 +1,13 @@
 craft-disclosure {
   [aria-expanded='true'] .cp-icon {
-    transform: rotate(0deg) translateY(-2px);
+    transform: rotate(0deg) translateY(-1px);
   }
+}
 
-  [aria-expanded='false'] .cp-icon {
-    transform: rotate(-90deg);
-  }
+body.ltr craft-disclosure [aria-expanded='false'] .cp-icon {
+  transform: rotate(-90deg) translateX(1px);
+}
+
+body.rtl craft-disclosure [aria-expanded='false'] .cp-icon {
+  transform: rotate(90deg) translateX(1px);
 }
