@@ -78,6 +78,7 @@ use craft\models\GqlToken;
 use craft\models\Section;
 use craft\records\GqlSchema as GqlSchemaRecord;
 use craft\records\GqlToken as GqlTokenRecord;
+use GraphQL\Error\ClientAware;
 use GraphQL\Error\DebugFlag;
 use GraphQL\Error\Error;
 use GraphQL\GraphQL;
@@ -1334,8 +1335,11 @@ class Gql extends Component
             }
 
             // If devMode enabled or exception is safe to show, substitute the original exception here.
-            $isClientSafe = $originException instanceof \GraphQL\Error\ClientAware && $originException->isClientSafe();
-            if (($devMode || $isClientSafe) && !empty($originException->getMessage())) {
+            if (
+                ($devMode || ($originException instanceof ClientAware && $originException->isClientSafe())
+                ) &&
+                !empty($originException->getMessage())
+            ) {
                 $error = $originException;
             } elseif (!$originException instanceof Error) {
                 // If devMode not enabled and the error seems to be originating from Craft, display a generic message
