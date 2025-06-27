@@ -59,6 +59,9 @@ abstract class BaseTextLinkType extends BaseLinkType
         foreach ((array)$this->urlPrefix() as $prefix) {
             $value = StringHelper::removeLeft($value, $prefix);
         }
+        if (preg_match('/^[^\/]+\/$/', $value)) {
+            $value = rtrim($value, '/');
+        }
         return $value;
     }
 

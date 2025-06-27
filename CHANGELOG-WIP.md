@@ -12,6 +12,7 @@
 - Relation fields set to a single element source will now show a search input by default. ([#17497](https://github.com/craftcms/cms/pull/17497))
 - Link fields’ condition rules now have an “is of type” operator. ([#17277](https://github.com/craftcms/cms/pull/17277))
 - Link fields now allow URLs without TLDs. ([#17450](https://github.com/craftcms/cms/issues/17450))
+- Link fields’ default URL labels now strip the trailing slash from URLs that don’t include URIs.
 - Content previews for Plain Text fields are now shown in a fixed-width font if “Use a monospaced font” is enabled. ([#17447](https://github.com/craftcms/cms/pull/17447))
 - Read-only relational fields now display element chips/cards more consistently with editable fields. ([#17146](https://github.com/craftcms/cms/discussions/17146))
 - Added the “Notification Position” and “Sideout Position” user preferences. ([#17169](https://github.com/craftcms/cms/pull/17169))
