@@ -1296,7 +1296,8 @@ class Gql extends Component
             }
 
             // If devMode enabled or exception is safe to show, substitute the original exception here.
-            if (($devMode || $originException instanceof \GraphQL\Error\UserError) && !empty($originException->getMessage())) {
+            $isClientSafe = $originException instanceof \GraphQL\Error\ClientAware && $originException->isClientSafe();
+            if (($devMode || $isClientSafe) && !empty($originException->getMessage())) {
                 $error = $originException;
             } elseif (!$originException instanceof Error) {
                 // If devMode not enabled and the error seems to be originating from Craft, display a generic message
