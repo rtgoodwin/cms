@@ -4246,6 +4246,7 @@ table {
     margin-inline: calc(
       var(--pane-padding, var(--pane-x-padding-default)) * -1
     );
+    overflow-x: auto;
 
     .elementselectormodal & {
       margin-block: 0;
