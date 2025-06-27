@@ -4,6 +4,7 @@
 
 - Added `craft\models\FieldLayout::isUiElementIncluded()`.
 - Fixed a bug where single-instance UI elements could be added to field layouts multiple times. ([#17485](https://github.com/craftcms/cms/issues/17485))
+- Fixed a bug where nested element index contents could overflow their container element. ([#17487](https://github.com/craftcms/cms/issues/17487))
 
 ## 5.7.11 - 2025-06-24
 
