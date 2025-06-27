@@ -503,6 +503,7 @@
                 label: 'Generated Fields'|t('app'),
                 instructions: 'Define any additional values that should be saved on your elements.'|t('app'),
                 errors: config.fieldLayout.getErrors('generatedFields') ?? [],
+                data: {'error-key': 'fieldLayout.generatedFields'},
                 fieldLayout: config.fieldLayout ?? null,
             }, 'template:_includes/forms/generatedFieldsTable') }}
         {% endif %}
