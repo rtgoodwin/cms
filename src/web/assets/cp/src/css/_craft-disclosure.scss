@@ -1,9 +1,9 @@
 craft-disclosure {
   [aria-expanded='true'] .cp-icon {
-    transform: rotate(180deg);
+    transform: rotate(0deg) translateY(-2px);
   }
 
   [aria-expanded='false'] .cp-icon {
-    transform: rotate(0deg);
+    transform: rotate(-90deg);
   }
 }
