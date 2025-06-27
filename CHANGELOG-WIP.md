@@ -24,6 +24,7 @@
 
 ### Accessibility
 - The Crop tool within the Image Editor is now screen reader and keyboard accessible. ([#17358](https://github.com/craftcms/cms/pull/17358))
+- Lightswitches now have a checkmark icon when turned on, and improved styling. ([#17492](https://github.com/craftcms/cms/pull/17492)) 
 
 ### Administration
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
