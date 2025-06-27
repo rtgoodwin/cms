@@ -24,7 +24,7 @@
 
 ### Accessibility
 - The Crop tool within the Image Editor is now screen reader and keyboard accessible. ([#17358](https://github.com/craftcms/cms/pull/17358))
-- Lightswitches now have a checkmark icon when turned on, and improved styling. ([#17492](https://github.com/craftcms/cms/pull/17492)) 
+- Lightswitches now have a checkmark icon when turned on, and improved styling. ([#17492](https://github.com/craftcms/cms/pull/17492))
 
 ### Administration
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
@@ -45,7 +45,7 @@
 - The full suite of Font Awesome icons is now available to Icons fields. ([#17440](https://github.com/craftcms/cms/issues/17440))
 
 ### Development
-- Added `<handle>Entry` GraphQL queries for each Single section, which resolve to the single entry within them. ([#17278](https://github.com/craftcms/cms/issues/17278))  
+- Added `<handle>Entry` GraphQL queries for each Single section, which resolve to the single entry within them. ([#17278](https://github.com/craftcms/cms/issues/17278))
 - GraphQL requests now return error messages for client-safe exceptions, even if Dev Mode is disabled. ([#17504](https://github.com/craftcms/cms/pull/17504))
 
 ### Extensibility
