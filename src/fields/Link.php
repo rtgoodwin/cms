@@ -892,11 +892,7 @@ JS;
     public function getPreviewHtml(mixed $value, ElementInterface $element): string
     {
         /** @var LinkData|null $value */
-        if (!$value) {
-            return '';
-        }
-        $value = Html::encode((string)$value);
-        return "<a href=\"$value\" target=\"_blank\">$value</a>";
+        return $value?->getLink() ?? '';
     }
 
     /**
