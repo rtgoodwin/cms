@@ -19,7 +19,7 @@ use craft\base\RelationalFieldTrait;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry as EntryElement;
 use craft\events\RegisterComponentTypesEvent;
-use craft\fields\conditions\TextFieldConditionRule;
+use craft\fields\conditions\LinkFieldConditionRule;
 use craft\fields\data\LinkData;
 use craft\fields\linktypes\Asset;
 use craft\fields\linktypes\BaseLinkType;
@@ -883,7 +883,7 @@ JS;
      */
     public function getElementConditionRuleType(): array|string|null
     {
-        return TextFieldConditionRule::class;
+        return LinkFieldConditionRule::class;
     }
 
     /**
@@ -892,11 +892,7 @@ JS;
     public function getPreviewHtml(mixed $value, ElementInterface $element): string
     {
         /** @var LinkData|null $value */
-        if (!$value) {
-            return '';
-        }
-        $value = Html::encode((string)$value);
-        return "<a href=\"$value\" target=\"_blank\">$value</a>";
+        return $value?->getLink() ?? '';
     }
 
     /**

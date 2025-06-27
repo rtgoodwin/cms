@@ -4,6 +4,9 @@
 
 - Added `craft\models\FieldLayout::isUiElementIncluded()`.
 - Fixed a bug where single-instance UI elements could be added to field layouts multiple times. ([#17485](https://github.com/craftcms/cms/issues/17485))
+- Fixed a bug where nested element index contents could overflow their container element. ([#17487](https://github.com/craftcms/cms/issues/17487))
+- Fixed a bug where Link field previews only displayed the linked URL. ([#17369](https://github.com/craftcms/cms/discussions/17369))
+- Fixed a bug where field layout designers weren’t showing validation errors when saved within a slideout. ([#16684](https://github.com/craftcms/cms/issues/16684))
 
 ## 5.7.11 - 2025-06-24
 

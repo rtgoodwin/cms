@@ -123,6 +123,7 @@ JS;
             '<span class="visually-hidden">Characters left:</span> {chars, number}',
             'A server error occurred.',
             'Actions',
+            'Add Group',
             'Add',
             'Add…',
             'All',
@@ -163,6 +164,7 @@ JS;
             'Content',
             'Continue',
             'Copied to clipboard.',
+            'Copy URL',
             'Copy from',
             'Copy the URL',
             'Copy the reference tag',
@@ -230,7 +232,9 @@ JS;
             'Found {num, number} {num, plural, =1{error} other{errors}} in this tab.',
             'From {date}',
             'From',
+            'General',
             'Give your tab a name.',
+            'Group Name',
             'Handle',
             'Heading',
             'Height unit',
@@ -269,6 +273,8 @@ JS;
             'Move folder',
             'Move forward',
             'Move reverted.',
+            'Move to next group',
+            'Move to previous group',
             'Move to the left',
             'Move to the right',
             'Move to',
@@ -401,6 +407,7 @@ JS;
             'Upload files',
             'Use defaults',
             'Use for element thumbnails',
+            'Use the arrow keys to change position, Tab or Spacebar to drop.',
             'User Groups',
             'View in a new tab',
             'View in a new tab',
@@ -436,6 +443,8 @@ JS;
             '{element} pagination',
             '{first, number}-{last, number} of {total, number} {total, plural, =1{{item}} other{{items}}}',
             '{first}-{last} of {total}',
+            '{item} dropped.',
+            '{item} picked up.',
             '{name} active, more info',
             '{name} folder',
             '{name} sorted by {attribute}, {direction}',
@@ -594,6 +603,12 @@ JS;
                 ?? $generalConfig->accessibilityDefaults['notificationDuration']
                 ?? 5000
             ),
+            'notificationPosition' => $currentUser->getPreference('notificationPosition')
+                ?? $generalConfig->accessibilityDefaults['notificationPosition']
+                ?? 'end-start',
+            'slideoutPosition' => $currentUser->getPreference('slideoutPosition')
+                ?? $generalConfig->accessibilityDefaults['slideoutPosition']
+                ?? 'end',
             'previewIframeResizerOptions' => $this->_previewIframeResizerOptions($generalConfig),
             'primarySiteId' => $primarySite ? (int)$primarySite->id : null,
             'primarySiteLanguage' => $primarySite->language ?? null,
@@ -606,6 +621,7 @@ JS;
             'slugWordSeparator' => $generalConfig->slugWordSeparator,
             'userEmail' => $currentUser->email,
             'userHasPasskeys' => Craft::$app->getAuth()->hasPasskeys($userSession->getImpersonator() ?? $currentUser),
+            'userId' => $currentUser->id,
             'userIsAdmin' => $currentUser->admin,
             'username' => $currentUser->username,
         ];

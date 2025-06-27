@@ -188,6 +188,10 @@ class NestedElementManager extends Component
 
         $query = $owner->getFieldValue($this->field->handle);
 
+        if ($query instanceof ElementCollection) {
+            return $query;
+        }
+
         if (!$query instanceof ElementQueryInterface) {
             $query = $this->nestedElementQuery($owner);
         }
@@ -582,7 +586,7 @@ class NestedElementManager extends Component
 
         $authorizedOwnerId = $owner->id;
         if ($owner->isProvisionalDraft) {
-            /** @var ElementInterface|DraftBehavior $owner */
+            /** @var ElementInterface&DraftBehavior $owner */
             if ($owner->creatorId === Craft::$app->getUser()->getIdentity()?->id) {
                 $authorizedOwnerId = $owner->getCanonicalId();
             }
