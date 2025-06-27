@@ -82,12 +82,12 @@
 {% set nestedUnderHeading = false %}
 
 {% tag 'ul' with {
-    class: keyPrefix ? 'nested' : null,
+    class: keyPrefix ? 'nested sources-list' : 'sources-list',
     id: id ?? ''
 } %}
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
-            {% set key = source.key ?? source.heading | kebab %}
+            {% set key = source.key ?? (source.heading ~ '-' ~ random())| kebab %}
             {% if nestedUnderHeading %}
                     </ul>
                 </li>
@@ -115,7 +115,7 @@
                         {% endembed %}
                     {% endif %}
                 </div>
-                <ul id="{{ key }}">
+                <ul id="{{ key }}" class="sources-list">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
             {% set key = source.keyPath ?? (keyPrefix ~ source.key) %}
