@@ -95,10 +95,10 @@
                     disabled ? 'disabled',
                     limit and elements|length >= limit ? 'hidden',
                 ]|filter,
-                text: (selectionLabel and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
+                text: ((selectionLabel ?? false) and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
                 disabled: disabled,
                 aria: {
-                    label: (selectionLabel and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
+                    label: ((selectionLabel ?? false) and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
                     describedby: describedBy ?? false,
                 }
             }) }}
