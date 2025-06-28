@@ -2256,7 +2256,7 @@ return [
     '{filename} isn’t selectable for this field.' => '{filename}はこのフィールドに対して選択できません。',
     '{first, number}-{last, number} of {total, number} {total, plural, =1{{item}} other{{items}}}' => '{first, number}–{last, number}/{total, number} {total, plural, =1{{item}} other{{items}}}',
     '{first}-{last} of {total}' => '{first}–{last}/{total}',
-    '{item} dropped.' => '{item}が削除されました。',
+    '{item} dropped.' => '{item}を削除しました。',
     '{item} picked up.' => '{item}を取得しました。',
     '{max, plural, =1{Author} other {Authors}}' => '{max, plural, =1{作成者} other {作成者}}',
     '{names} {total, plural, =1{is installed as a trial} other{are installed as trials}}.' => '{names}{total, plural, =1{がトライアルとしてインストールされました} other{がトライアルとしてインストールされました}}。',
