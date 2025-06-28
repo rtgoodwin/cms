@@ -1740,7 +1740,7 @@ return [
     'This can begin with an environment variable.' => 'Может начинаться с переменной среды.',
     'This draft’s entry type is no longer available. You can still view it, but not apply it.' => 'Этот тип записи черновика больше не доступен. Его можно просмотреть, но нельзя применить.',
     'This element is conditional' => 'Данный элемент является условным',
-    'This entry type’s {attributes} {totalAttributes, plural, =1{has} other{have}} been overridden.' => 'This entry type’s {attributes} {totalAttributes, plural, =1{has} other{have}} been overridden.',
+    'This entry type’s {attributes} {totalAttributes, plural, =1{has} other{have}} been overridden.' => '{totalAttributes, plural, one {} few {Атрибуты {attributes} этого типа записи были переопределены} many {Атрибуты {attributes} этого типа записи были переопределены}=1{Атрибут {attributes} этого типа записи был переопределен} other{Атрибуты {attributes} этого типа записи были переопределены}}.',
     'This field has a tip' => 'Это поле содержит подсказку',
     'This field has a warning' => 'Это поле содержит предупреждение',
     'This field has been modified.' => 'Поле было изменено.',
