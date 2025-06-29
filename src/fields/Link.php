@@ -901,7 +901,8 @@ JS;
     public function previewPlaceholderHtml(mixed $value, ?ElementInterface $element): string
     {
         if (!$value) {
-            $value = Craft::$app->getSites()->getCurrentSite()->baseUrl;
+            $url = Craft::$app->getSites()->getPrimarySite()->getBaseUrl() ?? 'https://craftcms.com/';
+            $value = new LinkData($url, new UrlType());
         }
 
         return $this->getPreviewHtml($value, new EntryElement());
