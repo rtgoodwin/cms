@@ -45,7 +45,7 @@ return [
     'Active trials added to the cart.' => 'Активні пробні версії додані до кошика.',
     'Active' => 'Активний',
     'Activity' => 'Дія',
-    'Add Group' => 'Add Group',
+    'Add Group' => 'Додати групу',
     'Add Row Label' => 'Додати мітку рядка',
     'Add a category' => 'Додати категорію',
     'Add a color' => 'Додати колір',
