@@ -45,7 +45,7 @@ return [
     'Active trials added to the cart.' => 'Do košíku byly přidány aktivní zkušební verze.',
     'Active' => 'Aktivní',
     'Activity' => 'Aktivita',
-    'Add Group' => 'Add Group',
+    'Add Group' => 'Přidat skupinu',
     'Add Row Label' => 'Přidat popisek řádku',
     'Add a category' => 'Přidat kategorii',
     'Add a color' => 'Přidat barvu',
