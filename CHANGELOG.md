@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed an error that could occur when indexing assets. ([#17240](https://github.com/craftcms/cms/issues/17240))
+
 ## 4.15.7 - 2025-06-24
 
 - Table fields with “Static Rows” enabled now get populated with the default row values when their value is `null`. ([#17452](https://github.com/craftcms/cms/pull/17452))
