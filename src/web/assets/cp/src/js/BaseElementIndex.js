@@ -1264,6 +1264,10 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         clearTimeout(this.searchTimeout);
       }
 
+      if (this.settings.context === 'index') {
+        Craft.setQueryParam('search', null);
+      }
+
       this.stopSearching();
 
       if (updateElements) {
@@ -2286,16 +2290,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       this.sourceNav.selectItem($source);
 
       this.updateMainHeading();
-
-      if (this.searching) {
-        // Clear the search value without causing it to update elements
-        this.searchText = null;
-        this.$search.val('');
-        if (this.settings.context === 'index') {
-          Craft.setQueryParam('search', null);
-        }
-        this.stopSearching();
-      }
+      this.clearSearch(false);
 
       // Status menu
       // ----------------------------------------------------------------------

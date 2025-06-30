@@ -2754,6 +2754,7 @@ abstract class Element extends Component implements ElementInterface
             $names['saveOwnership'],
             $names['searchScore'],
             $names['updateSearchIndexForOwner'],
+            $names['updateSearchIndexImmediately'],
             $names['updatingFromDerivative'],
             $names['viewMode'],
         );

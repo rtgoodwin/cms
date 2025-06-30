@@ -22,6 +22,7 @@
 - Users with “Moderate users” permission can now send activation emails. ([#17362](https://github.com/craftcms/cms/pull/17362))
 - Source headings within element indexes are now collapsible. ([#17226](https://github.com/craftcms/cms/pull/17226))
 - Element condition builders now show condition rules for custom fields with duplicate names. ([#17361](https://github.com/craftcms/cms/pull/17361))
+- After creating a new entry or category via a selector modal, the modal will now set its search input to the new element’s title. ([#17480](https://github.com/craftcms/cms/issues/17480)) 
 
 ### Accessibility
 - The Crop tool within the Image Editor is now screen reader and keyboard accessible. ([#17358](https://github.com/craftcms/cms/pull/17358))
@@ -57,6 +58,7 @@
 - Added `craft\base\ElementInterface::getGeneratedFieldValues()`.
 - Added `craft\base\ElementInterface::render()`.
 - Added `craft\base\ElementInterface::setGeneratedFieldValues()`.
+- Added `craft\base\ElementTrait::$updateSearchIndexImmediately`.
 - Added `craft\base\Field::RESERVED_HANDLES`.
 - Added `craft\base\FieldInterface::showStatus()`.
 - Added `craft\elements\Asset::setMimeType()`.

@@ -103,6 +103,7 @@ class ElementsController extends Controller
     private bool $_prevalidate;
     private bool $_asUnpublishedDraft;
     private bool $_deleteProvisionalDraft;
+    private ?bool $_updateSearchIndexImmediately;
 
     /**
      * @inheritdoc
@@ -145,6 +146,7 @@ class ElementsController extends Controller
         $this->_prevalidate = (bool)$this->_param('prevalidate');
         $this->_asUnpublishedDraft = (bool)$this->_param('asUnpublishedDraft');
         $this->_deleteProvisionalDraft = (bool)$this->_param('deleteProvisionalDraft');
+        $this->_updateSearchIndexImmediately = $this->_param('updateSearchIndexImmediately');
 
         unset($this->_attributes['failMessage']);
         unset($this->_attributes['redirect']);
@@ -1080,6 +1082,10 @@ JS, [
 
             if ($isUnpublishedDraft && $this->_fresh) {
                 $components[] = Html::hiddenInput('fresh', '1');
+            }
+
+            if ($this->_updateSearchIndexImmediately) {
+                $components[] = Html::hiddenInput('updateSearchIndexImmediately', '1');
             }
 
             $components[] = $contentHtml;
@@ -2805,6 +2811,10 @@ JS, [
             }
         } elseif (isset($this->_notes)) {
             $element->setRevisionNotes($this->_notes);
+        }
+
+        if ($this->_updateSearchIndexImmediately !== null) {
+            $element->updateSearchIndexImmediately = $this->_updateSearchIndexImmediately;
         }
 
         $scenario = $element->getScenario();
