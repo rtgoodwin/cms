@@ -116,3 +116,4 @@
 - Requests with user verification codes are now redirected to the login page by default. ([#17392](https://github.com/craftcms/cms/pull/17392))
 - Assets now keep track of their MIME types when uploaded, improving the accuracy of `craft\elements\Asset::getMimeType()`. ([#17254](https://github.com/craftcms/cms/pull/17254))
 - Reduced the number of SQL queries executed when fetching entries. ([#17326](https://github.com/craftcms/cms/discussions/17326))
+- Fixed an error that could occur when applying project config changes, if a plugin was uninstalled in the project config but still Composer-installed. ([#17479](https://github.com/craftcms/cms/issues/17479))
