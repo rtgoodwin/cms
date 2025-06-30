@@ -1652,7 +1652,6 @@ SQL)->execute();
 
             $entryTypeRecord->name = $data['name'];
             $entryTypeRecord->handle = $data['handle'];
-            $entryTypeRecord->description = $data['description'] ?? null;
             $entryTypeRecord->icon = $data['icon'] ?? null;
             $entryTypeRecord->color = $data['color'] ?? null;
             $entryTypeRecord->hasTitleField = $data['hasTitleField'];
@@ -1664,6 +1663,11 @@ SQL)->execute();
             $entryTypeRecord->slugTranslationKeyFormat = $data['slugTranslationKeyFormat'] ?? null;
             $entryTypeRecord->showStatusField = $data['showStatusField'] ?? true;
             $entryTypeRecord->uid = $entryTypeUid;
+
+            // todo: remove after the next breakpoint
+            if (Craft::$app->getDb()->columnExists(Table::ENTRYTYPES, 'description')) {
+                $entryTypeRecord->description = $data['description'] ?? null;
+            }
 
             if (!empty($data['fieldLayouts'])) {
                 // Save the field layout
