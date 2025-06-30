@@ -1,13 +1,17 @@
 craft-disclosure {
+  --disclosure-icon-transform: rotate(0deg);
+  --disclosure-icon-transform-active: rotate(-90deg);
+  display: contents;
+
   [aria-expanded='true'] .cp-icon {
-    transform: rotate(0deg) translateY(-1px);
+    transform: var(--disclosure-icon-transform);
   }
 }
 
-body.ltr craft-disclosure [aria-expanded='false'] .cp-icon {
-  transform: rotate(-90deg) translateX(1px);
+craft-disclosure [aria-expanded='false'] .cp-icon {
+  transform: var(--disclosure-icon-transform-active);
 }
 
-body.rtl craft-disclosure [aria-expanded='false'] .cp-icon {
-  transform: rotate(90deg) translateX(1px);
+body.rtl craft-disclosure {
+  --disclosure-icon-transform-active: rotate(90deg);
 }

@@ -311,12 +311,8 @@ history.replaceState(undefined, undefined, window.location.href.match(/^[^#]*/)[
                                                         <span class="details-toggle__inner">
                                                             <span
                                                                 aria-hidden="true"
-                                                                class="cp-icon toggle-icon toggle-icon--close"
+                                                                class="cp-icon"
                                                             >{{ iconSvg('angle-right') }}</span>
-                                                            <span
-                                                                aria-hidden="true"
-                                                                class="cp-icon toggle-icon toggle-icon--open"
-                                                            >{{ iconSvg('angle-left') }}</span>
                                                             <span class="visually-hidden">{{ 'Toggle details sidebar'|t('app') }}</span>
                                                         </span>
                                                     {% endblock %}
