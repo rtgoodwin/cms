@@ -45,7 +45,7 @@ return [
     'Active trials added to the cart.' => 'Aktiva testversioner har lagts till i kundvagnen.',
     'Active' => 'Aktiva',
     'Activity' => 'Aktivitet',
-    'Add Group' => 'Add Group',
+    'Add Group' => 'Lägg till grupp',
     'Add Row Label' => 'Lägg till radetikett',
     'Add a category' => 'Lägg till en kategori',
     'Add a color' => 'Lägg till en färg',
