@@ -45,7 +45,7 @@ return [
     'Active trials added to the cart.' => 'Az aktív próbaverziók bekerültek a kocsiba.',
     'Active' => 'Aktív',
     'Activity' => 'Tevékenység',
-    'Add Group' => 'Add Group',
+    'Add Group' => 'Csoport hozzáadása',
     'Add Row Label' => 'Sorcímke hozzáadása',
     'Add a category' => 'Adj hozzá egy kategóriát',
     'Add a color' => 'Szín hozzáadása',
