@@ -141,9 +141,12 @@ class ContentBlock extends Field implements
      */
     public function getSettings(): array
     {
+        $fieldLayout = $this->getFieldLayout();
         return [
             ...parent::getSettings(),
-            'fieldLayoutUid' => $this->getFieldLayoutUid(),
+            'fieldLayouts' => [
+                $fieldLayout->uid => $fieldLayout->getConfig(),
+            ],
         ];
     }
 
@@ -211,6 +214,28 @@ class ContentBlock extends Field implements
 
         $layout->provider = $this;
         $this->_fieldLayout = $layout;
+    }
+
+    /**
+     * Sets the field layouts.
+     *
+     * @param array $layouts
+     */
+    public function setFieldLayouts(array $layouts): void
+    {
+        $config = reset($layouts);
+        $layout = Craft::$app->getFields()->createLayout($config);
+        $layout->uid = array_key_first($layouts);
+        $layout->type = ContentBlockElement::class;
+
+        // Make sure all the elements have a dateAdded value set
+        foreach ($layout->getTabs() as $tab) {
+            foreach ($tab->getElements() as $layoutElement) {
+                $layoutElement->dateAdded ??= new DateTime();
+            }
+        }
+
+        $this->setFieldLayout($layout);
     }
 
     /**
