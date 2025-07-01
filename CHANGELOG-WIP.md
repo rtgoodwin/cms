@@ -44,6 +44,7 @@
 - “Field” condition rules for entry conditions now include an “is empty” operator.
 - Address conditions can now have a “Field” rule. ([#17502](https://github.com/craftcms/cms/discussions/17502))
 - The `accessibilityDefaults` config setting can now contain `notificationPosition` and `slideoutPosition` keys. ([#17169](https://github.com/craftcms/cms/pull/17169))
+- The `autoLoginAfterAccountActivation` config setting no longer applies to the password reset flow. ([#17522](https://github.com/craftcms/cms/pull/17522))
 - The full suite of Font Awesome icons is now available to Icons fields. ([#17440](https://github.com/craftcms/cms/issues/17440))
 
 ### Development

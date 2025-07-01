@@ -885,14 +885,11 @@ class UsersController extends Controller
             }
         }
 
-        // Maybe automatically log them in
-        $loggedIn = $this->_maybeLoginUserAfterAccountActivation($user);
-
         if ($this->request->getAcceptsJson()) {
             $return = [
                 'status' => $user->getStatus(),
             ];
-            if ($loggedIn && Craft::$app->getConfig()->getGeneral()->enableCsrfProtection) {
+            if (!Craft::$app->getUser()->getIsGuest() && Craft::$app->getConfig()->getGeneral()->enableCsrfProtection) {
                 $return['csrfTokenValue'] = $this->request->getCsrfToken();
             }
             return $this->asSuccess(data: $return);
@@ -1793,7 +1790,7 @@ JS);
 
         // Is this public registration, and was the user going to be activated automatically?
         $publicActivation = $isPublicRegistration && $user->getStatus() === User::STATUS_ACTIVE;
-        $loggedIn = $publicActivation && $this->_maybeLoginUserAfterAccountActivation($user);
+        $loggedIn = $publicActivation && !Craft::$app->getUser()->getIsGuest();
         $returnCsrfToken = $returnCsrfToken || $loggedIn;
 
         if ($this->request->getAcceptsJson()) {
@@ -2915,9 +2912,10 @@ JS);
     }
 
     /**
-     * Possibly log a user in right after they were activated or reset their password, if Craft is configured to do so.
+     * Possibly log a user in right after they activated their account (not when they reset their password),
+     * if Craft is configured to do so.
      *
-     * @param User $user The user that was just activated or reset their password
+     * @param User $user The user that was just activated
      * @return bool Whether the user was logged in
      */
     private function _maybeLoginUserAfterAccountActivation(User $user): bool
