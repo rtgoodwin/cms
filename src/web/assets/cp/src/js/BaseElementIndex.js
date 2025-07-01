@@ -1530,15 +1530,28 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       const baseCriteria = Object.assign(
         {
           status: null,
-          drafts: this.settings.canHaveDrafts ? null : false,
-          draftOf: this.settings.canHaveDrafts && this.drafts ? null : false,
-          savedDraftsOnly: true,
         },
         this.baseCriteria,
         {
           siteId: this.siteId,
         }
       );
+
+      // set drafts/draftOf/savedDraftsOnly params depending on the context
+      if (this.settings.context !== 'index') {
+        baseCriteria.drafts = this.settings.canHaveDrafts ? null : false;
+        baseCriteria.draftOf =
+          this.settings.canHaveDrafts && this.drafts ? null : false;
+        baseCriteria.savedDraftsOnly = true;
+      } else if (
+        this.settings.canHaveDrafts &&
+        (this.drafts || (this.settings.context === 'index' && !this.status))
+      ) {
+        baseCriteria.drafts = this.drafts || null;
+        baseCriteria.savedDraftsOnly = true;
+        baseCriteria.draftOf =
+          this.settings.canHaveDrafts && this.drafts ? null : false;
+      }
 
       const criteria = {
         offset: this.settings.batchSize * (this.page - 1),
