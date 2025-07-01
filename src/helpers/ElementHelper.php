@@ -15,6 +15,7 @@ use craft\base\Field;
 use craft\base\NestedElementInterface;
 use craft\db\Query;
 use craft\db\Table;
+use craft\elements\User as UserElement;
 use craft\errors\OperationAbortedException;
 use craft\fieldlayoutelements\CustomField;
 use craft\i18n\Locale;
@@ -35,6 +36,8 @@ use yii\base\NotSupportedException;
 class ElementHelper
 {
     private const URI_MAX_LENGTH = 255;
+
+    private static ?UserElement $provisionalDraftUser = null;
 
     /**
      * Generates a new temporary slug.
@@ -1007,7 +1010,7 @@ class ElementHelper
      */
     public static function swapInProvisionalDrafts(array &$elements): void
     {
-        $user = Craft::$app->getUser()->getIdentity();
+        $user = self::$provisionalDraftUser ?? Craft::$app->getUser()->getIdentity();
         if (!$user) {
             return;
         }
@@ -1082,5 +1085,27 @@ class ElementHelper
 
         $propSites = array_filter($supportedSites, fn($site) => $site['propagate']);
         return count($propSites) > 1;
+    }
+
+    /**
+     * Sets user to be used for swapping in provisional drafts.
+     *
+     * @param int|null $userId
+     * @return void
+     * @since 5.8.0
+     */
+    public static function setProvisionalDraftUser(?int $userId): void
+    {
+        if ($userId == null) {
+            self::$provisionalDraftUser = null;
+
+            return;
+        }
+
+        $user = Craft::$app->getUsers()->getUserById($userId);
+
+        if ($user) {
+            self::$provisionalDraftUser = $user;
+        }
     }
 }
