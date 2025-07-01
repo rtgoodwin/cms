@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed an error that could occur when indexing assets. ([#17240](https://github.com/craftcms/cms/issues/17240))
+- Fixed a bug where some partially-translated system languages were available for users’ Language preferences.
 
 ## 4.15.7 - 2025-06-24
 
