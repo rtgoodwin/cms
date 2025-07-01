@@ -1578,10 +1578,10 @@ JS;
         self::_setLayoutOnElements($availableNativeFields, $fieldLayout);
         self::_setLayoutOnElements($availableUiElements, $fieldLayout);
 
-        $fieldLayoutConfig = [
-            'uid' => $fieldLayout->uid,
-            ...(array)$fieldLayout->getConfig(),
-        ];
+        $fieldLayoutConfig = array_merge(
+            ['uid' => $fieldLayout->uid],
+            (array)$fieldLayout->getConfig(),
+        );
 
         if ($fieldLayout->id) {
             $fieldLayoutConfig['id'] = $fieldLayout->id;
