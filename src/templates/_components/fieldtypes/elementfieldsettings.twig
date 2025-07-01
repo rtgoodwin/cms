@@ -139,9 +139,8 @@
     {% endblock %}
 
     {% block showSearchInputField %}
-        {% set sources = field.getInputSources() %}
         {{ forms.lightswitchField({
-            fieldClass: sources is not array or sources|length != 1 ? 'hidden' : null,
+            fieldClass: 'hidden',
             label: 'Show the search input'|t('app'),
             id: 'show-search-input',
             name: 'showSearchInput',
@@ -190,7 +189,7 @@
   const $inputs = $('#{{ 'sources-field'|namespaceInputId }} input');
   const $searchField = $('#{{ 'show-search-input-field'|namespaceInputId }}');
 
-  $inputs.on('change', () => {
+  const updateSearchField = function() {
     let showSearchField = false;
     let foundChecked = false;
     for (let i = 0; i < $inputs.length; i++) {
@@ -217,6 +216,12 @@
     } else {
       $searchField.addClass('hidden');
     }
+  };
+
+  $inputs.on('change', () => {
+    updateSearchField();
   });
+
+  updateSearchField();
 })();
 {% endjs %}
