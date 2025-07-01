@@ -868,7 +868,7 @@ return [
     'Indigo' => 'Indigově modrá',
     'Information' => 'Informace',
     'Initial Rows' => 'Počet řádků',
-    'Inline' => 'Inline',
+    'Inline' => 'V řadě',
     'Insert the button label for adding a new row to the table.' => 'Vložte popisek tlačítka pro přidání nového řádku do tabulky.',
     'Install Craft CMS' => 'Nainstalovat Craft CMS',
     'Install an authenticator app, such as:' => 'Nainstalujte si autentizační aplikaci, například:',
