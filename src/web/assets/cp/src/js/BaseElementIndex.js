@@ -3093,7 +3093,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       for (let i = 0; i < $headings.length; i++) {
         $heading = $headings.eq(i);
-        if ($heading.has('> ul > li:not(.hidden)').length !== 0) {
+        if ($heading.has('> ul > li .source-item:not(.hidden)').length !== 0) {
           $heading.removeClass('hidden');
         } else {
           $heading.addClass('hidden');
@@ -3968,7 +3968,6 @@ const SourceNav = Garnish.Base.extend(
     $container: null,
     $items: null,
     $selectedItem: null,
-    $disclosures: null,
 
     init: function (container, settings) {
       this.$container = $(container);

@@ -103,7 +103,7 @@ class ElementsController extends Controller
     private bool $_prevalidate;
     private bool $_asUnpublishedDraft;
     private bool $_deleteProvisionalDraft;
-    private ?bool $_updateSearchIndexImmediately;
+    private ?bool $_updateSearchIndexImmediately = null;
 
     /**
      * @inheritdoc
