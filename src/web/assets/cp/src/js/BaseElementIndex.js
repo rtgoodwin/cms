@@ -1264,6 +1264,10 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         clearTimeout(this.searchTimeout);
       }
 
+      if (this.settings.context === 'index') {
+        Craft.setQueryParam('search', null);
+      }
+
       this.stopSearching();
 
       if (updateElements) {
@@ -1342,7 +1346,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       }
 
       if (typeof key === 'object') {
-        for (let k in key) {
+        for (const k in key) {
           if (key.hasOwnProperty(k)) {
             if (key[k] !== null) {
               viewState[k] = key[k];
@@ -1804,7 +1808,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
           : Craft.t('app', 'Descending');
       const sortLabel = this.getSortLabel(attribute);
 
-      if (!attribute && !direction && !sortLabel) return;
+      if (!attribute && !direction && !sortLabel) {
+        return;
+      }
 
       return Craft.t('app', '{name} sorted by {attribute}, {direction}', {
         name: this.getSourceLabel(),
@@ -1814,7 +1820,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     },
 
     updateLiveRegion: function (message) {
-      if (!message) return;
+      if (!message) {
+        return;
+      }
 
       this.$srStatusContainer.empty().text(message);
 
@@ -1823,7 +1831,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         const currentMessage = this.$srStatusContainer.text();
 
         // Check that this is the same message and hasn't been updated since
-        if (message !== currentMessage) return;
+        if (message !== currentMessage) {
+          return;
+        }
 
         this.$srStatusContainer.empty();
       }, 5000);
@@ -2293,16 +2303,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       this.sourceNav.selectItem($source);
 
       this.updateMainHeading();
-
-      if (this.searching) {
-        // Clear the search value without causing it to update elements
-        this.searchText = null;
-        this.$search.val('');
-        if (this.settings.context === 'index') {
-          Craft.setQueryParam('search', null);
-        }
-        this.stopSearching();
-      }
+      this.clearSearch(false);
 
       // Status menu
       // ----------------------------------------------------------------------
@@ -3105,7 +3106,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       for (let i = 0; i < $headings.length; i++) {
         $heading = $headings.eq(i);
-        if ($heading.has('> ul > li:not(.hidden)').length !== 0) {
+        if ($heading.has('> ul > li .source-item:not(.hidden)').length !== 0) {
           $heading.removeClass('hidden');
         } else {
           $heading.addClass('hidden');
@@ -3173,9 +3174,11 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     // -------------------------------------------------------------------------
 
     _getSourcesInList: function ($list, topLevel) {
-      let $sources = $list.find('> li:not(.heading) > a');
+      let $sources = $list.find('> li:not(.heading) [data-source-item]');
       if (topLevel) {
-        $sources = $sources.add($list.find('> li.heading > ul > li > a'));
+        $sources = $sources.add(
+          $list.find('> li.heading > ul > li [data-source-item]')
+        );
       }
       return $sources;
     },
@@ -3250,7 +3253,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         this.hideActionTriggers();
 
         if (this.triggers) {
-          for (let trigger of this.triggers) {
+          for (const trigger of this.triggers) {
             trigger.destroy();
           }
         }
@@ -3524,7 +3527,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     },
 
     _updateBadgeCounts: function (badgeCounts) {
-      for (let sourceKey in badgeCounts) {
+      for (const sourceKey in badgeCounts) {
         if (badgeCounts.hasOwnProperty(sourceKey)) {
           const $source = this.getSourceByKey(sourceKey);
           if ($source) {
@@ -3820,7 +3823,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       if (actions && actions.length) {
         const $ul = $('<ul/>');
 
-        for (let action of actions) {
+        for (const action of actions) {
           $('<li/>')
             .append(
               $('<a/>', {

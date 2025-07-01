@@ -44,7 +44,7 @@ abstract class BaseTextLinkType extends BaseLinkType
     {
         $value = str_replace(' ', '+', $value);
 
-        if ($this->supports($value)) {
+        if (str_contains($value, ':') || $this->supports($value)) {
             return $value;
         }
 
@@ -58,6 +58,9 @@ abstract class BaseTextLinkType extends BaseLinkType
     {
         foreach ((array)$this->urlPrefix() as $prefix) {
             $value = StringHelper::removeLeft($value, $prefix);
+        }
+        if (preg_match('/^[^\/]+\/$/', $value)) {
+            $value = rtrim($value, '/');
         }
         return $value;
     }
@@ -99,6 +102,7 @@ JS, [
                     'class' => 'chip-content',
                 ]) .
                 Html::a($linkText, $value, [
+                    'class' => ['truncate'],
                     'target' => '_blank',
                 ]) .
                 Html::beginTag('div', [

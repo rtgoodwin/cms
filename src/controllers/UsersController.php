@@ -849,7 +849,7 @@ class UsersController extends Controller
         $user = Craft::$app->getUsers()->getUserByUid($uid);
 
         if (!$user) {
-            throw new BadRequestHttpException("Invalid user UID: $uid");
+            throw new BadRequestHttpException("Invalid user UUID: $uid");
         }
 
         // Make sure we still have a valid token.
@@ -885,14 +885,11 @@ class UsersController extends Controller
             }
         }
 
-        // Maybe automatically log them in
-        $loggedIn = $this->_maybeLoginUserAfterAccountActivation($user);
-
         if ($this->request->getAcceptsJson()) {
             $return = [
                 'status' => $user->getStatus(),
             ];
-            if ($loggedIn && Craft::$app->getConfig()->getGeneral()->enableCsrfProtection) {
+            if (!Craft::$app->getUser()->getIsGuest() && Craft::$app->getConfig()->getGeneral()->enableCsrfProtection) {
                 $return['csrfTokenValue'] = $this->request->getCsrfToken();
             }
             return $this->asSuccess(data: $return);
@@ -922,12 +919,39 @@ class UsersController extends Controller
             $this->response->format = Response::FORMAT_HTML;
         }
 
-        if (!is_array($info = $this->_processTokenRequest())) {
-            return $info;
+        if (!$this->request->getIsPost()) {
+            if (!is_array($info = $this->_processTokenRequest())) {
+                return $info;
+            }
+
+            /** @var User $user */
+            /** @var string $uid */
+            /** @var string $code */
+            [$user, $uid, $code] = $info;
+
+            Craft::$app->getUser()->sendUsernameCookie($user);
+
+            // Send them to the set verify-email template
+            return $this->_rerouteWithFallbackTemplate('verify-email.twig', [
+                'id' => $uid,
+                'code' => $code,
+            ]);
         }
 
-        /** @var User $user */
-        [$user] = $info;
+        // POST request
+        $code = $this->request->getRequiredBodyParam('code');
+        $uid = $this->request->getRequiredParam('uid');
+        $user = Craft::$app->getUsers()->getUserByUid($uid);
+
+        if (!$user) {
+            throw new BadRequestHttpException("Invalid user UUID: $uid");
+        }
+
+        // Make sure we still have a valid token.
+        if (!Craft::$app->getUsers()->isVerificationCodeValidForUser($user, $code)) {
+            return $this->_processInvalidToken($user);
+        }
+
         $pending = $user->pending;
         $usersService = Craft::$app->getUsers();
 
@@ -1136,7 +1160,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = $this->editedUser($userId);
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_ADDRESSES);
 
         $response->contentHtml(function() use ($user) {
@@ -1170,7 +1197,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = $this->editedUser($userId);
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PERMISSIONS);
 
         $response->action('users/save-permissions');
@@ -1179,7 +1209,7 @@ class UsersController extends Controller
             'currentGroupIds' => array_map(fn(UserGroup $group) => $group->id, $user->getGroups()),
         ]);
 
-        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('administrateUsers')) {
+        if (!$user->getIsCredentialed() && $user->username && static::currentUser()->can('moderateUsers')) {
             $response->additionalButtonsHtml(
                 Html::button(Craft::t('app', 'Save and send activation email'), [
                     'class' => ['btn', 'secondary', 'formsubmit'],
@@ -1269,7 +1299,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PREFERENCES);
 
         $i18n = Craft::$app->getI18n();
@@ -1326,6 +1359,8 @@ class UsersController extends Controller
             'underlineLinks' => (bool)$this->request->getBodyParam('underlineLinks', $user->getPreference('underlineLinks')),
             'disableAutofocus' => $this->request->getBodyParam('disableAutofocus', $user->getPreference('disableAutofocus')),
             'notificationDuration' => $this->request->getBodyParam('notificationDuration', $user->getPreference('notificationDuration')),
+            'notificationPosition' => $this->request->getBodyParam('notificationPosition', $user->getPreference('notificationPosition')),
+            'slideoutPosition' => $this->request->getBodyParam('slideoutPosition', $user->getPreference('slideoutPosition')),
         ];
 
         if ($user->admin) {
@@ -1355,7 +1390,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user ??= static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PASSWORD);
 
         $this->getView()->registerAssetBundle(AuthMethodSetupAsset::class);
@@ -1416,7 +1454,10 @@ class UsersController extends Controller
     {
         $this->requireCpRequest();
         $user = static::currentUser();
-        /** @var Response|CpScreenResponseBehavior $response */
+        /**
+         * @var Response|CpScreenResponseBehavior $response
+         * @phpstan-ignore varTag.nativeType
+         */
         $response = $this->asEditUserScreen($user, self::SCREEN_PASSKEYS);
 
         $view = $this->getView();
@@ -1650,7 +1691,7 @@ JS);
             if (!empty($groups)) {
                 $user->setGroups($groups);
             }
-            
+
             // keep track of which site they registered from
             // (do this even if it's not a multi-site install, in case it becomes one later.)
             $user->affiliatedSiteId = Craft::$app->getSites()->getCurrentSite()->id;
@@ -1749,7 +1790,7 @@ JS);
 
         // Is this public registration, and was the user going to be activated automatically?
         $publicActivation = $isPublicRegistration && $user->getStatus() === User::STATUS_ACTIVE;
-        $loggedIn = $publicActivation && $this->_maybeLoginUserAfterAccountActivation($user);
+        $loggedIn = $publicActivation && !Craft::$app->getUser()->getIsGuest();
         $returnCsrfToken = $returnCsrfToken || $loggedIn;
 
         if ($this->request->getAcceptsJson()) {
@@ -1846,7 +1887,7 @@ JS);
             // Move to our own temp location
             $fileLocation = Assets::tempFilePath($file->getExtension());
             move_uploaded_file($file->tempName, $fileLocation);
-            $users->saveUserPhoto($fileLocation, $user, $file->name);
+            $users->saveUserPhoto($fileLocation, $user, $file->name, $file->type);
 
             return $this->_renderPhotoTemplate($user);
         } catch (Throwable $exception) {
@@ -1921,7 +1962,7 @@ JS);
         }
 
         if (!$user->pending) {
-            $this->requirePermission('administrateUsers');
+            $this->requirePermission('moderateUsers');
         }
 
         $userVariable = $this->request->getValidatedBodyParam('userVariable') ?? 'user';
@@ -2321,9 +2362,11 @@ JS);
             'active',
             'addresses',
             'admin',
+            'affiliatedSiteId',
             'email',
             'firstName',
             'friendlyName',
+            'fullName',
             'groups',
             'lastName',
             'locked',
@@ -2418,7 +2461,8 @@ JS);
                 }
                 return $this->redirect($loginPath);
             }
-            return $this->redirect('login');
+
+            return $this->redirect(Request::CP_PATH_LOGIN);
         }
 
         $activeMethods = $authService->getActiveMethods($user);
@@ -2522,7 +2566,7 @@ JS);
      */
     private function _renderSetPasswordTemplate(array $variables): Response
     {
-        return $this->_rerouteWithFallbackTemplate('setpassword.twig', $variables);
+        return $this->_rerouteWithFallbackTemplate('set-password.twig', $variables);
     }
 
     private function _rerouteWithFallbackTemplate(string $cpTemplate, array $variables = []): ?Response
@@ -2622,12 +2666,14 @@ JS);
         $newPhoto = false;
         $fileLocation = null;
         $filename = null;
+        $mimeType = null;
 
         // Did they upload a new one?
         if ($photo = UploadedFile::getInstanceByName('photo')) {
             $fileLocation = Assets::tempFilePath($photo->getExtension());
             move_uploaded_file($photo->tempName, $fileLocation);
             $filename = $photo->name;
+            $mimeType = $photo->type;
             $newPhoto = true;
         } elseif (($photo = $this->request->getBodyParam('photo')) && is_array($photo)) {
             // base64-encoded photo
@@ -2636,10 +2682,11 @@ JS);
             if (preg_match('/^data:((?<type>[a-z0-9]+\/[a-z0-9\+]+);)?base64,(?<data>.+)/i', $photo['data'] ?? '', $matches)) {
                 $filename = $photo['filename'] ?? null;
                 $extension = $filename ? pathinfo($filename, PATHINFO_EXTENSION) : null;
+                $mimeType = $matches['type'] ?: null;
 
-                if (!$extension && !empty($matches['type'])) {
+                if (!$extension && $mimeType) {
                     try {
-                        $extension = FileHelper::getExtensionByMimeType($matches['type']);
+                        $extension = FileHelper::getExtensionByMimeType($mimeType);
                     } catch (InvalidArgumentException) {
                     }
                 }
@@ -2658,7 +2705,7 @@ JS);
 
         if ($newPhoto) {
             try {
-                $users->saveUserPhoto($fileLocation, $user, $filename);
+                $users->saveUserPhoto($fileLocation, $user, $filename, $mimeType);
             } catch (Throwable $e) {
                 if (file_exists($fileLocation)) {
                     FileHelper::unlink($fileLocation);
@@ -2841,11 +2888,12 @@ JS);
 
         // If the invalidUserTokenPath config setting is set, send them there
         if ($this->request->getIsSiteRequest()) {
-            $url = Craft::$app->getConfig()->getGeneral()->getInvalidUserTokenPath();
+            $generalConfig = Craft::$app->getConfig()->getGeneral();
+            $url = $generalConfig->getInvalidUserTokenPath() ?? $generalConfig->getLoginPath();
             return $this->redirect(UrlHelper::siteUrl($url));
         }
 
-        throw new BadRequestHttpException(Craft::t('app', 'Invalid verification code. Please sign in or reset your password.'));
+        return $this->redirect(Request::CP_PATH_LOGIN);
     }
 
     /**
@@ -2866,9 +2914,10 @@ JS);
     }
 
     /**
-     * Possibly log a user in right after they were activated or reset their password, if Craft is configured to do so.
+     * Possibly log a user in right after they activated their account (not when they reset their password),
+     * if Craft is configured to do so.
      *
-     * @param User $user The user that was just activated or reset their password
+     * @param User $user The user that was just activated
      * @return bool Whether the user was logged in
      */
     private function _maybeLoginUserAfterAccountActivation(User $user): bool

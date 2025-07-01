@@ -180,6 +180,14 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
     public function getTranslationKey(ElementInterface $element): string;
 
     /**
+     * Returns whether the field should show a status indicator when modified.
+     *
+     * @return bool
+     * @since 5.8.0
+     */
+    public function showStatus(): bool;
+
+    /**
      * Returns the status of the field for a given element.
      *
      * If the field has a known status, an array should be returned with two elements:
