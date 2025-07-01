@@ -306,7 +306,7 @@ class FieldLayout extends Model
     {
         $rules = parent::defineRules();
         $rules[] = [['id'], 'number', 'integerOnly' => true];
-        $rules[] = [['customFields', 'generatedFields'], 'validateFields'];
+        $rules[] = [['customFields'], 'validateFields', 'skipOnEmpty' => false];
         return $rules;
     }
 
@@ -326,7 +326,7 @@ class FieldLayout extends Model
                     'handle' => $field->handle,
                 ]));
             } elseif (isset($handles[$field->handle])) {
-                $this->addError('fields', Craft::t('yii', '{attribute} "{value}" has already been taken.', [
+                $this->addError('customFields', Craft::t('yii', '{attribute} "{value}" has already been taken.', [
                     'attribute' => Craft::t('app', 'Handle'),
                     'value' => $field->handle,
                 ]));
