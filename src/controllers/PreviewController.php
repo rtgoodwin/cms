@@ -133,8 +133,9 @@ class PreviewController extends Controller
                 ->one();
         } else {
             if ($userId) {
-                ElementHelper::setProvisionalDraftUser($userId);
                 // First check if there's a provisional draft
+                $user = Craft::$app->getUsers()->getUserById($userId);
+                ElementHelper::setProvisionalDraftUser($user);
                 $element = (clone $query)
                     ->draftOf($canonicalId)
                     ->provisionalDrafts()
