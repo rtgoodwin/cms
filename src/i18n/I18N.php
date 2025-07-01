@@ -150,6 +150,7 @@ class I18N extends \yii\i18n\I18N
         }
 
         $this->_appLocaleIds = [
+            'en-US' => true,
             'ar' => true,
             'cs' => true,
             'da' => true,
@@ -157,7 +158,6 @@ class I18N extends \yii\i18n\I18N
             'de-CH' => true,
             'en' => true,
             'en-GB' => true,
-            'en-US' => true,
             'es' => true,
             'fa' => true,
             'fr' => true,
