@@ -1537,7 +1537,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         }
       );
 
-      // set drafts/draftOd/savedDraftsOnly params depending on the context
+      // set drafts/draftOf/savedDraftsOnly params depending on the context
       if (this.settings.context !== 'index') {
         baseCriteria.drafts = this.settings.canHaveDrafts ? null : false;
         baseCriteria.draftOf =
