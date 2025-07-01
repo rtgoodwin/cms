@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.16.0 - 2025-07-01
 
 ### Content Management
 - Element condition builders now show condition rules for custom fields with duplicate names. ([#17361](https://github.com/craftcms/cms/pull/17361))
