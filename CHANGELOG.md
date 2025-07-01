@@ -4,6 +4,7 @@
 
 - Added `craft\models\FieldLayout::isUiElementIncluded()`.
 - Fixed an error that could occur when indexing assets. ([#17240](https://github.com/craftcms/cms/issues/17240))
+- Fixed a bug where some partially-translated system languages were available for users’ Language preferences.
 - Fixed a bug where single-instance UI elements could be added to field layouts multiple times. ([#17485](https://github.com/craftcms/cms/issues/17485))
 - Fixed a bug where nested element index contents could overflow their container element. ([#17487](https://github.com/craftcms/cms/issues/17487))
 - Fixed a bug where Link field previews only displayed the linked URL. ([#17369](https://github.com/craftcms/cms/discussions/17369))
