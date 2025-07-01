@@ -1255,6 +1255,7 @@ li.breadcrumb-toggle-wrapper {
 }
 
 #details-toggle > button {
+  --disclosure-icon-transform-active: rotate(180deg);
   position: sticky;
   display: flex;
   flex-direction: column;
@@ -1309,18 +1310,9 @@ li.breadcrumb-toggle-wrapper {
     }
   }
 
-  .toggle-icon {
-    .rtl & {
-      transform: rotate(180deg);
-    }
-  }
-
-  &[aria-expanded='true'] .toggle-icon--open {
-    display: none;
-  }
-
-  &[aria-expanded='false'] .toggle-icon--close {
-    display: none;
+  body.rtl & {
+    --disclosure-icon-transform: rotate(180deg);
+    --disclosure-icon-transform-active: rotate(0);
   }
 }
 
@@ -1655,6 +1647,11 @@ li.breadcrumb-toggle-wrapper {
   @extend %type-heading-small;
   margin-block-end: var(--s);
   padding-block-end: var(--xs);
+
+  & > craft-disclosure > .source-item__toggle {
+    inset-block-start: calc(1lh * 0.5 - var(--source-item-toggle-size) / 2);
+    transform: none;
+  }
 }
 
 /* Sidebar */
