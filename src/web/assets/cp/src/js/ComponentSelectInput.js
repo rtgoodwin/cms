@@ -43,14 +43,14 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       this.resetComponents();
 
       if (this.$addBtn.length) {
-        this.addListener(this.getOptions(), 'activate', (ev) => {
+        this.getOptions().on('activate', (ev) => {
           const $button = $(ev.currentTarget);
           this.addComponent($button.data('type'), $button.data('id'));
         });
       }
 
       if (this.$createBtn.length && this.settings.createAction) {
-        this.addListener(this.$createBtn, 'activate', () => {
+        this.$createBtn.on('activate', () => {
           const slideout = new Craft.CpScreenSlideout(
             this.settings.createAction
           );
@@ -533,7 +533,7 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
           disclosureMenu.hideItem($menuItem.children()[0]);
         }
         $item = $menuItem;
-        this.addListener($menuItem.find('button'), 'activate', () => {
+        $menuItem.find('button').on('activate', () => {
           this.addComponent(type, id);
         });
       }
@@ -565,6 +565,9 @@ Craft.ComponentSelectInput = Garnish.Base.extend(
       this.componentSort?.destroy();
       delete this.componentSelect;
       delete this.componentSort;
+      this.getOptions().off('activate');
+      this.$createBtn.off('activate');
+      this.base();
     },
   },
   {
