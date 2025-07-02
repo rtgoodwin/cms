@@ -31,7 +31,9 @@ class CraftDisclosure extends HTMLElement {
       return;
     }
 
-    this.storageKey = this.getAttribute('storage-key') || `disclosure:${this.trigger.getAttribute('aria-controls')}`;
+    this.storageKey =
+      this.getAttribute('storage-key') ||
+      `disclosure:${this.trigger.getAttribute('aria-controls')}`;
     this.storageMode = this.getAttribute('storage-mode') || 'localStorage';
     this.persist = this.hasAttribute('persist');
 
