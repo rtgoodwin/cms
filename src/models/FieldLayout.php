@@ -345,7 +345,7 @@ class FieldLayout extends Model
                 ],
             ]);
 
-            foreach ($generatedFields as $i => &$field) {
+            foreach ($generatedFields as &$field) {
                 $field['name'] = trim($field['name'] ?? '');
                 $field['handle'] = trim($field['handle'] ?? '');
                 $field['template'] = trim($field['template'] ?? '');
@@ -1049,7 +1049,7 @@ class FieldLayout extends Model
 
         if (empty($cardElements)) {
             // index field layout elements by prefix + uid
-            foreach ($this->getCardBodyFields($element) as $key => $layoutElement) {
+            foreach ($this->getCardBodyFields($element) as $layoutElement) {
                 $layoutElements["layoutElement:$layoutElement->uid"] = $layoutElement;
             }
 
