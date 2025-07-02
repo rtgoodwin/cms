@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where Generated Fields settings were still interative when `allowAdminChanges` was disabled. ([#17535](https://github.com/craftcms/cms/pull/17535))
+
 ## 5.8.0 - 2025-07-01
 
 > [!NOTE]
