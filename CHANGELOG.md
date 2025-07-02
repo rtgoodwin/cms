@@ -32,6 +32,7 @@
 
 ### Administration
 - Added the “Content Block” field type. ([#17424](https://github.com/craftcms/cms/pull/17424))
+- Added support for Generated Fields. ([#17426](https://github.com/craftcms/cms/pull/17426))
 - Matrix fields’ entry type selections can now be grouped. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - Matrix fields with more than five entry types now show a search input within entry creation menus. ([#17425](https://github.com/craftcms/cms/pull/17425))
 - Relation fields set to a single element source now have a “Show the search input” setting. ([#17497](https://github.com/craftcms/cms/pull/17497))
