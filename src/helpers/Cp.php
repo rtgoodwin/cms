@@ -3375,6 +3375,7 @@ JS;
             'allowAdd' => true,
             'allowReorder' => true,
             'allowDelete' => true,
+            'static' => $config['disabled'],
         ];
 
         $view = Craft::$app->getView();
