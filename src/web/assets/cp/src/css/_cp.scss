@@ -1825,29 +1825,22 @@ li.breadcrumb-toggle-wrapper {
         align-items: center;
         justify-content: center;
       }
+    }
+  }
+}
 
-      ul:not([data-state]) {
-        display: none;
-      }
+.sources-list {
+  &[data-state='collapsed'] {
+    li:not(:has(.sel)) {
+      display: none;
+    }
 
-      ul[data-state='collapsed'] {
-        display: none;
-      }
+    .source-item:has(craft-disclosure) > * {
+      padding-inline-start: var(--s);
+    }
 
-      ul[data-state='expanded'] {
-        display: block;
-      }
-
-      &.heading,
-      &.expanded {
-        & > ul {
-          display: block;
-
-          &[data-state='collapsed'] {
-            display: none;
-          }
-        }
-      }
+    .source-item__toggle {
+      display: none;
     }
   }
 }
