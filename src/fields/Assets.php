@@ -793,6 +793,9 @@ class Assets extends BaseRelationField
             }
         }
 
+        // Include subfolders in the inline search results
+        $variables['searchCriteria']['includeSubfolders'] = true;
+
         return $variables;
     }
 
