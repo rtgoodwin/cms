@@ -8,6 +8,7 @@
 - Fixed a bug where source headings’ expanded/collapsed states weren’t persisting. ([#17541](https://github.com/craftcms/cms/pull/17541))
 - Fixed a bug where Assets fields’ inline search inputs weren’t respecting the fields’ Sources settings. ([#17538](https://github.com/craftcms/cms/issues/17538))
 - Fixed an error that could occur if a user photo’s file was missing. ([#17537](https://github.com/craftcms/cms/issues/17537))
+- Fixed a bug where the currently-selected element source wasn’t shown when its heading was collapsed. ([#17530](https://github.com/craftcms/cms/issues/17530))
 
 ## 5.8.0 - 2025-07-01
 
