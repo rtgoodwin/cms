@@ -793,8 +793,10 @@ class Assets extends BaseRelationField
             }
         }
 
-        // Include subfolders in the inline search results
-        $variables['searchCriteria']['includeSubfolders'] = true;
+        if (isset($variables['searchCriteria'])) {
+            // Include subfolders in the inline search results
+            $variables['searchCriteria']['includeSubfolders'] = true;
+        }
 
         return $variables;
     }
@@ -822,6 +824,25 @@ class Assets extends BaseRelationField
         $condition = Asset::createCondition();
         $condition->queryParams = ['volume', 'volumeId', 'kind'];
         return $condition;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function showSearchInput(?ElementInterface $element): bool
+    {
+        if (!$this->showSearchInput) {
+            return false;
+        }
+
+        $sources = $this->getInputSources($element);
+
+        if (!is_array($sources)) {
+            return false;
+        }
+
+        ArrayHelper::removeValue($sources, 'temp');
+        return count($sources) === 1;
     }
 
     /**
