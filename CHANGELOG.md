@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.1 - 2025-07-03
 
 - Element selector modals now clear out the search input when opened. ([#17480](https://github.com/craftcms/cms/issues/17480))
 - Improved relational fields’ inline search behavior. ([#17550](https://github.com/craftcms/cms/issues/17550))
