@@ -14,7 +14,6 @@ use craft\elements\conditions\ElementConditionInterface;
 use craft\errors\InvalidTypeException;
 use craft\helpers\Component;
 use craft\helpers\Cp;
-use craft\helpers\Db;
 use craft\helpers\Search;
 use craft\helpers\StringHelper;
 use craft\web\Controller;
@@ -56,7 +55,7 @@ class ElementSearchController extends Controller
 
         $query = $elementType::find()
             ->siteId($siteId)
-            ->title(Db::escapeParam($search) . '*')
+            ->search(sprintf('title:"%s"', str_replace('"', '', $search)))
             ->orderBy(['LENGTH([[title]])' => SORT_ASC])
             ->limit(5);
 
