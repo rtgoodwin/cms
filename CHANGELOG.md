@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Element selector modals now clear out the search input when opened. ([#17480](https://github.com/craftcms/cms/issues/17480))
 - Fixed a bug where Generated Fields settings were still interative when `allowAdminChanges` was disabled. ([#17535](https://github.com/craftcms/cms/pull/17535))
 - Fixed a bug where it was possible to select entries without URLs in Link fields. ([#17536](https://github.com/craftcms/cms/issues/17536))
 - Fixed a “Request Header Or Cookie Too Large” error that could occur in the control panel. ([#17531](https://github.com/craftcms/cms/issues/17531))
