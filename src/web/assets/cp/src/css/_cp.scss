@@ -1835,7 +1835,7 @@ li.breadcrumb-toggle-wrapper {
       display: none;
     }
 
-    .source-item > * {
+    .source-item:has(craft-disclosure) > * {
       padding-inline-start: var(--s);
     }
 
