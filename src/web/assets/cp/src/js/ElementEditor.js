@@ -1578,7 +1578,7 @@ Craft.ElementEditor = Garnish.Base.extend(
               );
             }
 
-            this.afterUpdate(data, newInitialDeltaValues);
+            this.afterUpdate(this.lastSerializedValue, newInitialDeltaValues);
             this.trigger('afterSaveDraft', {response});
 
             if (Craft.broadcaster) {
