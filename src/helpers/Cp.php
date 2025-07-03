@@ -2737,9 +2737,7 @@ JS, [
             'disabled' => false,
         ];
 
-        /** @var ElementInterface $elementType */
-        $elementType = new ($fieldLayout['type']);
-        $allOptions = $elementType::cardAttributes();
+        $allOptions = $fieldLayout->type::cardAttributes();
 
         foreach ($fieldLayout->getAllElements() as $layoutElement) {
             if ($layoutElement instanceof BaseField && $layoutElement->previewable()) {
@@ -2829,7 +2827,7 @@ JS, [
             'disabled' => false,
         ];
 
-        if ((new ($fieldLayout['type']))->hasThumbs()) {
+        if ($fieldLayout->type::hasThumbs()) {
             $options = [
                 ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
             ];
@@ -2914,7 +2912,7 @@ JS, [
      */
     public static function cardPreviewHtml(FieldLayout $fieldLayout, array $cardElements = [], $showThumb = false): string
     {
-        $hasThumb = $showThumb ?? $fieldLayout->getThumbField() !== null ? true : (new ($fieldLayout['type']))->hasThumbs();
+        $hasThumb = $showThumb ?? ($fieldLayout->getThumbField() !== null || $fieldLayout->type::hasThumbs());
         $thumbAlignment = $fieldLayout->getCardThumbAlignment();
 
         // get heading
@@ -2930,9 +2928,7 @@ JS, [
         );
 
         // get status label placeholder
-        /** @var ElementInterface $elementType */
-        $elementType = new ($fieldLayout['type']);
-        $labels = [$elementType::hasStatuses() ? static::componentStatusLabelHtml($elementType) : null];
+        $labels = [$fieldLayout->type::hasStatuses() ? static::componentStatusLabelHtml(new ($fieldLayout->type)()) : null];
 
         $previewHtml =
             Html::beginTag('div', [
@@ -2961,7 +2957,7 @@ JS, [
             } elseif (is_array($cardElement) && isset($cardElement['html'])) {
                 $previewHtml .= Html::tag('div', $cardElement['html']);
             } else {
-                $html = $elementType::attributePreviewHtml($cardElement);
+                $html = $fieldLayout->type::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
                     $html = $html();
                 }
@@ -3057,7 +3053,7 @@ JS, [
             'customizableTabs' => $config['customizableTabs'],
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
-            'alwaysShowThumbAlignmentBtns' => (new ($fieldLayout['type']))->hasThumbs(),
+            'alwaysShowThumbAlignmentBtns' => $fieldLayout->type::hasThumbs(),
             'readOnly' => $config['disabled'],
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
@@ -3375,6 +3371,7 @@ JS;
             'allowAdd' => true,
             'allowReorder' => true,
             'allowDelete' => true,
+            'static' => $config['disabled'],
         ];
 
         $view = Craft::$app->getView();

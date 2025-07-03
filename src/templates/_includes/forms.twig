@@ -505,6 +505,7 @@
                 errors: config.fieldLayout.getErrors('generatedFields') ?? [],
                 data: {'error-key': 'fieldLayout.generatedFields'},
                 fieldLayout: config.fieldLayout ?? null,
+                disabled: config.disabled ?? false,
             }, 'template:_includes/forms/generatedFieldsTable') }}
         {% endif %}
 
