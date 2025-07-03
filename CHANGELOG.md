@@ -4,6 +4,8 @@
 
 - Fixed a bug where Generated Fields settings were still interative when `allowAdminChanges` was disabled. ([#17535](https://github.com/craftcms/cms/pull/17535))
 - Fixed a bug where it was possible to select entries without URLs in Link fields. ([#17536](https://github.com/craftcms/cms/issues/17536))
+- Fixed a “Request Header Or Cookie Too Large” error that could occur in the control panel. ([#17531](https://github.com/craftcms/cms/issues/17531))
+- Fixed a bug where source headings’ expanded/collapsed states weren’t persisting. ([#17541](https://github.com/craftcms/cms/pull/17541))
 
 ## 5.8.0 - 2025-07-01
 
