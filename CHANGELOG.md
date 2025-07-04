@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.16.2 - 2025-07-04
 
 - Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
 
