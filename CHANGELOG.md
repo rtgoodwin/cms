@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a potential user account enumeration issue with the `preventUserEnumeration` config setting enabled.
+
 ## 4.16.1 - 2025-07-03
 
 - Fixed a bug where an unsaved changes warning would be shown when leaving an element edit form, if a conditional field had just been shown or hidden in the last autosave. ([#17518](https://github.com/craftcms/cms/issues/17518))
