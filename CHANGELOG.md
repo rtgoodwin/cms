@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Fixed a potential user account enumeration issue with the `preventUserEnumeration` config setting enabled.
+- Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
 
 ## 4.16.1 - 2025-07-03
 
