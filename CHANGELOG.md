@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a potential user account enumeration issue with the `preventUserEnumeration` config setting enabled.
+
 ## 5.8.1 - 2025-07-03
 
 - Element selector modals now clear out the search input when opened. ([#17480](https://github.com/craftcms/cms/issues/17480))
