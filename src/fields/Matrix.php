@@ -1028,7 +1028,6 @@ JS, [
                 ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
-                ->eagerly()
                 ->all();
         }
 
