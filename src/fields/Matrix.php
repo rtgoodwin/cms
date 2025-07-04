@@ -1028,10 +1028,6 @@ JS, [
                 ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
-                // clear out ownerId and primaryOwnerId in case they were set,
-                // or we'll only get the eager loading working for the first source element
-                ->ownerId(null)
-                ->primaryOwnerId(null)
                 ->eagerly()
                 ->all();
         }
