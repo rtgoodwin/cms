@@ -109,8 +109,12 @@ class User
     public static function getLoginFailureMessage(?string $authError, ?UserElement $user): string
     {
         $generalConfig = Craft::$app->getConfig()->getGeneral();
-        // if preventUserEnumeration is true, set the $authError to a value that will trigger the generic, default message
-        if ($generalConfig->preventUserEnumeration) {
+        // if preventUserEnumeration is true and the account is locked
+        // set the $authError to a value that will trigger the generic, default message
+        if (
+            $generalConfig->preventUserEnumeration &&
+            in_array($authError, [UserElement::AUTH_ACCOUNT_LOCKED, UserElement::AUTH_ACCOUNT_COOLDOWN])
+        ) {
             $authError = 'default';
         }
 
