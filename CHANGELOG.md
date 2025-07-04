@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Improved the performance of element indexes when custom sources are defined. ([#17484](https://github.com/craftcms/cms/issues/17484))
 - Fixed a bug where Matrix fields could load nested entries that belonged to other owner elements. ([#17551](https://github.com/craftcms/cms/issues/17551))
 - Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
 
