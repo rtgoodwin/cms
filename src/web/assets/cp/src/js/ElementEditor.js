@@ -1426,7 +1426,7 @@ Craft.ElementEditor = Garnish.Base.extend(
             this.settings.canonicalUpdatedTimestamp =
               response.data.canonicalUpdatedTimestamp;
 
-            this.afterUpdate(data);
+            this.afterUpdate(this.lastSerializedValue);
 
             if (Craft.broadcaster) {
               Craft.broadcaster.postMessage({
