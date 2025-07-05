@@ -25,7 +25,12 @@ class m250623_105031_entry_type_descriptions extends Migration
      */
     public function safeDown(): bool
     {
-        echo "m250623_105031_entry_type_descriptions cannot be reverted.\n";
-        return false;
+        if ($this->db->columnExists(Table::ENTRYTYPES, 'description')) {
+            $this->dropColumn(Table::ENTRYTYPES, 'description');
+        }
+        if ($this->db->columnExists(Table::SECTIONS_ENTRYTYPES, 'description')) {
+            $this->dropColumn(Table::SECTIONS_ENTRYTYPES, 'description');
+        }
+        return true;
     }
 }
