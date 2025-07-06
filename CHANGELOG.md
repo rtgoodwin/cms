@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a PHP error that could occur on installs with a large number of custom fields. ([#17556](https://github.com/craftcms/cms/issues/17556))
+
 ## 5.8.2 - 2025-07-04
 
 - Improved the performance of element indexes when custom sources are defined. ([#17484](https://github.com/craftcms/cms/issues/17484))
