@@ -274,7 +274,7 @@ Craft.CP = Garnish.Base.extend(
       }
 
       // Announcements HUD
-      if (Craft.announcements.length) {
+      if (Craft.announcements?.length) {
         let $btn = $('#announcements-btn').removeClass('hidden');
         const hasUnreads = Craft.announcements.some((a) => a.unread);
         let $unreadMessage;
@@ -1925,7 +1925,9 @@ Craft.CP = Garnish.Base.extend(
 
       // update the base URLs used get Craft.getUrl(), etc.
       Craft.actionUrl = Craft.getUrl(Craft.actionUrl, {site: site.handle});
-      Craft.baseCpUrl = Craft.getUrl(Craft.baseCpUrl, {site: site.handle});
+      if (Craft.baseCpUrl) {
+        Craft.baseCpUrl = Craft.getUrl(Craft.baseCpUrl, {site: site.handle});
+      }
       Craft.baseUrl = Craft.getUrl(Craft.baseUrl, {site: site.handle});
 
       // update the current URL
@@ -1943,6 +1945,7 @@ Craft.CP = Garnish.Base.extend(
       // update other URLs on the page
       $('a').each(function () {
         if (
+          Craft.cpTrigger &&
           this.hostname.length &&
           this.hostname === location.hostname &&
           this.href.indexOf(Craft.cpTrigger) !== -1
@@ -1953,8 +1956,6 @@ Craft.CP = Garnish.Base.extend(
     },
   },
   {
-    //maxWidth: 1051, //1024,
-
     /**
      * @deprecated in 4.2.0. Use Craft.notificationDuration instead.
      */

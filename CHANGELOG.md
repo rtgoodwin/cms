@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed an information disclosure vulnerability.
+
 ## 5.8.3 - 2025-07-06
 
 - Added `craft\helpers\Cp::parseMarkdown()`.
