@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.16.3 - 2025-07-07
 
 - Fixed a potential remote execution vulnerability.
 
