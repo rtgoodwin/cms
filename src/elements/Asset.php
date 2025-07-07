@@ -2449,11 +2449,7 @@ JS,[
             return FileHelper::getMimeTypeByExtension('.' . $transform->format);
         }
 
-        if (isset($this->_mimeType)) {
-            return $this->_mimeType;
-        }
-
-        return FileHelper::getMimeTypeByExtension($this->_filename);
+        return $this->_mimeType ?? FileHelper::getMimeTypeByExtension($this->_filename);
     }
 
     /**
