@@ -6,6 +6,7 @@
 - `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
 - Fixed a bug where Categories fields weren’t showing the “Show the search input” setting. ([#17561](https://github.com/craftcms/cms/discussions/17561))
 - Fixed a bug where overriding entry type settings from a Matrix field’s settings would cause the entry type to lose its group assignment. ([#17564](https://github.com/craftcms/cms/issues/17564))
+- Fixed a bug where address queries weren’t factoring in their `field` or `fieldId` parameters if an owner parameter wasn’t specified. ([#17565](https://github.com/craftcms/cms/issues/17565))
 - Fixed an information disclosure vulnerability.
 
 ## 5.8.3 - 2025-07-06
