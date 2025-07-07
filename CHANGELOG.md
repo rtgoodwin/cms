@@ -3,6 +3,7 @@
 ## Unreleased
 
 - `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
+- Fixed a bug where Categories fields weren’t showing the “Show the search input” setting. ([#17561](https://github.com/craftcms/cms/discussions/17561))
 - Fixed an information disclosure vulnerability.
 
 ## 5.8.3 - 2025-07-06

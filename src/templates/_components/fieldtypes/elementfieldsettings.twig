@@ -140,7 +140,7 @@
 
     {% block showSearchInputField %}
         {{ forms.lightswitchField({
-            fieldClass: 'hidden',
+            fieldClass: field.allowMultipleSources ? 'hidden' : null,
             label: 'Show the search input'|t('app'),
             id: 'show-search-input',
             name: 'showSearchInput',
@@ -184,6 +184,7 @@
     {% endblock %}
 {% endblock %}
 
+{% if field.allowMultipleSources %}
 {% js %}
 (() => {
   const $inputs = $('#{{ 'sources-field'|namespaceInputId }} input');
@@ -225,3 +226,4 @@
   updateSearchField();
 })();
 {% endjs %}
+{% endif %}
