@@ -1,5 +1,24 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Relation fields now show the search input after the “Add” button, and use a generic “Search” placeholder. ([#17562](https://github.com/craftcms/cms/issues/17562))
+- `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
+- Fixed a bug where Categories fields weren’t showing the “Show the search input” setting. ([#17561](https://github.com/craftcms/cms/discussions/17561))
+- Fixed a bug where overriding entry type settings from a Matrix field’s settings would cause the entry type to lose its group assignment. ([#17564](https://github.com/craftcms/cms/issues/17564))
+- Fixed a bug where address queries weren’t factoring in their `field` or `fieldId` parameters if an owner parameter wasn’t specified. ([#17565](https://github.com/craftcms/cms/issues/17565))
+- Fixed an information disclosure vulnerability.
+
+## 5.8.3 - 2025-07-06
+
+- Added `craft\helpers\Cp::parseMarkdown()`.
+- Added `craft\helpers\Html::decodeDoubles()`.
+- Added the `cpmd` Twig filter for control panel templates.
+- Fixed a PHP error that could occur on installs with a large number of custom fields. ([#17556](https://github.com/craftcms/cms/issues/17556))
+- Fixed a bug where entry type descriptions weren’t getting parsed as Markdown. ([#17554](https://github.com/craftcms/cms/issues/17554))
+- Fixed a bug where entry type description overrides were getting lost when the form was saved a second time.
+- Fixed an error that occurred when querying for entries’ `author` fields via GraphQL. ([#17555](https://github.com/craftcms/cms/issues/17555))
+
 ## 5.8.2 - 2025-07-04
 
 - Improved the performance of element indexes when custom sources are defined. ([#17484](https://github.com/craftcms/cms/issues/17484))

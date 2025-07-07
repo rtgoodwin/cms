@@ -54,6 +54,7 @@ use yii\base\Exception;
 use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
 use yii\caching\TagDependency;
+use yii\helpers\Markdown;
 
 /**
  * The Entries service provides APIs for managing entries in Craft.
@@ -1961,7 +1962,9 @@ SQL)->execute();
                     ]),
                 ]);
             if ($entryType->description) {
-                $chipCellContent .= Html::tag('span', $entryType->description, ['class' => 'info']);
+                $chipCellContent .= Html::tag('span',
+                    Html::decodeDoubles(Markdown::process(Html::encodeInvalidTags(Html::encode($entryType->description)), 'gfm-comment')),
+                    ['class' => 'info']);
             }
             $chipCellContent .= Html::endTag('div');
 

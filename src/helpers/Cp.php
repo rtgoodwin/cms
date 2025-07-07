@@ -9,6 +9,7 @@ namespace craft\helpers;
 
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository as BaseSubdivisionRepository;
 use Craft;
+use craft\assetpreviews\Text;
 use craft\base\Actionable;
 use craft\base\Chippable;
 use craft\base\Colorable;
@@ -435,9 +436,9 @@ class Cp
                 /** @var Chippable&Describable $component */
                 $description = $component->getDescription();
                 if ($description) {
-                    $labelHtml .= Html::tag('span', $description, [
-                        'class' => 'info',
-                    ]);
+                    $labelHtml .= Html::tag('span',
+                        static::parseMarkdown(Html::encode($description)),
+                        ['class' => 'info']);
                 }
             }
 
@@ -1685,7 +1686,7 @@ JS, [
         $showLabelExtra = $showAttribute || $showActionMenu || isset($config['labelExtra']);
 
         $instructionsHtml = $instructions
-            ? Html::tag('div', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::process(Html::encodeInvalidTags($instructions), 'gfm-comment')), [
+            ? Html::tag('div', static::parseMarkdown($instructions), [
                 'id' => $instructionsId,
                 'class' => ['instructions'],
             ])
@@ -1838,7 +1839,7 @@ JS, [
             Html::tag('span', "$label ", [
                 'class' => 'visually-hidden',
             ]) .
-            Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
+            Html::tag('span', Html::decodeDoubles(Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
     }
 
@@ -3923,5 +3924,18 @@ JS, [
     public static function reset(): void
     {
         self::$_requestedSite = null;
+    }
+
+    /**
+     * Processes the given text as Markdown, with extra defenses against invalid tags and double-encoded entities.
+     *
+     * @param string $text
+     * @param string $flavor
+     * @return string
+     * @since 5.8.3
+     */
+    public static function parseMarkdown(string $text, string $flavor = 'gfm-comment'): string
+    {
+        return Html::decodeDoubles(Markdown::process(Html::encodeInvalidTags($text), $flavor));
     }
 }

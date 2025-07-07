@@ -78,7 +78,7 @@
           <span class="visually-hidden">, selected</span>
         {% endif %}
         {% if item.info is defined and item.info is not empty %}
-          <span class="info">{{ item.info }}</span>
+          <span class="info">{{ item.info|e|cpmd }}</span>
         {% endif %}
       {% endapply -%}
     {% endtag %}
