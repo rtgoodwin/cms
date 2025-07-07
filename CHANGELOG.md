@@ -5,6 +5,7 @@
 - Relation fields now show the search input after the “Add” button, and use a generic “Search” placeholder. ([#17562](https://github.com/craftcms/cms/issues/17562))
 - `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
 - Fixed a bug where Categories fields weren’t showing the “Show the search input” setting. ([#17561](https://github.com/craftcms/cms/discussions/17561))
+- Fixed a bug where overriding entry type settings from a Matrix field’s settings would cause the entry type to lose its group assignment. ([#17564](https://github.com/craftcms/cms/issues/17564))
 - Fixed an information disclosure vulnerability.
 
 ## 5.8.3 - 2025-07-06
