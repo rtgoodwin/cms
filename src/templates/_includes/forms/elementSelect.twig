@@ -71,12 +71,29 @@
 
     <div class="flex">
         {% if allowAdd %}
+            {{ tag('button', {
+                type: 'button',
+                class: [
+                    'btn',
+                    'add',
+                    'icon',
+                    'dashed',
+                    'wrap',
+                    disabled ? 'disabled',
+                    limit and elements|length >= limit ? 'hidden',
+                ]|filter,
+                text: selectionLabel ?? 'Choose'|t('app'),
+                disabled: disabled,
+                aria: {
+                    label: selectionLabel ?? 'Choose'|t('app'),
+                    describedby: describedBy ?? false,
+                }
+            }) }}
             {% if searchCriteria %}
-                <div class="texticon icon add elementselect__search-input-wrapper">
-                    {{ iconSvg('plus') }}
+                <div class="texticon search icon elementselect__search-input-wrapper">
                     {{ text({
                         width: 'auto',
-                        placeholder: selectionLabel ?? 'Search'|t('app'),
+                        placeholder: 'Search'|t('app'),
                         describedBy: describedBy ?? false,
                         role: 'combobox',
                         labelledBy: labelId ?? false,
@@ -84,24 +101,6 @@
                     <div class="spinner hidden"></div>
                 </div>
             {% endif %}
-            {{ tag('button', {
-                type: 'button',
-                class: [
-                    'btn',
-                    'add',
-                    not searchCriteria ? 'icon',
-                    'dashed',
-                    'wrap',
-                    disabled ? 'disabled',
-                    limit and elements|length >= limit ? 'hidden',
-                ]|filter,
-                text: ((selectionLabel ?? false) and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
-                disabled: disabled,
-                aria: {
-                    label: ((selectionLabel ?? false) and not searchCriteria) ? selectionLabel : 'Choose'|t('app'),
-                    describedby: describedBy ?? false,
-                }
-            }) }}
         {% endif %}
         <div class="spinner hidden"></div>
     </div>
