@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.4 - 2025-07-07
 
 - Relation fields now show the search input after the “Add” button, and use a generic “Search” placeholder. ([#17562](https://github.com/craftcms/cms/issues/17562))
 - `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
