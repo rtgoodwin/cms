@@ -893,10 +893,18 @@ export default Base.extend(
 
       this.$container.find('h3,hr').each((i, el) => {
         const $el = $(el);
-        const $visibleItems = $el
+        const $prevVisibleItems = $el
+          .prevUntil('h3,hr')
+          .filter(':not(.hidden):not(.filtered)');
+        if (!$prevVisibleItems.length) {
+          $el.addClass('hidden');
+          return;
+        }
+
+        const $nextVisibleItems = $el
           .nextUntil('h3,hr')
           .filter(':not(.hidden):not(.filtered)');
-        if ($visibleItems.length) {
+        if ($nextVisibleItems.length) {
           $el.removeClass('hidden');
         } else {
           $el.addClass('hidden');
