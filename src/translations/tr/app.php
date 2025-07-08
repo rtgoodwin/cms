@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Kullanıcı hesaplarını etkinleştirmeyi/devre dışı bırakmayı, parolaları sıfırlamayı ve e-posta adreslerini değiştirmeyi içerir.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Öge seçim modelleri ve diğer yöntemler aracılığıyla kullanıcı verilerine ve çoğu içeriğe salt okunur erişimi içerir.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Kullanıcı hesaplarını askıya almayı, askıya alma durumunu kaldırmayı ve kilidini kaldırmayı içerir.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Geçerli şifre yanlış.',
     'Incorrect password.' => 'Yanlış şifre',
     'Indexing assets: {progress}' => 'Varlıklar dizinleniyor: {progress}',
