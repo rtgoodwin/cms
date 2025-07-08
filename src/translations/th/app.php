@@ -862,6 +862,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'รวมถึงการเปิดใช้งาน/ปิดใช้งานบัญชีผู้ใช้ การรีเซ็ตรหัสผ่าน และการเปลี่ยนที่อยู่อีเมล',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'รวมการเข้าถึงข้อมูลผู้ใช้และเนื้อหาส่วนใหญ่แบบอ่านได้อย่างเดียวผ่านโมดอลตัวเลือกองค์ประกอบและวิธีการอื่นๆ',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'รวมถึงการระงับ การยกเลิกระงับ และการปลดล็อกบัญชีผู้ใช้',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'รหัสผ่านปัจจุบันไม่ถูกต้อง',
     'Incorrect password.' => 'รหัสผ่านไม่ถูกต้อง',
     'Indexing assets: {progress}' => 'การจัดทำดัชนีแอสเซท: {progress}',
