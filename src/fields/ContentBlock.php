@@ -164,10 +164,26 @@ class ContentBlock extends Field implements
     private function validateFieldLayout(): void
     {
         $fieldLayout = $this->getFieldLayout();
+        $fieldLayout->validate();
 
-        if (!$fieldLayout->validate()) {
-            $this->addModelErrors($fieldLayout, 'fieldLayout');
+        if (!$this->ensureNoRecursion($this)) {
+            $fieldLayout->addError('customFields', Craft::t('app', 'Including a Content Block field recursively is not allowed.'));
         }
+
+        $this->addModelErrors($fieldLayout, 'fieldLayout');
+    }
+
+    private function ensureNoRecursion(self $field): bool
+    {
+        foreach ($field->getFieldLayout()->getCustomFields() as $customField) {
+            if (
+                $customField instanceof self &&
+                ($customField->id === $this->id || !$this->ensureNoRecursion($customField))
+            ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
