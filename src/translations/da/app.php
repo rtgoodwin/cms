@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Inkluderer aktivering/deaktivering af brugerkonti, nulstilling af adgangskoder og ændring af e-mailadresser.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Inkluderer skrivebeskyttet adgang til brugerdata og det meste indhold via elementvalgmodaler og andre metoder.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Inkluderer suspendering, ophævelse af suspendering og oplåsning af brugerkonti.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Forkert nuværende kodeord.',
     'Incorrect password.' => 'Forkert kodeord.',
     'Indexing assets: {progress}' => 'Indeksering af aktiver: {progress}',
