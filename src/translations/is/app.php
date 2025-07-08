@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Inniheldur að virkja/afvirkja notendareikninga, endurstilla lykilorð og breyta netföngum.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Inniheldur skrifvarinn aðgang að notendagögnum og flestu efni, með frumefnavalsaðferðum og öðrum hætti.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Inniheldur lokun, afturköllun og opnun notendareikninga.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Rangt núverandi lykilorð.',
     'Incorrect password.' => 'Rangt lykilorð.',
     'Indexing assets: {progress}' => 'Vinna í atriðaorðaskrá skráa: {progress}',
