@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where the `autoLoginAfterAccountActivation` config setting wasn’t being respected when email verification was disabled. ([#17571](https://github.com/craftcms/cms/issues/17571))
+
 ## 5.8.4 - 2025-07-07
 
 - Relation fields now show the search input after the “Add” button, and use a generic “Search” placeholder. ([#17562](https://github.com/craftcms/cms/issues/17562))
