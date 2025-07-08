@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'כולל הפעלה/נטרול חשבונות משתמש, איפוס סיסמאות ושינוי כתובות דוא"ל.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'כולל גישת קריאה בלבד לנתוני המשתמש ורוב התוכן, דרך מודלי בחירת אלמנטים ואמצעים אחרים.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'כולל השעיה, ביטול השעיה וביטול נעילה של חשבונות משתמש.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'סיסמה נוכחית שגויה.',
     'Incorrect password.' => 'סיסמה שגויה',
     'Indexing assets: {progress}' => 'אינדוקס נכסים: {progress}',
