@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Zahrnuje aktivaci/deaktivaci uživatelských účtů, resetování hesel a změnu e-mailových adres.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Zahrnuje přístup k uživatelským údajům a většině obsahu pouze pro čtení prostřednictvím modálních výběrů prvků a dalších prostředků.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Zahrnuje pozastavení, zrušení pozastavení a odemknutí uživatelských účtů.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Nesprávné stávající heslo.',
     'Incorrect password.' => 'Nesprávné heslo.',
     'Indexing assets: {progress}' => 'Idexování objektů: {progress}',
