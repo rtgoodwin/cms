@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Tartalmazza a felhasználói fiókok aktiválását/deaktiválását, a jelszavak visszaállítását és az e-mail-címek módosítását.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Csak olvasási hozzáférést biztosít a felhasználói adatokhoz és a legtöbb tartalomhoz elemválasztó modális ablakok útján és más módon.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Tartalmazza a felhasználói fiókok felfüggesztésének megszüntetését és feloldását.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Nem megfelelő jelenlegi jelszó.',
     'Incorrect password.' => 'Nem megfelelő jelszó.',
     'Indexing assets: {progress}' => 'Tartalmak indexelése: {progress}',
