@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.16.4 - 2025-07-08
 
 - Fixed an information disclosure vulnerability.
 
