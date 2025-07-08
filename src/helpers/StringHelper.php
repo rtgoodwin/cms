@@ -16,6 +16,7 @@ use Normalizer;
 use Stringy\Stringy as BaseStringy;
 use voku\helper\ASCII;
 use yii\base\Exception;
+use yii\base\InvalidArgumentException;
 use yii\base\InvalidConfigException;
 use const ENT_COMPAT;
 
@@ -413,11 +414,11 @@ class StringHelper extends \yii\helpers\StringHelper
      */
     public static function decdec(string $str): string
     {
-        if (strncmp($str, 'base64:', 7) === 0) {
+        if (str_starts_with($str, 'base64:')) {
             $str = base64_decode(substr($str, 7));
         }
 
-        if (strncmp($str, 'crypt:', 6) === 0) {
+        if (str_starts_with($str, 'crypt:')) {
             $str = Craft::$app->getSecurity()->decryptByKey(substr($str, 6));
         }
 
@@ -1255,12 +1256,20 @@ class StringHelper extends \yii\helpers\StringHelper
      */
     public static function replaceMb4(string $str, callable|string $replace): string
     {
-        return preg_replace_callback('/./u', function(array $match) use ($replace): string {
+        $r = preg_replace_callback('/./u', function(array $match) use ($replace): string {
             if (strlen($match[0]) >= 4) {
                 return is_callable($replace) ? $replace($match[0]) : $replace;
             }
             return $match[0];
         }, $str);
+        if ($r === null) {
+            $message = match (preg_last_error()) {
+                PREG_BAD_UTF8_ERROR => 'Malformed UTF-8 data',
+                default => 'Invalid string',
+            };
+            throw new InvalidArgumentException($message);
+        }
+        return $r;
     }
 
     /**

@@ -559,6 +559,9 @@ $.extend(Craft, {
    * @returns {string}
    */
   getCpUrl: function (path, params) {
+    if (!Craft.baseCpUrl) {
+      throw 'Craft.baseCpUrl is undefined.';
+    }
     return this.getUrl(path, params, Craft.baseCpUrl);
   },
 
@@ -1120,7 +1123,7 @@ $.extend(Craft, {
 
     // Figure out which of the new params should actually be posted
     let params = groupedNewParams.__root__;
-    for (let name of modifiedDeltaNames) {
+    for (const name of modifiedDeltaNames) {
       params = params.concat(groupedNewParams[name]);
       params.push(`modifiedDeltaNames[]=${name}`);
       if (callback) {
@@ -1174,19 +1177,19 @@ $.extend(Craft, {
 
     // Group all the old & new params by namespace
     const groupedOldParams = this._groupParamsByDeltaNames(
-      oldData.split('&'),
+      oldData,
       deltaNames,
       false,
       initialDeltaValues
     );
     const groupedNewParams = this._groupParamsByDeltaNames(
-      newData.split('&'),
+      newData,
       deltaNames,
       true,
       false
     );
 
-    for (let name of deltaNames) {
+    for (const name of deltaNames) {
       if (
         !modifiedDeltaNames.includes(name) &&
         typeof groupedNewParams[name] === 'object' &&
@@ -1213,19 +1216,16 @@ $.extend(Craft, {
   },
 
   /**
-   * @param {Object} params
+   * @param {string|Object} params
    * @param {Object} deltaNames
-   * @param {boolean} withRoot
-   * @param {(boolean|Object)} initialValues
+   * @param {boolean} [withRoot]
    * @returns {Object}
-   * @private
    */
-  _groupParamsByDeltaNames: function (
-    params,
-    deltaNames,
-    withRoot,
-    initialValues
-  ) {
+  groupParams: function (params, deltaNames, withRoot = false) {
+    if (typeof params === 'string') {
+      params = params.split('&');
+    }
+
     const grouped = {};
 
     if (withRoot) {
@@ -1235,7 +1235,7 @@ $.extend(Craft, {
     // sort delta names from most to least specific
     deltaNames = deltaNames.sort((a, b) => b.length - a.length);
 
-    for (let name of deltaNames) {
+    for (const name of deltaNames) {
       grouped[name] = [];
     }
 
@@ -1244,8 +1244,8 @@ $.extend(Craft, {
 
     params = params.map((p) => decodeURIComponent(p));
 
-    paramLoop: for (let param of params) {
-      for (let name of deltaNames) {
+    paramLoop: for (const param of params) {
+      for (const name of deltaNames) {
         const paramName = param.substring(0, name.length + 1);
         if ([`${name}=`, `${name}[`].includes(paramName)) {
           if (typeof grouped[name] === 'undefined') {
@@ -1261,6 +1261,25 @@ $.extend(Craft, {
       }
     }
 
+    return grouped;
+  },
+
+  /**
+   * @param {string|Object} params
+   * @param {Object} deltaNames
+   * @param {boolean} withRoot
+   * @param {(boolean|Object)} initialValues
+   * @returns {Object}
+   * @private
+   */
+  _groupParamsByDeltaNames: function (
+    params,
+    deltaNames,
+    withRoot,
+    initialValues
+  ) {
+    const grouped = this.groupParams(params, deltaNames, withRoot);
+
     if (initialValues) {
       const serializeParam = (name, value) => {
         if (Array.isArray(value) || $.isPlainObject(value)) {
@@ -1273,11 +1292,11 @@ $.extend(Craft, {
         return `${encodeURIComponent(name)}=${value}`;
       };
 
-      for (let name in initialValues) {
+      for (const name in initialValues) {
         if (initialValues.hasOwnProperty(name)) {
           if ($.isPlainObject(initialValues[name])) {
             grouped[name] = [];
-            for (let subName in initialValues[name]) {
+            for (const subName in initialValues[name]) {
               if (initialValues[name].hasOwnProperty(subName)) {
                 grouped[name].push(
                   serializeParam(
@@ -2095,22 +2114,25 @@ $.extend(Craft, {
     $('[data-disclosure-trigger]', $container).disclosureMenu();
 
     /**
-     * Swap any instruction text with info icons
+     * Swap any instruction text with info icons but avoid those with the class
+     * visually-hidden as those have already been swapped
      * This needs to happen before the `infoicon` method
      */
     $(
       '.field.info-icon-instructions > .instructions, #details .meta > .field > .instructions',
       $container
-    ).each(function () {
-      const $instructions = $(this);
-      const $label = $instructions.siblings('.heading').find('label');
-      $('<div/>', {
-        class: 'info',
-        html: $instructions.children().html(),
-      }).appendTo($label);
-      // Keep the original element around in case an aria-describedby attribute is referencing it
-      $instructions.addClass('visually-hidden');
-    });
+    )
+      .not('.visually-hidden')
+      .each(function () {
+        const $instructions = $(this);
+        const $label = $instructions.siblings('.heading').find('label');
+        $('<div/>', {
+          class: 'info',
+          html: $instructions.children().html(),
+        }).appendTo($label);
+        // Keep the original element around in case an aria-describedby attribute is referencing it
+        $instructions.addClass('visually-hidden');
+      });
 
     $('.info', $container).infoicon();
 
@@ -2493,18 +2515,18 @@ $.extend(Craft, {
     Craft.sendActionRequest('POST', 'app/render-elements', {data}).then(
       ({data}) => {
         const instances = data.elements[elementId] || {};
-        for (let key of Object.keys(instances)) {
+        for (const key of Object.keys(instances)) {
           const $element = $elements.eq(key);
           const $replacement = $(instances[key]);
           const replacementAttributes = $replacement[0].attributes;
-          for (let attribute of replacementAttributes) {
+          for (const attribute of replacementAttributes) {
             if (attribute.name === 'class') {
               $element.addClass(attribute.value);
             } else {
               $element.attr(attribute.name, attribute.value);
             }
           }
-          for (let attribute of $element[0].attributes) {
+          for (const attribute of $element[0].attributes) {
             if (replacementAttributes[attribute.name] === undefined) {
               $element.removeAttr(attribute.name);
             }
@@ -2567,7 +2589,7 @@ $.extend(Craft, {
         for (let i = 0; i < data.components[type][id].length; i++) {
           const $chip = $chips.eq(i);
           const $replacement = $(data.components[type][id][i]);
-          for (let attribute of $replacement[0].attributes) {
+          for (const attribute of $replacement[0].attributes) {
             if (attribute.name === 'class') {
               $chip.addClass(attribute.value);
             } else {
@@ -2603,7 +2625,7 @@ $.extend(Craft, {
     const $actions = $(chip).find(
       '> .chip-content > .chip-actions, > .card-titlebar > .card-actions-container > .card-actions'
     );
-    let $actionMenuBtn = $actions.find('.action-btn');
+    let $actionMenuBtn = $actions.find('.action-btn').removeClass('hidden');
 
     if (!$actionMenuBtn.length) {
       // the chip/card doesn't have an action menu yet, so add one
@@ -2706,8 +2728,8 @@ $.extend(Craft, {
     }
 
     if (options.params) {
-      for (let name in options.params) {
-        let value = options.params[name];
+      for (const name in options.params) {
+        const value = options.params[name];
         $('<input/>', {
           type: 'hidden',
           name: this.namespaceInputName(name, namespace),
@@ -2790,7 +2812,7 @@ $.extend(Craft, {
   setElementAttributes: function (element, attributes) {
     const $element = $(element);
 
-    for (let name in attributes) {
+    for (const name in attributes) {
       if (!attributes.hasOwnProperty(name)) {
         continue;
       }
@@ -2805,7 +2827,7 @@ $.extend(Craft, {
         if (Craft.dataAttributes.includes(name)) {
           // Make sure it's an object
           value = Object.assign({}, value);
-          for (let n in value) {
+          for (const n in value) {
             if (!value.hasOwnProperty(n)) {
               continue;
             }
@@ -2827,7 +2849,7 @@ $.extend(Craft, {
           if ($.isPlainObject(value)) {
             value = Object.values(value);
           }
-          for (let c of value) {
+          for (const c of value) {
             $element.addClass(c);
           }
         } else if (name === 'style') {
@@ -3129,8 +3151,9 @@ $.extend($.fn, {
             : $btn;
 
         let isFullPage = $anchor.parents('.slideout').length == 0;
+        let isElementIndex = $anchor.parents('.element-index.pane').length > 0;
 
-        if (isFullPage) {
+        if (isFullPage || isElementIndex) {
           $form = $anchor.attr('data-form')
             ? $('#' + $anchor.attr('data-form'))
             : $btn.attr('data-form')
