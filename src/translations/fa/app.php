@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'شامل فعال‌کردن/غیر‌فعال‌کردن حساب‌های کاربری، بازنشانی رمزهای عبور، و تغییر پست های الکترونیکی.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'شامل دسترسی فقط خواندنی به داده‌های کاربر و بیشتر محتوا، از طریق مدال‌های انتخابگر عنصر و ابزارهای دیگر.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'شامل به تعلیق در آوردن، از تعلیق خارج کردن و از قفل خارج کردن حساب های کاربری.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'رمز عبور فعلی صحیح نیست.',
     'Incorrect password.' => 'رمز عبور صحیح نیست.',
     'Indexing assets: {progress}' => 'نمایه‌سازی دارایی‌ها: {progress}',
