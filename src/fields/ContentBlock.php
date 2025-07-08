@@ -153,6 +153,26 @@ class ContentBlock extends Field implements
     /**
      * @inheritdoc
      */
+    protected function defineRules(): array
+    {
+        return [
+            ...parent::defineRules(),
+            [['fieldLayout'], fn() => $this->validateFieldLayout()],
+        ];
+    }
+
+    private function validateFieldLayout(): void
+    {
+        $fieldLayout = $this->getFieldLayout();
+
+        if (!$fieldLayout->validate()) {
+            $this->addModelErrors($fieldLayout, 'fieldLayout');
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getFieldLayoutProviders(): array
     {
         return [$this];
