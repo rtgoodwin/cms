@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => '사용자 계정 활성화/비활성화, 비밀번호 재설정, 이메일 주소 변경이 포함됩니다.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => '요소 선택기 모달 및 기타 수단을 통한 사용자 데이터 및 대부분의 콘텐츠에 대한 읽기 전용 액세스가 포함됩니다.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => '사용자 계정 중단, 중단 취소, 잠금 해제가 포함됩니다.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => '현재 비밀번호가 올바르지 않음.',
     'Incorrect password.' => '틀린 비밀번호',
     'Indexing assets: {progress}' => '자산 인덱싱 중: {progress}',
