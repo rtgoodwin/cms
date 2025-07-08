@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Omvat het activeren/deactiveren van gebruikersaccounts, het opnieuw instellen van wachtwoorden en het wijzigen van e-mailadressen.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Inclusief alleen-lezen toegang tot gebruikersgegevens en de meeste inhoud, via elementselectiemodalen en op andere manieren.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Omvat het schorsen, opheffing van schorsing en ontgrendelen van gebruikersaccounts.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Huidig wachtwoord is onjuist.',
     'Incorrect password.' => 'Onjuist wachtwoord.',
     'Indexing assets: {progress}' => 'Bestanden indexeren: {progress}',
