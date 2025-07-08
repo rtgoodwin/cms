@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Obejmuje aktywację/dezaktywację kont użytkowników, resetowanie haseł i zmianę adresów e-mail.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Obejmuje dostęp tylko do odczytu do danych użytkownika i większości zawartości za pośrednictwem okien modalnych wyboru elementów i innych środków.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Obejmuje zawieszanie, odwieszanie i odblokowywanie kont użytkowników.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Niepoprawne obecne hasło.',
     'Incorrect password.' => 'Niepoprawne hasło.',
     'Indexing assets: {progress}' => 'Indeksowanie zasobów: {progress}',
