@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Активація та деактивація облікових записів користувачів, скидання паролів і зміна адрес електронної пошти.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Включає доступ лише для читання до даних користувача та більшості контенту через модальні вікна вибору елементів та інші засоби.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Відключення, включення й розблокування облікових записів користувачів.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Неправильний поточний пароль.',
     'Incorrect password.' => 'Неправильний пароль.',
     'Indexing assets: {progress}' => 'Індексування ресурсів: {progress}',
