@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.5 - 2025-07-08
 
 - Fixed a bug where the `autoLoginAfterAccountActivation` config setting wasn’t being respected when email verification was disabled. ([#17571](https://github.com/craftcms/cms/issues/17571))
 - Fixed an error that occurred when saving a section from a slideout. ([#17573](https://github.com/craftcms/cms/issues/17573))
