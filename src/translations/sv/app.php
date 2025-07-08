@@ -861,6 +861,7 @@ return [
     'Includes activating/deactivating user accounts, resetting passwords, and changing email addresses.' => 'Inkluderar aktivering/inaktivering av användarkonton, återställning av lösenord och ändring av e-postadresser.',
     'Includes read-only access to user data and most content, via element selector modals and other means.' => 'Inkluderar skrivskyddad åtkomst till användardata och det mesta av innehållet via elementvalsmodaler och andra metoder.',
     'Includes suspending, unsuspending, and unlocking user accounts.' => 'Inkluderar avstängning, aktivering och upplåsning av användarkonton.',
+    'Including a Content Block field recursively is not allowed.' => 'Including a Content Block field recursively is not allowed.',
     'Incorrect current password.' => 'Felaktigt lösenord.',
     'Incorrect password.' => 'Ogiltigt lösenord.',
     'Indexing assets: {progress}' => 'Indexering av tillgångar: {progress}',
