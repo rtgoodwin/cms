@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where slideout submit buttons lost their loading spinner if `submitButtonLabel` was set on the controller response. ([#17567](https://github.com/craftcms/cms/issues/17567))
+- Fixed an error that could occur when saving an element that had a conditionally-hidden Content Block field. ([#17578](https://github.com/craftcms/cms/issues/17578))
 
 ## 5.8.5 - 2025-07-08
 
