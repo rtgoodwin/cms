@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where slideout submit buttons lost their loading spinner if `submitButtonLabel` was set on the controller response. ([#17567](https://github.com/craftcms/cms/issues/17567))
+
 ## 5.8.5 - 2025-07-08
 
 - Fixed a bug where the `autoLoginAfterAccountActivation` config setting wasn’t being respected when email verification was disabled. ([#17571](https://github.com/craftcms/cms/issues/17571))
