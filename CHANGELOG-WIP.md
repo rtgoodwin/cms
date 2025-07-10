@@ -1,5 +1,8 @@
 # Release Notes for Craft CMS 5.9 (WIP)
 
+### Content Management
+- Chips and cards are generally no longer hyperlinked. ([#17591](https://github.com/craftcms/cms/pull/17591))
+
 ### Extensibility
 - Added `Craft.BaseElementIndex::asyncSelectDefaultSource()`.
 - Added `Craft.BaseElementIndex::asyncSelectSource()`.
