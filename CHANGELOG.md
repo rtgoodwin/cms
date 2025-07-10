@@ -7,6 +7,7 @@
 - Fixed an error that could occur when saving an element that had a conditionally-hidden Content Block field. ([#17578](https://github.com/craftcms/cms/issues/17578))
 - Fixed a bug where headings within disclosure menus could disappear. ([#17581](https://github.com/craftcms/cms/issues/17581))
 - Fixed a bug where relational field previews were getting truncated within cards. ([#17582](https://github.com/craftcms/cms/issues/17582))
+- Fixed an error that could occur when editing an element with two Content Block fields owned by the same element. ([#17585](https://github.com/craftcms/cms/issues/17585))
 
 ## 5.8.5 - 2025-07-08
 

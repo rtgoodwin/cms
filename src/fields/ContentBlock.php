@@ -458,7 +458,9 @@ class ContentBlock extends Field implements
 
             if (count($sameSiteElements) > 1) {
                 $contentBlocks = ContentBlockElement::find()
+                    ->fieldId($this->id)
                     ->ownerId(array_map(fn(ElementInterface $e) => $e->id, $sameSiteElements))
+                    ->siteId($element->siteId)
                     ->indexBy('ownerId')
                     ->collect();
 
