@@ -891,16 +891,18 @@ export default Base.extend(
         this.toggleGroup(el);
       });
 
-      this.$container.find('h3,hr').each((i, el) => {
+      this.$container.find('hr').each((i, el) => {
         const $el = $(el);
         const $prevVisibleItems = $el
           .prevUntil('h3,hr')
           .filter(':not(.hidden):not(.filtered)');
         if (!$prevVisibleItems.length) {
           $el.addClass('hidden');
-          return;
         }
+      });
 
+      this.$container.find('h3,hr').each((i, el) => {
+        const $el = $(el);
         const $nextVisibleItems = $el
           .nextUntil('h3,hr')
           .filter(':not(.hidden):not(.filtered)');
