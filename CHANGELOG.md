@@ -8,6 +8,7 @@
 - Fixed a bug where headings within disclosure menus could disappear. ([#17581](https://github.com/craftcms/cms/issues/17581))
 - Fixed a bug where relational field previews were getting truncated within cards. ([#17582](https://github.com/craftcms/cms/issues/17582))
 - Fixed an error that could occur when editing an element with two Content Block fields owned by the same element. ([#17585](https://github.com/craftcms/cms/issues/17585))
+- Fixed an error that could occur when updating to Craft 5.8. ([#17583](https://github.com/craftcms/cms/issues/17583))
 
 ## 5.8.5 - 2025-07-08
 
