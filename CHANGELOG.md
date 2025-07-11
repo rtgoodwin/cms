@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.6 - 2025-07-10
 
 - Entry type groups within Matrix field settings are no longer justified in height. ([#17577](https://github.com/craftcms/cms/issues/17577))
 - Fixed a bug where slideout submit buttons lost their loading spinner if `submitButtonLabel` was set on the controller response. ([#17567](https://github.com/craftcms/cms/issues/17567))
