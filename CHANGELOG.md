@@ -9,6 +9,7 @@
 - Fixed a bug where relational field previews were getting truncated within cards. ([#17582](https://github.com/craftcms/cms/issues/17582))
 - Fixed an error that could occur when editing an element with two Content Block fields owned by the same element. ([#17585](https://github.com/craftcms/cms/issues/17585))
 - Fixed an error that could occur when updating to Craft 5.8. ([#17583](https://github.com/craftcms/cms/issues/17583))
+- Fixed a bug where some sortable items weren’t easily sortable via the cursor. ([#17588](https://github.com/craftcms/cms/issues/17588))
 
 ## 5.8.5 - 2025-07-08
 
