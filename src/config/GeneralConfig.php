@@ -1979,12 +1979,12 @@ class GeneralConfig extends BaseConfig
      * @var string The string preceding a number which Craft will look for when determining if the current request is for a particular page in
      * a paginated list of pages.
      *
-     * Example Value | Example URI
-     * ------------- | -----------
-     * `p` | `/news/p5`
-     * `page` | `/news/page5`
-     * `page/` | `/news/page/5`
-     * `?page` | `/news?page=5`
+     * | Example Value | Example URI |
+     * | --- | --- |
+     * | `p` | `/news/p5` |
+     * | `page` | `/news/page5` |
+     * | `page/` | `/news/page/5` |
+     * | `?page` | `/news?page=5` |
      *
      * ::: tip
      * If you want to set this to `?p` (e.g. `/news?p=5`), you’ll also need to change your <config5:pathParam> setting which defaults to `p`.
@@ -3126,8 +3126,9 @@ class GeneralConfig extends BaseConfig
      * The symbols are as follows:
      *
      * | Symbol | Example | Category |
-     * | `$` | `$Date Field$` | Site |
-     * | `@` | `@Entry Type@` | Application |
+     * | --- | --- | --- |
+     * | `$` | `$Date Field$` | Site (front-end, `site.php`) |
+     * | `@` | `@Entry Type@` | Application (Craft, `app.php`) |
      * | `%` | `%Object Template% | Other (plugin or custom source) |
      *
      * Translations _may_ be nested or surrounded by multiple symbols.
@@ -5536,12 +5537,12 @@ class GeneralConfig extends BaseConfig
      * The string preceding a number which Craft will look for when determining if the current request is for a particular page in
      * a paginated list of pages.
      *
-     * Example Value | Example URI
-     * ------------- | -----------
-     * `p` | `/news/p5`
-     * `page` | `/news/page5`
-     * `page/` | `/news/page/5`
-     * `?page` | `/news?page=5`
+     * | Example Value | Example URI |
+     * | --- | --- |
+     * | `p` | `/news/p5` |
+     * | `page` | `/news/page5` |
+     * | `page/` | `/news/page/5` |
+     * | `?page` | `/news?page=5` |
      *
      * ::: tip
      * If you want to set this to `?p` (e.g. `/news?p=5`), you’ll also need to change your <config5:pathParam> setting which defaults to `p`.
@@ -6856,8 +6857,9 @@ class GeneralConfig extends BaseConfig
      * The symbols are as follows:
      *
      * | Symbol | Example | Category |
-     * | `$` | `$Date Field$` | Site |
-     * | `@` | `@Entry Type@` | Application |
+     * | --- | --- | --- |
+     * | `$` | `$Date Field$` | Site (front-end, `site.php`) |
+     * | `@` | `@Entry Type@` | Application (Craft, `app.php`) |
      * | `%` | `%Object Template% | Other (plugin or custom source) |
      *
      * Translations _may_ be nested or surrounded by multiple symbols.
