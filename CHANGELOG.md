@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Button Group fields set to only show icons now add `title` text to the buttons, revealing the icon name. ([#17598](https://github.com/craftcms/cms/discussions/17598))
+
 ## 5.8.6 - 2025-07-10
 
 - Entry type groups within Matrix field settings are no longer justified in height. ([#17577](https://github.com/craftcms/cms/issues/17577))
