@@ -1,13 +1,23 @@
 # Release Notes for Craft CMS 5
 
+## 5.8.5 - 2025-07-08
+
+- Fixed a bug where the `autoLoginAfterAccountActivation` config setting wasn’t being respected when email verification was disabled. ([#17571](https://github.com/craftcms/cms/issues/17571))
+- Fixed an error that occurred when saving a section from a slideout. ([#17573](https://github.com/craftcms/cms/issues/17573))
+- Fixed an error that could occur when running “Pruning extra revisions” jobs. ([#17566](https://github.com/craftcms/cms/issues/17566))
+- Fixed a bug where disabled nested entries weren’t being shown within Matrix fields set to inline-editable blocks view, when viewing revisions. ([#17576](https://github.com/craftcms/cms/issues/17576))
+- Fixed a bug where Content Block fields weren’t validating their field layouts.
+- Fixed a bug where it was possible to save a Content Block field with the same field included recursively in its layout.
+- Fixed a styling issue.
+
 ## 5.8.4 - 2025-07-07
 
 - Relation fields now show the search input after the “Add” button, and use a generic “Search” placeholder. ([#17562](https://github.com/craftcms/cms/issues/17562))
 - `craft\elements\Asset::getMimeType()` no longer fetches the MIME type from disk for local assets. ([#17549](https://github.com/craftcms/cms/issues/17549))
-- Fixed a potential remote execution vulnerability.
 - Fixed a bug where Categories fields weren’t showing the “Show the search input” setting. ([#17561](https://github.com/craftcms/cms/discussions/17561))
 - Fixed a bug where overriding entry type settings from a Matrix field’s settings would cause the entry type to lose its group assignment. ([#17564](https://github.com/craftcms/cms/issues/17564))
 - Fixed a bug where address queries weren’t factoring in their `field` or `fieldId` parameters if an owner parameter wasn’t specified. ([#17565](https://github.com/craftcms/cms/issues/17565))
+- Fixed a potential remote execution vulnerability.
 - Fixed an information disclosure vulnerability.
 
 ## 5.8.3 - 2025-07-06
@@ -31,7 +41,7 @@
 - Element selector modals now clear out the search input when opened. ([#17480](https://github.com/craftcms/cms/issues/17480))
 - Improved relational fields’ inline search behavior. ([#17550](https://github.com/craftcms/cms/issues/17550))
 - Fixed a bug where an unsaved changes warning would be shown when leaving an element edit form, if a conditional field had just been shown or hidden in the last autosave. ([#17518](https://github.com/craftcms/cms/issues/17518))
-- Fixed a bug where Generated Fields settings were still interative when `allowAdminChanges` was disabled. ([#17535](https://github.com/craftcms/cms/pull/17535))
+- Fixed a bug where Generated Fields settings were still interactive when `allowAdminChanges` was disabled. ([#17535](https://github.com/craftcms/cms/pull/17535))
 - Fixed a bug where it was possible to select entries without URLs in Link fields. ([#17536](https://github.com/craftcms/cms/issues/17536))
 - Fixed a “Request Header Or Cookie Too Large” error that could occur in the control panel. ([#17531](https://github.com/craftcms/cms/issues/17531))
 - Fixed a bug where source headings’ expanded/collapsed states weren’t persisting. ([#17541](https://github.com/craftcms/cms/pull/17541))
