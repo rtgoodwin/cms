@@ -11,15 +11,15 @@
 
 {% block content %}
     {% for category, items in craft.cp.settings(80) %}
-        {% set headingId = "category-heading#{random()}" %}
+        {% set headingId = "category-heading-#{loop.index}" %}
         <h2 id="{{ headingId }}">{{ category }}</h2>
         <nav aria-labelledby="{{ headingId }}">
             <ul class="icons">
                 {% for handle, item in items %}
-                    {% set linkId = "settings-link#{random()}" %}
+                    {% set label = '{name} Settings'|t('app', {name: item.label}) %}
                     {% set icon = item.iconMask ?? item.icon %}
                     <li>
-                        <a id="{{ linkId }}" aria-labelledby="{{ linkId }} page-heading" href="{% if item.url is defined %}{{ url(item.url) }}{% else %}{{ url('settings/'~handle) }}{% endif %}">
+                        <a aria-label="{{ label }}" href="{% if item.url is defined %}{{ url(item.url) }}{% else %}{{ url('settings/'~handle) }}{% endif %}">
                             <div class="icon{% if item.iconMask is defined %} icon-mask{% endif %}" aria-hidden="true">
                                 {{ svg(icon, sanitize=true, namespace=true) }}
                             </div>
