@@ -6,6 +6,7 @@
 - Fixed an error that occurred when viewing a custom category source set to exclude certain category groups. ([#17599](https://github.com/craftcms/cms/issues/17599))
 - Fixed a bug where entries’ Author/Authors settings weren’t showing changed indicators. ([#17608](https://github.com/craftcms/cms/issues/17608))
 - Fixed a styling issue. ([#17611](https://github.com/craftcms/cms/pull/17611))
+- Fixed a bug where closing a modal could cause the page to be unscrollable.
 
 ## 5.8.6 - 2025-07-10
 
