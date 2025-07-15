@@ -4,6 +4,8 @@
 
 - Button Group fields set to only show icons now add `title` text to the buttons, revealing the icon name. ([#17598](https://github.com/craftcms/cms/discussions/17598))
 - Fixed an error that occurred when viewing a custom category source set to exclude certain category groups. ([#17599](https://github.com/craftcms/cms/issues/17599))
+- Fixed a bug where entries’ Author/Authors settings weren’t showing changed indicators. ([#17608](https://github.com/craftcms/cms/issues/17608))
+- Fixed a styling issue. ([#17611](https://github.com/craftcms/cms/pull/17611))
 
 ## 5.8.6 - 2025-07-10
 
