@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fixed a bug where transformed images based on named transforms weren’t getting regenerated when the transform settings changed. ([#17615](https://github.com/craftcms/cms/issues/17615))
 - Fixed an RCE vulnerability.
 
 ## 4.16.4 - 2025-07-08
