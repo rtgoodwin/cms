@@ -729,6 +729,11 @@ JS, [
             $docTitle .= ' (' . $element->getRevisionLabel() . ')';
         }
 
+        // Include site name if localized
+        if ($element::isLocalized()) {
+            $docTitle .= ' - ' . $element->getSite()->name;
+        }
+
         return [$docTitle, $title];
     }
 
