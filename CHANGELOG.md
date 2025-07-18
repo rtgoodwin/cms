@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.7 - 2025-07-17
 
 - Button Group fields set to only show icons now add `title` text to the buttons, revealing the icon name. ([#17598](https://github.com/craftcms/cms/discussions/17598))
 - Improved the accessibility of the Settings index page for screen reader users. ([#17610](https://github.com/craftcms/cms/pull/17610))
