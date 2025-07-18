@@ -87,7 +87,7 @@
 } %}
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
-            {% set key = source.key ?? (source.heading | kebab) %}
+            {% set key = source.key ?? ('heading-' ~ (source.heading | kebab)) %}
             {% if nestedUnderHeading %}
                     </ul>
                 </li>
