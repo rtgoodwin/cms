@@ -87,7 +87,9 @@
 } %}
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
-            {% set key = source.key ?? ('heading-' ~ (source.heading | kebab)) %}
+            {% set key = source.key ?? (source.heading | kebab) %}
+            {# Prefix the ID so we don't accidentally pick up styles #}
+            {% set id = source.key ?? 'heading-' ~ (source.heading | kebab) %}
             {% if nestedUnderHeading %}
                     </ul>
                 </li>
@@ -101,7 +103,7 @@
                             persist: true,
                             storageKey: 'sources-list:'~ key,
                             storageMode: 'cookies',
-                            controls: key,
+                            controls: id,
                             attributes: {
                                 class: 'source-item__toggle'
                             }
@@ -117,7 +119,7 @@
                         {% endembed %}
                     {% endif %}
                 </div>
-                <ul id="{{ key }}" class="sources-list">
+                <ul id="{{ id }}" class="sources-list">
             {% set nestedUnderHeading = true %}
         {% elseif (source.sites ?? null) is not same as([]) %}
             {% set key = source.keyPath ?? (keyPrefix ~ source.key) %}
