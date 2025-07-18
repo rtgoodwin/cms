@@ -3550,8 +3550,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       }
 
       newTitle = titleArr.join(' - ');
-
-      document.title = newTitle;
+      document.querySelector('head title').textContent = newTitle;
     },
 
     _appendContextInfoToDocumentTitle: function (text) {
@@ -3560,7 +3559,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       if (titleArr[0] !== this.getSourceLabel()) return;
 
       titleArr[0] = `${titleArr[0]}, ${text}`;
-      document.title = titleArr.join(' - ');
+      document.querySelector('head title').textContent = titleArr.join(' - ');
     },
 
     _updateBadgeCounts: function (badgeCounts) {
