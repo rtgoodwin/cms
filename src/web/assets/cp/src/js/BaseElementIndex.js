@@ -3269,7 +3269,6 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
       // Update the count text
       // -------------------------------------------------------------
-
       if (this.$countContainer.length) {
         this.$countSpinner.removeClass('hidden');
         this.$countContainer.html('');
@@ -3281,7 +3280,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
             const itemsLabel = this.getItemsLabel();
 
             if (!this.paginated) {
-              let countLabel = Craft.t(
+              countLabel = Craft.t(
                 'app',
                 '{total, number} {total, plural, =1{{item}} other{{items}}}',
                 {
@@ -3294,7 +3293,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
             } else {
               const first = this.getFirstItemNumber(total);
               const last = this.getLastItemNumber(first, total);
-              let countLabel = Craft.t(
+              countLabel = Craft.t(
                 'app',
                 '{first, number}-{last, number} of {total, number} {total, plural, =1{{item}} other{{items}}}',
                 {
@@ -3376,6 +3375,8 @@ Craft.BaseElementIndex = Garnish.Base.extend(
                 });
               }
             }
+
+            this._appendContextInfoToDocumentTitle(countLabel);
           })
           .catch(() => {
             this.$countSpinner.addClass('hidden');
@@ -3519,11 +3520,47 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
         this._autoSelectElements = null;
       }
+      this._updateDocumentTitle();
 
       // Trigger the event
       // -------------------------------------------------------------
 
       this.onUpdateElements();
+    },
+
+    _updateDocumentTitle: function () {
+      const documentTitleIncludesSourceLabel = () => {
+        const elementIndexType = this.settings.elementTypePluralName;
+        const titleArr = document.title.split(' - ');
+        return titleArr[1] === elementIndexType;
+      };
+
+      let newTitle = document.title;
+      const titleArr = document.title.split(' - ');
+
+      // Include source label in the document title if it exists
+      if (this.getSourceLabel()) {
+        const elementIndexType = this.settings.elementTypePluralName;
+        // If the first part of the title is the element type (i.e., "Entries - Craft CMS"), push the source label to the front
+        if (!documentTitleIncludesSourceLabel()) {
+          titleArr.unshift(this.getSourceLabel());
+        } else {
+          titleArr[0] = this.getSourceLabel();
+        }
+      }
+
+      newTitle = titleArr.join(' - ');
+
+      document.title = newTitle;
+    },
+
+    _appendContextInfoToDocumentTitle: function (text) {
+      const titleArr = document.title.split(' - ');
+
+      if (titleArr[0] !== this.getSourceLabel()) return;
+
+      titleArr[0] = `${titleArr[0]}, ${text}`;
+      document.title = titleArr.join(' - ');
     },
 
     _updateBadgeCounts: function (badgeCounts) {
