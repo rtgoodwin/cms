@@ -4,6 +4,7 @@
 
 - Fixed a bug where Content Block fields could lose their initial values, if they had just been conditionally shown for the first time. ([#17630](https://github.com/craftcms/cms/issues/17630))
 - Fixed a bug where Content Block fields weren’t getting stored for revisions.
+- Fixed a bug where global sidebar nav items with the same name as the selected nav item would also appear to be selected. ([#17633](https://github.com/craftcms/cms/issues/17633))
 
 ## 5.8.7 - 2025-07-17
 
