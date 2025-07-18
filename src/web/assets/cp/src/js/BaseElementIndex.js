@@ -3559,7 +3559,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       if (titleArr[0] !== this.getSourceLabel()) return;
 
       titleArr[0] = `${titleArr[0]}, ${text}`;
-      document.title = = titleArr.join(' - ').replace(/<[^>]*>?/gm, '');
+      document.title = titleArr.join(' - ').replace(/<[^>]*>?/gm, '');
     },
 
     _updateBadgeCounts: function (badgeCounts) {
