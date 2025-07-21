@@ -140,7 +140,7 @@
 
     {% block showSearchInputField %}
         {{ forms.lightswitchField({
-            fieldClass: field.allowMultipleSources ? 'hidden' : null,
+            fieldClass: field.allowMultipleSources and (restrictLocation is not defined or not restrictLocation) ? 'hidden' : null,
             label: 'Show the search input'|t('app'),
             id: 'show-search-input',
             name: 'showSearchInput',
@@ -184,31 +184,39 @@
     {% endblock %}
 {% endblock %}
 
-{% if field.allowMultipleSources %}
+{% if field.allowMultipleSources or restrictLocation is defined %}
 {% js %}
 (() => {
   const $inputs = $('#{{ 'sources-field'|namespaceInputId }} input');
   const $searchField = $('#{{ 'show-search-input-field'|namespaceInputId }}');
 
+  const $restrictLocationToggle = $('#{{ 'restrict-location-toggle'|namespaceInputId }}');
+  const $restrictLocationInput = $restrictLocationToggle.find('input');
+
   const updateSearchField = function() {
     let showSearchField = false;
     let foundChecked = false;
-    for (let i = 0; i < $inputs.length; i++) {
-      const $input = $inputs.eq(i);
-      const val = $input.val();
-      const checked = $input.prop('checked');
-      if (val === '*') {
-        if (checked) {
-          showSearchField = false;
-          break;
-        }
-      } else if (checked) {
-        if (foundChecked) {
-          showSearchField = false;
-          break;
-        }
+
+    if ($restrictLocationInput.length > 0 && $restrictLocationInput.val() == 1) {
         showSearchField = true;
-        foundChecked = true;
+    } else {
+      for (let i = 0; i < $inputs.length; i++) {
+        const $input = $inputs.eq(i);
+        const val = $input.val();
+        const checked = $input.prop('checked');
+        if (val === '*') {
+          if (checked) {
+            showSearchField = false;
+            break;
+          }
+        } else if (checked) {
+          if (foundChecked) {
+            showSearchField = false;
+            break;
+          }
+          showSearchField = true;
+          foundChecked = true;
+        }
       }
     }
 
@@ -219,6 +227,11 @@
     }
   };
 
+  if ($restrictLocationInput.length > 0) {
+    $restrictLocationToggle.on('change', () => {
+      updateSearchField();
+    });
+  }
   $inputs.on('change', () => {
     updateSearchField();
   });
