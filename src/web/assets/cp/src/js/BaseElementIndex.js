@@ -3528,6 +3528,11 @@ Craft.BaseElementIndex = Garnish.Base.extend(
       this.onUpdateElements();
     },
 
+    /**
+     * Updates the document title to include the source label if it exists.
+     * Example: "Blog - Entries - Craft CMS", where "Blog" is the source label.
+     * @private
+     */
     _updateDocumentTitle: function () {
       const documentTitleIncludesSourceLabel = () => {
         const elementIndexType = this.settings.elementTypePluralName;
@@ -3535,7 +3540,6 @@ Craft.BaseElementIndex = Garnish.Base.extend(
         return titleArr[1] === elementIndexType;
       };
 
-      let newTitle = document.title;
       const titleArr = document.title.split(' - ');
 
       // Include source label in the document title if it exists
@@ -3548,19 +3552,22 @@ Craft.BaseElementIndex = Garnish.Base.extend(
           titleArr[0] = this.getSourceLabel();
         }
       }
-
-      newTitle = titleArr.join(' - ');
-
-      $(document).attr('title', newTitle);
+      document.querySelector('title').textContent = titleArr.join(' - ');
     },
 
+    /**
+     * Appends context information to the document title after the specific source label.
+     * Example: "Blog, 1-100 of 250 entries - Craft CMS", where "1-100 of 250 entries" is the context info.
+     * @param text
+     * @private
+     */
     _appendContextInfoToDocumentTitle: function (text) {
       const titleArr = document.title.split(' - ');
 
       if (titleArr[0] !== this.getSourceLabel()) return;
 
       titleArr[0] = `${titleArr[0]}, ${text}`;
-      $(document).attr('title', titleArr.join(' - '));
+      document.querySelector('title').textContent = titleArr.join(' - ');
     },
 
     _updateBadgeCounts: function (badgeCounts) {
