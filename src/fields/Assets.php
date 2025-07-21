@@ -842,7 +842,7 @@ class Assets extends BaseRelationField
         }
 
         ArrayHelper::removeValue($sources, 'temp');
-        return count($sources) === 1;
+        return count($sources) === 1 && $this->sources !== '*';
     }
 
     /**
