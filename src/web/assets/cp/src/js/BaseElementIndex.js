@@ -3375,7 +3375,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
               }
             }
 
-            this._appendContextInfoToDocumentTitle(countLabel);
+            this._addPaginationContextToDocumentTitle(countLabel);
           })
           .catch(() => {
             this.$countSpinner.addClass('hidden');
@@ -3519,7 +3519,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
         this._autoSelectElements = null;
       }
-      this._updateDocumentTitle();
+      this._addSourceNameToDocumentTitle();
 
       // Trigger the event
       // -------------------------------------------------------------
@@ -3532,7 +3532,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
      * Example: "Blog - Entries - Craft CMS", where "Blog" is the source label.
      * @private
      */
-    _updateDocumentTitle: function () {
+    _addSourceNameToDocumentTitle: function () {
       const documentTitleIncludesSourceLabel = () => {
         const elementIndexType = this.settings.elementTypePluralName;
         const titleArr = document.title.split(' - ');
@@ -3560,7 +3560,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
      * @param text
      * @private
      */
-    _appendContextInfoToDocumentTitle: function (text) {
+    _addPaginationContextToDocumentTitle: function (text) {
       const titleArr = document.title.split(' - ');
 
       if (titleArr[0] !== this.getSourceLabel()) return;
