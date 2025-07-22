@@ -730,8 +730,8 @@ JS, [
         }
 
         // Include site name if localized
-        if ($element::isLocalized()) {
-            $docTitle .= ' - ' . $element->getSite()->name;
+        if ($element::isLocalized() && Craft::$app->getIsMultiSite()) {
+            $docTitle .= sprintf(' - %s', $element->getSite()->getUiLabel());
         }
 
         return [$docTitle, $title];

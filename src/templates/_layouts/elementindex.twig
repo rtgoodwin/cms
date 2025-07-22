@@ -21,7 +21,7 @@
         {% endif %}
     {% endif %}
 
-    {% set docTitle = "#{title} - #{selectedSite.name|t('site')}" %}
+    {% set docTitle = "#{title} - #{selectedSite.uiLabel}" %}
 
     {% set crumbs = (crumbs ?? [])|unshift({
         id: 'site-crumb',
