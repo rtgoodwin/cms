@@ -194,12 +194,12 @@ class EntryTypesController extends Controller
     {
         $this->requirePostRequest();
 
-        $sectionsService = Craft::$app->getEntries();
+        $entriesService = Craft::$app->getEntries();
         $entryTypeId = $this->request->getBodyParam('entryTypeId');
         $saveAsNew = $this->request->getBodyParam('saveAsNew');
 
         if ($entryTypeId) {
-            $entryType = $sectionsService->getEntryTypeById($entryTypeId);
+            $entryType = $entriesService->getEntryTypeById($entryTypeId);
             if (!$entryType) {
                 throw new BadRequestHttpException("Invalid entry type ID: $entryTypeId");
             }
@@ -248,7 +248,7 @@ class EntryTypesController extends Controller
         }
 
         // Save it
-        $sectionsService->saveEntryType($entryType, false);
+        $entriesService->saveEntryType($entryType, false);
         return $this->asModelSuccess($entryType, Craft::t('app', 'Entry type saved.'), 'entryType');
     }
 
