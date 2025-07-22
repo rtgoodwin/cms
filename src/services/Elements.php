@@ -3278,7 +3278,9 @@ class Elements extends Component
         $dirtyFields = $element->getDirtyFields();
 
         // Get the element's site record
-        if (!$isNewElement && !$element->isNewForSite) {
+        if ($isNewElement && $element->isNewForSite) {
+            $siteSettingsRecord = null;
+        } else {
             $siteSettingsRecord = Element_SiteSettingsRecord::findOne([
                 'elementId' => $element->id,
                 'siteId' => $element->siteId,
