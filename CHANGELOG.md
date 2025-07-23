@@ -7,6 +7,7 @@
 - Fixed a bug where element indexes in structure view weren’t switching to table/card view when searching.
 - Fixed a bug where Assets fields’ “Show the search input” setting wasn’t always visible when “Restrict assets to a single location” was enabled. ([#17628](https://github.com/craftcms/cms/issues/17628))
 - Fixed a bug where relational fields were showing the search input if “All” sources were selected, but there was only one available source. ([#17628](https://github.com/craftcms/cms/issues/17628))
+- Fixed a bug where top-level element sources’ expanded/collapsed states were stored as cookies rather than in local storage. ([#17649](https://github.com/craftcms/cms/issues/17649))
 
 ## 5.8.8 - 2025-07-18
 
