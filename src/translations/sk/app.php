@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Text predpony',
     'Prefix must be 5 or less characters long.' => 'Predpona musí mať 5 alebo menej znakov.',
     'Prefix' => 'Predpona',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Predvoľby',
     'Prettify query' => 'Prettify dotaz',
     'Prettify' => 'Prettify',
