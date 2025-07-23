@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Текст префікса',
     'Prefix must be 5 or less characters long.' => 'Префікс має містити до 5 символів.',
     'Prefix' => 'Префікс',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Типові налаштування',
     'Prettify query' => 'Запит Prettify',
     'Prettify' => 'Prettify',
