@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Текст префикса',
     'Prefix must be 5 or less characters long.' => 'Префикс должен быть длиной не более 5 символов.',
     'Prefix' => 'Префикс',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Предустановки',
     'Prettify query' => 'Запрос Prettify',
     'Prettify' => 'Prettify',
