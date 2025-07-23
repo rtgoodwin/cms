@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Texte de préfixe',
     'Prefix must be 5 or less characters long.' => 'Le préfixe doit faire au moins 5 caractères de long.',
     'Prefix' => 'Préfixe',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Préréglages',
     'Prettify query' => 'Embellir la requête',
     'Prettify' => 'Embellir',
