@@ -1,5 +1,11 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Added `craft\helpers\User::getLoginFailureInfo()`.
+- Deprecated `craft\helpers\User::getLoginFailureMessage()`.
+- Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
+
 ## 4.16.6.1 - 2025-07-24
 
 - Fixed a bug where the “Prep composer.json” button within the Craft 5 Upgrade utility was producing invalid composer.json data.

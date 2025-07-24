@@ -586,7 +586,7 @@ class User extends \yii\web\User
      */
     private function _handleLoginFailure(?string $authError, ?UserElement $user = null): void
     {
-        $message = UserHelper::getLoginFailureMessage($authError, $user);
+        [$authError, $message] = UserHelper::getLoginFailureInfo($authError, $user);
 
         // Fire a 'loginFailure' event
         $event = new LoginFailureEvent([

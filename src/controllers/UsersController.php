@@ -440,8 +440,7 @@ class UsersController extends Controller
                 ? User::AUTH_ACCOUNT_COOLDOWN
                 : User::AUTH_ACCOUNT_LOCKED;
 
-            $message = UserHelper::getLoginFailureMessage($authError, $e->user);
-
+            [, $message] = UserHelper::getLoginFailureInfo($authError, $e->user);
             return $this->asFailure($message);
         }
 
@@ -2202,7 +2201,7 @@ JS,
      */
     private function _handleLoginFailure(?string $authError, ?User $user = null): ?Response
     {
-        $message = UserHelper::getLoginFailureMessage($authError, $user);
+        [$authError, $message] = UserHelper::getLoginFailureInfo($authError, $user);
 
         // Fire a 'loginFailure' event
         $event = new LoginFailureEvent([
