@@ -42,9 +42,11 @@ import './upgrade.scss';
       });
       const versions = {
         craft: data.cms.latestVersion,
-        php: data.cms.phpConstraint,
         plugins: {},
       };
+      if (data.cms.phpConstraint) {
+        versions.php = data.cms.phpConstraint.match(/[\d.]+/)[0];
+      }
 
       data.plugins.push(
         ...missingPluginInfo.map((info) => Object.assign(info, {unknown: true}))
