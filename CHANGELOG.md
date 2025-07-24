@@ -12,6 +12,7 @@
 - Fixed a bug where relational fields were showing the search input if “All” sources were selected, but there was only one available source. ([#17628](https://github.com/craftcms/cms/issues/17628))
 - Fixed a bug where top-level element sources’ expanded/collapsed states were stored as cookies rather than in local storage. ([#17649](https://github.com/craftcms/cms/issues/17649))
 - Fixed a bug where entry authors could be set to the current user when resaved in bulk. ([#17654](https://github.com/craftcms/cms/pull/17654))
+- Fixed a bug where generated fields were showing up within card views even if they weren’t selected. ([#17662](https://github.com/craftcms/cms/issues/17662))
 
 ## 5.8.8 - 2025-07-18
 
