@@ -8,6 +8,7 @@
 - Fixed a SQL error that could occur when applying a draft that belonged to fewer sites than the canonical element. ([#17644](https://github.com/craftcms/cms/issues/17644))
 - Fixed an error that could occur when applying project config changes. ([#17625](https://github.com/craftcms/cms/issues/17625))
 - Fixed a bug where the password reset form could incorrectly have `newUser` set to `true`. ([#17659](https://github.com/craftcms/cms/issues/17659))
+- Fixed an error that could occur when exporting elements as XML. ([#17668](https://github.com/craftcms/cms/issues/17668))
 - Fixed a bug where element indexes in structure view weren’t switching to table/card view when searching.
 - Fixed a bug where Assets fields’ “Show the search input” setting wasn’t always visible when “Restrict assets to a single location” was enabled. ([#17628](https://github.com/craftcms/cms/issues/17628))
 - Fixed a bug where relational fields were showing the search input if “All” sources were selected, but there was only one available source. ([#17628](https://github.com/craftcms/cms/issues/17628))
