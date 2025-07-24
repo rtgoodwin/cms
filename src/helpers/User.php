@@ -20,7 +20,7 @@ class User
 {
     /**
      * @param string|null $authError
-     * @param UserElement $user
+     * @param UserElement|null $user
      * @return array{0:string,1:string}
      * @since 4.16.7
      */
