@@ -7,6 +7,7 @@
 - Added `craft\helpers\Json::encodeToFile()`.
 - Added `craft\helpers\Json::reindent()`.
 - Fixed a SQL error that could occur when applying a draft that belonged to fewer sites than the canonical element. ([#17644](https://github.com/craftcms/cms/issues/17644))
+- Fixed an error that could occur when applying project config changes. ([#17625](https://github.com/craftcms/cms/issues/17625))
 
 ## 4.16.5 - 2025-07-17
 
