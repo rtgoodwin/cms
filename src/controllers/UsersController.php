@@ -846,7 +846,11 @@ class UsersController extends Controller
         // POST request. They've just set the password.
         $code = $this->request->getRequiredBodyParam('code');
         $uid = $this->request->getRequiredParam('id');
-        $user = Craft::$app->getUsers()->getUserByUid($uid);
+        $user = User::find()
+            ->uid($uid)
+            ->status(null)
+            ->addSelect(['users.password'])
+            ->one();
 
         if (!$user) {
             throw new BadRequestHttpException("Invalid user UUID: $uid");
