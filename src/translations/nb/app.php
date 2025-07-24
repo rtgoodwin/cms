@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Prefiks-tekst',
     'Prefix must be 5 or less characters long.' => 'Prefiks må bestå av 5 eller færre tegn.',
     'Prefix' => 'Prefiks',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Forhåndsinnstillinger',
     'Prettify query' => 'Prettify-kø',
     'Prettify' => 'Prettify',

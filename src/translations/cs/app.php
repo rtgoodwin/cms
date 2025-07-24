@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Předpona textu',
     'Prefix must be 5 or less characters long.' => 'Předpona musí být dlouhá 5 nebo méně znaků.',
     'Prefix' => 'Předpona',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Předvolby',
     'Prettify query' => 'Dotaz Prettify',
     'Prettify' => 'Prettify',

@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'بادئة النص',
     'Prefix must be 5 or less characters long.' => 'يجب أن يكون طول البادئة 5 أحرف أو أقل',
     'Prefix' => 'بادئة',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'الإعدادات المسبقة',
     'Prettify query' => 'استعلام Prettify',
     'Prettify' => 'Prettify',
