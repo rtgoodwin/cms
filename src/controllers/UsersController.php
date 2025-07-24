@@ -2422,7 +2422,7 @@ JS);
      */
     private function _handleLoginFailure(?string $authError = null, ?User $user = null): ?Response
     {
-        $message = UserHelper::getLoginFailureMessage($authError, $user);
+        [$authError, $message] = UserHelper::getLoginFailureInfo($authError, $user);
 
         // Fire a 'loginFailure' event
         if ($this->hasEventHandlers(self::EVENT_LOGIN_FAILURE)) {
@@ -2434,7 +2434,6 @@ JS);
             $this->trigger(self::EVENT_LOGIN_FAILURE, $event);
             $message = $event->message;
         }
-
 
         return $this->asFailure(
             $message,
