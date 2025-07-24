@@ -44,7 +44,7 @@ class UpgradeController extends Controller
 
         $config['require']['craftcms/cms'] = $versions['craft'];
 
-        if (isset($config['config']['platform']['php'])) {
+        if (isset($versions['php'], $config['config']['platform']['php'])) {
             $config['config']['platform']['php'] = $versions['php'];
         }
 

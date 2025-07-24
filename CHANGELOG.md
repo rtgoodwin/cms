@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## 4.16.6.1 - 2025-07-24
+
+- Fixed a bug where the “Prep composer.json” button within the Craft 5 Upgrade utility was producing invalid composer.json data.
+
 ## 4.16.6 - 2025-07-24
 
 - The Craft 5 Upgrade utility now has a “Prep composer.json” button, which displays the project’s composer.json file, updated with Craft 5-compatible dependencies. ([#17534](https://github.com/craftcms/cms/discussions/17534), [#17647](https://github.com/craftcms/cms/discussions/17647))
