@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.10 - 2025-07-24
 
 - Added `craft\helpers\User::getLoginFailureInfo()`.
 - Deprecated `craft\helpers\User::getLoginFailureMessage()`.
