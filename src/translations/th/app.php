@@ -1130,6 +1130,7 @@ return [
     'Prefix Text' => 'ข้อความคำนำหน้า',
     'Prefix must be 5 or less characters long.' => 'คำนำหน้าจะต้องมีอักขระไม่เกิน 5 ตัว',
     'Prefix' => 'คำนำหน้า',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'พรีเซ็ต',
     'Prettify query' => 'การค้นหา Prettify',
     'Prettify' => 'Prettify',

@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Prefixtekst',
     'Prefix must be 5 or less characters long.' => 'Prefix moet 5 of minder karakters bevatten.',
     'Prefix' => 'Voorvoegsel',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Presets',
     'Prettify query' => 'Maak query mooi',
     'Prettify' => 'Maak mooi',
