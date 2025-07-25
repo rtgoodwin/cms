@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a potential session leakage vulnerability.
+
 ## 4.16.7 - 2025-07-24
 
 - Added `craft\helpers\User::getLoginFailureInfo()`.
