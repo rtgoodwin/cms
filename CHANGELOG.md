@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a JavaScript error that occurred when applying a draft that had a percent sign in its name. ([#17674](https://github.com/craftcms/cms/issues/17674))
+- Fixed a bug where custom source headings could have IDs that conflicted with other control panel components. ([#17632](https://github.com/craftcms/cms/issues/17632))
 - Fixed a potential session leakage vulnerability.
 
 ## 5.8.10 - 2025-07-24
