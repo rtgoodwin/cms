@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a JavaScript error that occurred when applying a draft that had a percent sign in its name. ([#17674](https://github.com/craftcms/cms/issues/17674))
+
 ## 5.8.10 - 2025-07-24
 
 - Added `craft\helpers\User::getLoginFailureInfo()`.
