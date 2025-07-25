@@ -88,8 +88,7 @@
     {% for source in sources %}
         {% if (source.type ?? null) == 'heading' %}
             {% set key = source.key ?? (source.heading | kebab) %}
-            {# Prefix the ID so we don't accidentally pick up styles #}
-            {% set sourceId = source.key ?? 'heading-' ~ (source.heading | kebab) %}
+            {% set sourceId = 'sources-list-' ~ random() %}
             {% if nestedUnderHeading %}
                     </ul>
                 </li>
@@ -101,7 +100,7 @@
                     {% if source.heading | length %}
                         {% embed '_includes/disclosure-toggle' with {
                             persist: true,
-                            storageKey: 'sources-list:'~ key,
+                            storageKey: 'sources-list:' ~ key,
                             controls: sourceId,
                             attributes: {
                                 class: 'source-item__toggle'
