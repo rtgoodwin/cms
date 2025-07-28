@@ -3277,6 +3277,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
             this.$countSpinner.addClass('hidden');
             const itemLabel = this.getItemLabel();
             const itemsLabel = this.getItemsLabel();
+            let countLabel;
 
             if (!this.paginated) {
               countLabel = Craft.t(
@@ -3375,7 +3376,9 @@ Craft.BaseElementIndex = Garnish.Base.extend(
               }
             }
 
-            this._addPaginationContextToDocumentTitle(countLabel);
+            if (this.settings.context === 'index') {
+              this._addPaginationContextToDocumentTitle(countLabel);
+            }
           })
           .catch(() => {
             this.$countSpinner.addClass('hidden');
@@ -3519,7 +3522,10 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
         this._autoSelectElements = null;
       }
-      this._addSourceNameToDocumentTitle();
+
+      if (this.settings.context === 'index') {
+        this._addSourceNameToDocumentTitle();
+      }
 
       // Trigger the event
       // -------------------------------------------------------------
