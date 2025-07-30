@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+
 ## 5.8.12 - 2025-07-29
 
 - Added support for passing a hashed `returnUrl` param to standalone Live Preview URLs. ([#17684](https://github.com/craftcms/cms/discussions/17684))
