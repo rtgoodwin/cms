@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+
 ## 4.16.8 - 2025-07-25
 
 - Fixed a potential session leakage vulnerability.
