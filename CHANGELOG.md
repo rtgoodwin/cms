@@ -6,6 +6,7 @@
 - Improved the performance of fetching nested values within content block fields. ([#17677](https://github.com/craftcms/cms/issues/17677))
 - Fixed a bug where embedded element indexes were manipulating the window title. ([#17679](https://github.com/craftcms/cms/issues/17679))
 - Fixed an error that could occur when rendering an Entries field. ([#17686](https://github.com/craftcms/cms/issues/17686))
+- Fixed a bug where element selection modals weren’t rendering elements in a structure view when they should have. ([#17678](https://github.com/craftcms/cms/issues/17678))
 
 ## 5.8.11 - 2025-07-25
 

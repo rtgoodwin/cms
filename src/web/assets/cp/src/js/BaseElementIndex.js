@@ -111,7 +111,7 @@ Craft.BaseElementIndex = Garnish.Base.extend(
     nestedInputNamespace: null,
 
     get viewMode() {
-      if (this._viewMode === 'structure' && !this.canSort) {
+      if (this._viewMode === 'structure' && !this.canViewAsStructure) {
         return this.doesSourceHaveViewMode('table') ? 'table' : 'cards';
       }
 
@@ -141,6 +141,16 @@ Craft.BaseElementIndex = Garnish.Base.extend(
 
     get sortable() {
       return this.settings.sortable && this.canSort && !this.inlineEditing;
+    },
+
+    get canViewAsStructure() {
+      return (
+        !this.status &&
+        !this.trashed &&
+        !this.drafts &&
+        !this.searching &&
+        !this.hasActiveFilter
+      );
     },
 
     get canSort() {
