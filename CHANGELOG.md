@@ -2,11 +2,44 @@
 
 ## Unreleased
 
+- Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+- Fixed an error that could occur when installing Craft with existing project config data. ([#17587](https://github.com/craftcms/cms/issues/17587))
+
+## 5.8.12 - 2025-07-29
+
+- Added support for passing a hashed `returnUrl` param to standalone Live Preview URLs. ([#17684](https://github.com/craftcms/cms/discussions/17684))
+- Improved the performance of fetching nested values within content block fields. ([#17677](https://github.com/craftcms/cms/issues/17677))
+- Fixed a bug where embedded element indexes were manipulating the window title. ([#17679](https://github.com/craftcms/cms/issues/17679))
+- Fixed an error that could occur when rendering an Entries field. ([#17686](https://github.com/craftcms/cms/issues/17686))
+- Fixed a bug where element selection modals weren’t rendering elements in a structure view when they should have. ([#17678](https://github.com/craftcms/cms/issues/17678))
+
+## 5.8.11 - 2025-07-25
+
+- Fixed a JavaScript error that occurred when applying a draft that had a percent sign in its name. ([#17674](https://github.com/craftcms/cms/issues/17674))
+- Fixed a bug where custom source headings could have IDs that conflicted with other control panel components. ([#17632](https://github.com/craftcms/cms/issues/17632))
+- Fixed a potential session leakage vulnerability.
+
+## 5.8.10 - 2025-07-24
+
+- Added `craft\helpers\User::getLoginFailureInfo()`.
+- Deprecated `craft\helpers\User::getLoginFailureMessage()`.
+- Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
+
+## 5.8.9 - 2025-07-24
+
 - Element index and edit pages now include the selected site’s name in the window title, on multi-site installs. ([#17626](https://github.com/craftcms/cms/pull/17626))
 - Entry type handles are now automatically incremented when duplicating an entry type, if the handle wasn’t edited. ([#17641](https://github.com/craftcms/cms/issues/17641))
+- JSON fields now have a max height of 550px. ([#17667](https://github.com/craftcms/cms/issues/17667))
+- Fixed a SQL error that could occur when applying a draft that belonged to fewer sites than the canonical element. ([#17644](https://github.com/craftcms/cms/issues/17644))
+- Fixed an error that could occur when applying project config changes. ([#17625](https://github.com/craftcms/cms/issues/17625))
+- Fixed a bug where the password reset form could incorrectly have `newUser` set to `true`. ([#17659](https://github.com/craftcms/cms/issues/17659))
+- Fixed an error that could occur when exporting elements as XML. ([#17668](https://github.com/craftcms/cms/issues/17668))
 - Fixed a bug where element indexes in structure view weren’t switching to table/card view when searching.
 - Fixed a bug where Assets fields’ “Show the search input” setting wasn’t always visible when “Restrict assets to a single location” was enabled. ([#17628](https://github.com/craftcms/cms/issues/17628))
 - Fixed a bug where relational fields were showing the search input if “All” sources were selected, but there was only one available source. ([#17628](https://github.com/craftcms/cms/issues/17628))
+- Fixed a bug where top-level element sources’ expanded/collapsed states were stored as cookies rather than in local storage. ([#17649](https://github.com/craftcms/cms/issues/17649))
+- Fixed a bug where entry authors could be set to the current user when resaved in bulk. ([#17654](https://github.com/craftcms/cms/pull/17654))
+- Fixed a bug where generated fields were showing up within card views even if they weren’t selected. ([#17662](https://github.com/craftcms/cms/issues/17662))
 
 ## 5.8.8 - 2025-07-18
 
