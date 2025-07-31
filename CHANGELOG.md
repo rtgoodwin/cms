@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+- Fixed a race condition that could cause “User is not authorized” errors in the control panel. ([#17694](https://github.com/craftcms/cms/issues/17694))
 
 ## 4.16.8 - 2025-07-25
 
