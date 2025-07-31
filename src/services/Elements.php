@@ -2027,7 +2027,7 @@ class Elements extends Component
                     // Now propagate $mainClone to any sites the source element didn’t already exist in
                     foreach ($supportedSites as $siteId => $siteInfo) {
                         if (!isset($propagatedTo[$siteId]) && $siteInfo['propagate']) {
-                            $siteClone = false;
+                            $siteClone = $element->getIsDraft() && !$element->getIsUnpublishedDraft() ? null : false;
                             if (!$this->_propagateElement($mainClone, $supportedSites, $siteId, $siteClone)) {
                                 /** @phpstan-ignore-next-line */
                                 throw $siteClone
@@ -3027,7 +3027,17 @@ class Elements extends Component
                         $elementQuery->ref($refNames);
                     }
 
-                    $elements = ArrayHelper::index($elementQuery->all(), $refType);
+                    $elements = [];
+                    foreach ($elementQuery->all() as $element) {
+                        $ref = $refType === 'id' ? $element->id : $element->getRef();
+                        $elements[$ref] = $element;
+
+                        // if the reference contains a slash (e.g. section/slug),
+                        // also index it by just whatever comes after it
+                        if ($refType === 'ref' && ($slash = strrpos($ref, '/')) !== false) {
+                            $elements[substr($ref, $slash + 1)] ??= $element;
+                        }
+                    }
 
                     // Now append new token search/replace strings
                     foreach ($tokensByName as $refName => $tokens) {

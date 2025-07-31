@@ -2217,7 +2217,6 @@ ul.icons {
   z-index: 1;
   display: flex;
   white-space: nowrap;
-  align-items: center;
 
   .text {
     border-start-end-radius: 0;
@@ -7989,6 +7988,10 @@ textarea.text.fullwidth {
       cursor: not-allowed;
     }
   }
+}
+
+.CodeMirror-scroll {
+  max-height: 550px;
 }
 
 .link-input {
