@@ -22,6 +22,7 @@ use craft\helpers\Cp;
 use craft\helpers\Html;
 use craft\helpers\Inflector;
 use craft\helpers\StringHelper;
+use yii\base\InvalidConfigException;
 
 /**
  * CustomField represents a custom field that can be included in field layouts.
@@ -55,6 +56,7 @@ class CustomField extends BaseField
     public ?string $handle = null;
 
     private ?FieldInterface $_field = null;
+    private ?string $_fieldUid = null;
     private ?string $_originalName = null;
     private ?string $_originalHandle = null;
     private ?string $_originalInstructions = null;
@@ -92,7 +94,7 @@ class CustomField extends BaseField
      */
     public function isMultiInstance(): bool
     {
-        return $this->_field::isMultiInstance();
+        return $this->getField()::isMultiInstance();
     }
 
     /**
@@ -100,7 +102,7 @@ class CustomField extends BaseField
      */
     public function attribute(): string
     {
-        return $this->handle ?? $this->_field->handle;
+        return $this->handle ?? $this->getField()->handle;
     }
 
     /**
@@ -117,7 +119,7 @@ class CustomField extends BaseField
      */
     protected function value(?ElementInterface $element = null): mixed
     {
-        return $element?->getFieldValue($this->_field->handle);
+        return $element?->getFieldValue($this->getField()->handle);
     }
 
     /**
@@ -125,7 +127,7 @@ class CustomField extends BaseField
      */
     public function requirable(): bool
     {
-        return $this->_field::isRequirable();
+        return $this->getField()::isRequirable();
     }
 
     /**
@@ -133,7 +135,7 @@ class CustomField extends BaseField
      */
     public function thumbable(): bool
     {
-        return $this->_field instanceof ThumbableFieldInterface;
+        return $this->getField() instanceof ThumbableFieldInterface;
     }
 
     /**
@@ -141,7 +143,7 @@ class CustomField extends BaseField
      */
     public function previewable(): bool
     {
-        return $this->_field instanceof PreviewableFieldInterface;
+        return $this->getField() instanceof PreviewableFieldInterface;
     }
 
     /**
@@ -172,9 +174,21 @@ class CustomField extends BaseField
      * Returns the custom field this layout field is based on.
      *
      * @return FieldInterface
+     * @throws InvalidConfigException
+     * @throws FieldNotFoundException
      */
     public function getField(): FieldInterface
     {
+        if (!isset($this->_field)) {
+            if (!isset($this->_fieldUid)) {
+                throw new InvalidConfigException('No field UUID set.');
+            }
+            if (($field = Craft::$app->getFields()->getFieldByUid($this->_fieldUid)) === null) {
+                throw new FieldNotFoundException($this->_fieldUid);
+            }
+            $this->setField($field);
+        }
+
         return $this->_field;
     }
 
@@ -186,6 +200,7 @@ class CustomField extends BaseField
     public function setField(FieldInterface $field): void
     {
         $this->_field = clone $field;
+        $this->_fieldUid = $this->_field->uid;
         $this->_field->layoutElement = $this;
         $this->_originalName = $this->_field->name;
         $this->_originalHandle = $this->_field->handle;
@@ -205,21 +220,18 @@ class CustomField extends BaseField
      */
     public function getFieldUid(): string
     {
-        return $this->_field->uid;
+        return $this->_fieldUid;
     }
 
     /**
      * Sets the UID of the field this layout field is based on.
      *
      * @param string $uid
-     * @throws FieldNotFoundException if $uid is invalid
      */
     public function setFieldUid(string $uid): void
     {
-        if (($field = Craft::$app->getFields()->getFieldByUid($uid)) === null) {
-            throw new FieldNotFoundException($uid);
-        }
-        $this->setField($field);
+        $this->_fieldUid = $uid;
+        $this->_field = null;
     }
 
     /**
@@ -287,7 +299,7 @@ class CustomField extends BaseField
     {
         return ArrayHelper::merge(parent::selectorAttributes(), [
             'data' => [
-                'id' => $this->_field->id,
+                'id' => $this->getField()->id,
             ],
         ]);
     }
@@ -312,10 +324,10 @@ class CustomField extends BaseField
     protected function containerAttributes(?ElementInterface $element = null, bool $static = false): array
     {
         /** @var FieldInterface $field */
-        $field = $this->_field;
+        $field = $this->getField();
 
         return ArrayHelper::merge(parent::containerAttributes($element, $static), [
-            'id' => "{$this->_field->handle}-field",
+            'id' => "{$field->handle}-field",
             'data' => [
                 'type' => get_class($field),
             ],
@@ -343,7 +355,7 @@ class CustomField extends BaseField
             return parent::showLabel();
         }
 
-        return $this->_field->name !== '__blank__';
+        return $this->getField()->name !== '__blank__';
     }
 
     /**
@@ -351,7 +363,7 @@ class CustomField extends BaseField
      */
     protected function selectorIcon(): ?string
     {
-        return $this->_field::icon();
+        return $this->getField()::icon();
     }
 
     protected function selectorIndicators(): array
@@ -382,7 +394,7 @@ class CustomField extends BaseField
      */
     protected function showStatus(): bool
     {
-        return $this->_field->showStatus();
+        return $this->getField()->showStatus();
     }
 
     /**
@@ -390,7 +402,7 @@ class CustomField extends BaseField
      */
     protected function statusClass(?ElementInterface $element = null, bool $static = false): ?string
     {
-        if ($element && ($status = $this->_field->getStatus($element))) {
+        if ($element && ($status = $this->getField()->getStatus($element))) {
             return StringHelper::toString($status[0]);
         }
         return null;
@@ -401,7 +413,7 @@ class CustomField extends BaseField
      */
     protected function statusLabel(?ElementInterface $element = null, bool $static = false): ?string
     {
-        if ($element && ($status = $this->_field->getStatus($element))) {
+        if ($element && ($status = $this->getField()->getStatus($element))) {
             return $status[1];
         }
         return null;
@@ -486,7 +498,7 @@ class CustomField extends BaseField
      */
     protected function useFieldset(): bool
     {
-        return $this->_field->useFieldset();
+        return $this->getField()->useFieldset();
     }
 
     /**
@@ -494,7 +506,7 @@ class CustomField extends BaseField
      */
     protected function id(): string
     {
-        return $this->_field->getInputId();
+        return $this->getField()->getInputId();
     }
 
     /**
@@ -502,7 +514,7 @@ class CustomField extends BaseField
      */
     protected function labelId(): string
     {
-        return $this->_field->getLabelId();
+        return $this->getField()->getLabelId();
     }
 
     /**
@@ -510,23 +522,24 @@ class CustomField extends BaseField
      */
     protected function inputHtml(?ElementInterface $element = null, bool $static = false): ?string
     {
-        $this->_field->static = $static;
-        $value = $element ? $element->getFieldValue($this->_field->handle) : $this->_field->normalizeValue(null, null);
+        $field = $this->getField();
+        $field->static = $static;
+        $value = $element ? $element->getFieldValue($field->handle) : $field->normalizeValue(null, null);
 
         if ($static) {
-            return $this->_field->getStaticHtml($value, $element);
+            return $field->getStaticHtml($value, $element);
         }
 
         $view = Craft::$app->getView();
-        $isDirty = $element?->isFieldDirty($this->_field->handle);
-        $view->registerDeltaName($this->_field->handle, $isDirty);
+        $isDirty = $element?->isFieldDirty($field->handle);
+        $view->registerDeltaName($field->handle, $isDirty);
 
-        $describedBy = $this->_field->describedBy;
-        $this->_field->describedBy = $this->describedBy($element, $static);
+        $describedBy = $field->describedBy;
+        $field->describedBy = $this->describedBy($element, $static);
 
-        $html = $this->_field->getInputHtml($value, $element);
+        $html = $field->getInputHtml($value, $element);
 
-        $this->_field->describedBy = $describedBy;
+        $field->describedBy = $describedBy;
 
         return $html !== '' ? $html : null;
     }
@@ -536,7 +549,7 @@ class CustomField extends BaseField
      */
     protected function orientation(?ElementInterface $element = null, bool $static = false): string
     {
-        return $this->_field->getOrientation($element);
+        return $this->getField()->getOrientation($element);
     }
 
     /**
@@ -544,7 +557,7 @@ class CustomField extends BaseField
      */
     protected function translatable(?ElementInterface $element = null, bool $static = false): bool
     {
-        return $this->_field->getIsTranslatable($element);
+        return $this->getField()->getIsTranslatable($element);
     }
 
     /**
@@ -552,7 +565,7 @@ class CustomField extends BaseField
      */
     protected function translationDescription(?ElementInterface $element = null, bool $static = false): ?string
     {
-        return $this->_field->getTranslationDescription($element);
+        return $this->getField()->getTranslationDescription($element);
     }
 
     /**
@@ -560,7 +573,8 @@ class CustomField extends BaseField
      */
     public function isCrossSiteCopyable(ElementInterface $element): bool
     {
-        return $this->_field instanceof CrossSiteCopyableFieldInterface && $this->_field->getIsTranslatable($element);
+        $field = $this->getField();
+        return $field instanceof CrossSiteCopyableFieldInterface && $field->getIsTranslatable($element);
     }
 
     /**
@@ -568,9 +582,10 @@ class CustomField extends BaseField
      */
     protected function actionMenuItems(?ElementInterface $element = null, bool $static = false): array
     {
-        if ($this->_field instanceof Actionable) {
-            $this->_field->static = $static;
-            $items = $this->_field->getActionMenuItems();
+        $field = $this->getField();
+        if ($field instanceof Actionable) {
+            $field->static = $static;
+            $items = $field->getActionMenuItems();
         } else {
             $items = [];
         }

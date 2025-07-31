@@ -816,7 +816,7 @@ JS, [
      */
     public function afterSave(bool $isNew): void
     {
-        Craft::$app->getFields()->saveLayout($this->getFieldLayout());
+        Craft::$app->getFields()->saveLayout($this->getFieldLayout(), false);
         parent::afterSave($isNew);
     }
 

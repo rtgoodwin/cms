@@ -14,6 +14,7 @@ use craft\base\FieldInterface;
 use craft\base\FieldLayoutElement;
 use craft\base\FieldLayoutProviderInterface;
 use craft\base\Model;
+use craft\errors\FieldNotFoundException;
 use craft\events\CreateFieldLayoutFormEvent;
 use craft\events\DefineFieldLayoutCustomFieldsEvent;
 use craft\events\DefineFieldLayoutElementsEvent;
@@ -423,8 +424,12 @@ class FieldLayout extends Model
         $missingFields = [];
 
         foreach ($this->getElementsByType(BaseField::class) as $field) {
-            /** @var BaseField $field */
-            $includedFields[$field->attribute()] = true;
+            try {
+                /** @var BaseField $field */
+                $includedFields[$field->attribute()] = true;
+            } catch (FieldNotFoundException) {
+                // move on
+            }
         }
 
         foreach ($this->getAvailableNativeFields() as $field) {
