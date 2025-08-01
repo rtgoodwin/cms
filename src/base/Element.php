@@ -251,7 +251,7 @@ abstract class Element extends Component implements ElementInterface
      *     Entry::class,
      *     Element::EVENT_REGISTER_TABLE_ATTRIBUTES,
      *     function(RegisterElementTableAttributesEvent $e) {
-     *         $e->attributes[] = 'authorExpertise';
+     *         $e->tableAttributes['authorExpertise'] = ['label' => 'Author Expertise'];
      *     }
      * );
      *
