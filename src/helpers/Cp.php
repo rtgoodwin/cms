@@ -9,10 +9,12 @@ namespace craft\helpers;
 
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository as BaseSubdivisionRepository;
 use Craft;
+use craft\assetpreviews\Text;
 use craft\base\Actionable;
 use craft\base\Chippable;
 use craft\base\Colorable;
 use craft\base\CpEditable;
+use craft\base\Describable;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\FieldLayoutElement;
@@ -346,6 +348,7 @@ class Cp
             'showStatus' => true,
             'showThumb' => true,
             'showIndicators' => false,
+            'showDescription' => false,
             'size' => self::CHIP_SIZE_SMALL,
             'sortable' => false,
         ];
@@ -355,6 +358,7 @@ class Cp
         $config['showStatus'] = $config['showStatus'] && $component instanceof Statusable;
         $config['showThumb'] = $config['showThumb'] && ($component instanceof Thumbable || $component instanceof Iconic);
         $config['showIndicators'] = $config['showIndicators'] && $component instanceof Indicative;
+        $config['showDescription'] = $config['showDescription'] && $component instanceof Describable;
 
         $color = $component instanceof Colorable ? $component->getColor() : null;
 
@@ -382,6 +386,7 @@ class Cp
                     'showHandle' => $config['showHandle'],
                     'showStatus' => $config['showStatus'],
                     'showThumb' => $config['showThumb'],
+                    'showDescription' => $config['showDescription'],
                     'size' => $config['size'],
                     'ui' => 'chip',
                 ] : false,
@@ -426,7 +431,19 @@ class Cp
                     $labelHtml = Html::a($labelHtml, $url);
                 }
             }
+
+            if ($config['showDescription']) {
+                /** @var Chippable&Describable $component */
+                $description = $component->getDescription();
+                if ($description) {
+                    $labelHtml .= Html::tag('span',
+                        static::parseMarkdown(Html::encode($description)),
+                        ['class' => 'info']);
+                }
+            }
+
             $labelHtml = Html::tag('div', $labelHtml);
+
             if ($config['showHandle']) {
                 /** @var Chippable&Grippable $component */
                 $handle = $component->getHandle();
@@ -667,6 +684,15 @@ JS, [
             $classes[] = 'error';
         }
 
+        $thumb = $element->getThumbHtml(120);
+        $thumbAlignment = $element->getFieldLayout()?->getCardThumbAlignment() ?? 'end';
+
+        if ($thumb) {
+            if ($thumbAlignment) {
+                $classes[] = 'thumb-' . $thumbAlignment;
+            }
+        }
+
         $attributes = ArrayHelper::merge(
             self::baseElementAttributes($element, $config),
             [
@@ -739,7 +765,6 @@ JS, [
                 Html::endTag('div');
         }
 
-        $thumb = $element->getThumbHtml(120);
         $icon = $element instanceof Iconic ? $element->getIcon() : null;
         $title = $element->getCardTitle();
 
@@ -793,12 +818,23 @@ JS, [
             Html::endTag('div') . // .card-actions
             Html::endTag('div') . // .card-actions-container
             Html::endTag('div') . // .card-titlebar
-            Html::beginTag('div', ['class' => 'card-main']) .
+            Html::beginTag('div', ['class' => 'card-main']);
+
+        $contentHtml =
             Html::beginTag('div', ['class' => 'card-content']) .
             ($headingContent !== '' ? Html::tag('div', $headingContent, ['class' => 'card-heading']) : '') .
             ($bodyContent !== '' ? Html::tag('div', $bodyContent, ['class' => 'card-body']) : '') .
-            Html::endTag('div') . // .card-content
-            ($thumb ?? '') .
+            Html::endTag('div'); // .card-content
+
+        $thumbHtml = $element->getThumbHtml(120);
+
+        if ($thumbAlignment === 'start') {
+            $html .= $thumbHtml . $contentHtml;
+        } else {
+            $html .= $contentHtml . $thumbHtml;
+        }
+
+        $html .=
             Html::endTag('div'); // .card-main
 
         if ($config['context'] === 'field' && $config['inputName'] !== null) {
@@ -1024,6 +1060,12 @@ JS, [
                     'duplicatable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDuplicate($element, $user),
                     'copyable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canCopy($element, $user),
                     'deletable' => $editable && self::contextIsAdministrative($config['context']) && $elementsService->canDelete($element, $user),
+                    'deletable-for-site' => (
+                        $editable &&
+                        self::contextIsAdministrative($config['context']) &&
+                        ElementHelper::isMultiSite($element) &&
+                        $elementsService->canDeleteForSite($element, $user)
+                    ),
                 ]),
             ],
         );
@@ -1077,7 +1119,7 @@ JS, [
 
         // show the draft name?
         if (($config['showDraftName'] ?? true) && $element->getIsDraft() && !$element->isProvisionalDraft && !$element->getIsUnpublishedDraft()) {
-            /** @var DraftBehavior|ElementInterface $element */
+            /** @var DraftBehavior&ElementInterface $element */
             $content .= Html::tag('span', $element->draftName ?: Craft::t('app', 'Draft'), [
                 'class' => 'context-label',
             ]);
@@ -1245,7 +1287,7 @@ JS, [
         }
 
         $first = array_shift($elements);
-        $html = Html::beginTag('div', ['class' => 'inline-chips']) .
+        $html = Html::beginTag('div', ['class' => ['inline-chips', 'no-truncate']]) .
             static::elementChipHtml($first, [
                 'showDraftName' => $showDraftName,
                 'showLabel' => $showLabel,
@@ -1644,7 +1686,7 @@ JS, [
         $showLabelExtra = $showAttribute || $showActionMenu || isset($config['labelExtra']);
 
         $instructionsHtml = $instructions
-            ? Html::tag('div', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::process(Html::encodeInvalidTags($instructions), 'gfm-comment')), [
+            ? Html::tag('div', static::parseMarkdown($instructions), [
                 'id' => $instructionsId,
                 'class' => ['instructions'],
             ])
@@ -1797,7 +1839,7 @@ JS, [
             Html::tag('span', "$label ", [
                 'class' => 'visually-hidden',
             ]) .
-            Html::tag('span', preg_replace('/&amp;(\w+);/', '&$1;', Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
+            Html::tag('span', Html::decodeDoubles(Markdown::processParagraph(Html::encodeInvalidTags($message)))) .
             Html::endTag('p');
     }
 
@@ -1806,12 +1848,39 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException
+     * @throws TemplateLoaderException
      * @since 5.7.0
      */
     public static function buttonHtml(array $config): string
     {
         return static::renderTemplate('_includes/forms/button.twig', $config);
+    }
+
+    /**
+     * Renders a button group.
+     *
+     * @param array $config
+     * @return string
+     * @since 5.8.0
+     */
+    public static function buttonGroupHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/buttonGroup.twig', $config);
+    }
+
+    /**
+     * Renders a button group field’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @since 5.8.0
+     */
+    public static function buttonGroupFieldHtml(array $config): string
+    {
+        $config['id'] ??= 'buttongroup' . mt_rand();
+        $config['fieldset'] = true;
+        return static::fieldHtml('template:_includes/forms/buttonGroup.twig', $config);
     }
 
     /**
@@ -1884,7 +1953,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 5.6.0
      */
     public static function colorHtml(array $config): string
@@ -1946,6 +2015,19 @@ JS, [
     }
 
     /**
+     * Renders an editable table’s HTML.
+     *
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     * @since 5.8.0
+     */
+    public static function editableTableHtml(array $config): string
+    {
+        return static::renderTemplate('_includes/forms/editableTable.twig', $config);
+    }
+
+    /**
      * Renders an editable table field’s HTML.
      *
      * @param array $config
@@ -1964,7 +2046,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function lightswitchHtml(array $config): string
@@ -1999,7 +2081,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 5.5.0
      */
     public static function rangeHtml(array $config): string
@@ -2008,7 +2090,7 @@ JS, [
     }
 
     /**
-     * Renders a lightswitch field’s HTML.
+     * Renders a range field’s HTML.
      *
      * @param array $config
      * @return string
@@ -2156,7 +2238,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function textHtml(array $config): string
@@ -2183,7 +2265,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function textareaHtml(array $config): string
@@ -2210,7 +2292,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function dateHtml(array $config): string
@@ -2237,7 +2319,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function timeHtml(array $config): string
@@ -2281,7 +2363,7 @@ JS, [
      *
      * @param array $config
      * @return string
-     * @throws InvalidArgumentException if `$config['siteId']` is invalid
+     * @throws TemplateLoaderException
      * @since 4.0.0
      */
     public static function elementSelectHtml(array $config): string
@@ -2397,7 +2479,7 @@ JS, [
                 $addressesService->getUsedSubdivisionFields($address->countryCode),
             )) + $requiredFields;
 
-        $parents = self::_getSubdivisionParents($address, $visibleFields);
+        $parents = self::_subdivisionParents($address, $visibleFields);
 
         return
             static::textFieldHtml([
@@ -2532,7 +2614,7 @@ JS, [
      * @param array $visibleFields
      * @return array
      */
-    private static function _getSubdivisionParents(Address $address, array $visibleFields): array
+    private static function _subdivisionParents(Address $address, array $visibleFields): array
     {
         $baseSubdivisionRepository = new BaseSubdivisionRepository();
 
@@ -2653,75 +2735,54 @@ JS, [
     {
         $config += [
             'id' => 'cvd' . mt_rand(),
+            'disabled' => false,
         ];
 
-        $disabled = isset($config['config']['disabled']) && $config['config']['disabled'];
+        $allOptions = $fieldLayout->type::cardAttributes();
 
-        // get the attributes that are set to be visible in the card body
-        $selectedCardAttributes = $fieldLayout->getCardBodyAttributes();
-
-        // get remaining attributes
-        /** @var class-string<ElementInterface> $elementType */
-        $elementType = new ($fieldLayout['type']);
-        $remainingItems = $elementType::cardAttributes();
-        foreach ($remainingItems as $key => $cardAttributes) {
-            if (isset($selectedCardAttributes[$key])) {
-                unset($remainingItems[$key]);
-            } else {
-                $remainingItems[$key]['value'] = $key;
-            }
-        }
-
-        // get all the previewable fields
-        // and split them between those visible in the card's body and remaining ones
-        $fldOptions = [];
         foreach ($fieldLayout->getAllElements() as $layoutElement) {
-            if (
-                $layoutElement instanceof BaseField &&
-                $layoutElement->previewable()
-            ) {
-                if ($layoutElement->includeInCards) {
-                    $fldOptions['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                } else {
-                    $remainingItems['layoutElement:' . $layoutElement->uid] = [
-                        'label' => $layoutElement->label(),
-                        'value' => 'layoutElement:' . $layoutElement->uid,
-                    ];
-                }
+            if ($layoutElement instanceof BaseField && $layoutElement->previewable()) {
+                $allOptions["layoutElement:$layoutElement->uid"] = [
+                    'label' => $layoutElement->label(),
+                ];
             }
         }
 
-        // merge selected card attributes with selected fields
-        $selectedOptions = array_merge($fldOptions, $selectedCardAttributes);
+        foreach ($fieldLayout->getGeneratedFields() as $field) {
+            if (($field['name'] ?? '') !== '') {
+                $allOptions["generatedField:{$field['uid']}"] = [
+                    'label' => $field['name'],
+                ];
+            }
+        }
 
-        // make sure we don't have any cardViewValues that are no longer allowed to show in cards
-        $cardViewValues = $fieldLayout->getCardView();
-        $cardViewValues = array_filter($cardViewValues, fn($value) => isset($selectedOptions[$value]));
+        foreach ($allOptions as $key => &$option) {
+            if (!isset($option['value'])) {
+                $option['value'] = $key;
+            }
+        }
 
-        // sort all selected options by the cardView order
-        $selectedOptions = array_replace(
-            array_flip($cardViewValues),
-            $selectedOptions
-        );
+        $selectedOptions = [];
+        $remainingOptions = [...$allOptions];
+
+        foreach ($fieldLayout->getCardView() as $key) {
+            if (isset($allOptions[$key])) {
+                $selectedOptions[$key] = $allOptions[$key];
+                unset($remainingOptions[$key]);
+            }
+        }
 
         // sort the remaining attributes alphabetically, by label
-        $labels = array_column($remainingItems, 'label');
-        array_multisort($labels, SORT_ASC, $remainingItems);
-
-        // and now that both parts are sorted, merge them
-        $options = array_values(array_merge($selectedOptions, $remainingItems));
+        usort($remainingOptions, fn(array $a, array $b) => $a['label'] <=> $b['label']);
 
         $checkboxSelect = self::checkboxSelectFieldHtml([
             'label' => Craft::t('app', 'Card Attributes'),
             'id' => $config['id'],
             'name' => 'cardView',
-            'options' => $options,
+            'options' => [...$selectedOptions, ...$remainingOptions],
             'values' => array_keys($selectedOptions),
             'sortable' => true,
-            'disabled' => $disabled,
+            'disabled' => $config['disabled'],
         ]);
 
         // js is initiated via Craft.FieldLayoutDesigner
@@ -2749,7 +2810,97 @@ JS, [
             Html::endTag('div') . // .cvd-preview-container
             Html::endTag('div') . // .cvd-preview
             Html::endTag('div') . // .cvd-container
+            self::_thumbManagementHtml($fieldLayout, $config) .
             Html::endTag('div'); // .card-view-designer
+    }
+
+    /**
+     * Return HTML for managing thumbnail provider and position.
+     *
+     * @param FieldLayout $fieldLayout
+     * @param array $config
+     * @return string
+     * @throws TemplateLoaderException
+     */
+    private static function _thumbManagementHtml(FieldLayout $fieldLayout, array $config): string
+    {
+        $config += [
+            'disabled' => false,
+        ];
+
+        if ($fieldLayout->type::hasThumbs()) {
+            $options = [
+                ['label' => Craft::t('app', 'Default'), 'value' => '__default__'],
+            ];
+        } else {
+            $options = [
+                ['label' => Craft::t('app', 'None'), 'value' => '__none__'],
+            ];
+        }
+        $elementThumbnail = $fieldLayout->getThumbField()?->uid;
+        $thumbnailAlignment = $fieldLayout->getCardThumbAlignment();
+
+        $thumbableElements = array_filter(
+            $fieldLayout->getAllElements(),
+            fn($element) => $element instanceof BaseField && $element->thumbable()
+        );
+
+        foreach ($thumbableElements as $thumbableElement) {
+            $options[] = ['label' => $thumbableElement->label(), 'value' => $thumbableElement->uid];
+        }
+
+        $thumbHtml = Html::beginTag('div', ['class' => 'thumb-management']) .
+            Html::tag('h2', Craft::t('app', 'Manage element thumbnails'), ['class' => 'visually-hidden']) .
+            Html::beginTag('div', ['class' => ['flex', 'flex-nowrap', 'items-start']]);
+
+        // dropdown field that contains all thumbable fields + 'None' option
+        $thumbHtml .= self::selectFieldHtml([
+            'label' => Craft::t('app', 'Thumbnail Source'),
+            'id' => 'thumb-source',
+            'name' => 'thumbSource',
+            'options' => $options,
+            'value' => $elementThumbnail,
+            'disabled' => $config['disabled'],
+        ]);
+
+        // radio button switch that lets you choose whether the thumb alignment should be start or end
+        $orientation = Craft::$app->getLocale()->getOrientation();
+        $thumbHtml .= self::buttonGroupFieldHtml([
+            'label' => Craft::t('app', 'Thumbnail Alignment'),
+            'id' => 'thumb-alignment',
+            'fieldClass' => $elementThumbnail === null ? 'hidden' : false,
+            'name' => 'thumbAlignment',
+            'options' => [
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-left' : 'slideout-right',
+                    'value' => 'start',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Left') : Craft::t('app', 'Right'),
+                        ],
+                    ],
+                ],
+                [
+                    'icon' => $orientation == 'ltr' ? 'slideout-right' : 'slideout-left',
+                    'value' => 'end',
+                    'attributes' => [
+                        'title' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        'aria' => [
+                            'label' => $orientation == 'ltr' ? Craft::t('app', 'Right') : Craft::t('app', 'Left'),
+                        ],
+                    ],
+                ],
+            ],
+            'value' => $thumbnailAlignment,
+            'disabled' => $config['disabled'],
+        ]);
+
+
+        $thumbHtml .= Html::endTag('div') . // .flex
+            Html::endTag('div'); // .thumb-management
+
+        return $thumbHtml;
     }
 
     /**
@@ -2762,6 +2913,9 @@ JS, [
      */
     public static function cardPreviewHtml(FieldLayout $fieldLayout, array $cardElements = [], $showThumb = false): string
     {
+        $hasThumb = $showThumb ?? ($fieldLayout->getThumbField() !== null || $fieldLayout->type::hasThumbs());
+        $thumbAlignment = $fieldLayout->getCardThumbAlignment();
+
         // get heading
         $heading = Html::tag('craft-element-label',
             Html::tag('a', Html::tag('span', Craft::t('app', 'Title')), [
@@ -2775,13 +2929,15 @@ JS, [
         );
 
         // get status label placeholder
-        /** @var ElementInterface $elementType */
-        $elementType = new ($fieldLayout['type']);
-        $labels = [$elementType::hasStatuses() ? static::componentStatusLabelHtml($elementType) : null];
+        $labels = [$fieldLayout->type::hasStatuses() ? static::componentStatusLabelHtml(new ($fieldLayout->type)()) : null];
 
         $previewHtml =
             Html::beginTag('div', [
-                'class' => ['element', 'card'],
+                'class' => array_filter([
+                    'element',
+                    'card',
+                    $hasThumb ? "thumb-$thumbAlignment" : null,
+                ]),
             ]);
 
         $previewHtml .=
@@ -2799,8 +2955,10 @@ JS, [
                 $previewHtml .= Html::tag('div', $cardElement->getField()->previewPlaceholderHtml(null, null));
             } elseif ($cardElement instanceof BaseField) {
                 $previewHtml .= Html::tag('div', $cardElement->previewPlaceholderHtml(null, null));
+            } elseif (is_array($cardElement) && isset($cardElement['html'])) {
+                $previewHtml .= Html::tag('div', $cardElement['html']);
             } else {
-                $html = $elementType::attributePreviewHtml($cardElement);
+                $html = $fieldLayout->type::attributePreviewHtml($cardElement);
                 if (is_callable($html)) {
                     $html = $html();
                 }
@@ -2820,7 +2978,7 @@ JS, [
             Html::endTag('div'); // .card-content
 
         // get thumb placeholder
-        if ($showThumb ?? $fieldLayout->getThumbField() !== null) {
+        if ($hasThumb) {
             $previewThumb = Html::tag('div',
                 Html::tag('div', Cp::iconSvg('image'), ['class' => 'cp-icon']),
                 ['class' => 'cvd-thumbnail']
@@ -2847,11 +3005,11 @@ JS, [
      */
     public static function fieldLayoutDesignerHtml(FieldLayout $fieldLayout, array $config = []): string
     {
-        $readOnly = isset($config['disabled']) && $config['disabled'];
         $config += [
             'id' => 'fld' . mt_rand(),
             'customizableTabs' => true,
             'customizableUi' => true,
+            'disabled' => false,
         ];
 
         $tabs = array_values($fieldLayout->getTabs());
@@ -2896,7 +3054,8 @@ JS, [
             'customizableTabs' => $config['customizableTabs'],
             'customizableUi' => $config['customizableUi'],
             'withCardViewDesigner' => $config['withCardViewDesigner'] ?? false,
-            'readOnly' => $readOnly,
+            'alwaysShowThumbAlignmentBtns' => $fieldLayout->type::hasThumbs(),
+            'readOnly' => $config['disabled'],
         ]);
         $namespacedId = $view->namespaceInputId($config['id']);
 
@@ -2916,22 +3075,23 @@ JS;
         self::_setLayoutOnElements($availableNativeFields, $fieldLayout);
         self::_setLayoutOnElements($availableUiElements, $fieldLayout);
 
-        // Don't call FieldLayout::getConfig() here because we want to include *all* tabs, not just non-empty ones
         $fieldLayoutConfig = [
             'uid' => $fieldLayout->uid,
-            'tabs' => array_map(function(FieldLayoutTab $tab) {
-                $config = $tab->getConfig();
-                foreach ($config['elements'] as &$elementConfig) {
+            ...(array)$fieldLayout->getConfig(),
+        ];
+
+        // Default `dateAdded` to a minute ago for each element, so there’s no chance that an element that predated 5.3
+        // would get the same timestamp as a newly-added element, if the layout was saved within a minute of being
+        // edited, after updating to Craft 5.3+.
+        if (isset($fieldLayoutConfig['tabs'])) {
+            foreach ($fieldLayoutConfig['tabs'] as &$tabConfig) {
+                foreach ($tabConfig['elements'] as &$elementConfig) {
                     if (!isset($elementConfig['dateAdded'])) {
-                        // Default `dateAdded` to a minute ago, so there’s no chance that an element that predated 5.3 would get
-                        // the same timestamp as a newly-added element, if the layout was saved within a minute of being edited,
-                        // after updating to Craft 5.3+.
                         $elementConfig['dateAdded'] = DateTimeHelper::toIso8601((new DateTime())->modify('-1 minute'));
                     }
                 }
-                return $config;
-            }, $tabs),
-        ];
+            }
+        }
 
         if ($fieldLayout->id) {
             $fieldLayoutConfig['id'] = $fieldLayout->id;
@@ -2952,13 +3112,16 @@ JS;
             Html::beginTag('div', ['class' => 'fld-container']) .
             Html::beginTag('div', ['class' => 'fld-workspace']) .
             Html::beginTag('div', ['class' => 'fld-tabs']) .
-            implode('', array_map(fn(FieldLayoutTab $tab) => self::_fldTabHtml($tab, $config['customizableTabs'], $readOnly), $tabs)) .
+            implode('', array_map(
+                fn(FieldLayoutTab $tab) => self::_fldTabHtml($tab, $config['customizableTabs'], $config['disabled']),
+                $tabs,
+            )) .
             Html::endTag('div') . // .fld-tabs
             ($config['customizableTabs']
                 ? Html::button(Craft::t('app', 'New Tab'), [
                     'type' => 'button',
                     'class' => ['fld-new-tab-btn', 'btn', 'add', 'icon'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ])
                 : '') .
             Html::endTag('div') . // .fld-workspace
@@ -2973,14 +3136,14 @@ JS;
                     'class' => ['btn', 'small', 'active'],
                     'aria' => ['pressed' => 'true'],
                     'data' => ['library' => 'field'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ]) .
                 Html::button(Craft::t('app', 'UI Elements'), [
                     'type' => 'button',
                     'class' => ['btn', 'small'],
                     'aria' => ['pressed' => 'false'],
                     'data' => ['library' => 'ui'],
-                    'disabled' => $readOnly,
+                    'disabled' => $config['disabled'],
                 ]) .
                 Html::endTag('section') // .btngroup
                 : '') .
@@ -2990,7 +3153,7 @@ JS;
                 'class' => 'fullwidth',
                 'inputmode' => 'search',
                 'placeholder' => Craft::t('app', 'Search'),
-                'disabled' => $readOnly,
+                'disabled' => $config['disabled'],
             ]) .
             Html::tag('div', '', [
                 'class' => ['clear-btn', 'hidden'],
@@ -3003,7 +3166,11 @@ JS;
             Html::endTag('div') . // .fld-field-library
             ($config['customizableUi']
                 ? Html::beginTag('div', ['class' => ['fld-ui-library', 'hidden']]) .
-                implode('', array_map(fn(FieldLayoutElement $element) => self::layoutElementSelectorHtml($element, true), $availableUiElements)) .
+                implode('', array_map(fn(FieldLayoutElement $element) => self::layoutElementSelectorHtml($element, true, [
+                    'class' => array_filter([
+                        !self::_showFldUiElementSelector($fieldLayout, $element) ? 'hidden' : null,
+                    ]),
+                ]), $availableUiElements)) .
                 Html::endTag('div') // .fld-ui-library
                 : '') .
             Html::endTag('div') . // .fld-library
@@ -3147,6 +3314,89 @@ JS;
                 return $field->attribute() === $attribute;
             })
         );
+    }
+
+    private static function _showFldUiElementSelector(FieldLayout $fieldLayout, FieldLayoutElement $uiElement): bool
+    {
+        return $uiElement->isMultiInstance() ||
+            !$fieldLayout->isUiElementIncluded(
+                fn(FieldLayoutElement $element) => $uiElement::class === $element::class
+            );
+    }
+
+    /**
+     * Renders a Generated Fields table for a field layout
+     *
+     * @param FieldLayout $fieldLayout
+     * @param array $config
+     * @return string
+     */
+    public static function generatedFieldsTableHtml(FieldLayout $fieldLayout, array $config = []): string
+    {
+        $config += [
+            'id' => sprintf('generated-fields-table-%s', mt_rand()),
+            'disabled' => false,
+        ];
+
+        $name = 'generatedFields';
+
+        $cols = [
+            'name' => [
+                'heading' => Craft::t('app', 'Name'),
+                'type' => 'singleline',
+                'width' => '15%',
+            ],
+            'handle' => [
+                'heading' => Craft::t('app', 'Handle'),
+                'type' => 'singleline',
+                'code' => true,
+                'width' => '15%',
+            ],
+            'template' => [
+                'heading' => Craft::t('app', 'Template'),
+                'type' => 'multiline',
+                'code' => true,
+            ],
+        ];
+
+        $rows = array_map(function(array $field) {
+            if (isset($field['uid'])) {
+                $field['hiddenInputs'] = [
+                    'uid' => $field['uid'],
+                ];
+            }
+            return $field;
+        }, $fieldLayout->getGeneratedFields());
+
+        $settings = [
+            'allowAdd' => true,
+            'allowReorder' => true,
+            'allowDelete' => true,
+            'static' => $config['disabled'],
+        ];
+
+        $view = Craft::$app->getView();
+        $view->registerJsWithVars(fn($id, $name, $cols, $settings) => <<<JS
+(() => {
+  new Craft.GeneratedFieldsTable($id, $name, $cols, $settings);
+})();
+JS, [
+            $view->namespaceInputId($config['id']),
+            $view->namespaceInputName($name),
+            $cols,
+            $settings,
+        ]);
+
+        return static::editableTableHtml([
+            'id' => $config['id'],
+            'name' => $name,
+            'cols' => $cols,
+            'rows' => $rows,
+            'addRowLabel' => Craft::t('app', 'Add a field'),
+            'static' => $config['disabled'],
+            'initJs' => false,
+            ...$settings,
+        ]);
     }
 
     /**
@@ -3512,15 +3762,23 @@ JS;
                     'asterisk-slash',
                     'diamond-slash',
                     'element-card',
-                    'gear-slash',
                     'element-card-slash',
                     'element-cards',
+                    'gear-slash',
                     'graphql',
                     'grip-dots',
                     'image-slash',
                     'list-flip',
                     'list-tree-flip',
+                    'notification-bottom-left',
+                    'notification-bottom-right',
+                    'notification-top-left',
+                    'notification-top-right',
                     'share-flip',
+                    'slideout-left',
+                    'slideout-right',
+                    'thumb-left',
+                    'thumb-right',
                     => Craft::getAlias("@app/icons/custom-icons/$icon.svg"),
                     default => Craft::getAlias("@appicons/$icon.svg"),
                 };
@@ -3666,5 +3924,18 @@ JS;
     public static function reset(): void
     {
         self::$_requestedSite = null;
+    }
+
+    /**
+     * Processes the given text as Markdown, with extra defenses against invalid tags and double-encoded entities.
+     *
+     * @param string $text
+     * @param string $flavor
+     * @return string
+     * @since 5.8.3
+     */
+    public static function parseMarkdown(string $text, string $flavor = 'gfm-comment'): string
+    {
+        return Html::decodeDoubles(Markdown::process(Html::encodeInvalidTags($text), $flavor));
     }
 }

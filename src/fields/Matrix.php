@@ -40,6 +40,7 @@ use craft\gql\resolvers\elements\Entry as EntryResolver;
 use craft\gql\types\generators\EntryType as EntryTypeGenerator;
 use craft\gql\types\input\Matrix as MatrixInputType;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\Gql;
 use craft\helpers\Html;
@@ -64,6 +65,7 @@ use yii\db\Expression;
 /**
  * Matrix field type
  *
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -649,8 +651,40 @@ class Matrix extends Field implements
 
     private function settingsHtml(bool $readOnly): string
     {
-        return Craft::$app->getView()->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
+        $view = Craft::$app->getView();
+
+        $entryTypes = Collection::make($this->getEntryTypes());
+        $entryTypeSelectConfig = [
+            'name' => 'entryTypes[]',
+            'renderDefaultInput' => false,
+            'allowOverrides' => true,
+            'create' => true,
+            'jsClass' => 'Craft.GroupedEntryTypeSelectInput',
+            'errors' => $this->getErrors('entryTypes'),
+            'data' => [
+                'error-key' => 'entryTypes',
+                'disabled' => $readOnly,
+            ],
+        ];
+
+        if (!$readOnly) {
+            $view->startJsBuffer();
+            $namespace = $view->getNamespace();
+            $view->setNamespace(null);
+            $entryTypeSelectHtml = $view->namespaceInputs(fn() => Cp::entryTypeSelectHtml([
+                ...$entryTypeSelectConfig,
+                'id' => 'TEMP_ID',
+            ]), $namespace);
+            $view->setNamespace($namespace);
+            $entryTypeSelectJs = $view->clearJsBuffer();
+        }
+
+        return $view->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
             'field' => $this,
+            'entryTypes' => $entryTypes,
+            'entryTypeSelectConfig' => $entryTypeSelectConfig,
+            'entryTypeSelectHtml' => $entryTypeSelectHtml ?? null,
+            'entryTypeSelectJs' => $entryTypeSelectJs ?? null,
             'defaultTableColumnOptions' => static::defaultTableColumnOptions($this->getEntryTypes()),
             'defaultCreateButtonLabel' => $this->defaultCreateButtonLabel(),
             'indexViewModes' => array_filter(
@@ -822,10 +856,65 @@ class Matrix extends Field implements
     protected function actionMenuItems(): array
     {
         $items = [];
+        $view = Craft::$app->getView();
+
+        if ($this->viewMode === self::VIEW_MODE_BLOCKS) {
+            // Expand/Collapse all
+            $expandAllId = sprintf('expand-all-%s', mt_rand());
+            $collapseAllId = sprintf('collapse-all-%s', mt_rand());
+            $items[] = [
+                'id' => $expandAllId,
+                'icon' => 'expand',
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Expand all blocks', [
+                    'type' => Entry::pluralLowerDisplayName(),
+                ])),
+            ];
+            $items[] = [
+                'id' => $collapseAllId,
+                'icon' => 'collapse',
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Collapse all blocks', [
+                    'type' => Entry::pluralLowerDisplayName(),
+                ])),
+            ];
+            $view->registerJsWithVars(fn($expandAllId, $collapseAllId, $fieldId) => <<<JS
+(() => {
+  const expandAllBtn = $('#' + $expandAllId);
+  const collapseAllBtn = $('#' + $collapseAllId);
+  const getBlocks = () => $('#' + $fieldId + ' > .blocks > .matrixblock');
+
+  expandAllBtn.on('activate', () => {
+    getBlocks().each((i, block) => {
+      $(block).data('entry').expand();
+    });
+  });
+
+  collapseAllBtn.on('activate', () => {
+    getBlocks().each((i, block) => {
+      $(block).data('entry').collapse();
+    });
+  });
+
+  setTimeout(() => {
+    const menu = expandAllBtn.closest('.menu').data('disclosureMenu');
+    menu.on('show', () => {
+      const blocks = getBlocks();
+      menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
+      menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
+    });
+  }, 1);
+})();
+JS, [
+                $view->namespaceInputId($expandAllId),
+                $view->namespaceInputId($collapseAllId),
+                $view->namespaceInputId($this->getInputId()),
+            ]);
+        }
 
         // Copy all
         if ($this->maxEntries !== 1 && $this->viewMode !== self::VIEW_MODE_INDEX) {
-            $view = Craft::$app->getView();
+            if (!empty($items)) {
+                $items[] = ['type' => 'hr'];
+            }
             $copyAllId = sprintf('action-copy-all-%s', mt_rand());
             $items[] = [
                 'id' => $copyAllId,
@@ -929,7 +1018,7 @@ JS, [
             return Html::tag('div', $message, ['class' => 'pane no-border zilch small']);
         }
 
-        if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
+        if ($element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         }
 
@@ -939,7 +1028,6 @@ JS, [
                 ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
-                ->eagerly()
                 ->all();
         }
 
@@ -996,7 +1084,9 @@ JS, [
 
             $js .= "\n" . <<<JS
 input.on('afterInit', async () => {
-  input.elementEditor?.pause();
+  if (input.elementEditor) {
+    await input.elementEditor.pause();
+  }
 JS . "\n";
 
             $entryTypeJs = Json::encode($entryTypes[0]->handle);
@@ -1056,6 +1146,7 @@ JS;
 }
 JS,
                 'createAttributes' => array_map(fn(EntryType $entryType) => [
+                    'group' => $entryType->group,
                     'icon' => $entryType->icon,
                     'color' => $entryType->color,
                     'label' => Craft::t('site', $entryType->name),
@@ -1238,7 +1329,7 @@ JS,
         }
 
         /** @var EntryQuery|ElementCollection $value */
-        $entries = $value->all();
+        $entries = $value->status(null)->all();
 
         if (empty($entries)) {
             return '<p class="light">' . Craft::t('app', 'No entries.') . '</p>';
@@ -1270,6 +1361,7 @@ JS;
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public function getEagerLoadingMap(array $sourceElements): array|null|false
     {

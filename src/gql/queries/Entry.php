@@ -18,6 +18,7 @@ use craft\gql\types\generators\EntryType as EntryTypeGenerator;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Gql as GqlHelper;
 use craft\models\EntryType;
+use craft\models\Section;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use yii\base\InvalidConfigException;
@@ -125,17 +126,32 @@ class Entry extends Query
                 $arguments += $gqlService->getFieldLayoutArguments($entryType->getFieldLayout());
             }
 
+            $unionType = GqlHelper::getUnionType("{$section->handle}SectionEntryUnion", $entryTypesInSection);
+
             // Create the section query field
             $name = "{$section->handle}Entries";
             $gqlTypes[$name] = [
                 'name' => $name,
                 'args' => $arguments,
                 'description' => sprintf('Entries within the “%s” section.', $section->name),
-                'type' => Type::listOf(GqlHelper::getUnionType("{$section->handle}SectionEntryUnion", $entryTypesInSection)),
+                'type' => Type::listOf($unionType),
                 // Enforce the section argument and set the source to `null`, to enforce a new element query.
                 'resolve' => fn($source, array $arguments, $context, ResolveInfo $resolveInfo) =>
                 EntryResolver::resolve(null, $arguments + ['section' => $section->handle], $context, $resolveInfo),
             ];
+
+            if ($section->type === Section::TYPE_SINGLE) {
+                $name = "{$section->handle}Entry";
+                $gqlTypes[$name] = [
+                    'name' => $name,
+                    'args' => $arguments,
+                    'description' => sprintf('Single entry within the “%s” section.', $section->name),
+                    'type' => $unionType,
+                    // Enforce the section argument and set the source to `null`, to enforce a new element query.
+                    'resolve' => fn($source, array $arguments, $context, ResolveInfo $resolveInfo) =>
+                    EntryResolver::resolveOne(null, $arguments + ['section' => $section->handle], $context, $resolveInfo),
+                ];
+            }
         }
 
         return $gqlTypes;

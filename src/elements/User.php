@@ -1491,7 +1491,7 @@ class User extends Element implements IdentityInterface
             return false;
         }
 
-        if (is_object($group) && $group instanceof UserGroup) {
+        if ($group instanceof UserGroup) {
             $group = $group->id;
         }
 
@@ -1702,7 +1702,7 @@ XML;
      */
     protected function thumbAlt(): ?string
     {
-        return $this->getPhoto()?->alt ?? $this->getName();
+        return $this->getPhoto()->alt ?? $this->getName();
     }
 
     /**
@@ -1960,7 +1960,7 @@ XML;
                 case self::STATUS_PENDING:
                     // Only provide activation actions if they have an email address
                     if ($this->email) {
-                        if ($this->pending || $canAdministrateUsers) {
+                        if ($this->pending || $canModerateUsers) {
                             $statusItems[] = [
                                 'icon' => 'paperplane',
                                 'label' => Craft::t('app', 'Send activation email'),
@@ -2201,12 +2201,6 @@ JS,
         return $items;
     }
 
-//    public function prepareEditScreen(Response $response, string $containerId): void
-//    {
-//        $cpScreen = $response->getBehavior('cp-screen');
-//        $t = 1;
-//    }
-
     private function _copyPasswordResetUrlActionItem(string $label, View $view): array
     {
         $id = sprintf('action-copy-password-reset-url-%s', mt_rand());
@@ -2402,7 +2396,7 @@ JS, [
                         ],
                     ]);
                 }
-                
+
                 // no break
             case 'isCredentialed':
                 $value = $this->getIsCredentialed();
