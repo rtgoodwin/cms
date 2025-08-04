@@ -11,6 +11,7 @@
 - Fixed a bug where entry authors could be changed to the current user when updating a provisional draft with upstream changes. ([#17693](https://github.com/craftcms/cms/issues/17693))
 - Fixed a bug where Money fields lost their focus when the clear button was activated.
 - Fixed a bug where focus wasn’t being managed properly when clicking on the image editor modal background. ([#17455](https://github.com/craftcms/cms/pull/17455))
+- Fixed a bug where custom sources that were hidden for certain user groups weren’t available within element selector modals either. ([#17703](https://github.com/craftcms/cms/issues/17703))
 
 ## 5.8.12 - 2025-07-29
 

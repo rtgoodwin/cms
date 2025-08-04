@@ -96,7 +96,7 @@ class ElementSources extends Component
                     }
                 } else {
                     if ($source['type'] === self::TYPE_CUSTOM) {
-                        if (!$this->_showCustomSource($source)) {
+                        if ($context === self::CONTEXT_INDEX && !$this->_showCustomSource($source)) {
                             continue;
                         }
                         $source = $elementType::modifyCustomSource($source);
