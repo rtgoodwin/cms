@@ -1242,7 +1242,7 @@ JS, [
                     Html::tag('span', '', [
                         'class' => 'notification-icon',
                         'data-icon' => 'alert',
-                        'aria-label' => 'error',
+                        'aria-label' => Craft::t('app', 'Error'),
                         'role' => 'img',
                     ]) .
                     Html::tag('h2', $heading) .

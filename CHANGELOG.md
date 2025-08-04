@@ -2,8 +2,15 @@
 
 ## Unreleased
 
+- `craft\models\FieldLayout::EVENT_CREATE_FORM` event handlers can now control whether the form will be rendered statically, by setting `$event->static`. ([#17699](https://github.com/craftcms/cms/pull/17699))
 - Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+- Fixed a race condition that could cause “User is not authorized” errors in the control panel. ([#17694](https://github.com/craftcms/cms/issues/17694))
+- Fixed a bug where `craft\elements\Asset::getFormattedSizeInBytes()` wasn’t returning `null` when the asset’s `size` property was `null`. ([#17695](https://github.com/craftcms/cms/issues/17695))
+- Fixed an error that could occur when saving an address, if any fields contained more than 255 characters, or emoji characters. ([#17696](https://github.com/craftcms/cms/issues/17696))
 - Fixed an error that could occur when installing Craft with existing project config data. ([#17587](https://github.com/craftcms/cms/issues/17587))
+- Fixed a bug where entry authors could be changed to the current user when updating a provisional draft with upstream changes. ([#17693](https://github.com/craftcms/cms/issues/17693))
+- Fixed a bug where Money fields lost their focus when the clear button was activated.
+- Fixed a bug where focus wasn’t being managed properly when clicking on the image editor modal background. ([#17455](https://github.com/craftcms/cms/pull/17455))
 
 ## 5.8.12 - 2025-07-29
 

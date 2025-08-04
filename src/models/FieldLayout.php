@@ -1242,6 +1242,7 @@ class FieldLayout extends Model
             ]);
             $this->trigger(self::EVENT_CREATE_FORM, $event);
             $tabs = $event->tabs;
+            $static = $event->static;
         }
 
         foreach ($tabs as $tab) {
