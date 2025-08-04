@@ -48,22 +48,33 @@
             <button type="button" class="focal-point btn icon leftalign">{{ 'Focal Point'|t('app') }}</button>
         </div>
 
-        {% set orientationOptions = [
-            {
-                label: 'Landscape'|t('app'),
-                value: 'landscape',
-            },
-            {
-                label: 'Portrait'|t('app'),
-                value: 'portrait',
-            }
-        ] %}
-
-        {{ forms.radioGroupField({
-            label: 'Orientation'|t('app'),
+        {{ forms.buttonGroupField({
+            id: 'orientation',
             name: 'orientation',
+            label: 'Orientation'|t('app'),
             value: 'landscape',
-            options: orientationOptions,
+            options: [
+                {
+                    icon: 'image-landscape',
+                    value: 'landscape',
+                    attributes: {
+                        title: 'Landscape'|t('app'),
+                        aria: {
+                            label: 'Landscape'|t('app'),
+                        },
+                    },
+                },
+                {
+                    icon: 'image-portrait',
+                    value: 'portrait',
+                    attributes: {
+                        title: 'Portrait'|t('app'),
+                        aria: {
+                            label: 'Portrait'|t('app'),
+                        },
+                    },
+                },
+            ],
         }) }}
 
         {% set constraintOptions = [] %}
