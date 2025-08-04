@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Forskeyti Texti',
     'Prefix must be 5 or less characters long.' => 'Forskeyti verður að vera 5 eða færri stafir að lengd.',
     'Prefix' => 'Forskeyti',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Forstillingar',
     'Prettify query' => 'Lagfærðu fyrirspurnina',
     'Prettify' => 'Pretty',

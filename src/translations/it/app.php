@@ -1129,6 +1129,7 @@ return [
     'Prefix Text' => 'Testo prefisso',
     'Prefix must be 5 or less characters long.' => 'Il prefisso può contenere massimo 5 caratteri.',
     'Prefix' => 'Prefisso',
+    'Prep {file}' => 'Prep {file}',
     'Presets' => 'Preset',
     'Prettify query' => 'Query Prettify',
     'Prettify' => 'Prettify',

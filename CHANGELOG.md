@@ -1,5 +1,43 @@
 # Release Notes for Craft CMS 4
 
+## Unreleased
+
+- Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
+- Fixed a race condition that could cause “User is not authorized” errors in the control panel. ([#17694](https://github.com/craftcms/cms/issues/17694))
+- Fixed a bug where `craft\elements\Asset::getFormattedSizeInBytes()` wasn’t returning `null` when the asset’s `size` property was `null`. ([#17695](https://github.com/craftcms/cms/issues/17695))
+- Fixed an error that could occur when saving an address, if any fields contained more than 255 characters, or emoji characters. ([#17696](https://github.com/craftcms/cms/issues/17696))
+
+## 4.16.8 - 2025-07-25
+
+- Fixed a potential session leakage vulnerability.
+
+## 4.16.7 - 2025-07-24
+
+- Added `craft\helpers\User::getLoginFailureInfo()`.
+- Deprecated `craft\helpers\User::getLoginFailureMessage()`.
+- Fixed a potential user account enumeration bug when `preventUserEnumeration` was enabled.
+
+## 4.16.6.1 - 2025-07-24
+
+- Fixed a bug where the “Prep composer.json” button within the Craft 5 Upgrade utility was producing invalid composer.json data.
+
+## 4.16.6 - 2025-07-24
+
+- The Craft 5 Upgrade utility now has a “Prep composer.json” button, which displays the project’s composer.json file, updated with Craft 5-compatible dependencies. ([#17534](https://github.com/craftcms/cms/discussions/17534), [#17647](https://github.com/craftcms/cms/discussions/17647))
+- Added `craft\helpers\Json::detectIndent()`.
+- Added `craft\helpers\Json::encodeToFile()`.
+- Added `craft\helpers\Json::reindent()`.
+- Fixed a SQL error that could occur when applying a draft that belonged to fewer sites than the canonical element. ([#17644](https://github.com/craftcms/cms/issues/17644))
+- Fixed an error that could occur when applying project config changes. ([#17625](https://github.com/craftcms/cms/issues/17625))
+- Fixed a bug where the password reset form could incorrectly have `newUser` set to `true`. ([#17659](https://github.com/craftcms/cms/issues/17659))
+- Fixed an error that could occur when exporting elements as XML. ([#17668](https://github.com/craftcms/cms/issues/17668))
+
+## 4.16.5 - 2025-07-17
+
+- Craft no longer logs warnings for requests that don’t meet the user agent and IP requirements for maintaining a user session, unless a PHP session already exists or the user is attempting to sign in.
+- Fixed a bug where transformed images based on named transforms weren’t getting regenerated when the transform settings changed. ([#17615](https://github.com/craftcms/cms/issues/17615))
+- Fixed an RCE vulnerability.
+
 ## 4.16.4 - 2025-07-08
 
 - Fixed an information disclosure vulnerability.
