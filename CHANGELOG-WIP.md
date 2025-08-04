@@ -5,6 +5,7 @@
 
 ### Administration
 - Users’ User Groups settings now show a component select input, and support inline group editing/creation on environments that allow administrative changes.
+- Control panel-defined routes now have action menus with “Move up”/“Move down” actions. ([#17706](https://github.com/craftcms/cms/pull/17706))
 
 ### Extensibility
 - Added `Craft.BaseElementIndex::asyncSelectDefaultSource()`.
