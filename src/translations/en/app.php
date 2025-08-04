@@ -1955,6 +1955,7 @@ return [
     'User Profile Fields' => 'User Profile Fields',
     'User Settings' => 'User Settings',
     'User fields saved.' => 'User fields saved.',
+    'User group settings' => 'User group settings',
     'User photo must be an image that Craft can manipulate.' => 'User photo must be an image that Craft can manipulate.',
     'User registered.' => 'User registered.',
     'User settings saved.' => 'User settings saved.',
