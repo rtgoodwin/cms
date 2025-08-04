@@ -17,6 +17,10 @@
   cursor: pointer;
   display: flex;
 
+  &.inactive:hover {
+    cursor: not-allowed;
+  }
+
   .uri-container,
   .template,
   .actions {
