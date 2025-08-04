@@ -14,6 +14,7 @@ use craft\base\FieldInterface;
 use craft\base\FieldLayoutElement;
 use craft\base\FieldLayoutProviderInterface;
 use craft\base\Model;
+use craft\errors\FieldNotFoundException;
 use craft\events\CreateFieldLayoutFormEvent;
 use craft\events\DefineFieldLayoutCustomFieldsEvent;
 use craft\events\DefineFieldLayoutElementsEvent;
@@ -423,8 +424,12 @@ class FieldLayout extends Model
         $missingFields = [];
 
         foreach ($this->getElementsByType(BaseField::class) as $field) {
-            /** @var BaseField $field */
-            $includedFields[$field->attribute()] = true;
+            try {
+                /** @var BaseField $field */
+                $includedFields[$field->attribute()] = true;
+            } catch (FieldNotFoundException) {
+                // move on
+            }
         }
 
         foreach ($this->getAvailableNativeFields() as $field) {
@@ -1099,10 +1104,17 @@ class FieldLayout extends Model
             }
         }
 
-        $elements = array_merge($layoutElements, $attributes);
-
-        // get card view IDs stored in the field layout config
+        // get the card view config - array of all the attributes, fields and generated fields that should be shown in the card
         $cardViewValues = $this->getCardView();
+
+        // filter out any generated fields that shouldn't show in the card
+        $layoutElements = array_filter(
+            $layoutElements,
+            fn($key) => !str_starts_with($key, 'generatedField:') || in_array($key, $cardViewValues),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        $elements = array_merge($layoutElements, $attributes);
 
         // make sure we don't have any cardViewValues that are no longer allowed to show in cards
         $cardViewValues = array_filter($cardViewValues, fn($value) => isset($elements[$value]));
