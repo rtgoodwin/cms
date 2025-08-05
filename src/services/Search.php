@@ -927,63 +927,59 @@ SQL;
                 $pgsqlPhrase = !$isMysql && $term->phrase;
                 if ($pgsqlPhrase && $term->exact) {
                     $sql = $this->_sqlPhraseExactMatch($keywords);
-                } else {
-                    if (!$pgsqlPhrase && $this->_doFullTextSearch($keywords, $term)) {
-                        if ($term->subRight) {
-                            if ($isMysql) {
-                                $keywords .= '*';
-                            } else {
-                                $keywords .= ':*';
-                            }
-                        }
-
-                        // Add quotes for exact match
-                        if ($isMysql && StringHelper::contains($keywords, ' ')) {
-                            if (StringHelper::first($keywords, 1) === '*') {
-                                $keywords = StringHelper::insert($keywords, '"', 1);
-                            } else {
-                                $keywords = '"' . $keywords;
-                            }
-
-                            if (StringHelper::last($keywords, 1) === '*') {
-                                $keywords = StringHelper::insert($keywords, '"', StringHelper::length($keywords) - 1);
-                            } else {
-                                $keywords .= '"';
-                            }
-                        }
-
-                        // Determine prefix for the full-text keyword
-                        if ($term->exclude) {
-                            $keywords = '-' . $keywords;
-                        }
-
-                        // Only create an SQL clause if there's a subselect. Otherwise, return the keywords.
-                        if ($subSelect !== null) {
-                            // If there is a subselect, create the full text SQL bit
-                            $sql = $this->_sqlFullText($keywords);
-                        }
-                    } // Create LIKE clause from term
-                    else {
-                        if ($term->exact) {
-                            // Create exact clause from term
-                            $operator = $term->exclude ? 'NOT LIKE' : 'LIKE';
-                            $keywords = ($term->subLeft ? '%' : ' ') . $keywords . ($term->subRight ? '%' : ' ');
+                } elseif (!$pgsqlPhrase && $this->_doFullTextSearch($keywords, $term)) {
+                    if ($term->subRight) {
+                        if ($isMysql) {
+                            $keywords .= '*';
                         } else {
-                            // Create LIKE clause from term
-                            $operator = $term->exclude ? 'NOT LIKE' : 'LIKE';
-                            $keywords = ($term->subLeft ? '%' : '% ') . $keywords . ($term->subRight ? '%' : ' %');
+                            $keywords .= ':*';
+                        }
+                    }
+
+                    // Add quotes for exact match
+                    if ($isMysql && StringHelper::contains($keywords, ' ')) {
+                        if (StringHelper::first($keywords, 1) === '*') {
+                            $keywords = StringHelper::insert($keywords, '"', 1);
+                        } else {
+                            $keywords = '"' . $keywords;
                         }
 
-                        // Generate the SQL
-                        $sql = $this->_sqlWhere('keywords', $operator, $keywords);
+                        if (StringHelper::last($keywords, 1) === '*') {
+                            $keywords = StringHelper::insert($keywords, '"', StringHelper::length($keywords) - 1);
+                        } else {
+                            $keywords .= '"';
+                        }
                     }
+
+                    // Determine prefix for the full-text keyword
+                    if ($term->exclude) {
+                        $keywords = '-' . $keywords;
+                    }
+
+                    // Only create an SQL clause if there's a subselect. Otherwise, return the keywords.
+                    if ($subSelect !== null) {
+                        // If there is a subselect, create the full text SQL bit
+                        $sql = $this->_sqlFullText($keywords);
+                    }
+                } else {
+                    // Create LIKE clause from term
+                    if ($term->exact) {
+                        // Create exact clause from term
+                        $operator = $term->exclude ? 'NOT LIKE' : 'LIKE';
+                        $keywords = ($term->subLeft ? '%' : ' ') . $keywords . ($term->subRight ? '%' : ' ');
+                    } else {
+                        // Create LIKE clause from term
+                        $operator = $term->exclude ? 'NOT LIKE' : 'LIKE';
+                        $keywords = ($term->subLeft ? '%' : '% ') . $keywords . ($term->subRight ? '%' : ' %');
+                    }
+
+                    // Generate the SQL
+                    $sql = $this->_sqlWhere('keywords', $operator, $keywords);
                 }
             }
-        } else {
+        } elseif ($term->subLeft) {
             // Support for attribute:* syntax to just check if something has *any* keyword value.
-            if ($term->subLeft) {
-                $sql = $this->_sqlWhere('keywords', '!=', '');
-            }
+            $sql = $this->_sqlWhere('keywords', '!=', '');
         }
 
         // If we have a where clause in the subselect, add the keyword bit to it.
