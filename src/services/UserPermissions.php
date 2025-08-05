@@ -145,7 +145,7 @@ class UserPermissions extends Component
      * Returns all of a given user group's permissions.
      *
      * @param int $groupId
-     * @return array
+     * @return string[]
      */
     public function getPermissionsByGroupId(int $groupId): array
     {
