@@ -146,8 +146,9 @@ class Assets extends Component
      * @param Asset $asset
      * @param string $pathOnServer
      * @param string $filename
+     * @param string|null $mimeType The default MIME type to use, if it can’t be determined based on the server path
      */
-    public function replaceAssetFile(Asset $asset, string $pathOnServer, string $filename): void
+    public function replaceAssetFile(Asset $asset, string $pathOnServer, string $filename, ?string $mimeType = null): void
     {
         // Fire a 'beforeReplaceFile' event
         if ($this->hasEventHandlers(self::EVENT_BEFORE_REPLACE_ASSET)) {
@@ -162,6 +163,7 @@ class Assets extends Component
 
         $asset->tempFilePath = $pathOnServer;
         $asset->newFilename = $filename;
+        $asset->setMimeType(FileHelper::getMimeType($pathOnServer, checkExtension: false) ?? $mimeType);
         $asset->uploaderId = Craft::$app->getUser()->getId();
         $asset->avoidFilenameConflicts = true;
         $asset->setScenario(Asset::SCENARIO_REPLACE);
@@ -487,7 +489,7 @@ class Assets extends Component
      * @param string $orderBy
      * @param bool $withParent Whether the parent folder should be included in the results
      * @param bool $asTree Whether the folders should be returned hierarchically
-     * @return VolumeFolder[]
+     * @return array<int,VolumeFolder> The descendant folders, indexed by their IDs
      */
     public function getAllDescendantFolders(
         VolumeFolder $parentFolder,
@@ -545,7 +547,7 @@ class Assets extends Component
         $criteria->limit = 1;
         $folder = $this->findFolders($criteria);
 
-        if (is_array($folder) && !empty($folder)) {
+        if (!empty($folder)) {
             return array_pop($folder);
         }
 

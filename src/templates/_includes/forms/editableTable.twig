@@ -144,6 +144,15 @@
                                                 describedBy: describedBy,
                                             } only %}
                                         </div>
+                                    {%- case 'icon' -%}
+                                        {% include '_includes/forms/iconPicker' with {
+                                          name: cellName,
+                                          value,
+                                          small: true,
+                                          disabled: static,
+                                          labelledBy: headingId,
+                                          describedBy: describedBy,
+                                        } only %}
                                     {%- case 'color' -%}
                                         {% include "_includes/forms/color" with {
                                             name: cellName,
@@ -221,6 +230,10 @@
                                                 name: cellName,
                                                 rows: col.rows ?? 1,
                                                 placeholder: col.placeholder ?? false,
+                                                autocomplete: isCode ? 'off' : false,
+                                                autocorrect: isCode ? 'off' : false,
+                                                autocapitalize: isCode ? 'off' : false,
+                                                spellcheck: isCode ? 'false' : false,
                                                 aria: {
                                                     labelledby: headingId,
                                                     describedby: describedBy,
@@ -236,7 +249,7 @@
                 {% if allowReorder -%}
                     <td class="thin action">
                       <div class="flex flex-nowrap">
-                        <a class="move icon" title="{{ 'Reorder'|t('app') }}" aria-label="{{ 'Reorder'|t('app') }}" type="button" role="button"></a>
+                        <a class="move icon" title="{{ 'Reorder'|t('app') }}"></a>
                         {{~ disclosureMenu(actionMenuItems, {
                           buttonAttributes: {
                             'aria-label': actionBtnLabel,
@@ -269,6 +282,9 @@
                         }) }}
                     </td>
                 {%- endif -%}
+                {% for inputName, value in row.hiddenInputs ?? [] %}
+                    {{ hiddenInput("#{name}[#{rowId}][#{inputName}]", value) }}
+                {% endfor %}
             </tr>
         {% endfor %}
     </tbody>

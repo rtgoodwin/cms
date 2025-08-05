@@ -180,6 +180,14 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
     public function getTranslationKey(ElementInterface $element): string;
 
     /**
+     * Returns whether the field should show a status indicator when modified.
+     *
+     * @return bool
+     * @since 5.8.0
+     */
+    public function showStatus(): bool;
+
+    /**
      * Returns the status of the field for a given element.
      *
      * If the field has a known status, an array should be returned with two elements:
@@ -419,9 +427,8 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
     public function normalizeValueFromRequest(mixed $value, ?ElementInterface $element): mixed;
 
     /**
-     * Prepares the field’s value to be stored somewhere, like the content table.
+     * Serializes the field’s value into a transportable format (either a scalar value or array of scalar values).
      *
-     * Data types that are JSON-encodable are safe (arrays, integers, strings, booleans, etc).
      * Whatever this returns should be something [[normalizeValue()]] can handle.
      *
      * @param mixed $value The raw field value
@@ -429,6 +436,19 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
      * @return mixed The serialized field value
      */
     public function serializeValue(mixed $value, ?ElementInterface $element): mixed;
+
+    /**
+     * Serializes the field’s value into a transportable format (either a scalar value or array of scalar values),
+     * for database storage.
+     *
+     * Whatever this returns should be something [[normalizeValue()]] can handle.
+     *
+     * @param mixed $value
+     * @param ElementInterface $element
+     * @return mixed
+     * @since 5.7.0
+     */
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed;
 
     /**
      * Copies the field’s value from one element to another.
@@ -451,6 +471,10 @@ interface FieldInterface extends SavableComponentInterface, Chippable, Grippable
 
     /**
      * Returns a SQL expression which extracts the field’s value from the `elements_sites.content` column.
+     *
+     * > [!NOTE]
+     * > This method expects the resulting SQL to be used within a query where the `elements_sites`
+     * > table has been explicitly aliased to `elements_sites`, in case the actual table name has a prefix.
      *
      * @param string|null $key The data key to fetch, if this field stores multiple values
      * @return string|null

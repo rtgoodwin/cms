@@ -30,7 +30,6 @@ use craft\web\twig\SinglePreloaderExtension;
 use craft\web\twig\TemplateLoader;
 use Illuminate\Support\Collection;
 use LogicException;
-use Stringable;
 use Throwable;
 use Twig\Error\LoaderError as TwigLoaderError;
 use Twig\Error\RuntimeError as TwigRuntimeError;
@@ -189,16 +188,6 @@ class View extends \yii\web\View
     /**
      * @var array|null
      */
-    private ?array $_cpTemplateRoots = null;
-
-    /**
-     * @var array|null
-     */
-    private ?array $_siteTemplateRoots = null;
-
-    /**
-     * @var array|null
-     */
     private ?array $_templateRoots = null;
 
     /**
@@ -309,7 +298,6 @@ class View extends \yii\web\View
      */
     private array $_assetBundleBuffers = [];
 
-
     /**
      * @var array
      * @see startJsImportBuffer()
@@ -334,6 +322,12 @@ class View extends \yii\web\View
      * @see registerJsImport()
      */
     private array $_jsImports = [];
+
+    /**
+     * @var string[] The icons that should be registered to the page.
+     * @see registerIcons()
+     */
+    private array $_icons = [];
 
     /**
      * @var callable[][]
@@ -428,8 +422,8 @@ class View extends \yii\web\View
         $twig = new Environment(new TemplateLoader($this), $this->_getTwigOptions());
 
         // Mark SafeHtml as a safe interface
-        /** @var class-string<Stringable> $safeClass */
         $safeClass = SafeHtml::class;
+        /** @phpstan-ignore argument.type */
         $twig->getRuntime(EscaperRuntime::class)->addSafeClass($safeClass, ['html']);
 
         $twig->addExtension(new StringLoaderExtension());
@@ -847,7 +841,6 @@ class View extends \yii\web\View
      * @param string|null $templateMode The template mode to use.
      * @param bool $publicOnly Whether to only look for public templates (template paths that don’t start with the private template trigger).
      * @return bool Whether the template exists.
-     * @throws Exception
      */
     public function doesTemplateExist(string $name, ?string $templateMode = null, bool $publicOnly = false): bool
     {
@@ -1610,6 +1603,20 @@ JS;
     }
 
     /**
+     * Registers icons for `Craft.ui.icon()`.
+     *
+     * @param string[] $icons The icons to be registered
+     * @since 5.7.0
+     */
+    public function registerIcons(array $icons): void
+    {
+        $this->_icons = [
+            ...$this->_icons,
+            ...array_flip($icons),
+        ];
+    }
+
+    /**
      * Returns the active namespace.
      *
      * This is the default namespaces that will be used when [[namespaceInputs()]], [[namespaceInputName()]],
@@ -2039,9 +2046,10 @@ JS;
 
         if (isset($this->_hooks[$hook])) {
             $handled = false;
+
+            /** @var callable(array $context, bool &$handled):string $method */
             foreach ($this->_hooks[$hook] as $method) {
                 $return .= $method($context, $handled);
-                /** @var bool $handled */
                 if ($handled) {
                     break;
                 }
@@ -2254,6 +2262,18 @@ JS;
         }
         if (!empty($this->_html[self::POS_END])) {
             $lines[] = implode("\n", $this->_html[self::POS_END]);
+        }
+
+        if (!empty($this->_icons)) {
+            $icons = [];
+            foreach (array_keys($this->_icons) as $icon) {
+                $icons[$icon] = Cp::iconSvg($icon);
+            }
+            $iconsJs = Json::encode($icons);
+            $this->js[self::POS_END][] = <<<JS
+Craft.icons = $iconsJs;
+JS;
+            $this->_icons = [];
         }
 
         $html = parent::renderBodyEndHtml($ajaxMode);

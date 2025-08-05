@@ -60,8 +60,9 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
             multi: this.settings.multiSelect,
             vertical: this.isVerticalList(),
             filter: (target) => {
-              return !$(target).closest('a[href],.toggle,.btn,[role=button]')
-                .length;
+              return !$(target).closest(
+                'a[href],.toggle,.btn,[role=button],.move,craft-copy-attribute'
+              ).length;
             },
             checkboxMode: this.settings.checkboxMode,
             waitForDoubleClicks: this.settings.waitForDoubleClicks,
@@ -100,9 +101,9 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
         this._handleElementEditing = (ev) => {
           if (
             this.elementIndex.inlineEditing ||
-            $(ev.target).closest('a[href],button,[role=button]').length
+            $(ev.target).closest('a[href],button,[role=button],.move').length
           ) {
-            // Let the link/button do its thing
+            // Let the link/button/move handle do its thing
             return;
           }
 

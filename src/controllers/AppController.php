@@ -116,8 +116,6 @@ class AppController extends Controller
      */
     public function actionResourceJs(string $url): Response
     {
-        $this->requireCpRequest();
-
         if (!str_starts_with($url, Craft::$app->getAssetManager()->baseUrl)) {
             throw new BadRequestHttpException("$url does not appear to be a resource URL");
         }
@@ -129,6 +127,22 @@ class AppController extends Controller
         $this->response->setCacheHeaders();
         $this->response->getHeaders()->set('content-type', 'application/javascript');
         return $this->asRaw($response->getBody());
+    }
+
+    /**
+     * Returns the HTML for a control panel icon.
+     *
+     * @return Response
+     * @since 5.7.0
+     */
+    public function actionIconSvg(): Response
+    {
+        $this->requireCpRequest();
+        $this->requireAcceptsJson();
+
+        return $this->asJson([
+            'iconSvg' => Cp::iconSvg($this->request->getRequiredParam('icon')),
+        ]);
     }
 
     /**
@@ -445,6 +459,7 @@ class AppController extends Controller
             default => 1597,
         };
 
+        $this->response->setNoCacheHeaders();
         return $this->renderTemplate('_special/licensing-issues.twig', [
             'issues' => $issues,
             'hash' => $hash,

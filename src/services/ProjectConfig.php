@@ -409,7 +409,7 @@ class ProjectConfig extends Component
     }
 
     /**
-     * Saves the modified project confgi state and writes out updated YAML files, if needed.
+     * Saves the modified project config state and writes out updated YAML files, if needed.
      *
      * @since 5.0.0
      */
@@ -1289,7 +1289,11 @@ class ProjectConfig extends Component
     {
         Craft::info('Looking for pending changes', __METHOD__);
 
-        $processChanges = fn($path, $triggerUpdate = false) => $this->getCurrentWorkingConfig()->commitChanges($existingConfig->get($path), $incomingConfig->get($path), $path, $triggerUpdate, null, true);
+        $processChanges = function($path, $triggerUpdate = false) use ($existingConfig, $incomingConfig) {
+            $oldValue = $existingConfig->get($path);
+            $newValue = $incomingConfig->get($path);
+            $this->getCurrentWorkingConfig()->commitChanges($oldValue, $newValue, $path, $triggerUpdate, null, true);
+        };
 
         // If we're parsing all the changes, we better work the actual config map.
         if (!empty($changes['removedItems'])) {
@@ -1843,6 +1847,7 @@ class ProjectConfig extends Component
                 $segments = explode('.', $path);
                 foreach ($segments as $segment) {
                     // If we're still traversing, enforce array to avoid errors.
+                    /** @phpstan-ignore-next-line */
                     if (!is_array($current)) {
                         $current = [];
                     }
@@ -2020,8 +2025,10 @@ class ProjectConfig extends Component
      */
     private function _getUserData(array $data): array
     {
-        $fieldLayout = Craft::$app->getFields()->getLayoutByType(User::class);
-        if ($fieldLayoutConfig = $fieldLayout->getConfig()) {
+        $fieldLayout = Craft::$app->getFields()->getLayoutByType(User::class, false);
+        $fieldLayoutConfig = $fieldLayout?->getConfig();
+
+        if ($fieldLayoutConfig) {
             $data['fieldLayouts'] = [
                 $fieldLayout->uid => $fieldLayoutConfig,
             ];
@@ -2048,8 +2055,10 @@ class ProjectConfig extends Component
     private function _getAddressesData(): array
     {
         $data = [];
-        $fieldLayout = Craft::$app->getFields()->getLayoutByType(Address::class);
-        if ($fieldLayoutConfig = $fieldLayout->getConfig()) {
+        $fieldLayout = Craft::$app->getFields()->getLayoutByType(Address::class, false);
+        $fieldLayoutConfig = $fieldLayout?->getConfig();
+
+        if ($fieldLayoutConfig) {
             $data['fieldLayouts'] = [
                 $fieldLayout->uid => $fieldLayoutConfig,
             ];

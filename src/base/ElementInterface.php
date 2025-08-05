@@ -10,7 +10,6 @@ namespace craft\base;
 use craft\behaviors\CustomFieldBehavior;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\EagerLoadPlan;
-use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\ElementCollection;
 use craft\elements\User;
@@ -18,7 +17,10 @@ use craft\enums\AttributeStatus;
 use craft\errors\InvalidFieldException;
 use craft\models\FieldLayout;
 use craft\models\Site;
+use GraphQL\Type\Definition\Type;
 use Twig\Markup;
+use yii\base\InvalidConfigException;
+use yii\base\NotSupportedException;
 use yii\web\Response;
 
 /**
@@ -29,6 +31,8 @@ use yii\web\Response;
  * @mixin CustomFieldBehavior
  * @mixin Component
  * @phpstan-require-extends Element
+ * @phpstan-type EagerLoadingMapItem array{elementType?:class-string<ElementInterface>,source:int,target:int}
+ * @phpstan-type EagerLoadingMap array{elementType?:class-string<ElementInterface>,map:EagerLoadingMapItem[],criteria?:array,createElement?:callable}
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -407,6 +411,14 @@ interface ElementInterface extends
     public static function searchableAttributes(): array;
 
     /**
+     * Returns the base attributes that should be applied when bulk-duplicating elements of this type.
+     *
+     * @return array
+     * @since 5.7.0
+     */
+    public static function baseBulkDuplicateAttributes(): array;
+
+    /**
      * Returns the element index HTML.
      *
      * @param ElementQueryInterface $elementQuery
@@ -565,12 +577,19 @@ interface ElementInterface extends
      *
      * This method aids in the eager-loading of elements when performing an element query. The returned array should
      * contain the following keys:
-     * - `elementType` – the fully qualified class name of the element type that should be eager-loaded
-     * - `map` – an array of element ID mappings, where each element is a sub-array with `source` and `target` keys
+     * - `map` – an array defining source-target element mappings
+     * - `elementType` *(optional)* – the fully qualified class name of the element type that should be eager-loaded,
+     *   if each target element is of the same element type
      * - `criteria` *(optional)* – any criteria parameters that should be applied to the element query when fetching the
      *   eager-loaded elements
      * - `createElement` *(optional)* - an element factory function, which will be passed the element query, the current
      *   query result data, and the first source element that the result was eager-loaded for
+     *
+     * Each mapping listed in `map` should be an array with the following keys:
+     * - `source` – the source element ID
+     * - `target` – the target element ID
+     * - `elementType` *(optional)* – the target element type (only checked for if the top-level array doesn’t specify
+     *   an `elementType` key)
      *
      * ```php
      * use craft\base\ElementInterface;
@@ -607,12 +626,23 @@ interface ElementInterface extends
      * }
      * ```
      *
+     * Alternatively, the method can return an array of multiple sets of mappings, each with their own nested `map`,
+     * `elementType`, `criteria`, and `createElement` keys.
+     *
      * @param self[] $sourceElements An array of the source elements
      * @param string $handle The property handle used to identify which target elements should be included in the map
-     * @return array|null|false The eager-loading element ID mappings, false if no mappings exist, or null if the result
-     * should be ignored
+     * @return EagerLoadingMap|EagerLoadingMap[]|null|false The eager-loading element ID mappings, false if no mappings
+     * exist, or null if the result should be ignored
      */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false;
+
+    /**
+     * Returns the base GraphQL type name that represents elements of this type.
+     *
+     * @return Type
+     * @since 5.7.0
+     */
+    public static function baseGqlType(): Type;
 
     /**
      * Returns the GraphQL scopes required by element’s context.
@@ -857,6 +887,14 @@ interface ElementInterface extends
     public function showStatusIndicator(): bool;
 
     /**
+     * Returns the titlebar label for element cards.
+     *
+     * @return string|null
+     * @since 5.7.0
+     */
+    public function getCardTitle(): ?string;
+
+    /**
      * Returns the body HTML for element cards.
      *
      * @return string|null
@@ -924,6 +962,15 @@ interface ElementInterface extends
      * @since 5.0.0
      */
     public function canDuplicateAsDraft(User $user): bool;
+
+    /**
+     * Returns whether the given user is authorized to copy this element, to be duplicated elsewhere.
+     *
+     * @param User $user
+     * @return bool
+     * @since 5.7.0
+     */
+    public function canCopy(User $user): bool;
 
     /**
      * Returns whether the given user is authorized to delete this element.
@@ -1416,6 +1463,18 @@ interface ElementInterface extends
     public function getSerializedFieldValues(?array $fieldHandles = null): array;
 
     /**
+     * Returns an array of the element’s serialized custom field values, indexed by their handles,
+     * for database storage.
+     *
+     * @param string[]|null $fieldHandles The list of field handles whose values
+     * need to be returned. Defaults to null, meaning all fields’ values will be
+     * returned. If it is an array, only the fields in the array will be returned.
+     * @return array
+     * @since 5.7.0
+     */
+    public function getSerializedFieldValuesForDb(?array $fieldHandles = null): array;
+
+    /**
      * Sets the element’s custom field values.
      *
      * @param array $values The custom field values (handle => value)
@@ -1562,6 +1621,22 @@ interface ElementInterface extends
      * @return string
      */
     public function getFieldContext(): string;
+
+    /**
+     * Returns the generated field values for the element, indexed by handle.
+     *
+     * @return array<string,string>
+     * @since 5.8.0
+     */
+    public function getGeneratedFieldValues(): array;
+
+    /**
+     * Sets the generated field values for the element, indexed by handle.
+     *
+     * @param array<string,string|null> $values
+     * @since 5.8.0
+     */
+    public function setGeneratedFieldValues(array $values): void;
 
     /**
      * Returns the element’s invalid nested element IDs.
@@ -1845,4 +1920,17 @@ interface ElementInterface extends
      * Returns the string representation of the element.
      */
     public function __toString(): string;
+
+    /**
+     * Renders the element using its partial template.
+     *
+     * If no partial template exists for the element, its string representation will be output instead.
+     *
+     * @param array $variables
+     * @return Markup
+     * @throws InvalidConfigException
+     * @throws NotSupportedException
+     * @since 5.8.0
+     */
+    public function render(array $variables = []): Markup;
 }

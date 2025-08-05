@@ -160,9 +160,7 @@ Craft.Preview = Garnish.Base.extend(
     _buildUi: function () {
       this.editorId = `lp-editor-${Math.floor(Math.random() * 100000000)}`;
 
-      const previewSkipLinkText = Craft.t('app', 'Skip to {title}', {
-        title: Craft.t('app', 'Top of preview'),
-      });
+      const previewSkipLinkText = Craft.t('app', 'Skip to top of preview');
 
       this.$shade = $('<div/>', {class: 'modal-shade dark'}).appendTo(
         Garnish.$bod
@@ -412,7 +410,11 @@ Craft.Preview = Garnish.Base.extend(
             updateTabs: (tabs) => this.updateTabs(tabs),
             getTabManager: () => this.tabManager,
             handleSubmitResponse: (response) => {
-              window.location.reload();
+              if (this.settings.redirectUrl) {
+                document.location.href = this.settings.redirectUrl;
+              } else {
+                window.location.reload();
+              }
             },
             handleSubmitError: async (error) => {
               // We can get away with just refreshing the content since there's
@@ -1116,20 +1118,21 @@ Craft.Preview = Garnish.Base.extend(
       revisionId: null,
       siteId: null,
       standaloneMode: false,
+      redirectUrl: null,
       onBeforeLoad: async () => {},
     },
 
     refresh: function () {
-      for (let preview of Craft.Preview.instances) {
+      for (const preview of Craft.Preview.instances) {
         preview.updateIframe();
       }
-      for (let preview of Craft.LivePreview.instances) {
+      for (const preview of Craft.LivePreview.instances) {
         preview.forceUpdateIframe();
       }
     },
 
     getActive: function () {
-      for (let preview of Craft.Preview.instances) {
+      for (const preview of Craft.Preview.instances) {
         if (preview.isActive) {
           return preview;
         }

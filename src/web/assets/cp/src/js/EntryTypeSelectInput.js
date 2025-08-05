@@ -19,28 +19,28 @@ Craft.EntryTypeSelectInput = Craft.ComponentSelectInput.extend(
         const disclosureMenu = this.getDisclosureMenu($component);
         const $editBtn = disclosureMenu.$container.find('[data-edit-action]');
         if ($editBtn.length) {
-          const $ul = $editBtn.closest('ul');
-          $editBtn.closest('li').remove();
-          if ($ul.find('li').length === 0) {
-            $ul.remove();
-          }
+          disclosureMenu.hideItem($editBtn[0]);
         }
-        Craft.addActionsToChip(
-          $component,
-          [
-            {
-              icon: 'gear',
-              label: Craft.t('app', 'Settings'),
-              callback: () => {
-                this.createSettings($component);
+        if (this.settings.addItemsToActionMenus) {
+          Craft.addActionsToChip(
+            $component,
+            [
+              {
+                icon: async () => await Craft.ui.icon('gear'),
+                label: Craft.t('app', 'Settings'),
+                onActivate: (el) => {
+                  $(el)
+                    .closest('.menu')
+                    .data('disclosureMenu')
+                    .$trigger.closest('.componentselect')
+                    .data('componentSelect')
+                    .createSettings($component);
+                },
               },
-              attributes: {
-                'data-edit-action': true,
-              },
-            },
-          ],
-          true
-        );
+            ],
+            true
+          );
+        }
       }
 
       this.base($component);
@@ -164,7 +164,6 @@ Craft.EntryTypeSelectInput = Craft.ComponentSelectInput.extend(
         } catch (e) {
           let errors = e?.response?.data?.errors;
           if (errors) {
-            debugger;
             Object.entries(errors).forEach(([name, fieldErrors]) => {
               const $field = slideout.$container.find(
                 `[data-error-key="${name}"]`
@@ -183,7 +182,19 @@ Craft.EntryTypeSelectInput = Craft.ComponentSelectInput.extend(
         $component
           .find('.chip-label')
           .replaceWith($newContainer.find('.chip-label'));
-        $component.find('input').val(JSON.stringify(data.config));
+
+        // Update the input with the new config, but keep the old group value around
+        const $input = $component.find('input');
+        const config = {...data.config};
+        const group = JSON.parse($input.val()).group;
+        if (group) {
+          config.group = group;
+        }
+        $input.val(JSON.stringify(config));
+
+        Craft.initUiElements($component);
+
+        this.trigger('applySettings');
 
         slideout.close();
         slideout.destroy();

@@ -34,6 +34,7 @@ use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\ElementHelper;
 use craft\helpers\Html;
+use craft\helpers\Json;
 use craft\helpers\StringHelper;
 use craft\helpers\UrlHelper;
 use craft\i18n\Locale;
@@ -44,6 +45,7 @@ use craft\web\Controller;
 use craft\web\CpScreenResponseBehavior;
 use craft\web\UrlManager;
 use craft\web\View;
+use Illuminate\Support\Collection;
 use Throwable;
 use yii\helpers\Markdown;
 use yii\web\BadRequestHttpException;
@@ -99,6 +101,9 @@ class ElementsController extends Controller
     private ?string $_selectedTab = null;
     private bool $_applyParams;
     private bool $_prevalidate;
+    private bool $_asUnpublishedDraft;
+    private bool $_deleteProvisionalDraft;
+    private ?bool $_updateSearchIndexImmediately = null;
 
     /**
      * @inheritdoc
@@ -139,6 +144,9 @@ class ElementsController extends Controller
         $this->_selectedTab = $this->_param('selectedTab');
         $this->_applyParams = $this->_param('applyParams', true) || !$this->request->getIsPost();
         $this->_prevalidate = (bool)$this->_param('prevalidate');
+        $this->_asUnpublishedDraft = (bool)$this->_param('asUnpublishedDraft');
+        $this->_deleteProvisionalDraft = (bool)$this->_param('deleteProvisionalDraft');
+        $this->_updateSearchIndexImmediately = $this->_param('updateSearchIndexImmediately');
 
         unset($this->_attributes['failMessage']);
         unset($this->_attributes['redirect']);
@@ -175,7 +183,9 @@ class ElementsController extends Controller
      */
     public function actionRedirect(?int $elementId = null, ?string $elementUid = null): Response
     {
-        $element = $this->_element($elementId, $elementUid);
+        $this->_elementId = $elementId ?? $this->_elementId;
+        $this->_elementUid = $elementUid ?? $this->_elementUid;
+        $element = $this->_element();
 
         if ($element instanceof Response) {
             return $element;
@@ -260,8 +270,12 @@ class ElementsController extends Controller
         $strictSite = $this->request->getAcceptsJson();
 
         if ($element === null) {
-            /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
-            $element = $this->_element($elementId, checkForProvisionalDraft: true, strictSite: $strictSite);
+            $this->_elementId = $elementId ?? $this->_elementId;
+            /**
+             * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+             * @phpstan-ignore varTag.nativeType
+             */
+            $element = $this->_element(checkForProvisionalDraft: true, strictSite: $strictSite);
 
             if ($element instanceof Response) {
                 return $element;
@@ -345,10 +359,9 @@ class ElementsController extends Controller
 
         // Screen prep
         [$docTitle, $title] = $this->_editElementTitles($element);
-        $type = $element::lowerDisplayName();
         $enabledForSite = $element->getEnabledForSite();
         $hasRoute = $element->getRoute() !== null;
-        $redirectUrl = ElementHelper::postEditUrl($element);
+        $redirectUrl = $this->request->getValidatedQueryParam('returnUrl') ?? ElementHelper::postEditUrl($element);
 
         // Site statuses
         if ($canEditMultipleSites) {
@@ -388,6 +401,13 @@ class ElementsController extends Controller
                 $isUnpublishedDraft,
                 $canCreateDrafts,
             ))
+            ->toolbarHtml(
+                // if we're in a slideout, we don't want to add the .flex-grow to the header toolbar
+                // as it'll mess with the width available for the tabs
+                // see https://github.com/craftcms/cms/issues/17260
+                ($this->_isSlideout() ? '' : Html::tag('div', options: ['class' => 'flex-grow'])) .
+                Html::tag('div', options: ['class' => 'activity-container']),
+            )
             ->additionalButtonsHtml(fn() => $this->_additionalButtons(
                 $element,
                 $canonical,
@@ -402,10 +422,7 @@ class ElementsController extends Controller
                 $isUnpublishedDraft,
                 $isDraft
             ))
-            ->actionMenuItems(fn() => $element->id ? array_filter(
-                $element->getActionMenuItems(),
-                fn(array $item) => !str_starts_with($item['id'] ?? '', 'action-edit-'),
-            ) : [])
+            ->actionMenuItems(fn() => $this->_actionMenuItems($element, $previewTargets))
             ->noticeHtml($notice)
             ->errorSummary(fn() => $this->_errorSummary($element))
             ->prepareScreen(
@@ -500,8 +517,12 @@ class ElementsController extends Controller
     {
         $this->requireCpRequest();
 
-        /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
-        $element = $this->_element($elementId, checkForProvisionalDraft: true);
+        $this->_elementId = $elementId;
+        /**
+         * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
+        $element = $this->_element(checkForProvisionalDraft: true);
 
         if ($element instanceof Response) {
             return $element;
@@ -513,12 +534,16 @@ class ElementsController extends Controller
 
         $this->element = $element;
 
+        // Screen prep
+        $redirectUrl = $this->request->getValidatedQueryParam('returnUrl') ?? ElementHelper::postEditUrl($element);
+
         $this->getView()->registerJsWithVars(fn(
             $elementType,
             $elementId,
             $draftId,
             $revisionId,
             $siteId,
+            $redirectUrl,
         ) => <<<JS
 (() => {
   const preview = new Craft.Preview({
@@ -528,6 +553,7 @@ class ElementsController extends Controller
     revisionId: $revisionId,
     siteId: $siteId,
     standaloneMode: true,
+    redirectUrl: $redirectUrl,
   });
   preview.open();
 })();
@@ -537,6 +563,7 @@ JS, [
             !$element->isProvisionalDraft ? $element->draftId : null,
             $element->revisionId,
             $element->siteId,
+            $redirectUrl,
         ], View::POS_END);
 
         [$docTitle, $title] = $this->_editElementTitles($element);
@@ -632,8 +659,12 @@ JS, [
     {
         $this->requireCpRequest();
 
-        /** @var Element|DraftBehavior|RevisionBehavior|Response|null $element */
-        $element = $this->_element($elementId);
+        $this->_elementId = $elementId;
+        /**
+         * @var Element|DraftBehavior|RevisionBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
+        $element = $this->_element();
 
         if (!$element) {
             throw new BadRequestHttpException('No element was identified by the request.');
@@ -693,15 +724,20 @@ JS, [
         $docTitle = $element->getUiLabel();
 
         if ($element->getIsDraft() && !$element->getIsUnpublishedDraft()) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             if ($element->isProvisionalDraft) {
                 $docTitle .= ' — ' . Craft::t('app', 'Edited');
             } else {
                 $docTitle .= " ($element->draftName)";
             }
         } elseif ($element->getIsRevision()) {
-            /** @var ElementInterface|RevisionBehavior $element */
+            /** @var ElementInterface&RevisionBehavior $element */
             $docTitle .= ' (' . $element->getRevisionLabel() . ')';
+        }
+
+        // Include site name if localized
+        if ($element::isLocalized() && Craft::$app->getIsMultiSite()) {
+            $docTitle .= sprintf(' - %s', $element->getSite()->getUiLabel());
         }
 
         return [$docTitle, $title];
@@ -718,7 +754,10 @@ JS, [
         return [
             ...$crumbs,
             [
-                'html' => Cp::elementChipHtml($element, ['showDraftName' => !$current]),
+                'html' => Cp::elementChipHtml($element, [
+                    'showDraftName' => !$current,
+                    'class' => 'chromeless',
+                ]),
                 'current' => $current,
             ],
         ];
@@ -806,7 +845,7 @@ JS, [
             'revisionId' => null,
         ]);
 
-        /** @var ElementInterface|RevisionBehavior|null $revision */
+        /** @var (ElementInterface&RevisionBehavior)|null $revision */
         $revision = $element->getCurrentRevision();
         $creator = $revision?->getCreator();
         $timestamp = $formatter->asTimestamp($revision->dateCreated ?? $element->dateUpdated, Locale::LENGTH_SHORT, true);
@@ -840,7 +879,7 @@ JS, [
                 'heading' => Craft::t('app', 'Drafts'),
                 'listAttributes' => ['class' => ['revision-group-drafts']],
                 'items' => array_map(function($draft) use ($element, $formatter, $cpEditUrl, $baseParams) {
-                    /** @var ElementInterface|DraftBehavior $draft */
+                    /** @var ElementInterface&DraftBehavior $draft */
                     $creator = $draft->getCreator();
                     $timestamp = $formatter->asTimestamp($draft->dateUpdated, Locale::LENGTH_SHORT, true);
 
@@ -868,7 +907,7 @@ JS, [
                 'heading' => Craft::t('app', 'Recent Revisions'),
                 'listAttributes' => ['class' => ['revision-group-revisions']],
                 'items' => array_map(function($revision) use ($element, $formatter, $cpEditUrl, $baseParams) {
-                    /** @var ElementInterface|RevisionBehavior $revision */
+                    /** @var ElementInterface&RevisionBehavior $revision */
                     $creator = $revision->getCreator();
                     $timestamp = $formatter->asTimestamp($revision->dateCreated, Locale::LENGTH_SHORT, true);
 
@@ -919,11 +958,7 @@ JS, [
         bool $isUnpublishedDraft,
         bool $isDraft,
     ): string {
-        $components = [
-            Html::tag('div', options: [
-                'class' => ['activity-container'],
-            ]),
-        ];
+        $components = [];
 
         // Preview (View will be added later by JS)
         if ($previewTargets) {
@@ -974,6 +1009,7 @@ JS, [
                 Html::actionInput('elements/duplicate') .
                 Html::redirectInput('{cpEditUrl}') .
                 Html::hiddenInput('elementId', (string)$canonical->id) .
+                Html::hiddenInput('asUnpublishedDraft', '1') .
                 Html::button(Craft::t('app', 'Save as a new {type}', ['type' => $element::lowerDisplayName()]), [
                     'class' => ['btn', 'formsubmit'],
                 ]) .
@@ -1059,6 +1095,10 @@ JS, [
                 $components[] = Html::hiddenInput('fresh', '1');
             }
 
+            if ($this->_updateSearchIndexImmediately) {
+                $components[] = Html::hiddenInput('updateSearchIndexImmediately', '1');
+            }
+
             $components[] = $contentHtml;
             $contentHtml = implode("\n", $components);
         }
@@ -1069,8 +1109,7 @@ JS, [
 
         $settings = $jsSettingsFn($form);
 
-        $isSlideout = Craft::$app->getRequest()->getHeaders()->has('X-Craft-Container-Id');
-        if ($isSlideout) {
+        if ($this->_isSlideout()) {
             $this->view->registerJsWithVars(fn($settings) => <<<JS
 $('#$containerId').data('elementEditorSettings', $settings);
 JS, [
@@ -1083,8 +1122,6 @@ JS, [
                 $settings,
             ]);
         }
-
-
 
         // Give the element a chance to do things here too
         $element->prepareEditScreen($response, $containerId);
@@ -1205,7 +1242,7 @@ JS, [
                     Html::tag('span', '', [
                         'class' => 'notification-icon',
                         'data-icon' => 'alert',
-                        'aria-label' => 'error',
+                        'aria-label' => Craft::t('app', 'Error'),
                         'role' => 'img',
                     ]) .
                     Html::tag('h2', $heading) .
@@ -1238,7 +1275,6 @@ JS, [
                 Html::endTag('div');
         }
 
-        /** @var ElementInterface|DraftBehavior|RevisionBehavior $element */
         $components[] = $element->getSidebarHtml(!$canSave);
 
         if ($this->id) {
@@ -1246,6 +1282,51 @@ JS, [
         }
 
         return trim(implode("\n", $components));
+    }
+
+    /**
+     * Returns an array of action menu items for the element.
+     *
+     * @param ElementInterface $element
+     * @param array $previewTargets
+     * @return array
+     */
+    private function _actionMenuItems(ElementInterface $element, array $previewTargets): array
+    {
+        if (!$element->id) {
+            return [];
+        }
+
+        $hideViewAction = !empty($previewTargets) && !$this->_isSlideout();
+
+        return array_filter(
+            $element->getActionMenuItems(),
+            function(array $item) use ($hideViewAction) {
+                // filter out "Edit" item - no point showing edit action on the edit page,
+                if (str_starts_with($item['id'] ?? '', 'action-edit-')) {
+                    return false;
+                }
+
+                // and "View in a new tab" item, if we have at least one preview target, and it's not a slideout
+                // as that action is already covered by the "View" button;
+                // (https://github.com/craftcms/cms/issues/16556)
+                if ($hideViewAction && str_starts_with($item['id'] ?? '', 'action-view-')) {
+                    return false;
+                }
+
+                return true;
+            },
+        );
+    }
+
+    /**
+     * Returns whether this is for a slideout.
+     *
+     * @return bool
+     */
+    private function _isSlideout(): bool
+    {
+        return $this->request->getHeaders()->has('X-Craft-Container-Id');
     }
 
     private function _draftNotice(): string
@@ -1300,8 +1381,11 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|null $element */
         $element = $this->_element();
+
+        if ($element instanceof Response) {
+            return $element;
+        }
 
         if (!$element || $element->getIsDraft() || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
@@ -1529,14 +1613,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
+        /** @var (ElementInterface&DraftBehavior)|null $element */
         $element = $this->_element();
 
-        if (
-            !$element ||
-            ($element->getIsDraft() && !$element->isProvisionalDraft && !$element->getIsUnpublishedDraft()) ||
-            $element->getIsRevision()
-        ) {
+        if (!$element || $element->getIsRevision()) {
             throw new BadRequestHttpException('No element was identified by the request.');
         }
 
@@ -1546,7 +1626,8 @@ JS, [
         $user = static::currentUser();
 
         // save as a new is now available to people who can create drafts
-        if ($element::hasDrafts()) {
+        $asUnpublishedDraft = $this->_asUnpublishedDraft && $element::hasDrafts();
+        if ($asUnpublishedDraft) {
             $authorized = $elementsService->canDuplicateAsDraft($element, $user);
         } else {
             $authorized = $elementsService->canDuplicate($element, $user);
@@ -1556,14 +1637,24 @@ JS, [
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
+        $newAttributes = [
+            'isProvisionalDraft' => false,
+            'draftId' => null,
+        ];
+
+        if ($element instanceof NestedElementInterface) {
+            $newAttributes += [
+                'primaryOwnerId' => $element->getOwnerId(),
+                'ownerId' => $element->getOwnerId(),
+                'sortOrder' => null,
+            ];
+        }
+
         try {
             $newElement = $elementsService->duplicateElement(
                 $element,
-                [
-                    'isProvisionalDraft' => false,
-                    'draftId' => null,
-                ],
-                asUnpublishedDraft: $element::hasDrafts(),
+                $newAttributes,
+                asUnpublishedDraft: $asUnpublishedDraft,
             );
         } catch (InvalidElementException $e) {
             return $this->_asFailure($e->element, Craft::t('app', 'Couldn’t duplicate {type}.', [
@@ -1575,13 +1666,74 @@ JS, [
 
         // If the original element is a provisional draft,
         // delete the draft as the changes are likely no longer wanted.
-        if ($element->isProvisionalDraft) {
+        if ($this->_deleteProvisionalDraft && $element->isProvisionalDraft) {
             Craft::$app->getElements()->deleteElement($element);
         }
 
         return $this->_asSuccess(Craft::t('app', '{type} duplicated.', [
             'type' => $element::displayName(),
         ]), $newElement);
+    }
+
+    /**
+     * Duplicates multiple elements with the given new attributes.
+     *
+     * @return Response|null
+     * @since 5.7.0
+     */
+    public function actionBulkDuplicate(): ?Response
+    {
+        $this->requirePostRequest();
+
+        $elementInfo = $this->request->getRequiredBodyParam('elements');
+        $newAttributes = $this->request->getRequiredBodyParam('newAttributes');
+
+        $newElementInfo = [];
+
+        Craft::$app->getDb()->transaction(function() use ($elementInfo, $newAttributes, &$newElementInfo) {
+            $elementsService = Craft::$app->getElements();
+            $elementsService->ensureBulkOp(function() use ($elementInfo, $newAttributes, &$newElementInfo, $elementsService) {
+                foreach ($elementInfo as $info) {
+                    $element = $this->_element($info);
+
+                    if (!$element instanceof ElementInterface) {
+                        Craft::warning(sprintf('Unable to duplicate element: %s', Json::encode($info)), __METHOD__);
+                        continue;
+                    }
+
+                    $safeNewAttributes = Collection::make($newAttributes)
+                        ->only($element->safeAttributes())
+                        ->all();
+
+                    try {
+                        $newElement = $elementsService->duplicateElement(
+                            $element,
+                            $safeNewAttributes + $element::baseBulkDuplicateAttributes(),
+                            false,
+                            checkAuthorization: true,
+                        );
+                    } catch (InvalidElementException $e) {
+                        return $this->_asFailure($e->element, Craft::t('app', 'Couldn’t duplicate {type}.', [
+                            'type' => $element::lowerDisplayName(),
+                        ]));
+                    } catch (ForbiddenHttpException $e) {
+                        throw $e;
+                    } catch (Throwable $e) {
+                        throw new ServerErrorHttpException('An error occurred when duplicating the element.', 0, $e);
+                    }
+
+                    $newElementInfo[] = $newElement->toArray($newElement->attributes());
+                }
+            });
+        });
+
+        /** @var class-string<ElementInterface> $elementType */
+        $elementType = $elementInfo[0]['type'];
+        return $this->asSuccess(StringHelper::upperCaseFirst(Craft::t('app', '{type} duplicated.', [
+            'type' => count($elementInfo) === 1 ? $elementType::displayName() : $elementType::pluralDisplayName(),
+        ])), [
+            'newElements' => $newElementInfo,
+        ]);
     }
 
     /**
@@ -1672,6 +1824,45 @@ JS, [
     }
 
     /**
+     * Validates an element.
+     *
+     * @return Response|null
+     * @since 5.8.0
+     */
+    public function actionValidate(): ?Response
+    {
+        $this->requirePostRequest();
+
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
+        $element = $this->_element();
+
+        // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
+        // and we hit "create entry" before the autosave kicks in
+        if ($element instanceof Response) {
+            return $element;
+        }
+
+        if (!$element || $element->getIsRevision()) {
+            throw new BadRequestHttpException('No element was identified by the request.');
+        }
+
+        $element->setScenario(Element::SCENARIO_LIVE);
+
+        if (!$element->validate()) {
+            return $this->_asFailure($element, Craft::t('app', '{type} validation failed.', [
+                'type' => $element::displayName(),
+            ]));
+        }
+
+        return $this->_asSuccess(Craft::t('app', '{type} validation successful.', [
+            'type' => $element::displayName(),
+        ]), $element);
+    }
+
+    /**
      * Saves a draft.
      *
      * @return Response|null
@@ -1684,7 +1875,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         // this can happen if we're creating e.g. nested entry in a matrix field (cards or element index)
@@ -1793,12 +1987,15 @@ JS, [
         if ($this->request->getIsCpRequest()) {
             [$docTitle, $title] = $this->_editElementTitles($element);
             $previewTargets = $element->getPreviewTargets();
-            $data += $this->_fieldLayoutData($element);
+            $data += $this->_fieldLayoutData($element, [
+                'registerDeltas' => true,
+            ]);
             $data += [
                 'docTitle' => $docTitle,
                 'title' => $title,
                 'previewTargets' => $previewTargets,
                 'previewParamValue' => $previewTargets ? Craft::$app->getSecurity()->hashData(StringHelper::randomString(10)) : null,
+                'deltaNames' => Craft::$app->getView()->getDeltaNames(),
                 'initialDeltaValues' => Craft::$app->getView()->getInitialDeltaValues(),
                 'updatedTimestamp' => $element->dateUpdated->getTimestamp(),
                 'canonicalUpdatedTimestamp' => $element->getCanonical()->dateUpdated->getTimestamp(),
@@ -1823,7 +2020,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|DraftBehavior|null $element */
+        /**
+         * @var Element|DraftBehavior|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element(checkForProvisionalDraft: true);
 
         if (!$element || $element->getIsRevision()) {
@@ -1882,7 +2082,10 @@ JS, [
         $this->requirePostRequest();
         $elementsService = Craft::$app->getElements();
 
-        /** @var Element|DraftBehavior|Response|null $element */
+        /**
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         // this can happen if creating element via slideout, and we hit "create entry" before the autosave kicks in
@@ -2063,7 +2266,10 @@ JS, [
     {
         $this->requirePostRequest();
 
-        /** @var Element|RevisionBehavior|null $element */
+        /**
+         * @var Element|RevisionBehavior|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         $element = $this->_element();
 
         if (!$element || !$element->getIsRevision()) {
@@ -2112,8 +2318,11 @@ JS, [
             $element->validate();
         }
 
-        /** @var Element|DraftBehavior|Response|null $element */
-        // see https://github.com/craftcms/cms/issues/14635#issuecomment-2349006694 for details
+        /**
+         * see https://github.com/craftcms/cms/issues/14635#issuecomment-2349006694 for details
+         * @var Element|DraftBehavior|Response|null $element
+         * @phpstan-ignore varTag.nativeType
+         */
         if ($element instanceof Response) {
             return $element;
         }
@@ -2146,12 +2355,12 @@ JS, [
         return $this->_asSuccess('Field layout updated.', $element, $data, true);
     }
 
-    private function _fieldLayoutData(ElementInterface $element): array
+    private function _fieldLayoutData(ElementInterface $element, array $formConfig = []): array
     {
         $view = Craft::$app->getView();
         $namespace = $this->request->getHeaders()->get('X-Craft-Namespace');
         $fieldLayout = $element->getFieldLayout();
-        $form = $fieldLayout->createForm($element, false, [
+        $form = $fieldLayout->createForm($element, false, $formConfig + [
             'namespace' => $namespace,
             'registerDeltas' => false,
             'visibleElements' => $this->_visibleLayoutElements,
@@ -2267,8 +2476,7 @@ JS, [
     /**
      * Returns the requested element, populated with any posted attributes.
      *
-     * @param int|null $elementId
-     * @param string|null $elementUid
+     * @param array|null $elementInfo
      * @param bool $checkForProvisionalDraft
      * @param bool $strictSite
      * @return ElementInterface|Response|null
@@ -2276,40 +2484,47 @@ JS, [
      * @throws ForbiddenHttpException
      */
     private function _element(
-        ?int $elementId = null,
-        ?string $elementUid = null,
+        ?array $elementInfo = null,
         bool $checkForProvisionalDraft = false,
         bool $strictSite = true,
     ): ElementInterface|Response|null {
-        $elementId ??= $this->_elementId;
-        $elementUid ??= $this->_elementUid;
-
         $elementsService = Craft::$app->getElements();
         $user = static::currentUser();
 
-        if ($this->_elementType) {
-            $elementType = $this->_elementType;
-        } elseif ($elementId || $elementUid) {
+        $elementType = $elementInfo['type'] ?? $this->_elementType;
+        $elementId = $elementInfo['id'] ?? $this->_elementId;
+        $elementUid = $elementInfo['uid'] ?? $this->_elementUid;
+        $fieldId = $elementInfo['fieldId'] ?? $this->_fieldId;
+        $ownerId = $elementInfo['ownerId'] ?? $this->_ownerId;
+        $siteId = $elementInfo['siteId'] ?? $this->_siteId;
+        $draftId = $elementInfo['draftId'] ?? $this->_draftId;
+        $revisionId = $elementInfo['revisionId'] ?? $this->_revisionId;
+        $provisional = $elementInfo['isProvisionalDraft'] ?? $this->_provisional;
+
+        if (!$elementType) {
             if ($elementId) {
                 $elementType = $elementsService->getElementTypeById($elementId);
-            } else {
+                if (!$elementType) {
+                    throw new BadRequestHttpException("Invalid element ID: $elementId");
+                }
+            } elseif ($elementUid) {
                 $elementType = $elementsService->getElementTypeByUid($elementUid);
+                if (!$elementType) {
+                    throw new BadRequestHttpException("Invalid element UUID: $elementUid");
+                }
+            } else {
+                throw new BadRequestHttpException('Request missing required param.');
             }
-            if (!$elementType) {
-                throw new BadRequestHttpException($elementId ? "Invalid element ID: $elementId" : "Invalid element UUID: $elementUid");
-            }
-        } else {
-            throw new BadRequestHttpException('Request missing required param.');
         }
 
         /** @var class-string<ElementInterface> $elementType */
         $this->_validateElementType($elementType);
 
         if ($elementType::isLocalized()) {
-            if ($this->_siteId) {
-                $site = Craft::$app->getSites()->getSiteById($this->_siteId, true);
+            if ($siteId) {
+                $site = Craft::$app->getSites()->getSiteById($siteId, true);
                 if (!$site) {
-                    throw new BadRequestHttpException("Invalid side ID: $this->_siteId");
+                    throw new BadRequestHttpException("Invalid side ID: $siteId");
                 }
                 if (Craft::$app->getIsMultiSite() && !$user->can("editSite:$site->uid")) {
                     throw new ForbiddenHttpException('User not authorized to edit content for this site.');
@@ -2333,17 +2548,17 @@ JS, [
         }
 
         // Loading an existing element?
-        if ($this->_draftId || $this->_revisionId) {
-            $query = $this->_elementQuery($elementType)
-                ->draftId($this->_draftId)
-                ->revisionId($this->_revisionId)
-                ->provisionalDrafts($this->_provisional)
+        if ($draftId || $revisionId) {
+            $query = $this->_elementQuery($elementType, $fieldId, $ownerId)
+                ->draftId($draftId)
+                ->revisionId($revisionId)
+                ->provisionalDrafts($provisional)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
                 ->unique()
                 ->status(null);
 
-            if ($this->_revisionId) {
+            if ($revisionId) {
                 $query->trashed(null);
             }
 
@@ -2351,14 +2566,34 @@ JS, [
 
             if (!$element) {
                 // check for the canonical element as a fallback
-                $element = $this->_elementById($elementId, $elementUid, false, $elementType, $user, $siteId, $preferSites);
+                $element = $this->_elementById(
+                    $elementId,
+                    $elementUid,
+                    $fieldId,
+                    $ownerId,
+                    false,
+                    $elementType,
+                    $user,
+                    $siteId,
+                    $preferSites,
+                );
                 if ($element && $elementsService->canView($element, $user)) {
                     return $this->redirect($element->getCpEditUrl());
                 }
-                throw new BadRequestHttpException($this->_draftId ? "Invalid draft ID: $this->_draftId" : "Invalid revision ID: $this->_revisionId");
+                throw new BadRequestHttpException($draftId ? "Invalid draft ID: $draftId" : "Invalid revision ID: $revisionId");
             }
         } elseif ($elementId || $elementUid) {
-            $element = $this->_elementById($elementId, $elementUid, $checkForProvisionalDraft, $elementType, $user, $siteId, $preferSites);
+            $element = $this->_elementById(
+                $elementId,
+                $elementUid,
+                $fieldId,
+                $ownerId,
+                $checkForProvisionalDraft,
+                $elementType,
+                $user,
+                $siteId,
+                $preferSites,
+            );
             if (!$element) {
                 throw new BadRequestHttpException($elementId ? "Invalid element ID: $elementId" : "Invalid element UUID: $elementUid");
             }
@@ -2380,6 +2615,8 @@ JS, [
     /**
      * @param int|null $elementId
      * @param string|null $elementUid
+     * @param int|null $fieldId
+     * @param int|null $ownerId
      * @param bool $checkForProvisionalDraft
      * @param class-string<ElementInterface> $elementType
      * @param User $user
@@ -2390,6 +2627,8 @@ JS, [
     private function _elementById(
         ?int $elementId,
         ?string $elementUid,
+        ?int $fieldId,
+        ?int $ownerId,
         bool $checkForProvisionalDraft,
         string $elementType,
         User $user,
@@ -2399,7 +2638,7 @@ JS, [
         if ($elementId) {
             // First check for a provisional draft, if we're open to it
             if ($checkForProvisionalDraft) {
-                $element = $this->_elementQuery($elementType)
+                $element = $this->_elementQuery($elementType, $fieldId, $ownerId)
                     ->provisionalDrafts()
                     ->draftOf($elementId)
                     ->draftCreator($user)
@@ -2414,7 +2653,7 @@ JS, [
                 }
             }
 
-            $element = $this->_elementQuery($elementType)
+            $element = $this->_elementQuery($elementType, $fieldId, $ownerId)
                 ->id($elementId)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
@@ -2431,7 +2670,7 @@ JS, [
 
             // finally, check for an unpublished draft
             // (see https://github.com/craftcms/cms/issues/14199)
-            return $this->_elementQuery($elementType)
+            return $this->_elementQuery($elementType, $fieldId, $ownerId)
                 ->id($elementId)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
@@ -2442,7 +2681,7 @@ JS, [
         }
 
         if ($elementUid) {
-            $element = $this->_elementQuery($elementType)
+            $element = $this->_elementQuery($elementType, $fieldId, $ownerId)
                 ->uid($elementUid)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
@@ -2457,7 +2696,7 @@ JS, [
             // check for an unpublished draft if we got this far
             // (e.g. newly added matrix "block" or where autosaveDrafts is off)
             // https://github.com/craftcms/cms/issues/15985
-            return $this->_elementQuery($elementType)
+            return $this->_elementQuery($elementType, $fieldId, $ownerId)
                 ->uid($elementUid)
                 ->siteId($siteId)
                 ->preferSites($preferSites)
@@ -2472,15 +2711,17 @@ JS, [
 
     /**
      * @param class-string<ElementInterface> $elementType
+     * @param int|null $fieldId
+     * @param int|null $ownerId
      * @return ElementQueryInterface
      */
-    private function _elementQuery(string $elementType): ElementQueryInterface
+    private function _elementQuery(string $elementType, ?int $fieldId, ?int $ownerId): ElementQueryInterface
     {
         $query = $elementType::find();
         if ($query instanceof NestedElementQueryInterface) {
             $query
-                ->fieldId($this->_fieldId)
-                ->ownerId($this->_ownerId);
+                ->fieldId($fieldId)
+                ->ownerId($ownerId);
         }
         return $query;
     }
@@ -2572,7 +2813,7 @@ JS, [
         }
 
         if ($element->getIsDraft()) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             if (isset($this->_draftName)) {
                 $element->draftName = $this->_draftName;
             }
@@ -2581,6 +2822,10 @@ JS, [
             }
         } elseif (isset($this->_notes)) {
             $element->setRevisionNotes($this->_notes);
+        }
+
+        if ($this->_updateSearchIndexImmediately !== null) {
+            $element->updateSearchIndexImmediately = $this->_updateSearchIndexImmediately;
         }
 
         $scenario = $element->getScenario();

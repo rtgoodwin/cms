@@ -178,10 +178,9 @@ abstract class BaseField extends FieldLayoutElement
         $label = $this->selectorLabel();
         $icon = $this->selectorIcon();
 
-        $indicatorHtml = implode('', array_map(fn(array $indicator) => Html::tag('div', Cp::iconSvg($indicator['icon']), [
+        $indicatorHtml = implode('', array_map(fn(array $indicator) => Html::tag('div', Cp::iconSvg($indicator['icon'], altText: $indicator['label']), [
             'class' => array_filter(['cp-icon', 'puny', $indicator['iconColor'] ?? null]),
             'title' => $indicator['label'],
-            'aria' => ['label' => $indicator['label']],
         ]), $this->selectorIndicators()));
 
         if ($label !== null) {
@@ -367,7 +366,8 @@ abstract class BaseField extends FieldLayoutElement
             return null;
         }
 
-        $statusClass = $this->statusClass($element, $static);
+        $showStatus = $this->showStatus();
+        $statusClass = $showStatus ? $this->statusClass($element, $static) : null;
         $label = $this->showLabel() ? $this->label() : null;
         $instructions = $this->instructions($element, $static);
         $tip = $this->tip($element, $static);
@@ -408,6 +408,9 @@ abstract class BaseField extends FieldLayoutElement
         }
 
         return Cp::fieldHtml($inputHtml, [
+            'fieldClass' => array_keys(array_filter([
+                'no-status' => !$showStatus,
+            ])),
             'fieldset' => $this->useFieldset(),
             'id' => $this->id(),
             'labelId' => $this->labelId(),
@@ -415,7 +418,7 @@ abstract class BaseField extends FieldLayoutElement
             'tipId' => $this->tipId(),
             'warningId' => $this->warningId(),
             'errorsId' => $this->errorsId(),
-            'statusId' => $this->statusId(),
+            'statusId' => $showStatus ? $this->statusId() : null,
             'fieldAttributes' => $this->containerAttributes($element, $static),
             'inputContainerAttributes' => $this->inputContainerAttributes($element, $static),
             'labelAttributes' => $this->labelAttributes($element, $static),
@@ -431,7 +434,8 @@ abstract class BaseField extends FieldLayoutElement
             'translatable' => $translatable,
             'translationDescription' => $this->translationDescription($element, $static),
             'actionMenuItems' => $actionMenuItems,
-            'errors' => !$static ? $this->errors($element) : [],
+            // show errors regardless of whether the field is static
+            'errors' => $this->errors($element),
         ]);
     }
 
@@ -675,6 +679,17 @@ abstract class BaseField extends FieldLayoutElement
     protected function showLabel(): bool
     {
         return $this->label !== '__blank__';
+    }
+
+    /**
+     * Returns whether the field should show a status indicator when modified.
+     *
+     * @return bool
+     * @since 5.8.0
+     */
+    protected function showStatus(): bool
+    {
+        return true;
     }
 
     /**

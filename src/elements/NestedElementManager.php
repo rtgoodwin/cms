@@ -14,8 +14,11 @@ use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\base\NestedElementInterface;
 use craft\behaviors\DraftBehavior;
+use craft\db\Query;
 use craft\db\Table;
 use craft\elements\actions\ChangeSortOrder;
+use craft\elements\actions\MoveDown;
+use craft\elements\actions\MoveUp;
 use craft\elements\db\ElementQueryInterface;
 use craft\enums\Color;
 use craft\enums\PropagationMethod;
@@ -185,6 +188,10 @@ class NestedElementManager extends Component
 
         $query = $owner->getFieldValue($this->field->handle);
 
+        if ($query instanceof ElementCollection) {
+            return $query;
+        }
+
         if (!$query instanceof ElementQueryInterface) {
             $query = $this->nestedElementQuery($owner);
         }
@@ -192,14 +199,10 @@ class NestedElementManager extends Component
         if ($fetchAll && $query->getCachedResult() === null) {
             $query
                 ->drafts(null)
+                ->canonicalsOnly()
                 ->savedDraftsOnly()
                 ->status(null)
-                ->limit(null)
-                ->andWhere([
-                    'or',
-                    ['elements.draftId' => null],
-                    ['elements.canonicalId' => null],
-                ]);
+                ->limit(null);
         }
 
         return $query;
@@ -228,7 +231,7 @@ class NestedElementManager extends Component
     {
         foreach ($elements as $element) {
             $element->setOwner($owner);
-            if ($element->id === $element->getPrimaryOwnerId()) {
+            if ($owner->id === $element->getPrimaryOwnerId()) {
                 $element->setPrimaryOwner($owner);
             }
         }
@@ -399,6 +402,7 @@ class NestedElementManager extends Component
                     $elements = $value->getCachedResult() ?? $value
                         ->status(null)
                         ->limit(null)
+                        ->eagerly()
                         ->all();
                 }
 
@@ -422,6 +426,8 @@ class NestedElementManager extends Component
                             'context' => 'field',
                             'showActionMenu' => true,
                             'sortable' => $config['sortable'],
+                            'showInGrid' => $config['showInGrid'] ?? false,
+                            'hyperlink' => false,
                         ]),
                         $elements,
                     ), [
@@ -523,6 +529,16 @@ class NestedElementManager extends Component
                     $actionConfig = ElementHelper::actionConfig(new ChangeSortOrder($owner, $attribute));
                     $actionConfig['bodyHtml'] = $view->clearJsBuffer();
                     $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveUp($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
+
+                    $view->startJsBuffer();
+                    $actionConfig = ElementHelper::actionConfig(new MoveDown($owner, $attribute));
+                    $actionConfig['bodyHtml'] = $view->clearJsBuffer();
+                    $settings['indexSettings']['actions'][] = $actionConfig;
                 }
 
                 return Cp::elementIndexHtml($this->elementType, [
@@ -555,6 +571,7 @@ class NestedElementManager extends Component
         $config += [
             'sortable' => false,
             'canCreate' => false,
+            'canPaste' => false,
             'createButtonLabel' => null,
             'createAttributes' => null,
             'minElements' => null,
@@ -569,7 +586,7 @@ class NestedElementManager extends Component
 
         $authorizedOwnerId = $owner->id;
         if ($owner->isProvisionalDraft) {
-            /** @var ElementInterface|DraftBehavior $owner */
+            /** @var ElementInterface&DraftBehavior $owner */
             if ($owner->creatorId === Craft::$app->getUser()->getIdentity()?->id) {
                 $authorizedOwnerId = $owner->getCanonicalId();
             }
@@ -596,10 +613,12 @@ class NestedElementManager extends Component
                 'attribute' => $attribute,
                 'sortable' => $config['sortable'],
                 'canCreate' => $config['canCreate'],
+                'canPaste' => $config['canPaste'],
                 'minElements' => $config['minElements'],
                 'maxElements' => $config['maxElements'],
                 'createButtonLabel' => $config['createButtonLabel'],
                 'ownerIdParam' => $this->ownerIdParam,
+                'fieldId' => $this->field?->id,
                 'fieldHandle' => $this->field?->handle,
                 'baseInputName' => $view->getNamespace(),
                 'prevalidate' => $config['prevalidate'] ?? false,
@@ -938,15 +957,11 @@ JS, [
         /** @var NestedElementInterface[] $elements */
         $elements = $this->nestedElementQuery($owner)
             ->drafts(null)
+            ->canonicalsOnly()
             ->savedDraftsOnly(false)
             ->status(null)
             ->siteId($owner->siteId)
             ->andWhere(['not', ['elements.id' => $except]])
-            ->andWhere([
-                'or',
-                ['elements.draftId' => null],
-                ['elements.canonicalId' => null],
-            ])
             ->all();
 
         $elementsService = Craft::$app->getElements();
@@ -988,12 +1003,17 @@ JS, [
         bool $force = false,
     ): void {
         $elementsService = Craft::$app->getElements();
-        $value = $this->getValue($source, true);
-        if ($value instanceof ElementCollection) {
-            $elements = $value->all();
-        } else {
-            $elements = $value->getCachedResult() ?? $value->all();
+        $elements = $this->getValue($source, true);
+        if ($elements instanceof ElementQueryInterface) {
+            $elements = ElementCollection::make($elements->getCachedResult() ?? $elements->all());
         }
+
+        // Ignore any elements that don't have an ID yet
+        /** @var ElementCollection<NestedElementInterface> $elements */
+        $elements = $elements
+            ->filter(fn(ElementInterface $element) => isset($element->id))
+            ->values()
+            ->all();
 
         /** @var NestedElementInterface[] $elements */
         $this->setOwnerOnNestedElements($source, $elements);
@@ -1300,6 +1320,22 @@ JS, [
             $elements = $query->all();
 
             foreach ($elements as $element) {
+                // If the element is a revision, see if we can reassign it to a new primary owner
+                if ($element->getIsRevision() && !isset($element->dateDeleted)) {
+                    $newOwnerId = (new Query())
+                        ->select(['ownerId'])
+                        ->from(Table::ELEMENTS_OWNERS)
+                        ->where(['elementId' => $element->id])
+                        ->andWhere(['not', ['ownerId' => $owner->id]])
+                        ->orderBy(['ownerId' => SORT_ASC])
+                        ->scalar();
+                    if ($newOwnerId) {
+                        $element->setPrimaryOwnerId($newOwnerId);
+                        $elementsService->saveElement($element);
+                        continue;
+                    }
+                }
+
                 $element->deletedWithOwner = true;
                 $elementsService->deleteElement($element, $hardDelete);
             }

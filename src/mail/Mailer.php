@@ -110,7 +110,7 @@ class Mailer extends \yii\symfonymailer\Mailer
         $generateTransformsBeforePageLoad = $generalConfig->generateTransformsBeforePageLoad;
         $originalSettings = [];
 
-        $templateMode = $view->getTemplateMode();
+        $originalTemplateMode = $view->getTemplateMode();
         $view->setTemplateMode(View::TEMPLATE_MODE_SITE);
 
         try {
@@ -235,7 +235,7 @@ class Mailer extends \yii\symfonymailer\Mailer
                 $sitesService->setCurrentSite($currentSite);
             }
 
-            $view->setTemplateMode($templateMode);
+            $view->setTemplateMode($originalTemplateMode);
 
             if ($twig) {
                 $view->setTwig($twig);

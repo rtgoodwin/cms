@@ -17,6 +17,7 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
     $header: null,
     $toolbar: null,
     $tabContainer: null,
+    $extraToolbarItems: null,
     $loadSpinner: null,
     $actionBtn: null,
     $editLink: null,
@@ -54,7 +55,20 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
 
     init: function (action, settings) {
       this.action = action;
-      this.setSettings(settings, Craft.CpScreenSlideout.defaults);
+
+      settings = Object.assign({}, Craft.CpScreenSlideout.defaults, settings);
+      Object.assign(settings.containerAttributes, {
+        id: `cp-screen-${Math.floor(Math.random() * 100000000)}`,
+        class: 'cp-screen',
+      });
+      const isForm = settings.containerElement === 'form';
+      if (isForm) {
+        Object.assign(settings.containerAttributes, {
+          action: '',
+          method: 'post',
+          novalidate: '',
+        });
+      }
 
       this.fieldsWithErrors = [];
 
@@ -123,29 +137,20 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
       this.$cancelBtn = $('<button/>', {
         type: 'button',
         class: 'btn',
-        text: Craft.t('app', 'Cancel'),
+        text: isForm ? Craft.t('app', 'Cancel') : Craft.t('app', 'Close'),
       }).appendTo($btnContainer);
-      this.$saveBtn = Craft.ui
-        .createSubmitButton({
-          label: Craft.t('app', 'Save'),
-          spinner: true,
-        })
-        .appendTo($btnContainer);
+      if (isForm) {
+        this.$saveBtn = Craft.ui
+          .createSubmitButton({
+            label: Craft.t('app', 'Save'),
+            spinner: true,
+          })
+          .appendTo($btnContainer);
+      }
 
       let $contents = this.$header.add(this.$body).add(this.$footer);
 
-      this.base($contents, {
-        containerElement: 'form',
-        containerAttributes: {
-          id: `cp-screen-${Math.floor(Math.random() * 100000000)}`,
-          action: '',
-          method: 'post',
-          novalidate: '',
-          class: 'cp-screen',
-        },
-        closeOnEsc: false,
-        closeOnShadeClick: false,
-      });
+      this.base($contents, settings);
 
       this.$container.data('cpScreen', this);
       this.on('beforeClose', () => {
@@ -304,10 +309,11 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
         this.$content.html(data.content);
 
         if (data.submitButtonLabel) {
-          this.$saveBtn.text(data.submitButtonLabel);
+          this.$saveBtn.find('.label').text(data.submitButtonLabel);
         }
 
         this.updateTabs(data.tabs);
+        this.updateExtraToolbarItems(data.extraToolbarItems);
 
         if (data.formAttributes) {
           Craft.setElementAttributes(this.$container, data.formAttributes);
@@ -399,8 +405,8 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
             Craft.cp.elementThumbLoader.load(this.$sidebar);
           }
 
-          if (!Garnish.isMobileBrowser()) {
-            Craft.setFocusWithin(this.$content);
+          if (!Garnish.isMobileBrowser() && !this.isOpening) {
+            this.setFocusWithin();
           }
 
           resolve();
@@ -408,6 +414,10 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
           this.settings.onLoad();
         });
       });
+    },
+
+    setFocusWithin: function () {
+      Craft.setFocusWithin(this.$content);
     },
 
     updateTabs: function (tabs) {
@@ -433,6 +443,19 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
           this.$body.trigger('scroll');
         });
       }
+    },
+
+    updateExtraToolbarItems: function (toolbar) {
+      if (this.$extraToolbarItems) {
+        this.$extraToolbarItems.remove();
+        this.$extraToolbarItems = null;
+      }
+
+      if (!toolbar) {
+        return;
+      }
+
+      this.$extraToolbarItems = $(toolbar).insertAfter(this.$tabContainer);
     },
 
     showSidebar: function (focus = true) {
@@ -802,9 +825,13 @@ Craft.CpScreenSlideout = Craft.Slideout.extend(
   },
   {
     defaults: {
+      containerElement: 'form',
+      containerAttributes: {},
       params: {},
       requestOptions: {},
       showHeader: null,
+      closeOnEsc: false,
+      closeOnShadeClick: false,
       closeOnSubmit: true,
       onLoad: () => {},
       onSubmit: () => {},

@@ -15,6 +15,7 @@ use craft\fields\Link;
 use craft\helpers\Cp;
 use craft\helpers\Html;
 use craft\services\ElementSources;
+use GraphQL\Type\Definition\Type;
 use Illuminate\Support\Collection;
 use yii\base\InvalidArgumentException;
 
@@ -47,6 +48,17 @@ abstract class BaseElementLinkType extends BaseLinkType
     public static function displayName(): string
     {
         return static::elementType()::displayName();
+    }
+
+    /**
+     * Returns the GraphQL type that elements of this type should
+     *
+     * @return Type
+     * @since 5.7.0
+     */
+    public static function elementGqlType(): Type
+    {
+        return static::elementType()::baseGqlType();
     }
 
     /**
@@ -128,10 +140,12 @@ abstract class BaseElementLinkType extends BaseLinkType
     const element = ev.elements[0];
     input.val(`{\${refHandle}:\${element.id}@\${element.siteId}:url}`);
     field.updateLabel(element.label);
+    field.updateFilename(element.\$element.data('filename'));
   });
   elementSelect.on('removeElements', () => {
     input.val('');
     field.updateLabel('');
+    field.updateFilename('');
   });
 })();
 JS, [
@@ -207,6 +221,38 @@ JS, [
     public function validateValue(string $value, ?string &$error = null): bool
     {
         return true;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isValueEmpty(string $value): bool
+    {
+        // check if the element we're linking to still exists (e.g. it wasn't deleted)
+        // we already validated the link type, so getting the element type as string
+        // (instead of getting all element types ref handles) should be fine
+        preg_match("/^{(?P<elementType>[\w\\\\]+):(?P<elementId>\d+)(?:@(?P<siteId>\d+))?/", $value, $matches);
+
+        // if we couldn't get an element ID, treat the value as not empty
+        // as we already checked for empty string, null and empty array in base\Field::isValueEmpty()
+        if (empty($matches['elementId'])) {
+            return false;
+        }
+
+        /** @var class-string<ElementInterface>|null $elementType */
+        $elementType = Craft::$app->getElements()->getElementTypeByRefHandle($matches['elementType']);
+        if (!$elementType) {
+            return true;
+        }
+
+        return !$elementType::find()
+            ->id($matches['elementId'])
+            ->siteId($matches['siteId'] ?? null)
+            ->status(null)
+            ->drafts(null)
+            ->provisionalDrafts(null)
+            ->revisions(null)
+            ->exists();
     }
 
     /**

@@ -268,11 +268,15 @@ Craft.EntryIndex = Craft.BaseElementIndex.extend({
             draftId: data.entry.draftId,
             params: {
               fresh: 1,
+              updateSearchIndexImmediately: 1,
             },
           });
-          slideout.on('submit', () => {
-            this.clearSearch();
-            this.setSelectedSortAttribute('dateCreated', 'desc');
+          slideout.on('submit', (ev) => {
+            this.clearSearch(false);
+            this.startSearching();
+            this.$search.val(ev.data.title);
+            this.searchText = ev.data.title;
+
             this.selectElementAfterUpdate(data.entry.id);
             this.updateElements();
           });
@@ -281,6 +285,28 @@ Craft.EntryIndex = Craft.BaseElementIndex.extend({
       .finally(() => {
         this.$newEntryBtn.removeClass('loading');
       });
+  },
+
+  canPaste: function (elementInfo) {
+    if (!this.$source.data('sectionId')) {
+      return false;
+    }
+
+    const entryTypeIds = this.$source.data('entryTypeIds') || [];
+    for (const info of elementInfo) {
+      if (!entryTypeIds.includes(info.data.entryTypeId)) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
+  pasteAttributes: function () {
+    return {
+      sectionId: this.$source.data('sectionId'),
+      placeInStructure: true,
+    };
   },
 });
 

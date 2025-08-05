@@ -2,6 +2,8 @@
 
 {% set sourceOptions = field.getSourceOptions() %}
 {% set elementType = elementType ?? pluralElementType %}
+{% set upperElementType = upperElementType ?? elementType|capitalize %}
+
 {% block fieldSettings %}
     {% block sourcesField %}
         {% if sourceOptions %}
@@ -91,6 +93,22 @@
         }) }}
     {% endblock %}
 
+    {% block defaultPlacementField %}
+        {{ forms.selectField({
+            label: 'Default {type} Placement'|t('app', {type: upperElementType}),
+            instructions: 'Where new {type} should be placed by default in the field.'|t('app', {type: pluralElementType}),
+            id: 'default-placement',
+            name: 'defaultPlacement',
+            options: [
+                {label: 'Before other {type}'|t('app', {type: pluralElementType}), value: 'beginning'},
+                {label: 'After other {type}'|t('app', {type: pluralElementType}), value: 'end'},
+            ],
+            value: field.defaultPlacement,
+            errors: field.getErrors('defaultPlacement'),
+            data: {'error-key': 'defaultPlacement'},
+        })}}
+    {% endblock %}
+
     {% block viewModeField %}
         {{ field.getViewModeFieldHtml()|raw }}
 
@@ -117,6 +135,17 @@
             value: field.selectionLabel,
             placeholder: field.defaultSelectionLabel(),
             errors: field.getErrors('selectionLabel'),
+        }) }}
+    {% endblock %}
+
+    {% block showSearchInputField %}
+        {{ forms.lightswitchField({
+            fieldClass: field.allowMultipleSources ? 'hidden' : null,
+            label: 'Show the search input'|t('app'),
+            id: 'show-search-input',
+            name: 'showSearchInput',
+            on: field.showSearchInput,
+            errors: field.getErrors('showSearchInput'),
         }) }}
     {% endblock %}
 
@@ -154,3 +183,52 @@
         </div>
     {% endblock %}
 {% endblock %}
+
+{% if field.allowMultipleSources %}
+{% js %}
+(() => {
+  const $sourcesField = $('#{{ 'sources-field'|namespaceInputId }}');
+  const $inputs = $sourcesField.find('input');
+  const $searchField = $('#{{ 'show-search-input-field'|namespaceInputId }}');
+
+  const updateSearchField = function() {
+    let showSearchField = false;
+    if (!$sourcesField.is(':visible')) {
+      showSearchField = true;
+    } else {
+      let foundChecked = false;
+      for (let i = 0; i < $inputs.length; i++) {
+        const $input = $inputs.eq(i);
+        const val = $input.val();
+        const checked = $input.prop('checked');
+        if (val === '*') {
+          if (checked) {
+            showSearchField = false;
+            break;
+          }
+        } else if (checked) {
+          if (foundChecked) {
+            showSearchField = false;
+            break;
+          }
+          showSearchField = true;
+          foundChecked = true;
+        }
+      }
+    }
+
+    if (showSearchField) {
+      $searchField.removeClass('hidden');
+    } else {
+      $searchField.addClass('hidden');
+    }
+  };
+
+  $inputs.on('change', () => {
+    updateSearchField();
+  });
+
+  updateSearchField();
+})();
+{% endjs %}
+{% endif %}

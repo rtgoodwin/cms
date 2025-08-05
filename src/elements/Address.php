@@ -12,6 +12,7 @@ use craft\base\NameTrait;
 use craft\base\NestedElementInterface;
 use craft\base\NestedElementTrait;
 use craft\db\Table;
+use craft\elements\actions\Copy;
 use craft\elements\conditions\addresses\AddressCondition;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\AddressQuery;
@@ -22,6 +23,7 @@ use craft\fieldlayoutelements\BaseNativeField;
 use craft\fieldlayoutelements\FullNameField;
 use craft\models\FieldLayout;
 use craft\records\Address as AddressRecord;
+use craft\validators\StringValidator;
 use yii\base\InvalidConfigException;
 
 /**
@@ -81,7 +83,7 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
     }
 
     /**
-     * @inerhitdoc
+     * @inheritdoc
      */
     public static function hasTitles(): bool
     {
@@ -102,6 +104,16 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
     public static function createCondition(): ElementConditionInterface
     {
         return Craft::createObject(AddressCondition::class, [static::class]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected static function defineActions(string $source): array
+    {
+        return [
+            Copy::class,
+        ];
     }
 
     /**
@@ -390,6 +402,31 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
     /**
      * @inheritdoc
      */
+    public function canDuplicate(User $user): bool
+    {
+        if (parent::canDuplicate($user)) {
+            return true;
+        }
+
+        $owner = $this->getOwner()?->getCanonical(true);
+        if (!$owner) {
+            return false;
+        }
+
+        return Craft::$app->getElements()->canSave($owner, $user);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function canCopy(User $user): bool
+    {
+        return Craft::$app->getElements()->canDuplicate($this, $user);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function canDelete(User $user): bool
     {
         if (parent::canDelete($user)) {
@@ -579,6 +616,27 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
         $rules[] = [['fieldId', 'ownerId', 'primaryOwnerId'], 'number'];
         $rules[] = [['countryCode'], 'required'];
 
+        $stringFields = [
+            'countryCode',
+            'administrativeArea',
+            'locality',
+            'dependentLocality',
+            'postalCode',
+            'sortingCode',
+            'addressLine1',
+            'addressLine2',
+            'addressLine3',
+            'organization',
+            'organizationTaxId',
+            'fullName',
+            'firstName',
+            'lastName',
+            'latitude',
+            'longitude',
+        ];
+        $rules[] = [$stringFields, 'trim'];
+        $rules[] = [$stringFields, StringValidator::class, 'max' => 255, 'disallowMb4' => true];
+
         $addressesService = Craft::$app->getAddresses();
         $countryCodes = array_keys($addressesService->getCountryRepository()->getList());
         $rules[] = [['countryCode'], 'in', 'range' => $countryCodes];
@@ -630,7 +688,9 @@ class Address extends Element implements AddressInterface, NestedElementInterfac
             }
         }
 
-        $rules[] = [['longitude', 'latitude'], 'safe'];
+        $rules[] = ['latitude', 'number', 'min' => -90, 'max' => 90, 'on' => [self::SCENARIO_LIVE, self::SCENARIO_DEFAULT]];
+        $rules[] = ['longitude', 'number', 'min' => -180, 'max' => 180, 'on' => [self::SCENARIO_LIVE, self::SCENARIO_DEFAULT]];
+
         $rules[] = [self::_addressAttributes(), 'safe'];
 
         if ($generalConfig->showFirstAndLastNameFields) {

@@ -40,6 +40,7 @@ use craft\gql\resolvers\elements\Entry as EntryResolver;
 use craft\gql\types\generators\EntryType as EntryTypeGenerator;
 use craft\gql\types\input\Matrix as MatrixInputType;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\Gql;
 use craft\helpers\Html;
@@ -64,6 +65,7 @@ use yii\db\Expression;
 /**
  * Matrix field type
  *
+ * @phpstan-import-type EagerLoadingMap from ElementInterface
  * @author Pixel & Tonic, Inc. <support@pixelandtonic.com>
  * @since 3.0.0
  */
@@ -205,6 +207,12 @@ class Matrix extends Field implements
      * @since 5.0.0
      */
     public ?int $maxEntries = null;
+
+    /**
+     * @var bool Enable versioning
+     * @since 5.7.0
+     */
+    public bool $enableVersioning = false;
 
     /**
      * @var string The view mode
@@ -643,8 +651,40 @@ class Matrix extends Field implements
 
     private function settingsHtml(bool $readOnly): string
     {
-        return Craft::$app->getView()->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
+        $view = Craft::$app->getView();
+
+        $entryTypes = Collection::make($this->getEntryTypes());
+        $entryTypeSelectConfig = [
+            'name' => 'entryTypes[]',
+            'renderDefaultInput' => false,
+            'allowOverrides' => true,
+            'create' => true,
+            'jsClass' => 'Craft.GroupedEntryTypeSelectInput',
+            'errors' => $this->getErrors('entryTypes'),
+            'data' => [
+                'error-key' => 'entryTypes',
+                'disabled' => $readOnly,
+            ],
+        ];
+
+        if (!$readOnly) {
+            $view->startJsBuffer();
+            $namespace = $view->getNamespace();
+            $view->setNamespace(null);
+            $entryTypeSelectHtml = $view->namespaceInputs(fn() => Cp::entryTypeSelectHtml([
+                ...$entryTypeSelectConfig,
+                'id' => 'TEMP_ID',
+            ]), $namespace);
+            $view->setNamespace($namespace);
+            $entryTypeSelectJs = $view->clearJsBuffer();
+        }
+
+        return $view->renderTemplate('_components/fieldtypes/Matrix/settings.twig', [
             'field' => $this,
+            'entryTypes' => $entryTypes,
+            'entryTypeSelectConfig' => $entryTypeSelectConfig,
+            'entryTypeSelectHtml' => $entryTypeSelectHtml ?? null,
+            'entryTypeSelectJs' => $entryTypeSelectJs ?? null,
             'defaultTableColumnOptions' => static::defaultTableColumnOptions($this->getEntryTypes()),
             'defaultCreateButtonLabel' => $this->defaultCreateButtonLabel(),
             'indexViewModes' => array_filter(
@@ -764,6 +804,31 @@ class Matrix extends Field implements
     /**
      * @inheritdoc
      */
+    public function serializeValueForDb(mixed $value, ElementInterface $element): mixed
+    {
+        /** @var EntryQuery|ElementCollection $value */
+        $serialized = [];
+        $new = 0;
+
+        foreach ($value->all() as $entry) {
+            /** @var Entry $entry */
+            $entryId = $entry->id ?? sprintf('new%s', ++$new);
+            $serialized[$entryId] = [
+                'title' => $entry->title,
+                'slug' => $entry->slug,
+                'type' => $entry->getType()->handle,
+                'enabled' => $entry->enabled,
+                'collapsed' => $entry->collapsed,
+                'fields' => $entry->getSerializedFieldValuesForDb(),
+            ];
+        }
+
+        return $serialized;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function copyValue(ElementInterface $from, ElementInterface $to): void
     {
         // We'll do it later from afterElementPropagate()
@@ -788,6 +853,142 @@ class Matrix extends Field implements
     /**
      * @inheritdoc
      */
+    protected function actionMenuItems(): array
+    {
+        $items = [];
+        $view = Craft::$app->getView();
+
+        if ($this->viewMode === self::VIEW_MODE_BLOCKS) {
+            // Expand/Collapse all
+            $expandAllId = sprintf('expand-all-%s', mt_rand());
+            $collapseAllId = sprintf('collapse-all-%s', mt_rand());
+            $items[] = [
+                'id' => $expandAllId,
+                'icon' => 'expand',
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Expand all blocks', [
+                    'type' => Entry::pluralLowerDisplayName(),
+                ])),
+            ];
+            $items[] = [
+                'id' => $collapseAllId,
+                'icon' => 'collapse',
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Collapse all blocks', [
+                    'type' => Entry::pluralLowerDisplayName(),
+                ])),
+            ];
+            $view->registerJsWithVars(fn($expandAllId, $collapseAllId, $fieldId) => <<<JS
+(() => {
+  const expandAllBtn = $('#' + $expandAllId);
+  const collapseAllBtn = $('#' + $collapseAllId);
+  const getBlocks = () => $('#' + $fieldId + ' > .blocks > .matrixblock');
+
+  expandAllBtn.on('activate', () => {
+    getBlocks().each((i, block) => {
+      $(block).data('entry').expand();
+    });
+  });
+
+  collapseAllBtn.on('activate', () => {
+    getBlocks().each((i, block) => {
+      $(block).data('entry').collapse();
+    });
+  });
+
+  setTimeout(() => {
+    const menu = expandAllBtn.closest('.menu').data('disclosureMenu');
+    menu.on('show', () => {
+      const blocks = getBlocks();
+      menu.toggleItem(expandAllBtn[0], blocks.is('.collapsed'));
+      menu.toggleItem(collapseAllBtn[0], blocks.is(':not(.collapsed)'));
+    });
+  }, 1);
+})();
+JS, [
+                $view->namespaceInputId($expandAllId),
+                $view->namespaceInputId($collapseAllId),
+                $view->namespaceInputId($this->getInputId()),
+            ]);
+        }
+
+        // Copy all
+        if ($this->maxEntries !== 1 && $this->viewMode !== self::VIEW_MODE_INDEX) {
+            if (!empty($items)) {
+                $items[] = ['type' => 'hr'];
+            }
+            $copyAllId = sprintf('action-copy-all-%s', mt_rand());
+            $items[] = [
+                'id' => $copyAllId,
+                'icon' => 'clone-dashed',
+                'color' => \craft\enums\Color::Fuchsia,
+                'label' => StringHelper::upperCaseFirst(Craft::t('app', 'Copy all {type}', [
+                    'type' => Entry::pluralLowerDisplayName(),
+                ])),
+            ];
+
+            if ($this->viewMode === self::VIEW_MODE_CARDS) {
+                $copyAllJs = <<<JS
+copyAllBtn.on('activate', () => {
+  Craft.cp.copyElements(field.find('> .nested-element-cards > .elements > li > .element'));
+});
+JS;
+            } else {
+                $baseInfo = Json::encode([
+                    'type' => Entry::class,
+                    'fieldId' => $this->id,
+                ]);
+                $copyAllJs = <<<JS
+copyAllBtn.on('activate', () => {
+  const elementInfo = [];
+  field.find('> .blocks > .matrixblock').each((i, element) => {
+    element = $(element);
+    elementInfo.push(Object.assign({
+        id: element.data('id'),
+        draftId: element.data('draftId'),
+        revisionId: element.data('revisionId'),
+        ownerId: element.data('ownerId'),
+        siteId: element.data('siteId'),
+      }, $baseInfo));
+  });
+  Craft.cp.copyElements(elementInfo);
+});
+JS;
+            }
+
+            $view->registerJsWithVars(fn($copyAllId, $fieldId) => <<<JS
+(() => {
+  const copyAllBtn = $('#' + $copyAllId);
+  const field = $('#' + $fieldId);
+  if (field.length) {
+    $copyAllJs
+  } else {
+    setTimeout(() => {
+      const menu = copyAllBtn.closest('.menu').data('disclosureMenu');
+      menu.removeItem(copyAllBtn[0]);
+    }, 1);
+  }
+})();
+JS, [
+                $view->namespaceInputId($copyAllId),
+                $view->namespaceInputId($this->getInputId()),
+            ]);
+        }
+
+        $parentItems = parent::actionMenuItems();
+
+        if (!empty($items) && !empty($parentItems)) {
+            return [
+                ...$items,
+                ['type' => 'hr'],
+                ...$parentItems,
+            ];
+        }
+
+        return [...$items, ...$parentItems];
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getTranslationDescription(?ElementInterface $element): ?string
     {
         return $this->entryManager()->getTranslationDescription($element);
@@ -801,7 +1002,9 @@ class Matrix extends Field implements
     {
         return match ($this->viewMode) {
             self::VIEW_MODE_BLOCKS => $this->blockInputHtml($value, $element),
-            default => $this->nestedElementManagerHtml($element),
+            default => Html::tag('div', $this->nestedElementManagerHtml($element), [
+                'id' => $this->getInputId(),
+            ]),
         };
     }
 
@@ -815,20 +1018,16 @@ class Matrix extends Field implements
             return Html::tag('div', $message, ['class' => 'pane no-border zilch small']);
         }
 
-        if ($element !== null && $element->hasEagerLoadedElements($this->handle)) {
+        if ($element->hasEagerLoadedElements($this->handle)) {
             $value = $element->getEagerLoadedElements($this->handle)->all();
         }
 
         if ($value instanceof EntryQuery) {
             $value = $value->getCachedResult() ?? (clone $value)
                 ->drafts(null)
+                ->canonicalsOnly()
                 ->status(null)
                 ->limit(null)
-                ->andWhere([
-                    'or',
-                    ['elements.draftId' => null],
-                    ['elements.canonicalId' => null],
-                ])
                 ->all();
         }
 
@@ -885,7 +1084,9 @@ class Matrix extends Field implements
 
             $js .= "\n" . <<<JS
 input.on('afterInit', async () => {
-  input.elementEditor?.pause();
+  if (input.elementEditor) {
+    await input.elementEditor.pause();
+  }
 JS . "\n";
 
             $entryTypeJs = Json::encode($entryTypes[0]->handle);
@@ -929,15 +1130,27 @@ JS;
         ];
 
         if (!$static) {
+            $entryTypeIdsJs = Json::encode(array_map(fn(EntryType $entryType) => $entryType->id, $entryTypes));
             $config += [
                 'sortable' => true,
                 'canCreate' => true,
+                'canPaste' => <<<JS
+(elementInfo) => {
+  const entryTypeIds = $entryTypeIdsJs;
+  for (const info of elementInfo) {
+    if (!entryTypeIds.includes(info.data.entryTypeId)) {
+      return false;
+    }
+  }
+  return true;
+}
+JS,
                 'createAttributes' => array_map(fn(EntryType $entryType) => [
+                    'group' => $entryType->group,
                     'icon' => $entryType->icon,
                     'color' => $entryType->color,
                     'label' => Craft::t('site', $entryType->name),
                     'attributes' => [
-                        'fieldId' => $this->id,
                         'typeId' => $entryType->id,
                     ],
                 ], $entryTypes),
@@ -1116,7 +1329,7 @@ JS;
         }
 
         /** @var EntryQuery|ElementCollection $value */
-        $entries = $value->all();
+        $entries = $value->status(null)->all();
 
         if (empty($entries)) {
             return '<p class="light">' . Craft::t('app', 'No entries.') . '</p>';
@@ -1148,6 +1361,7 @@ JS;
 
     /**
      * @inheritdoc
+     * @return EagerLoadingMap|null|false
      */
     public function getEagerLoadingMap(array $sourceElements): array|null|false
     {
@@ -1181,7 +1395,10 @@ JS;
                 'fieldId' => $this->id,
                 'allowOwnerDrafts' => true,
                 'allowOwnerRevisions' => true,
-                'revisions' => null,
+                // only include revisions if any of the source elements is a revision
+                // see https://github.com/craftcms/cms/issues/14448 and https://github.com/craftcms/cms/issues/17324
+                'revisions' => Collection::make($sourceElements)
+                    ->contains(fn($sourceElement) => $sourceElement->getIsRevision()),
             ],
         ];
     }
@@ -1449,7 +1666,6 @@ JS;
                 ->ownerId($element->id)
                 ->siteId($element->siteId)
                 ->drafts(null)
-                ->revisions(null)
                 ->status(null)
                 ->indexBy($uids ? 'uid' : 'id')
                 ->all();

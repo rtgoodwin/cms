@@ -46,7 +46,7 @@ class GeneralConfig extends BaseConfig
     public const SNAKE_CASE = 'snake';
 
     /**
-     * @inerhitdoc
+     * @inheritdoc
      */
     protected static array $renamedSettings = [
         'activateAccountFailurePath' => 'invalidUserTokenPath',
@@ -72,11 +72,16 @@ class GeneralConfig extends BaseConfig
      *
      * The array can contain the following keys:
      *
-     * - `alwaysShowFocusRings` - Whether focus rings should always be shown when an element has focus.
      * - `useShapes` – Whether shapes should be used to represent statuses.
      * - `underlineLinks` – Whether links should be underlined.
+     * - `disableAutofocus` – Whether inputs should make use of the `autofocus` attribute.
      * - `notificationDuration` – How long notifications should be shown before they disappear automatically (in
      *   milliseconds). Set to `0` to show them indefinitely.
+     * - `notificationPosition` – Where notifications should be shown on the screen (`'start-start'` for top-left,
+     *   `'start-end'` for top-right, `'end-start'` for bottom-left, or `'end-end'` for bottom-right, when using an
+     *   LTR orientation).
+     * - `slideoutPosition` – Where slideouts should be shown on the screen (`'start'` for left, or `'end'`
+     *   for right, when using an LTR orientation).
      *
      * ```php
      * ->accessibilityDefaults([
@@ -88,11 +93,12 @@ class GeneralConfig extends BaseConfig
      * @since 3.6.4
      */
     public array $accessibilityDefaults = [
-        'alwaysShowFocusRings' => false,
         'useShapes' => false,
         'underlineLinks' => false,
         'disableAutofocus' => false,
         'notificationDuration' => 5000,
+        'notificationPosition' => 'end-start',
+        'slideoutPosition' => 'end',
     ];
 
     /**
@@ -1582,10 +1588,12 @@ class GeneralConfig extends BaseConfig
     public mixed $invalidLoginWindowDuration = 3600;
 
     /**
-     * @var mixed The URI Craft should redirect to when user token validation fails. A token is used on things like setting and resetting user account
-     * passwords. Note that this only affects front-end site requests.
+     * @var mixed The URI Craft should redirect to when user token validation fails. User tokens are used for
+     * email verification and password resets. If `null`, <config5:loginPath> will be used by default.
      *
      * See [[ConfigHelper::localizedValue()]] for a list of supported value types.
+     *
+     * Note that this only affects front-end site requests.
      *
      * ::: code
      * ```php Static Config
@@ -1601,7 +1609,7 @@ class GeneralConfig extends BaseConfig
      * @see getInvalidUserTokenPath()
      * @group Routing
      */
-    public mixed $invalidUserTokenPath = '';
+    public mixed $invalidUserTokenPath = null;
 
     /**
      * @var string[]|null List of headers where proxies store the real client IP.
@@ -2960,6 +2968,24 @@ class GeneralConfig extends BaseConfig
     public mixed $softDeleteDuration = 2592000;
 
     /**
+     * @var bool Whether entries’ statuses should be stored statically, and only get updated on entry save, or when the
+     * `update-statuses` command is executed.
+     *
+     * ::: code
+     * ```php Static Config
+     * ->staticStatuses()
+     * ```
+     * ```shell Environment Override
+     * CRAFT_STATIC_STATUSES=true
+     * ```
+     * :::
+     *
+     * @group System
+     * @since 5.7.0
+     */
+    public bool $staticStatuses = false;
+
+    /**
      * @var bool Whether user IP addresses should be stored/logged by the system.
      *
      * ::: code
@@ -3434,7 +3460,6 @@ class GeneralConfig extends BaseConfig
      *
      * The array can contain the following keys:
      *
-     * - `alwaysShowFocusRings` - Whether focus rings should always be shown when an element has focus.
      * - `useShapes` – Whether shapes should be used to represent statuses.
      * - `underlineLinks` – Whether links should be underlined.
      * - `disableAutofocus` – Whether search inputs should be focused on page load.
@@ -5086,10 +5111,12 @@ class GeneralConfig extends BaseConfig
     }
 
     /**
-     * The URI Craft should redirect to when user token validation fails. A token is used on things like setting and resetting user account
-     * passwords. Note that this only affects front-end site requests.
+     * The URI Craft should redirect to when user token validation fails. User tokens are used for
+     * email verification and password resets. If `null`, <config5:loginPath> will be used by default.
      *
      * See [[ConfigHelper::localizedValue()]] for a list of supported value types.
+     *
+     * Note that this only affects front-end site requests.
      *
      * ```php
      * // 1 day
@@ -6648,6 +6675,31 @@ class GeneralConfig extends BaseConfig
     }
 
     /**
+     * Whether entries’ statuses should be stored statically, and only get updated on entry save, or when the
+     * `update-statuses` command is executed.
+     *
+     * ::: code
+     * ```php Static Config
+     * ->staticStatuses()
+     * ```
+     * ```shell Environment Override
+     * CRAFT_STATIC_STATUSES=true
+     * ```
+     * :::
+     *
+     * @group System
+     * @param bool $value
+     * @return self
+     * @see $staticStatuses
+     * @since 5.7.0
+     */
+    public function staticStatuses(bool $value = true): self
+    {
+        $this->staticStatuses = $value;
+        return $this;
+    }
+
+    /**
      * Whether user IP addresses should be stored/logged by the system.
      *
      * ```php
@@ -7169,10 +7221,10 @@ class GeneralConfig extends BaseConfig
      * Returns the localized Invalid User Token Path value.
      *
      * @param string|null $siteHandle The site handle the value should be defined for. Defaults to the current site.
-     * @return string
+     * @return string|null
      * @see invalidUserTokenPath
      */
-    public function getInvalidUserTokenPath(?string $siteHandle = null): string
+    public function getInvalidUserTokenPath(?string $siteHandle = null): ?string
     {
         $path = ConfigHelper::localizedValue($this->invalidUserTokenPath, $siteHandle);
         return is_string($path) ? trim($path, '/') : $path;
