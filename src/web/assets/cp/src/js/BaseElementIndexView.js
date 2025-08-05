@@ -79,7 +79,7 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
 
           for (let i = 0; i < $(ev.elements).length; i++) {
             const $element = $(ev.elements).eq(i);
-            this.enableWidgets($element);
+            this.enableFocusableElements($element);
           }
         };
 
@@ -88,7 +88,7 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
 
           for (let i = 0; i < $(ev.elements).length; i++) {
             const $element = $(ev.elements).eq(i);
-            this.disableWidgets($element);
+            this.disableFocusableElements($element);
           }
         };
 
@@ -171,8 +171,8 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
             'aria-checked': 'true',
           });
 
-          // remove checkbox other widgets from tab order
-          this.disableWidgets($element);
+          // remove other focusable elements from the tab order
+          this.disableFocusableElements($element);
           continue;
         }
 
@@ -202,34 +202,34 @@ Craft.BaseElementIndexView = Garnish.Base.extend(
     },
 
     /**
-     * Removes all interactive widgets inside the element from the focus order
-     * @param $element
+     * Removes all focusable elements inside the given container from the focus order
+     * @param $container
      */
-    disableWidgets: function ($element) {
+    disableFocusableElements: function ($container) {
       const disabledAttributes = {
         tabindex: '-1',
-        'data-widget': true,
+        'data-focusable': true,
       };
       // Disable all focusable elements inside the disabled elements
-      const $focusable = Garnish.getKeyboardFocusableElements($element);
+      const $focusable = Garnish.getKeyboardFocusableElements($container);
 
       if ($focusable.length) {
         $focusable.attr(disabledAttributes);
       }
-      this.getElementCheckbox($element).attr(disabledAttributes);
+      this.getElementCheckbox($container).attr(disabledAttributes);
     },
 
     /**
-     * Moves all interactive widgets inside the element into the default focus order
-     * @param $element
+     * Moves all focusable elements inside the given container into the default focus order
+     * @param $container
      */
-    enableWidgets: function ($element) {
-      const $disabledWidgets = $element.find('[data-widget]');
+    enableFocusableElements: function ($container) {
+      const $focusableElements = $container.find('[data-focusable]');
 
-      if (!$disabledWidgets.length) return;
+      if (!$focusableElements.length) return;
 
-      $disabledWidgets.removeAttr('tabindex data-widget');
-      this.getElementCheckbox($element).attr('tabindex', '0');
+      $focusableElements.removeAttr('tabindex data-focusable');
+      this.getElementCheckbox($container).attr('tabindex', '0');
     },
 
     canSelectElement: function ($element) {
