@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 4
 
-## Unreleased
+## 4.16.9 - 2025-08-05
 
 - Added `craft\services\UserPermissions::reset()`.
 - Fixed a bug where reference tags that only referenced an entry’s slug weren’t resolving.
