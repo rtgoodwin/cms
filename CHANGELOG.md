@@ -13,6 +13,7 @@
 - Fixed a bug where focus wasn’t being managed properly when clicking on the image editor modal background. ([#17455](https://github.com/craftcms/cms/pull/17455))
 - Fixed a bug where custom sources that were hidden for certain user groups weren’t available within element selector modals either. ([#17703](https://github.com/craftcms/cms/issues/17703))
 - Fixed a bug where element queries weren’t returning any results if they had a param that resolved to multiple generated fields. ([#17709](https://github.com/craftcms/cms/issues/17709))
+- Fixed a bug where Link fields weren’t preserving spaces within Phone and SMS link labels. ([#17707](https://github.com/craftcms/cms/issues/17707))
 
 ## 5.8.12 - 2025-07-29
 
