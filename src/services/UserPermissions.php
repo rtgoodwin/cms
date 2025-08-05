@@ -294,9 +294,7 @@ class UserPermissions extends Component
             }
         }
 
-        return array_values(array_filter($permissions, function($permission) {
-            return isset($this->_allPermissionNames[strtolower($permission)]);
-        }));
+        return array_values(array_filter($permissions, fn($permission) => isset($this->_allPermissionNames[strtolower($permission)])));
     }
 
     private function collectPermissionNames(array &$permissions): void
@@ -950,7 +948,7 @@ class UserPermissions extends Component
     /**
      * Resets the internal state
      *
-     * @since 4.16.9
+     * @since 5.8.13
      */
     public function reset(): void
     {
