@@ -63,13 +63,13 @@ class UserPermissions extends Component
      * @var array
      * @see getAllPermissions()
      */
-    private array $_allPermissions;
+    private array|null $_allPermissions = null;
 
     /**
      * @var string[]
      * @see filterInvalidPermissions()
      */
-    private array $_allPermissionNames;
+    private array|null $_allPermissionNames = null;
 
     /**
      * @var string[][]
@@ -945,5 +945,18 @@ class UserPermissions extends Component
         return (new Query())
             ->select(['p.name'])
             ->from(['p' => Table::USERPERMISSIONS]);
+    }
+
+    /**
+     * Resets the internal state
+     *
+     * @since 4.16.9
+     */
+    public function reset(): void
+    {
+        $this->_allPermissions = null;
+        $this->_allPermissionNames = null;
+        $this->_permissionsByGroupId = [];
+        $this->_permissionsByUserId = [];
     }
 }
