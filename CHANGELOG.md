@@ -14,7 +14,7 @@
 - Fixed a bug where custom sources that were hidden for certain user groups weren’t available within element selector modals either. ([#17703](https://github.com/craftcms/cms/issues/17703))
 - Fixed a bug where element queries weren’t returning any results if they had a param that resolved to multiple generated fields. ([#17709](https://github.com/craftcms/cms/issues/17709))
 - Fixed a bug where Link fields weren’t preserving spaces within Phone and SMS link labels. ([#17707](https://github.com/craftcms/cms/issues/17707))
-- Fixes a bug in element index views where focusable elements in disabled elements remained in the focus order. ([#17053](https://github.com/craftcms/cms/pull/17053))
+- Fixed a bug where disabled rows within element selector modals could contain nested focusable elements. ([#17053](https://github.com/craftcms/cms/pull/17053))
 
 ## 5.8.12 - 2025-07-29
 
