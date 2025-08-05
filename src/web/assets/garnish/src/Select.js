@@ -574,10 +574,19 @@ export default Base.extend(
      * Sets the focus on an item.
      */
     focusItem: function ($item, preventScroll) {
+      let $focusableElement;
       if (this.settings.makeFocusable) {
         this.setFocusableItem($item);
-        $item[0].focus({preventScroll: !!preventScroll});
+        $focusableElement = $item;
+      } else if ($item.is(':focusable')) {
+        $focusableElement = $item;
+      } else {
+        $focusableElement = $item.find(':focusable:first');
       }
+      if ($focusableElement?.length) {
+        $focusableElement[0].focus({preventScroll: !!preventScroll});
+      }
+
       this.$focusedItem = $item;
       this.trigger('focusItem', {item: $item});
     },
