@@ -66,7 +66,7 @@ class Color extends Field implements InlineEditableFieldInterface, MergeableFiel
 
     /**
      * @var array Color palette
-     * @phpstan-var array{color:string,label:string|null,default:bool}[]
+     * @phpstan-var array{color:string,label:string|null,default:bool|null}[]
      * @since 5.6.0
      */
     public array $palette = [];
@@ -240,7 +240,6 @@ class Color extends Field implements InlineEditableFieldInterface, MergeableFiel
                 foreach ($this->palette as $color) {
                     if (!$validator->validate($color['color'], $error)) {
                         $this->addError('palette', Craft::t('yii', '{attribute} is invalid.', [
-                            /** @phpstan-ignore-next-line */
                             'attribute' => StringHelper::ensureLeft($color['color'] ?? '', '#'),
                         ]));
                     }

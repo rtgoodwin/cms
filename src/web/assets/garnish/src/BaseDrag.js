@@ -81,11 +81,31 @@ export default Base.extend(
 
     setScrollContainer: function () {
       this._.$scrollContainer = this.$targetItem.scrollParent();
-      if (
-        this._.$scrollContainer[0] === Garnish.$doc[0] ||
-        this._.$scrollContainer[0] === Garnish.$bod[0]
-      ) {
-        this._.$scrollContainer = Garnish.$win;
+
+      while (true) {
+        if (
+          this._.$scrollContainer[0] === Garnish.$doc[0] ||
+          this._.$scrollContainer[0] === Garnish.$bod[0]
+        ) {
+          this._.$scrollContainer = Garnish.$win;
+          break;
+        }
+
+        if (
+          // if we're able to drag vertically and the container is vertically scrollable
+          (this.settings.axis !== Garnish.X_AXIS &&
+            this._.$scrollContainer[0].scrollHeight >
+              this._.$scrollContainer[0].clientHeight) ||
+          // or if we're able to drag horizontally and the container is horizontally scrollable
+          (this.settings.axis !== Garnish.Y_AXIS &&
+            this._.$scrollContainer[0].scrollWidth >
+              this._.$scrollContainer[0].clientWidth)
+        ) {
+          // ...we found our scroll container
+          break;
+        }
+
+        this._.$scrollContainer = this._.$scrollContainer.scrollParent();
       }
     },
 
@@ -218,6 +238,10 @@ export default Base.extend(
       for (const item of items) {
         // Make sure this element doesn't belong to another dragger
         if ($.data(item, 'drag')) {
+          if ($.data(item, 'drag') === this) {
+            continue;
+          }
+
           console.warn('Element was added to more than one dragger');
           $.data(item, 'drag').removeItems(item);
         }
@@ -252,6 +276,34 @@ export default Base.extend(
           this.$items.splice(index, 1);
         }
       }
+    },
+
+    getPrevItem: function (item) {
+      if (item instanceof jQuery) {
+        item = item[0];
+      }
+
+      this.$items = $().add(this.$items);
+      const index = $.inArray(item, this.$items);
+      if (index === -1 || index === 0) {
+        return null;
+      }
+
+      return this.$items.eq(index - 1);
+    },
+
+    getNextItem: function (item) {
+      if (item instanceof jQuery) {
+        item = item[0];
+      }
+
+      this.$items = $().add(this.$items);
+      const index = $.inArray(item, this.$items);
+      if (index === -1 || index === this.$items.length - 1) {
+        return null;
+      }
+
+      return this.$items.eq(index + 1);
     },
 
     /**

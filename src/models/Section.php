@@ -201,9 +201,9 @@ class Section extends Model implements Chippable, CpEditable, Iconic
     protected function defineRules(): array
     {
         $rules = parent::defineRules();
-        $rules[] = [['id', 'structureId', 'maxLevels'], 'number', 'integerOnly' => true];
+        $rules[] = [['id', 'structureId'], 'number', 'integerOnly' => true];
         $rules[] = [
-            ['maxAuthors'],
+            ['maxLevels', 'maxAuthors'],
             'number',
             'integerOnly' => true,
             'min' => 0,
@@ -439,7 +439,7 @@ class Section extends Model implements Chippable, CpEditable, Iconic
         ];
 
         if (!empty($this->previewTargets)) {
-            $config['previewTargets'] = ProjectConfigHelper::packAssociativeArray($this->previewTargets);
+            $config['previewTargets'] = ProjectConfigHelper::packAssociativeArray(array_values($this->previewTargets));
         }
 
         if ($this->type === self::TYPE_STRUCTURE) {

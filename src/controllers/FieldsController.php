@@ -27,6 +27,7 @@ use craft\helpers\Component;
 use craft\helpers\Cp;
 use craft\helpers\Html;
 use craft\helpers\StringHelper;
+use craft\helpers\Typecast;
 use craft\helpers\UrlHelper;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
@@ -376,6 +377,7 @@ JS, [
                 }
             }, ARRAY_FILTER_USE_KEY);
 
+            Typecast::properties($type, $settings);
             Craft::configure($field, $settings);
         }
 
@@ -609,6 +611,7 @@ JS, [
         $fieldLayoutConfig = $this->request->getRequiredBodyParam('fieldLayoutConfig');
         $cardElements = $this->request->getRequiredBodyParam('cardElements');
         $showThumb = $this->request->getBodyParam('showThumb', false);
+        $thumbAlignment = $this->request->getBodyParam('thumbAlignment', false);
 
         if (!isset($fieldLayoutConfig['id'])) {
             $fieldLayout = Craft::createObject([
@@ -621,12 +624,14 @@ JS, [
         }
 
         if (!$fieldLayout) {
-            throw new BadRequestHttpException("Invalid field layout");
+            throw new BadRequestHttpException('Invalid field layout');
         }
 
         $fieldLayout->setCardView(
             array_column($cardElements, 'value')
         ); // this fully takes care of attributes, but not fields
+
+        $fieldLayout->setCardThumbAlignment($thumbAlignment);
 
         return $this->asJson([
             'previewHtml' => Cp::cardPreviewHtml($fieldLayout, $cardElements, $showThumb),

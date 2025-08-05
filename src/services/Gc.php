@@ -19,6 +19,7 @@ use craft\db\TableSchema;
 use craft\elements\Address;
 use craft\elements\Asset;
 use craft\elements\Category;
+use craft\elements\ContentBlock;
 use craft\elements\Entry;
 use craft\elements\GlobalSet;
 use craft\elements\Tag;
@@ -52,6 +53,11 @@ class Gc extends Component
      * @event Event The event that is triggered when running garbage collection.
      */
     public const EVENT_RUN = 'run';
+
+    /**
+     * @var int The number of items that should be deleted in a single batch.
+     */
+    private const CHUNK_SIZE = 10000;
 
     /**
      * @var int the probability (parts per million) that garbage collection (GC) should be performed
@@ -141,6 +147,7 @@ class Gc extends Component
 
         $this->_deleteUnsupportedSiteEntries();
         $this->deleteOrphanedNestedElements(Address::class, Table::ADDRESSES);
+        $this->deleteOrphanedNestedElements(ContentBlock::class, Table::CONTENTBLOCKS);
         $this->deleteOrphanedNestedElements(Entry::class, Table::ENTRIES);
 
         // Fire a 'run' event
@@ -272,7 +279,9 @@ class Gc extends Component
             $ids = array_unique(array_merge($ids1, $ids2));
 
             if (!empty($ids)) {
-                Db::delete(Table::ELEMENTS, ['id' => $ids]);
+                foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                    Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
+                }
             }
         }
 
@@ -326,7 +335,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::ELEMENTS, ['id' => $ids]);
+            foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                Db::delete(Table::ELEMENTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -480,7 +491,9 @@ class Gc extends Component
         }
 
         if (!empty($deleteIds)) {
-            Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIds]);
+            foreach (array_chunk($deleteIds, self::CHUNK_SIZE) as $deleteIdsChunk) {
+                Db::delete(Table::ELEMENTS_SITES, ['id' => $deleteIdsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -548,7 +561,9 @@ class Gc extends Component
                 ->column();
 
             if (!empty($ids)) {
-                Db::delete($table, ['id' => $ids]);
+                foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                    Db::delete($table, ['id' => $idsChunk]);
+                }
             }
         }
 
@@ -574,7 +589,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::RELATIONS, ['id' => $ids]);
+            foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                Db::delete(Table::RELATIONS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -596,7 +613,9 @@ class Gc extends Component
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::STRUCTUREELEMENTS, ['id' => $ids]);
+            foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                Db::delete(Table::STRUCTUREELEMENTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);
@@ -714,7 +733,9 @@ SQL;
             ->column();
 
         if (!empty($ids)) {
-            Db::delete(Table::FIELDLAYOUTS, ['id' => $ids]);
+            foreach (array_chunk($ids, self::CHUNK_SIZE) as $idsChunk) {
+                Db::delete(Table::FIELDLAYOUTS, ['id' => $idsChunk]);
+            }
         }
 
         $this->_stdout("done\n", Console::FG_GREEN);

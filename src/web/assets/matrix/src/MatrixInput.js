@@ -342,7 +342,8 @@
           );
         }
 
-        await Craft.queue.push(async () => {
+        const queue = this.elementEditor?.queue ?? Craft.queue;
+        await queue.push(async () => {
           if (this.addingEntry) {
             // only one new entry at a time
             return;
@@ -388,7 +389,7 @@
           $entry.css(this.getHiddenEntryCss($entry)).velocity(
             {
               opacity: 1,
-              'margin-bottom': 10,
+              'margin-bottom': 8,
             },
             'fast',
             async () => {
@@ -451,6 +452,10 @@
 
       deleteSelectedEntries: function () {
         this.callOnSelectedEntries('selfDestruct');
+      },
+
+      duplicateSelectedEntries: function () {
+        this.callOnSelectedEntries('duplicate');
       },
 
       callOnSelectedEntries: function (fn) {
@@ -745,15 +750,16 @@
           let value;
 
           if ($input.hasClass('label')) {
-            const $maybeLightswitchContainer = $input.parent().parent();
-
+            const $lightswitch = $input.closest('.lightswitch');
             if (
-              $maybeLightswitchContainer.hasClass('lightswitch') &&
-              (($maybeLightswitchContainer.hasClass('on') &&
-                $input.hasClass('off')) ||
-                (!$maybeLightswitchContainer.hasClass('on') &&
-                  $input.hasClass('on')))
+              $lightswitch.length &&
+              (($lightswitch.hasClass('on') && $input.hasClass('off')) ||
+                (!$lightswitch.hasClass('on') && $input.hasClass('on')))
             ) {
+              continue;
+            }
+
+            if ($input.closest('button[aria-pressed=false]').length) {
               continue;
             }
 
@@ -935,6 +941,14 @@
       });
     },
 
+    duplicate: function () {
+      const type = this.$container.data('type');
+      const elementEditor = this.matrix.elementEditor;
+      this.matrix.addEntry(type, this.$container.next('.matrixblock'), true, {
+        duplicate: elementEditor?.getDraftElementId(this.id) || this.id,
+      });
+    },
+
     handleActionClick: function (event) {
       event.preventDefault();
       this.onActionSelect(event.target);
@@ -998,6 +1012,15 @@
           break;
         }
 
+        case 'editEntryType': {
+          new Craft.CpScreenSlideout('entry-types/edit', {
+            params: {
+              entryTypeId: this.$container.data('type-id'),
+            },
+          });
+          break;
+        }
+
         case 'add': {
           const type = $option.data('type');
           this.matrix.addEntry(type, this.$container);
@@ -1005,33 +1028,51 @@
         }
 
         case 'duplicate': {
-          const type = this.$container.data('type');
-          const elementEditor = this.matrix.elementEditor;
-          this.matrix.addEntry(
-            type,
-            this.$container.next('.matrixblock'),
-            true,
-            {
-              duplicate: elementEditor?.getDraftElementId(this.id) || this.id,
-            }
-          );
+          if (batchAction) {
+            this.matrix.duplicateSelectedEntries();
+          } else {
+            this.duplicate();
+          }
+
           break;
         }
 
         case 'copy': {
-          Craft.cp.copyElements([
-            {
-              type: 'craft\\elements\\Entry',
-              id:
-                this.matrix.elementEditor?.getDraftElementId(this.id) ||
-                this.id,
-              draftId: this.$container.data('draftId'),
-              revisionId: this.$container.data('revisionId'),
-              fieldId: this.matrix.settings.fieldId,
-              ownerId: this.matrix.settings.ownerId,
-              siteId: this.matrix.settings.siteId,
-            },
-          ]);
+          let elementInfo = [];
+          if (batchAction) {
+            let selectedItems = this.matrix.entrySelect.getSelectedItems();
+            for (let i = 0; i < selectedItems.length; i++) {
+              let entry = $(selectedItems[i]).data('entry');
+
+              elementInfo.push({
+                type: 'craft\\elements\\Entry',
+                id:
+                  entry.matrix.elementEditor?.getDraftElementId(entry.id) ||
+                  entry.id,
+                draftId: entry.$container.data('draftId'),
+                revisionId: entry.$container.data('revisionId'),
+                fieldId: entry.matrix.settings.fieldId,
+                ownerId: entry.matrix.settings.ownerId,
+                siteId: entry.matrix.settings.siteId,
+              });
+            }
+          } else {
+            elementInfo = [
+              {
+                type: 'craft\\elements\\Entry',
+                id:
+                  this.matrix.elementEditor?.getDraftElementId(this.id) ||
+                  this.id,
+                draftId: this.$container.data('draftId'),
+                revisionId: this.$container.data('revisionId'),
+                fieldId: this.matrix.settings.fieldId,
+                ownerId: this.matrix.settings.ownerId,
+                siteId: this.matrix.settings.siteId,
+              },
+            ];
+          }
+
+          Craft.cp.copyElements(elementInfo);
           break;
         }
 

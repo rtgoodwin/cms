@@ -71,6 +71,7 @@ Craft.ElementFieldSettings = Garnish.Base.extend({
       this.$maxRelationsField.addClass('hidden');
       this.$branchLimitField.removeClass('hidden');
       this.$defaultPlacementField.addClass('hidden');
+      this.$viewModeField.find('select').val('list').trigger('change');
       this.$viewModeField.addClass('hidden');
     } else {
       this.$branchLimitField.addClass('hidden');

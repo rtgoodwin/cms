@@ -9,6 +9,7 @@ use craft\base\ElementInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\errors\InvalidTypeException;
 use craft\fields\conditions\FieldConditionRuleInterface;
+use craft\fields\conditions\GeneratedFieldConditionRule;
 use craft\models\FieldLayout;
 use yii\base\InvalidConfigException;
 
@@ -21,7 +22,7 @@ use yii\base\InvalidConfigException;
 class ElementCondition extends BaseCondition implements ElementConditionInterface
 {
     /**
-     * @inerhitdoc
+     * @inheritdoc
      */
     public bool $sortable = false;
 
@@ -214,6 +215,15 @@ class ElementCondition extends BaseCondition implements ElementConditionInterfac
                     $type['layoutElementUid'] = $field->layoutElement->uid;
 
                     $types[] = $type;
+                }
+
+                foreach ($fieldLayout->getGeneratedFields() as $field) {
+                    if (($field['name'] ?? '') !== '' && ($field['handle'] ?? '') !== '') {
+                        $types[] = [
+                            'class' => GeneratedFieldConditionRule::class,
+                            'fieldUid' => $field['uid'],
+                        ];
+                    }
                 }
             }
         }

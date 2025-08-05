@@ -116,8 +116,6 @@ class AppController extends Controller
      */
     public function actionResourceJs(string $url): Response
     {
-        $this->requireCpRequest();
-
         if (!str_starts_with($url, Craft::$app->getAssetManager()->baseUrl)) {
             throw new BadRequestHttpException("$url does not appear to be a resource URL");
         }
@@ -461,6 +459,7 @@ class AppController extends Controller
             default => 1597,
         };
 
+        $this->response->setNoCacheHeaders();
         return $this->renderTemplate('_special/licensing-issues.twig', [
             'issues' => $issues,
             'hash' => $hash,

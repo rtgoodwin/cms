@@ -64,38 +64,49 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
         if (Array.isArray(this.settings.createAttributes)) {
           const createMenuId = `menu-${Math.floor(Math.random() * 1000000)}`;
-          const $menu = $('<div/>', {
+          $('<div/>', {
             id: createMenuId,
             class: 'menu menu--disclosure',
+            'data-with-search-input':
+              this.settings.createAttributes.length > 5 ? 'true' : null,
           }).insertAfter(this.$createBtn);
-          const $ul = $('<ul/>').appendTo($menu);
-          for (let type of this.settings.createAttributes) {
-            const $li = $('<li/>').appendTo($ul);
-            let buttonHtml = '';
-            if (type.icon) {
-              const $icon = $(`<span class="icon">${type.icon}</span>`);
-              if (type.color) {
-                $icon.addClass(type.color);
-              }
-              buttonHtml += $icon.prop('outerHTML');
-            }
-            buttonHtml += `<span class="label">${type.label}</span>`;
-            const $button = $('<button/>', {
-              type: 'button',
-              class: 'menu-item',
-              html: buttonHtml,
-            }).appendTo($li);
-            this.addListener($button, 'activate', (ev) => {
-              ev.preventDefault();
-              this.$createBtn.data('disclosureMenu').hide();
-              this.createElement(type.attributes);
-            });
-          }
           this.$createBtn
             .attr('aria-controls', createMenuId)
             .attr('data-disclosure-trigger', 'true')
             .addClass('menubtn')
             .disclosureMenu();
+          const disclosureMenu = this.$createBtn.data('disclosureMenu');
+
+          // can't use Object.groupBy() here because the group order matters
+          const groupedCreateAttributes = {};
+          const groupOrder = [];
+          this.settings.createAttributes.forEach((attributes) => {
+            const group = attributes.group || Craft.t('app', 'General');
+            if (!groupedCreateAttributes[group]) {
+              groupedCreateAttributes[group] = [];
+              groupOrder.push(group);
+            }
+            groupedCreateAttributes[group].push(attributes);
+          });
+          const withHeadings = groupOrder.length > 1;
+
+          groupOrder.forEach((group) => {
+            if (withHeadings) {
+              disclosureMenu.addHr();
+              disclosureMenu.addGroup(group, false);
+            }
+
+            groupedCreateAttributes[group].forEach((attributes) => {
+              disclosureMenu.addItem({
+                icon: attributes.icon ? $(attributes.icon)[0] : null,
+                label: attributes.label,
+                iconColor: attributes.color,
+                onActivate: () => {
+                  this.createElement(attributes.attributes);
+                },
+              });
+            });
+          });
         } else {
           this.addListener(this.$createBtn, 'activate', (ev) => {
             ev.preventDefault();
@@ -173,7 +184,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
         });
       }
 
-      for (let element of this.$elements.children().toArray()) {
+      for (const element of this.$elements.children().toArray()) {
         this.initElement($(element).children('.element'));
       }
     },
@@ -581,6 +592,8 @@ Craft.NestedElementManager = Garnish.Base.extend(
             // Override the default event listener
             $editBtn.off('activate');
             this.addListener($editBtn, 'activate', (ev) => {
+              // focus on the button so that when the slideout is closed, it's returned to the button
+              $editBtn.focus();
               const cpUrl = $element.data('cpUrl');
               if (cpUrl && Garnish.isCtrlKeyPressed(ev.originalEvent)) {
                 window.open(cpUrl);
@@ -600,6 +613,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
         const actionDisclosure = $element
           .find('.action-btn')
+          .removeClass('hidden')
           .disclosureMenu()
           .data('disclosureMenu');
 
@@ -888,7 +902,7 @@ Craft.NestedElementManager = Garnish.Base.extend(
 
       let $cards = $();
 
-      for (let elementInfo of elements) {
+      for (const elementInfo of elements) {
         for (const card of data.elements[elementInfo.id] || []) {
           const $li = $('<li/>').appendTo(this.$elements);
           const $card = $(card).appendTo($li);

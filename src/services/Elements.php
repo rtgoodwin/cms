@@ -16,7 +16,6 @@ use craft\base\ExpirableElementInterface;
 use craft\base\FieldInterface;
 use craft\base\NestedElementInterface;
 use craft\behaviors\DraftBehavior;
-use craft\behaviors\RevisionBehavior;
 use craft\console\controllers\MigrateController;
 use craft\console\controllers\UpController;
 use craft\controllers\AppController;
@@ -1631,18 +1630,13 @@ class Elements extends Component
                                 throw new InvalidElementException($element, "Skipped resaving $label due to an error obtaining its root element: " . $rootException->getMessage());
                             }
                         }
-                    } catch (InvalidElementException $e) {
-                    }
 
-                    if ($e === null) {
-                        try {
-                            $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
-                        } catch (Throwable $e) {
-                            if (!$continueOnError) {
-                                throw $e;
-                            }
-                            Craft::$app->getErrorHandler()->logException($e);
+                        $this->_saveElementInternal($element, true, true, $updateSearchIndex, forceTouch: $touch, saveContent: true);
+                    } catch (Throwable $e) {
+                        if (!$continueOnError) {
+                            throw $e;
                         }
+                        Craft::$app->getErrorHandler()->logException($e);
                     }
 
                     // Fire an 'afterResaveElement' event
@@ -1856,13 +1850,13 @@ class Elements extends Component
         $mainClone->setDirtyFields($dirtyFields, false);
 
         // Check authorization?
-        if ($checkAuthorization && !$this->canSave($mainClone)) {
+        if ($checkAuthorization && !($this->canDuplicate($mainClone) && $this->canSave($mainClone))) {
             throw new ForbiddenHttpException('User not authorized to duplicate this element.');
         }
 
         // If we are duplicating a draft as another draft, create a new draft row
         if ($mainClone->draftId && $mainClone->draftId === $element->draftId) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             /** @var DraftBehavior $draftBehavior */
             $draftBehavior = $mainClone->getBehavior('draft');
             $draftsService = Craft::$app->getDrafts();
@@ -1885,7 +1879,7 @@ class Elements extends Component
 
         // If we are supposed to save it as new unpublished draft
         if ($asUnpublishedDraft) {
-            /** @var ElementInterface|DraftBehavior $element */
+            /** @var ElementInterface&DraftBehavior $element */
             /** @var DraftBehavior $draftBehavior */
             // check if draftBehavior is attached - if not, attach it
             $draftBehavior = $mainClone->getBehavior('draft') ?? $mainClone->attachBehavior('draft', new DraftBehavior());
@@ -2033,8 +2027,9 @@ class Elements extends Component
                     // Now propagate $mainClone to any sites the source element didn’t already exist in
                     foreach ($supportedSites as $siteId => $siteInfo) {
                         if (!isset($propagatedTo[$siteId]) && $siteInfo['propagate']) {
-                            $siteClone = false;
+                            $siteClone = $element->getIsDraft() && !$element->getIsUnpublishedDraft() ? null : false;
                             if (!$this->_propagateElement($mainClone, $supportedSites, $siteId, $siteClone)) {
+                                /** @phpstan-ignore-next-line */
                                 throw $siteClone
                                     ? new InvalidElementException($siteClone, "Element $siteClone->id could not be propagated to site $siteId: " . implode(', ', $siteClone->getFirstErrors()))
                                     : new InvalidElementException($mainClone, "Element $mainClone->id could not be propagated to site $siteId.");
@@ -2339,9 +2334,7 @@ class Elements extends Component
      */
     public function deleteElementById(int $elementId, ?string $elementType = null, ?int $siteId = null, bool $hardDelete = false): bool
     {
-        /** @var ElementInterface|string|null $elementType */
         if ($elementType === null) {
-            /** @noinspection CallableParameterUseCaseInTypeContextInspection */
             $elementType = $this->getElementTypeById($elementId);
 
             if ($elementType === null) {
@@ -2738,6 +2731,7 @@ class Elements extends Component
             ->indexBy('id')
             ->all();
 
+        /** @var Collection<ElementActivity> $activity */
         $activity = Collection::make();
         /** @var ElementActivity[] $activityByUserId */
         $activityByUserId = [];
@@ -3033,7 +3027,17 @@ class Elements extends Component
                         $elementQuery->ref($refNames);
                     }
 
-                    $elements = ArrayHelper::index($elementQuery->all(), $refType);
+                    $elements = [];
+                    foreach ($elementQuery->all() as $element) {
+                        $ref = $refType === 'id' ? $element->id : $element->getRef();
+                        $elements[$ref] = $element;
+
+                        // if the reference contains a slash (e.g. section/slug),
+                        // also index it by just whatever comes after it
+                        if ($refType === 'ref' && ($slash = strrpos($ref, '/')) !== false) {
+                            $elements[substr($ref, $slash + 1)] ??= $element;
+                        }
+                    }
 
                     // Now append new token search/replace strings
                     foreach ($tokensByName as $refName => $tokens) {
@@ -3125,6 +3129,13 @@ class Elements extends Component
         foreach ($with as $path) {
             // Is this already an EagerLoadPlan object?
             if ($path instanceof EagerLoadPlan) {
+                // Make sure $all is true if $count is false
+                if (!$path->count && !$path->all) {
+                    $path->all = true;
+                }
+                // ...recursively for any nested plans
+                $path->nested = $this->createEagerLoadingPlans($path->nested);
+
                 // Don't index the plan by its alias, as two plans w/ different `when` filters could be using the same alias.
                 // Side effect: mixing EagerLoadPlan objects and arrays could result in redundant element queries,
                 // but that would be a weird thing to do.
@@ -3484,6 +3495,7 @@ class Elements extends Component
 
         if (isset($map['map'])) {
             // no single element type was provided, so split it up into multiple maps - one for each unique type
+            /** @phpstan-ignore-next-line */
             $maps = $this->groupMapsByElementType($map['map']);
             if (isset($map['criteria']) || isset($map['createElement'])) {
                 foreach ($maps as &$m) {
@@ -3497,8 +3509,8 @@ class Elements extends Component
         // multiple maps were provided, so normalize and return each of them
         $maps = [];
         foreach ($map as $m) {
-            /** @phpstan-ignore-next-line */
             if (isset($m['map'])) {
+                /** @phpstan-ignore-next-line */
                 $maps += $this->normalizeEagerLoadingMaps($m);
             }
         }
@@ -3618,7 +3630,7 @@ class Elements extends Component
         bool $crossSiteValidate = false,
         bool $saveContent = false,
     ): bool {
-        /** @var ElementInterface|DraftBehavior|RevisionBehavior $element */
+        /** @var ElementInterface&DraftBehavior $element */
         $isNewElement = !$element->id;
 
         // Are we tracking changes?
@@ -3791,7 +3803,7 @@ class Elements extends Component
                     $elementRecord->canonicalId = $element->getIsDerivative() ? $element->getCanonicalId() : null;
                     $elementRecord->draftId = (int)$element->draftId ?: null;
                     $elementRecord->revisionId = (int)$element->revisionId ?: null;
-                    $elementRecord->fieldLayoutId = $element->fieldLayoutId = (int)($element->fieldLayoutId ?? $fieldLayout?->id ?? 0) ?: null;
+                    $elementRecord->fieldLayoutId = $element->fieldLayoutId = (int)($element->fieldLayoutId ?? $fieldLayout->id ?? 0) ?: null;
                     $elementRecord->enabled = (bool)$element->enabled;
                     $elementRecord->archived = (bool)$element->archived;
                     $elementRecord->dateLastMerged = Db::prepareDateForDb($element->dateLastMerged);
@@ -3886,14 +3898,17 @@ class Elements extends Component
                 }
 
                 $saveContent = $saveContent || $element->isNewForSite;
+                $generatedFields = $fieldLayout?->getGeneratedFields() ?? [];
 
-                if ($saveContent || !empty($dirtyFields)) {
+                if ($saveContent || !empty($dirtyFields) || !empty($generatedFields)) {
                     $oldContent = $siteSettingsRecord->content ?? []; // we'll need that if we're not saving all the content
                     if (is_string($oldContent)) {
                         $oldContent = $oldContent !== '' ? Json::decode($oldContent) : [];
                     }
 
                     $content = [];
+                    $view = Craft::$app->getView();
+
                     if ($fieldLayout) {
                         foreach ($fieldLayout->getCustomFields() as $field) {
                             if (($saveContent || in_array($field->handle, $dirtyFields)) && $field::dbType() !== null) {
@@ -3913,6 +3928,20 @@ class Elements extends Component
                                 }
                             }
                         }
+
+                        $generatedFieldValues = [];
+                        foreach ($generatedFields as $field) {
+                            $value = $view->renderObjectTemplate($field['template'] ?? '', $element);
+                            if ($value !== '') {
+                                $content[$field['uid']] = $value;
+                                if (($field['handle'] ?? '') !== '') {
+                                    $generatedFieldValues[$field['handle']] = $value;
+                                }
+                            } elseif (!$saveContent) {
+                                unset($oldContent[$field['uid']]);
+                            }
+                        }
+                        $element->setGeneratedFieldValues($generatedFieldValues);
                     }
 
                     // if we're only saving dirty fields, we need to merge the new dirty values with what's already in the db
@@ -4108,7 +4137,7 @@ class Elements extends Component
         bool $propagate,
         ?bool $updateForOwner = null,
     ): void {
-        if (Craft::$app->getRequest()->getIsConsoleRequest()) {
+        if ($element->updateSearchIndexImmediately ?? Craft::$app->getRequest()->getIsConsoleRequest()) {
             Craft::$app->getSearch()->indexElementAttributes($element, $searchableDirtyFields);
         } else {
             Craft::$app->getSearch()->queueIndexElement($element, $searchableDirtyFields);
@@ -4143,6 +4172,7 @@ class Elements extends Component
      * @param array $supportedSites The element’s supported site info, indexed by site ID
      * @param int $siteId The site ID being propagated to
      * @param ElementInterface|false|null $siteElement The element loaded for the propagated site
+     * @param-out ElementInterface $siteElement
      * @param bool $crossSiteValidate Whether the element should be validated across all supported sites
      * @param bool $saveContent Whether the element’s content should be saved
      * @retrun bool
@@ -4165,8 +4195,10 @@ class Elements extends Component
 
         // Try to fetch the element in this site
         if ($siteElement === null && $element->id) {
+            /** @phpstan-ignore-next-line */
             $siteElement = $this->getElementById($element->id, get_class($element), $siteInfo['siteId']);
         } elseif (!$siteElement) {
+            /** @phpstan-ignore-next-line */
             $siteElement = null;
         }
 
@@ -4444,7 +4476,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_VIEW) ?? $element->canView($user))
+        );
     }
 
     /**
@@ -4464,7 +4499,10 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user);
+        return (
+            $this->_siteAuthCheck($element, $user) &&
+            ($this->_authCheck($element, $user, self::EVENT_AUTHORIZE_SAVE) ?? $element->canSave($user))
+        );
     }
 
     /**
@@ -4532,6 +4570,8 @@ SQL;
     /**
      * Returns whether a user is authorized to copy the given element, to be duplicated elsewhere.
      *
+     *  This should always be called in conjunction with [[canView()]].
+     *
      * @param ElementInterface $element
      * @param User|null $user
      * @return bool
@@ -4590,10 +4630,7 @@ SQL;
             }
         }
 
-        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_DELETE_FOR_SITE) ?? (
-            $element->canDelete($user) &&
-            $element->canDeleteForSite($user)
-        );
+        return $this->_authCheck($element, $user, self::EVENT_AUTHORIZE_DELETE_FOR_SITE) ?? $element->canDeleteForSite($user);
     }
 
     /**
@@ -4631,5 +4668,14 @@ SQL;
 
         $this->trigger($eventName, $event);
         return $event->authorized;
+    }
+
+    private function _siteAuthCheck(ElementInterface $element, User $user): bool
+    {
+        return (
+            !$element::isLocalized() ||
+            !Craft::$app->getIsMultiSite() ||
+            $user->can(sprintf('editSite:%s', $element->getSite()->uid))
+        );
     }
 }

@@ -11,6 +11,7 @@ use Craft;
 use craft\db\Query;
 use craft\db\Table;
 use craft\elements\Asset;
+use craft\elements\db\UserQuery;
 use craft\elements\User;
 use craft\enums\CmsEdition;
 use craft\errors\ImageException;
@@ -27,6 +28,7 @@ use craft\events\UserPhotoEvent;
 use craft\helpers\Assets as AssetsHelper;
 use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
+use craft\helpers\FileHelper;
 use craft\helpers\Image;
 use craft\helpers\Json;
 use craft\helpers\ProjectConfig as ProjectConfigHelper;
@@ -205,18 +207,32 @@ class Users extends Component
         /** @var User|null $user */
         $user = User::find()
             ->email($email)
-            ->status(null)
+            ->status([UserQuery::STATUS_CREDENTIALED])
             ->one();
 
-        if (!$user) {
-            $user = new User();
-            $user->email = $email;
-            if (!$user->validate(['email'])) {
-                throw new InvalidArgumentException($user->getFirstError('email'));
-            }
-            if (!Craft::$app->getElements()->saveElement($user, false)) {
-                throw new Exception('Unable to save user: ' . implode(', ', $user->getFirstErrors()));
-            }
+        if ($user) {
+            return $user;
+        }
+
+        /** @var User|null $user */
+        $user = User::find()
+            ->email($email)
+            ->status([User::STATUS_INACTIVE])
+            ->one();
+
+        if ($user) {
+            return $user;
+        }
+
+        $user = new User();
+        $user->email = $email;
+
+        if (!$user->validate(['email'])) {
+            throw new InvalidArgumentException($user->getFirstError('email'));
+        }
+
+        if (!Craft::$app->getElements()->saveElement($user, false)) {
+            throw new Exception('Unable to save user: ' . implode(', ', $user->getFirstErrors()));
         }
 
         return $user;
@@ -559,10 +575,11 @@ class Users extends Component
      * @param User $user the user.
      * @param string $fileLocation the local image path on server
      * @param string|null $filename name of the file to use, defaults to filename of `$fileLocation`
+     * @param string|null $mimeType the default MIME type to use, if it can’t be determined based on the server path
      * @throws ImageException if the file provided is not a manipulatable image
      * @throws VolumeException if the user photo volume is not provided or is invalid
      */
-    public function saveUserPhoto(string $fileLocation, User $user, ?string $filename = null): void
+    public function saveUserPhoto(string $fileLocation, User $user, ?string $filename = null, ?string $mimeType = null): void
     {
         $filename = AssetsHelper::prepareAssetName($filename ?? pathinfo($fileLocation, PATHINFO_BASENAME), true, true);
 
@@ -585,7 +602,7 @@ class Users extends Component
 
         // If the photo exists, just replace the file.
         if ($photoId && ($photo = Craft::$app->getAssets()->getAssetById($photoId)) !== null) {
-            $assetsService->replaceAssetFile($photo, $fileLocation, $filename);
+            $assetsService->replaceAssetFile($photo, $fileLocation, $filename, $mimeType);
         } else {
             $volume = $this->_userPhotoVolume();
             $folderId = $this->_userPhotoFolderId($user, $volume);
@@ -595,6 +612,7 @@ class Users extends Component
             $photo->setScenario(Asset::SCENARIO_CREATE);
             $photo->tempFilePath = $fileLocation;
             $photo->setFilename($filename);
+            $photo->setMimeType(FileHelper::getMimeType($fileLocation, checkExtension: false) ?? $mimeType);
             $photo->newFolderId = $folderId;
             $photo->setVolumeId($volume->id);
 
@@ -1640,9 +1658,10 @@ class Users extends Component
             ($generalConfig->headlessMode && !UrlHelper::isAbsoluteUrl($fePath))
         );
         $scheme = UrlHelper::getSchemeForTokenizedUrl($cp);
+        $siteId = $isCpRequest ? $user->affiliatedSiteId : null;
 
         if (!$cp) {
-            return UrlHelper::siteUrl($fePath, $params, $scheme);
+            return UrlHelper::siteUrl($fePath, $params, $scheme, siteId: $siteId);
         }
 
         // Only use cpUrl() if this is a control panel request, or the base control panel URL has been explicitly set,
@@ -1651,7 +1670,7 @@ class Users extends Component
             $url = UrlHelper::cpUrl($cpPath, $params, $scheme);
         } else {
             $path = UrlHelper::prependCpTrigger($cpPath);
-            $url = UrlHelper::siteUrl($path, $params, $scheme);
+            $url = UrlHelper::siteUrl($path, $params, $scheme, siteId: $siteId);
         }
 
         if (UrlHelper::isRootRelativeUrl($url)) {
