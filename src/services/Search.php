@@ -918,11 +918,11 @@ SQL;
             // unless it's meant to search for *anything* (e.g. if they entered 'attribute:*').
             if ($keywords !== '' || $term->subLeft) {
                 // If we're on PostgreSQL and this is a phrase or exact match, we have to special case it.
-                if (!$isMysql && $term->phrase) {
-                    $sql = $this->_sqlPhraseExactMatch($keywords, $term->exact);
+                $pgsqlPhrase = !$isMysql && $term->phrase;
+                if ($pgsqlPhrase && $term->exact) {
+                    $sql = $this->_sqlPhraseExactMatch($keywords);
                 } else {
-                    // Create fulltext clause from term
-                    if ($this->_doFullTextSearch($keywords, $term)) {
+                    if (!$pgsqlPhrase && $this->_doFullTextSearch($keywords, $term)) {
                         if ($term->subRight) {
                             if ($isMysql) {
                                 $keywords .= '*';
@@ -1141,18 +1141,13 @@ SQL;
      * This method will return PostgreSQL specific SQL necessary to find an exact phrase search.
      *
      * @param string $val The phrase or exact value to search for.
-     * @param bool $exact Whether this should be an exact match or not.
      * @return string The SQL to perform the search.
      */
-    private function _sqlPhraseExactMatch(string $val, bool $exact = false): string
+    private function _sqlPhraseExactMatch(string $val): string
     {
-        $ftVal = explode(' ', $val);
-        $ftVal = implode(' & ', $ftVal);
-        $likeVal = !$exact ? '%' . $val . '%' : " $val ";
-
+        $ftVal = implode(' & ', explode(' ', $val));
         $db = Craft::$app->getDb();
-
-        return sprintf("%s @@ '%s'::tsquery AND %s LIKE '%s'", $db->quoteColumnName('keywords_vector'), $ftVal, $db->quoteColumnName('keywords'), $likeVal);
+        return sprintf("%s @@ '%s'::tsquery AND %s LIKE ' %s '", $db->quoteColumnName('keywords_vector'), $ftVal, $db->quoteColumnName('keywords'), $val);
     }
 
     /**
