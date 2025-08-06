@@ -232,6 +232,12 @@ class CustomField extends BaseField
     {
         $this->_fieldUid = $uid;
         $this->_field = null;
+
+        if (($field = Craft::$app->getFields()->getFieldByUid($uid)) === null) {
+            throw new FieldNotFoundException($uid);
+        } else {
+            $this->setField($field);
+        }
     }
 
     /**
