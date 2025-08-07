@@ -60,14 +60,14 @@ class UserPermissions extends Component
     public const EVENT_AFTER_SAVE_GROUP_PERMISSIONS = 'afterSaveGroupPermissions';
 
     /**
-     * @var array
+     * @var array|null
      * @see getAllPermissions()
      */
     private array|null $_allPermissions = null;
 
     /**
-     * @var string[]
-     * @see allPermissionNames()
+     * @var string[]|null
+     * @see validatePermission()
      */
     private array|null $_allPermissionNames = null;
 
