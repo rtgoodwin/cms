@@ -2,8 +2,10 @@
 
 ## Unreleased
 
+- Added `craft\services\UserPermissions::validatePermission()`.
 - Fixed an error that occurred when saving an entry with a Lightswitch field. ([#17721](https://github.com/craftcms/cms/issues/17721))
 - Fixed a bug where GraphiQL’s query input had a 550px max height. ([#17723](https://github.com/craftcms/cms/issues/17723))
+- Fixed an authorization error that occurred when non-admin users attempted to modify content on multi-site installs with SEOmatic installed. ([#17716](https://github.com/craftcms/cms/issues/17716))
 
 ## 5.8.13.1 - 2025-08-06
 
