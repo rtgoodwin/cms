@@ -3243,6 +3243,15 @@ JS;
         bool $forLibrary = false,
         array $attributes = [],
     ): string {
+        // ignore invalid custom fields
+        if ($element instanceof CustomField) {
+            try {
+                $element->getField();
+            } catch (FieldNotFoundException) {
+                return '';
+            }
+        }
+
         if ($element instanceof BaseField) {
             $attributes = ArrayHelper::merge($attributes, [
                 'data' => [
