@@ -40,6 +40,7 @@ use craft\elements\exporters\Raw;
 use craft\elements\User;
 use craft\enums\AttributeStatus;
 use craft\enums\Color;
+use craft\errors\FieldNotFoundException;
 use craft\errors\InvalidFieldException;
 use craft\events\AuthorizationCheckEvent;
 use craft\events\DefineAltActionsEvent;
@@ -6022,7 +6023,13 @@ JS, [
                         $field = Craft::$app->getFields()->getFieldByUid($uid);
                     } else {
                         $layoutElement = $this->getFieldLayout()?->getElementByUid($uid);
-                        $field = $layoutElement instanceof CustomField ? $layoutElement->getField() : null;
+                        if ($layoutElement instanceof CustomField) {
+                            try {
+                                $field = $layoutElement->getField();
+                            } catch (FieldNotFoundException) {
+                            }
+                        }
+                        $field ??= null;
                     }
 
                     if ($field instanceof PreviewableFieldInterface) {
@@ -6067,7 +6074,10 @@ JS, [
             $instanceUid = $matches[1];
             $layoutElement = $this->getFieldLayout()?->getElementByUid($instanceUid);
             if ($layoutElement instanceof CustomField) {
-                $field = $layoutElement->getField();
+                try {
+                    $field = $layoutElement->getField();
+                } catch (FieldNotFoundException) {
+                }
             }
         }
 
