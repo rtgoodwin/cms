@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Fixed an error that occurred when saving an entry with a Lightswitch field. ([#17721](https://github.com/craftcms/cms/issues/17721))
+- Fixed a bug where GraphiQL’s query input had a 550px max height. ([#17723](https://github.com/craftcms/cms/issues/17723))
 
 ## 5.8.13.1 - 2025-08-06
 
