@@ -35,6 +35,7 @@ use craft\elements\GlobalSet;
 use craft\elements\Tag;
 use craft\elements\User;
 use craft\errors\ElementNotFoundException;
+use craft\errors\FieldNotFoundException;
 use craft\errors\InvalidElementException;
 use craft\errors\OperationAbortedException;
 use craft\errors\SiteNotFoundException;
@@ -1524,7 +1525,12 @@ class Elements extends Component
         foreach ($changedFields as $field) {
             $layoutElement = $element->getFieldLayout()?->getElementByUid($field['layoutElementUid']);
             if ($layoutElement instanceof CustomField) {
-                $newAttributes['siteAttributes'][$field['siteId']]['dirtyFields'][] = $layoutElement->getField()->handle;
+                try {
+                    $field = $layoutElement->getField();
+                } catch (FieldNotFoundException) {
+                    continue;
+                }
+                $newAttributes['siteAttributes'][$field['siteId']]['dirtyFields'][] = $field->handle;
             }
         }
 
