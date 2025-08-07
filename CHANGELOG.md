@@ -1,5 +1,9 @@
 # Release Notes for Craft CMS 5
 
+## Unreleased
+
+- Fixed an error that occurred when saving an entry with a Lightswitch field. ([#17721](https://github.com/craftcms/cms/issues/17721))
+
 ## 5.8.13.1 - 2025-08-06
 
 - Fixed errors that could occur if a field layout was referencing an invalid field UUID. ([#17713](https://github.com/craftcms/cms/issues/17713))
