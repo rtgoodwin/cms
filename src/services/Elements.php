@@ -1522,15 +1522,15 @@ class Elements extends Component
             $newAttributes['siteAttributes'][$attribute['siteId']]['dirtyAttributes'][] = $attribute['attribute'];
         }
 
-        foreach ($changedFields as $field) {
-            $layoutElement = $element->getFieldLayout()?->getElementByUid($field['layoutElementUid']);
+        foreach ($changedFields as $changedField) {
+            $layoutElement = $element->getFieldLayout()?->getElementByUid($changedField['layoutElementUid']);
             if ($layoutElement instanceof CustomField) {
                 try {
                     $field = $layoutElement->getField();
                 } catch (FieldNotFoundException) {
                     continue;
                 }
-                $newAttributes['siteAttributes'][$field['siteId']]['dirtyFields'][] = $field->handle;
+                $newAttributes['siteAttributes'][$changedField['siteId']]['dirtyFields'][] = $field->handle;
             }
         }
 
