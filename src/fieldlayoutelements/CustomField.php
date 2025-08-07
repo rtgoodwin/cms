@@ -359,12 +359,11 @@ class CustomField extends BaseField
             return $attributes;
         }
 
-        return [
-            ...$attributes,
+        return ArrayHelper::merge($attributes, [
             'data' => [
                 'id' => $field->id,
             ],
-        ];
+        ]);
     }
 
     /**
@@ -394,13 +393,12 @@ class CustomField extends BaseField
             return $attributes;
         }
 
-        return [
-            ...$attributes,
+        return ArrayHelper::merge($attributes, [
             'id' => "{$field->handle}-field",
             'data' => [
                 'type' => get_class($field),
             ],
-        ];
+        ]);
     }
 
     /**
