@@ -1,6 +1,6 @@
 # Release Notes for Craft CMS 5
 
-## Unreleased
+## 5.8.13.2 - 2025-08-07
 
 - Added `craft\services\UserPermissions::validatePermission()`.
 - Fixed an error that occurred when saving an entry with a Lightswitch field. ([#17721](https://github.com/craftcms/cms/issues/17721))
